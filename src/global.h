@@ -45,11 +45,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#ifndef FENV_H_EXISTS
+#ifdef FENV_H_EXISTS
 #  include <fenv.h> // floating-point environment 
 #endif
 
-#ifndef SYS_FENV_H_EXISTS
+#ifdef SYS_FENV_H_EXISTS
 #  include <sys/fenv.h> // floating-point environment 
 #endif
 
