@@ -12,6 +12,7 @@
 * les fichiers stdout.txt et stderr.txt sont générés.
 */
 
+#include "biglib.h"
 
 #define DEFINE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)		\
   static struct TYPENAME * glue(new_,TYPENAME)(void) {		\
