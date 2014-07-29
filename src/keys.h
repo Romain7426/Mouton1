@@ -1,22 +1,28 @@
-#ifndef KEYS_HPP
-#define KEYS_HPP
+#ifndef KEYS_H
+#define KEYS_H
 
 
 // TODO XXX Bad
 extern unsigned char * KeyBoard;
 
 
-class CKey {
-private:
+struct CKey {
+  //private:
   char kk;
   char previous;
-  
-public:  
+
+#if 0  
+  //public:  
   //  CKey::CKey(char kkk);
   CKey(char kkk);
   bool Enfoncee(void);
   bool Appuye(void);
+#endif
 };
+//DEFINE_NEW_OPERATOR_FOR_STRUCT(CKey);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CKey);
+extern CKey * new_CKey(char kkk);
+
 
 
 extern CKey KeySpace;
@@ -89,5 +95,5 @@ extern CKey KeyF12;
 
 
 
-#endif /* KEYS_HPP */
+#endif /* KEYS_H */
 

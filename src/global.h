@@ -122,12 +122,13 @@ typedef char str_t;
 #define DEFINE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)		\
   static struct TYPENAME * glue(new_,TYPENAME)(void) {		\
     struct TYPENAME * this = NULL;				\
-    this = (struct TYPENAME *) malloc(sizeof struct NAME);	\
-    bzero(this, sizeof struct NAME);				\
+    this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME)); \
+    bzero(this, sizeof(struct TYPENAME));			\
     return this;						\
   }
 
-
+#define TYPEDEF_TYPENAME_WITHOUT_STRUCT(TYPENAME)	\
+  typedef struct TYPENAME TYPENAME;
 
 
 

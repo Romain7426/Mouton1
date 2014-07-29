@@ -5,11 +5,14 @@ struct TPoint2D {
   float x, y;
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(TPoint2D);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(TPoint2D);
 
 struct TPoint3D {
   float x, y, z, arf;
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(TPoint3D);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(TPoint3D);
+
 
 #if 0
 TPoint2D operator- (TPoint2D p1, TPoint2D p2);
@@ -35,8 +38,13 @@ void TPoint3D_operator_hat(const TPoint3D p1, const TPoint3D p2, TPoint3D * p3);
 TPoint3D Point3D(float x, float y, float z);
 #endif
 
+#if 0
 float Norme1(TPoint3D p);
 float Norme1(TPoint2D p);
+#else
+float TPoint3D_Norme1(TPoint3D p);
+float TPoint2D_Norme1(TPoint2D p);
+#endif
 
 //void Normer2(TPoint3D &p);
 

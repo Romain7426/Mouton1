@@ -1,7 +1,6 @@
-#ifndef UTILITIES_HPP
-#define UTILITIES_HPP
+#ifndef UTILITIES_H
+#define UTILITIES_H
 
-//#include "global.hpp"
 
 #define RGBA(r,v,b,a) (((a * 256 + v) * 256 + b) * 256 + r)
 #define sqr(a) ((a)*(a))
@@ -28,4 +27,4 @@ extern SDL_PixelFormat sdl_pixel_format_rgba;
 
 #define GDB_BREAK ((*((int *) NULL)) = 0)
 
-#endif /* UTILITIES_HPP */
+#endif /* UTILITIES_H */

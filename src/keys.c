@@ -1,5 +1,10 @@
-#include "global.hpp"
-#include "keys.hpp"
+#include "global.h"
+#include "keys.h"
+
+
+  CKey(char kkk);
+  bool Enfoncee(void);
+  bool Appuye(void);
 
 
 CKey::CKey(char kkk) : kk(kkk), previous(0) {}
