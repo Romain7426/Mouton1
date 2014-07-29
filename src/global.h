@@ -1,17 +1,122 @@
-#ifndef GLOBAL_HPP
-#define GLOBAL_HPP
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
-/* 
- * GLOBAL.H contient les références à SDL, et OpenGL… tous les
- * fichiers du projets peuvent utiliser ce fichier, dès qu'ils veulent
- * utiliser SDL ou OpenGL
- */
 /*
 * IMPORTANT: dans les options de compilations de DevCpp, il faut que
 * la case ANSI C soit décochée.  Le jeu perd ainsi 500ko d'un coup, et
 * les fichiers stdout.txt et stderr.txt sont générés.
 */
 
+#ifdef WINDOWS_DEV_CPP
+#  define ASPRINTF_IS_NOT_PROVIDED
+#  define BZERO_IS_NOT_PROVIDED
+#  define USE_FREAD_INSTEAD_OF_STAT
+#  define random rand
+#  define srandom srand
+#endif
+
+#include <stdlib.h>
+#include <stdint.h> // int8_t, etc., intmax_t , uintmax_t, 
+#include <inttypes.h> // uint8_t, ..., uintmax_t i = UINTMAX_MAX; // this type always exists 
+//#include <stdbool.h> // define a «bool» type which extends to «_Bool»
+#include <stddef.h> // offsetof(type, member-designator) 
+#include <stdio.h> // remove, int rename(const char *old, const char *new); , 
+#include <stdarg.h>
+#include <string.h>
+#include <strings.h>
+#include <assert.h>
+#include <math.h>     // cosf, ..., int signbit(real-floating x); , isnormal(neither zero, subnormal, infinite, nor NaN)., int isnan(real-floating x); , int isinf(real-floating x); int isfinite(real-floating x); 
+#include <ctype.h>    // tolower, toupper
+#include <assert.h>  // dépend de la valeur de la macro NDEBUG 
+#include <complex.h>  // types «complex», «double complex», «long double complex», «float complex» 
+#include <ctype.h> 
+#include <errno.h> 
+#include <float.h> // limits 
+#include <iso646.h>  // Alternative spellings: and &&, xor ^, etc. 
+#include <limits.h> 
+#include <setjmp.h> 
+#include <signal.h> 
+#include <time.h> // clock & time --- 
+#include <wchar.h> 
+#include <wctype.h> 
+#include <locale.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#ifndef FENV_H_EXISTS
+#  include <fenv.h> // floating-point environment 
+#endif
+
+#ifdef LANGINFO_H_EXISTS
+#  include <langinfo.h> // pas fournie sous WIN
+#endif 
+
+#ifdef TGMATH_H_EXISTS
+#  include <tgmath.h> // includes the headers <math.h> and <complex.h>
+#endif
+
+
+#ifdef CTIME_R_IS_NEEDED_AND_IS_NOT_PROVIDED
+// CTIME
+// Attention!!!!! ctime n'est pas n'est pas thread safe!!!!
+// il retourne un pointeur vers une chaîne allouée statiquement et c'est la même à chaque fois
+// faut mieux utiliser plutôt ctime_r() qui est thread safe
+//  char * ctime(const time_t * clock)
+//  char * ctime_r(const time_t * clock, char * buf);
+// La taille de buf doit etre au minimum de 26 octets.
+// De plus, apparemment, elle ne marche pas pareil sous MacOSX et sous Windows.
+#ifndef ctime_r
+// time_t time(time_t *tloc);
+// char * ctime(const time_t * clock);
+// char * ctime_r(const time_t * clock, char * buf);
+#  define ctime_r(a,b) ((b == NULL ? 0 : strcpy(b, "FAILED ")), *a = time(NULL), ctime(a))
+#endif
+#endif
+
+
+
+
+
+enum bool {true = (0 == 0), false = (0 != 0)};
+typedef enum bool bool;
+
+#ifndef BOOL_T
+#define BOOL_T
+typedef bool bool_t;
+#endif
+
+#ifndef INT_T
+#define INT_T
+typedef int int_t;
+#endif
+
+#ifndef UINT_T
+#define UINT_T
+typedef unsigned int uint_t;
+#endif
+
+typedef uint8_t byte;
+typedef uint16_t word;
+typedef uint32_t dword;
+typedef uint64_t qword;
+
+typedef int32_t integer;
+typedef integer entier;
+
+typedef double real;
+
+#ifndef REAL_T
+#define REAL_T
+typedef real real_t;
+#endif
+
+
+typedef char str_t;
+
+#include "biglib.h"
+#include "biglib_suppl.h"
 #include "biglib.h"
 
 #define DEFINE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)		\
@@ -21,6 +126,11 @@
     bzero(this, sizeof struct NAME);				\
     return this;						\
   }
+
+
+
+
+
 
 
 
@@ -108,61 +218,62 @@
 
 
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h> // besoin pour les parsers et les lexers; va savoir pourquoi...
-                    //  besoin de la fonction isatty(int)
-#include <string.h>
-#include <stdarg.h>
-#include <assert.h>
 
-#include <locale.h>
-#ifndef WIN
-# include <langinfo.h> // pas fournie sous WIN
-# include <errno.h> // déjà défini dans stdlib.h
-#endif 
-#include <time.h> // time_t, time(), ctime() ;  ("man 3 time") donne la date d'ajd
-// Attention !!!!! ctime n'est pas n'est pas thread safe !!!!
-// il retourne un pointeur vers une chaine allouee statiquement et c'est la meme a chaque fois.
-// utilise plutot ctime_r() qui l'est.
-//  char * ctime(const time_t *clock)
-//  char * ctime_r(const time_t *clock, char *buf);
-// La taille de buf doit etre au minimum de 26 octets.
-#ifdef WIN
-//# define ctime_r(a,b) ((b == NULL ? 0 : strcpy(b, "FAILED")), ctime(a))
-# define ctime_r(a,b) ((b == NULL ? 0 : strcpy(b, "FAILED ")), *a = time(NULL), ctime(a))
-#endif
+
+
 
                                   
 
-#include <math.h>
-#include "vectors.hpp" // pour pouvoir utiliser des vecteurs 2D et 3D
-#include "keys.hpp"
+#include "vectors.h" // pour pouvoir utiliser des vecteurs 2D et 3D
+#include "keys.h"
 
-#include "messages.hpp"
-#include "utilities.hpp"
-#include "structures.hpp"
-#include "constantes.hpp"
+#include "messages.h"
+#include "utilities.h"
+#include "structures.h"
+#include "constantes.h"
+
+#include "3ds.h"
+#include "action.h"
+#include "affichagemainpierre.h"
+#include "apiscript.h"
+#include "arme.h"
+#include "asprintf.h"
+#include "biglib.h"
+#include "biglib_rm_recursive.h"
+#include "biglib_suppl.h"
+#include "bonhomme.h"
+#include "camera.h"
+#include "coeurs.h"
+#include "constantes.h"
+#include "dico.h"
+#include "evenement.h"
+#include "evenements.h"
+#include "global.h"
+#include "kernel.h"
+#include "keys.h"
+#include "liste.h"
+#include "main.h"
+#include "map.h"
+#include "menu.h"
+#include "menuentreenom.h"
+#include "messages.h"
+#include "moteurdeplacement.h"
+#include "moteurteleportation.h"
+#include "obj3ds.h"
+#include "objnonanime.h"
+#include "pagetitre.h"
+#include "pascal.h"
+#include "physicalobj.h"
+#include "ressource.h"
+#include "sol.h"
+#include "son.h"
+#include "structures.h"
+#include "text.h"
+#include "texture.h"
+#include "timer.h"
+#include "utilities.h"
+#include "vectors.h"
 
 
-//#include "son.h"
 
-//#include "text.h" 
-// pour pouvoir afficher du texte
-// je sais…
-// c'est un peu la honte de devoir écrire qch pour pouvoir
-// juste afficher du texte :( mais bon…
-
-//#include "map.h"
-//#include "texture.h" // contient la classe pour utiliser des textures
-//#include "texture.h"
-
-
-
-//extern void DemanderAQuitterLeJeu();
-//extern bool isrunning;
-//extern TMouse Mouse;
-
-
-
-#endif /* GLOBAL_HPP */
+#endif /* GLOBAL_H */

@@ -60,18 +60,6 @@ extern void biglib_assert_aux(const char * expression, const char * fichier, uns
 
 
 
-
-extern real real_of_integer(integer n);
-
-extern const real biglib_constantes_pi;
-extern const real biglib_constantes_e;
-#define pi biglib_constantes_pi
-#define PI biglib_constantes_pi
-#define Pi biglib_constantes_pi
-#define pI biglib_constantes_pi
-#define e biglib_constantes_e
-#define E biglib_constantes_e
-
 #ifdef ASPRINTF_IS_NOT_PROVIDED
 extern int asprintf(char * * strp, const char * format, ...);
 extern int vasprintf(char * * strp, const char * format, va_list args);   
@@ -83,20 +71,16 @@ extern void bzero(void *s, size_t n);
 
 
 
-extern void biglib_structures_base_test(void);
+
+enum { CR = ('\r'), LF ('\n') };
 
 
-
-#define CR ('\r')
-#define LF ('\n')
-
-
-extern char * strallouer(unsigned int taille);
+extern char * str_alloc(int char_nb);
+extern char * stralloc(int char_nb);
 extern void strfree(char * str);
 extern void str_free(char * str);
 
 extern char * strcopy(const char * str);
-//extern char * strcopy(const char * str);
 
 extern bool strnull_huh(const char * str);
 extern bool strempty_huh(const char * str);
@@ -105,7 +89,7 @@ extern bool strempty_huh(const char * str);
 #define str_string strcopy
 #define str_equal strequal
 
-extern char * substring(const char * str, unsigned int debut, unsigned int fin);
+extern char * substring(const char * str, int starting_index, int ending_index);
 
 #define strconcat1 strcopy
 extern char * strconcat2(const char * str1, const char * str2);
