@@ -49,6 +49,10 @@
 #  include <fenv.h> // floating-point environment 
 #endif
 
+#ifndef SYS_FENV_H_EXISTS
+#  include <sys/fenv.h> // floating-point environment 
+#endif
+
 #ifdef LANGINFO_H_EXISTS
 #  include <langinfo.h> // pas fournie sous WIN
 #endif 
@@ -74,6 +78,34 @@
 #  define ctime_r(a,b) ((b == NULL ? 0 : strcpy(b, "FAILED ")), *a = time(NULL), ctime(a))
 #endif
 #endif
+
+
+
+
+#include <SDL/SDL.h> //bibliothèque graphique 2D...
+#include <SDL_image.h> /* pour ouvrir des images d'autres formats que BMP (notamment des images au format PNG) */
+#include <SDL_mixer.h>
+
+#ifdef SYS_MACOSX
+  #include <OpenGL/gl.h>
+  #include <OpenGL/glu.h>
+#endif /* MACOSX */
+
+#ifdef SYS_OPENBSD
+  #include <GL/gl.h>
+  #include <GL/glu.h>
+#endif /* MACOSX */
+
+#ifdef SYS_WIN32
+ #include <winsock2.h>
+ #include <windows.h>
+ #include <GL/gl.h>
+ #include <GL/glu.h>
+#endif //_WIN32
+
+
+  
+
 
 
 
@@ -152,7 +184,6 @@ typedef char str_t;
 #else
 #define SCREEN_MODE SDL_RESIZABLE/*SDL_RESIZABLE, SDL_FULLSCREEN*/
 #endif
-
 #define BINDIR "."
 #define ROOTDIR BINDIR "/" ".."
 //#define SRCDIR ROOTDIR  "/src/"
@@ -173,43 +204,6 @@ typedef char str_t;
 
 
 
-#include <SDL.h> //bibliothèque graphique 2D...
-#include <SDL_image.h> /* pour ouvrir des images d'autres formats que BMP (notamment des images au format PNG) */
-#include <SDL_mixer.h>
-  
-
-#ifdef LIBPROG_SYS_MACOSX
-  #include <OpenGL/gl.h>
-  #include <OpenGL/glu.h>
-#endif /* MACOSX */
-
-#ifdef LIBPROG_SYS_OPENBSD
-  #include <GL/gl.h>
-  #include <GL/glu.h>
-#endif /* MACOSX */
-
-#ifdef _WIN32
- #include <winsock2.h>
- #include <windows.h>
- #undef _MAC
- #undef _LINUX
- #include <GL/gl.h>
- #include <GL/glu.h>
-#endif //_WIN32
-
-#ifdef _MAC
- #include <GLUT/glut.h>
-#endif //_MAC
-
-#ifdef _LINUX
- #include <GL/gl.h>
- #include <GL/glu.h>
-#endif //_LINUX
-
-#ifdef _CYGWIN
- #include <GL/gl.h>
- #include <GL/glu.h>
-#endif //_CYGWIN
 
 #ifdef _WIN32
  #define GL_BGR GL_BGR_EXT

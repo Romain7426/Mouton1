@@ -1,6 +1,6 @@
 #!/bin/sh
 
-prefix=/Users/romain/Projets/mouton2/libs/SDL-1.2.15/destroot
+prefix=/Users/romain/Projets/zelda-c-language/libs/SDL-1.2.15/destroot
 exec_prefix=${prefix}
 exec_prefix_set=no
 libdir=${exec_prefix}/lib

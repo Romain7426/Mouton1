@@ -1,6 +1,6 @@
 # sdl pkg-config source file
 
-prefix=/Users/romain/Projets/mouton2/libs/SDL-1.2.15/destroot
+prefix=/Users/romain/Projets/zelda-c-language/libs/SDL-1.2.15/destroot
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
