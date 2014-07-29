@@ -7,10 +7,10 @@
  * dx, dy : dernier déplacement 
  */
 struct TMouse {int x,y,dx,dy;};
-TYPEDEF_TYPENAME_WITHOUT_ENUM(TMouse);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(TMouse);
 
 struct TColor {char r,v,b,a;};
-TYPEDEF_TYPENAME_WITHOUT_ENUM(TColor);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(TColor);
 
 
 enum TDirection {FACE, PROFIL_VERS_D, DOS, PROFIL_VERS_G};
