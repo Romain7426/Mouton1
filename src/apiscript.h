@@ -1,17 +1,14 @@
-#ifndef APISCRIPT_HPP
-#define APISCRIPT_HPP
+#ifndef APISCRIPT_H
+#define APISCRIPT_H
 
-class CMenuAbstrait;
-class CZoneTeleportation;
-class CBonhomme;
-class CPhysicalObj;
-class CMap;
-class CMusique;
-class CMoteurTeleportation;
-class CMenuEntreeNom;
-
-//enum TMethodePlacement;
-#include "physicalobj.hpp" // enum TMethodePlacement;
+struct CMenuAbstrait;
+struct CZoneTeleportation;
+struct CBonhomme;
+struct CPhysicalObj;
+struct CMap;
+struct CMusique;
+struct CMoteurTeleportation;
+struct CMenuEntreeNom;
 
 
 enum TTypeInstructionCourante {
@@ -48,6 +45,8 @@ struct api_contexte_t {
   int nbpasses;
   CBonhomme * b;
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(api_contexte_t);
+DEFINE_NEW_OPERATOR_FOR_STRUCT(api_contexte_t);
 
 
 

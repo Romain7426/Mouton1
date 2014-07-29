@@ -7,11 +7,15 @@
  * dx, dy : dernier déplacement 
  */
 struct TMouse {int x,y,dx,dy;};
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TMouse);
+
 struct TColor {char r,v,b,a;};
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TColor);
 
 
 enum TDirection {FACE, PROFIL_VERS_D, DOS, PROFIL_VERS_G};
 /* bas : 0, droite : 1, haut : 2, gauche : 3 */
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TDirection);
 
 enum TModeJeu { 
  mjTITRE,  // au début, on affiche le titre
@@ -21,6 +25,7 @@ enum TModeJeu {
  mjTELEPORTATION,
  mjNOMBRE
 };
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TModeJeu);
 
 
 

@@ -154,17 +154,20 @@ typedef char str_t;
 #define TYPEDEF_TYPENAME_WITHOUT_STRUCT(TYPENAME)	\
   typedef struct TYPENAME TYPENAME;
 
-#define DECLARE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)		\
-  extern struct TYPENAME * glue(new_,TYPENAME)(void);			\
+#define TYPEDEF_TYPENAME_WITHOUT_ENUM(TYPENAME)	\
+  typedef enum TYPENAME TYPENAME;
 
+#define DECLARE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)			\
+  extern struct TYPENAME * glue(new_,TYPENAME)(void);			\
+					      
 #define DEFINE_NEW_OPERATOR_FOR_STRUCT DEFINE_NEW_OPERATOR_FOR_STRUCT0
 
-#define DEFINE_NEW_OPERATOR_FOR_STRUCT0(TYPENAME)		\
-  struct TYPENAME * glue(new_,TYPENAME)(void) {			\
-    struct TYPENAME * this = NULL;				\
-    this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME)); \
-    bzero(this, sizeof(struct TYPENAME));			\
-    return this;						\
+#define DEFINE_NEW_OPERATOR_FOR_STRUCT0(TYPENAME)			\
+  static struct TYPENAME * glue(new_,TYPENAME)(void) {			\
+    struct TYPENAME * this = NULL;					\
+    this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME));		\
+    bzero(this, sizeof(struct TYPENAME));				\
+    return this;							\
   }
 
 #define DEFINE_NEW_OPERATOR_FOR_STRUCT1(TYPENAME,FIELDNAME1,FUNNAME_FOR_ATTRIBUTS) \
@@ -237,14 +240,17 @@ typedef char str_t;
 
 
                                   
-
-#include "vectors.h" // pour pouvoir utiliser des vecteurs 2D et 3D
-#include "keys.h"
+#include "biglib.h"
+#include "biglib_rm_recursive.h"
+#include "biglib_suppl.h"
 
 #include "messages.h"
 #include "utilities.h"
 #include "structures.h"
 #include "constantes.h"
+
+#include "vectors.h" // pour pouvoir utiliser des vecteurs 2D et 3D
+#include "keys.h"
 
 #include "3ds.h"
 #include "action.h"
@@ -252,9 +258,6 @@ typedef char str_t;
 #include "apiscript.h"
 #include "arme.h"
 #include "asprintf.h"
-#include "biglib.h"
-#include "biglib_rm_recursive.h"
-#include "biglib_suppl.h"
 #include "bonhomme.h"
 #include "camera.h"
 #include "coeurs.h"
