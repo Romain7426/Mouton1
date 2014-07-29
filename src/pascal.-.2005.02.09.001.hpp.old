@@ -1,0 +1,305 @@
+#ifndef PASCAL_HPP
+#define PASCAL_HPP
+
+#include "liste.hpp"
+
+/* Ce fichier contient la classe de cosntruction d'un arbre de compilation
+   PASCAL, qui est le langage de script adopté pour et par le projet.
+   Arbre Syntaxique Pascal (ASP)
+*/
+
+/* Dans cet arbre syntaxique, les feuilles sont les instructions.
+   Un arbre syntaxique est un arbre binaire.
+   On exécute d'abord le fils de gauche, puis le fils de droite.
+*/
+
+/* La création d'un noeud se fait au moyen de la séquence.
+   La séquence est associtive comme cela : a ; (b ; c) .
+   Ce qui fait qu'une suite d'instruction est un peigne à "droite".
+   
+   Pour créer un arbre à gauche, c'est la commance begin de bloc.
+   
+   En effet, un programme est une suite d'instruction élémentaire,
+   donc une suite de feuilles.
+   Le begin a pour effet de rendre élémentaire ('atomic') un regroupement
+   d'instructions, ce qui crée une dérivation dans la suite, donc un arbre.
+
+   La lecture des feuilles de l'arbre syntaxique de gauche à droite donne 
+   la liste des instructions qui vont être exécutées (ou presque ; 
+   on a le cas du if qui crée deux branches, mais qui se rejoignent 
+   ensuite ; même chose pour les boucles).
+*/
+
+
+/* Bon on s'occupe des
+
+
+
+/* Les feuilles des expressions. */
+
+enum pascal_type {PBoolean, PInteger, PReal, PPointeur};
+
+typedef enum pascal_type ptype;
+
+typedef bool ptboolean;
+typedef int ptinteger;
+typedef float ptreal;
+typedef unsigned int pascal_adresse_memoire;
+typedef pascal_adresse_memoire pam;
+/*
+struct slptype {
+    ptype contenu;
+    struct slptype *suivant;
+};
+*/
+struct ptptr {
+       pam ptr;
+       // correspond au type exact du pointeur.
+       //slptype lptype;
+       
+       // En fait, comme il n'y a que les pointeurs qui contruisent sur eux-mêmes,
+       // il est plus simple de compter le nombre d'imbrication (de niveaux) 
+       // de pointeurs.
+       unsigned int niveau = 0;
+       // Ça c'est le type qu'on trouve au bout après toutes les indirections.
+       // Normalement, ça ne peut pas contenir le type pointeur.
+       ptype contenu;
+};
+
+
+union UPValeur {
+   ptboolean b;
+   ptinteger i;
+   ptreal r;
+   ptptr ptr;
+};
+
+struct PValeur {
+       ptype t;
+       UPValeur val;
+       // Ce dernier champ est dans le cas où on 
+       };
+       
+
+/* Les expressions. */
+
+enum pascal_expression {PEt, POu, PEqual, PDiff, PInf, PSup, PInfEq, PSupEq, \
+     PPlus, PMoins, PMult, PDiv, PMod, PNot, PUPlus, PUMoins, PIdent};
+
+typedef enum pascal_expression pexpr;
+
+
+class CPexpr {
+      public:
+      /* Définition des types d'une expression. */
+      struct SPOpBinaire {
+             CPexpr *e1, *e2;
+             };
+      struct SPEt : public SPOpBinaire {
+             };
+      struct SPOu : public SPOpBinaire {
+             };
+      struct SPEqual : public SPOpBinaire {
+             };
+      struct SPDiff : public SPOpBinaire {
+             };
+      struct SPInf : public SPOpBinaire {
+             };
+      struct SPSup : public SPOpBinaire {
+             };
+      struct SPInfEq : public SPOpBinaire {
+             };
+      struct SPSupEq : public SPOpBinaire {
+             };
+      struct SPPlus : public SPOpBinaire {
+             };
+      struct SPMoins : public SPOpBinaire {
+             };
+      struct SPMult : public SPOpBinaire {
+             };
+      struct SPDiv : public SPOpBinaire {
+             };
+      struct SPMod : public SPOpBinaire {
+             };
+      struct SPOpUnaire {
+             CPexpr *e;
+             };
+      struct SPNot : public SPOpUnaire {
+             };
+      struct SPUPlus : public SPOpUnaire {
+             };
+      struct SPUMoins : public SPOpUnaire {
+             };
+      struct SPIdent {
+             char *pident;
+             };
+             
+      private:
+      union UPexpr {
+            SPEt upet;
+            SPOu upou;
+            SPEqual upequal;
+            SPDiff updiff;
+            SPInf upinf;
+            SPSup upsup;
+            SPInfEq upinfeq;
+            SPSupEq upsupeq;
+            SPPlus upplus;
+            SPMoins upmoins;
+            SPMult upmult;
+            SPDiv updiv;
+            SPMod upmod;
+            SPNot upnot;
+            SPUPlus upuplus;
+            SPUMoins upumoins;
+            SPIdent upident;
+            };
+      
+      
+      /* Le type de l'expression (sens pour filtrer le contenu). */
+      pexpr t;
+      
+      /* Maintenant le contenu. */
+      UPexpr expr;
+      
+      /* Le vrai type de l'expression. */
+      ptype pt;
+
+      #define CHECK_TYPE(a) (this->pt == a)
+      
+      public:
+      /* La fonction d'évaluation.
+         Elle retourne le résultat dans le PValeur,
+         et la valeur rendue est un code d'erreur.
+           0 : oki
+         < 0 : pas oki
+      */
+      /* r_ et l_ sont identiques, sauf dans l'évaluation des idents.
+         Ainsi, dans "x := x",
+         à gauche du ':=', on appelle l_  //pointeur
+         à droite du ':=', on appelle r_  //valeur
+      */
+      int r_evaluate(PValeur &val);
+      int l_evaluate(PValeur &val);
+
+
+};
+
+
+
+
+/* Les instructions. */
+
+enum pascal_instruction {PSeq, PIf, PWhile, PFor, PRepeat, PBegin, \
+     PVar, PAffectation, PWrite, PWriteln, PRead, PReadln};
+
+
+typedef enum pascal_instruction pinst;
+
+
+class CPprog {
+      /* D'abord définition des conteneurs de type. */
+      public:
+             struct SPSeq {
+                    CPprog *p1, *p2;
+                    };
+                    
+             struct SPIf {
+                    CPexpr *b;
+                    CPprog *p, *q;
+                    };
+                    
+             struct SPWhile {
+                     CPexpr *b;
+                     CPprog *p;
+                     };
+                     
+             struct SPFor {
+                    char *i;
+                    CPexpr *e1, *e2;
+                    CPprog *p;
+                    };
+             
+             struct SPRepeat {
+                    CPprog *p;
+                    CPexpr *b;
+                    };
+             
+             struct SPBegin {
+                    CPprog *p;
+                    };
+                    
+             struct SPVar {
+                    char *nom;
+                    ptype t;
+                    };
+                    
+             struct SPAffectation {
+                    CPexpr *lvar;
+                    CPexpr *e;
+                    };
+                    
+             struct SPWrite {
+                    CListe<CPexpr*> *le;
+                    };
+             
+             struct SPWriteln {
+                    CListe<CPexpr*> *le;
+                    };
+                    
+             struct SPRead {
+                    CListe<CPexpr*> *llvar;
+                    };
+                    
+             struct SPReadln {
+                    CListe<CPexpr*> *llvar;
+                    };
+             
+
+      private:
+             /* Une instruction est un de ces éléments. */
+             union UPinst {
+                   SPSeq upseq;
+                   SPIf upif;
+                   SPWhile upwhile;
+                   SPFor upfor;
+                   SPRepeat uprepeat;
+                   SPBegin upbegin;
+                   SPVar upvar;
+                   SPAffectation upaffectation;
+                   SPWrite upwrite;
+                   SPWriteln upwriteln;
+                   SPRead upread;
+                   SPReadln upreadln;
+                   };
+                   
+              /* Le type de l'instruction. */
+              pinst t;
+              
+              /* L'instruction elle-même. */
+              UPinst inst;
+             
+      public:
+             /* La fonction qui exécute une instruction.
+                Elle retourne un code d'erreur :
+                       0 ça s'est bien passé
+                     < 0 erreur !!!
+             */
+             int execute(void);
+             
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif /* PASCAL_HPP */

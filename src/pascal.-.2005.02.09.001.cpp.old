@@ -1,0 +1,900 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include "pascal.hpp"
+
+
+/* On a un environnement à deux niveaux,
+   ce qui permet l'utilisation de pointeurs.
+   D'où un environnement et une mémoire.
+   L'environnement est le monde à la compilation,
+   et la mémoire est le monde à l'exécution.
+   Le type des éléments de l'environnement est DVal.
+   Le type des éléments de la mémoire est SVal.
+*/
+/* C'est l'environnement qui fait le lien entre un ident et sa valeur
+   (constante, variable, fonction, procedure).
+*/
+
+
+enum pascal_dval {PDConstante, PDMemoire};
+
+typedef pascal_dval pdval;
+
+
+enum pascal_sval {PSValeur, PSFonction, PSProcedure};
+
+typedef pascal_sval psval;
+
+
+
+
+
+struct SPDConstante : public PValeur {
+};
+
+
+
+struct SPDMemoire {
+       pam adr;
+       };
+       
+union UEnvCell {
+      SPDConstante c;
+      SPDMemoire m;
+      };
+      
+struct SEnvCell {
+       char *nom;
+       UEnvCell contenu;
+       pdval t;
+       };
+
+
+
+
+
+
+
+struct SPSValeur : PValeur {
+};
+
+struct SPSFunction : CPprog {
+};
+
+struct SPSProcedure : CPprog {
+};
+
+
+union UPSVal {
+      SPSValeur val;
+      SPSFunction *f;
+      SPSProcedure *p;
+};
+
+struct SMemCell {
+       UPSVal v;
+       psval t;
+};
+      
+
+
+
+#define MAX_ENVIRONNEMENT 128
+#define MAX_MEMOIRE 1024
+typedef SEnvCell TEnvironnement[MAX_ENVIRONNEMENT];
+TEnvironnement env;
+unsigned int env_nbelts = 0;
+typedef SMemCell TMemoire[MAX_MEMOIRE];
+TMemoire mem;
+pam mem_nbelts = 0;
+
+
+
+
+/* La fonction de recherche dans l'environnement.
+   La fonction retourne l'indice de l'élément dans le tableau,
+   sinon, un nombre négatif correspondant à un code d'erreur.
+*/
+int envlookup(char *ident)
+{
+    //message("Recherche dans l'environnement l'identifiant '%s'.", ident);
+    
+    if (ident == NULL)
+    {
+       //messerr("'ident' est NULL ==> DTC");
+       return -1;
+    }
+    
+    int i = 0;
+    while (i < MAX_ENVIRONNEMENT)
+    {
+          if (strcmp(env[i].nom,ident) == 0) break;
+    }
+    
+    if (i >= MAX_ENVIRONNEMENT)
+    {
+       //messerr("identifiant \"%s\" n'est pas défini.", ident);
+       return -2;
+    }
+    else
+    {
+        //message("identifiant trouvé. i = %d", i);
+        return i;
+    }
+}   
+
+
+
+
+
+/* La fonction malloc sur la memoire.
+   Renvoie 0 si tout s'est bien passé,
+   un truc négatif sinon.
+   -1 : not enough memory
+*/
+int pnew(unsigned int taille, pam &a)
+{
+    //message("Demande d'allocation de mémoires de %u cases. Mémoire disponible : %u cases. Mémoire totale : %u cases.", taille, MAX_MEMOIRE - mem_nbelts, MAXMEMOIRE);
+    /* On fait la vérification dans ce sens là pour être sûr que le résultat
+       soit valide. */
+    if (taille > (MAX_MEMOIRE - mem_nbelts))
+    {
+               //messerr("Erreur à l'exécution d'un script : demande d'allocation de mémoire de %u cases, alors qu'il restait %u cases mémoires. Mémoire totale disponible : %u.", taille, MAX_MEMOIRE - mem_nbelts, MAX_MEMOIRE);
+               return -1;
+    }
+
+    a = (pam) mem_nbelts;
+    mem_nbelts += taille;
+    //message("Allocation réussie à l'adresse %d.", a);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Renvoie un code d'erreur.
+   0 oki
+   négatif : dtc
+   -1 : lors d'un ET, l'opérande de gauche n'était pas du type booléen ;
+   -2 : lors d'un ET, l'opérande de droite n'était pas du type booléen ;
+*/
+/*
+enum pascal_expression {PEt, POu, PEqual, PDiff, PInf, PSup, PInfEq, PSupEq, \
+     PPlus, PMoins, PMult, PDiv, PMod, PNot, PUPlus, PUMoins, PIdent};
+*/
+int CPexpr::r_evaluate(PValeur &val)
+{
+    PValeur e, e1, e2;
+    int ret;
+    #define VERIF_OK(a) {if ((ret = (a)) < 0){return ret;}}
+    
+    switch(this->t)
+    {
+     case PEt:
+          VERIF_OK(this->expr.upet.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upet.e2->r_evaluate(e2));
+          
+          if (e1.t != PBoolean) {
+             //messerr("Erreur d'évaluation d'une expression. Le membre de gauche d'un ET n'est pas de type booleen.");
+             return -1;
+             }
+
+          if (e2.t != PBoolean) {
+             //messerr("Erreur d'évaluation d'une expression. Le membre de droite d'un ET n'est pas de type booleen.");
+             return -2;
+             }
+          
+          val.t = PBoolean;
+          val.val.b = (e1.val.b && e2.val.b);
+          
+          break;
+          
+
+     case POu:
+          VERIF_OK(this->expr.upou.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upou.e2->r_evaluate(e2));
+          
+          if (e1.t != PBoolean) {
+             //messerr("Erreur d'évaluation d'une expression. Le membre de gauche d'un OU n'est pas de type booleen.");
+             return -3;
+             }
+
+          if (e2.t != PBoolean) {
+             //messerr("Erreur d'évaluation d'une expression. Le membre de droite d'un OU n'est pas de type booleen.");
+             return -4;
+             }
+          
+          val.t = PBoolean;
+          val.val.b = (e1.val.b || e2.val.b);
+          
+          break;
+          
+
+     case PEqual:
+          VERIF_OK(this->expr.upequal.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upequal.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '=', les objets n'ont pas le même type.");
+             return -5;
+             }
+
+          val.t = PBoolean;
+          switch (e1.t) 
+          {
+                 case PBoolean: val.val.b = (e1.val.b == e2.val.b); break;
+                 case PInteger: val.val.b = (e1.val.i == e2.val.i);break;
+                 case PReal: val.val.b = (e1.val.r == e2.val.r);break;
+                 case PPointeur: val.val.b = (e1.val.ptr.ptr == e2.val.ptr.ptr);break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un equal, type inconnu utilisé (erreur interne)");
+                  return -6;
+          }
+          
+          break;
+          
+
+
+     case PDiff:
+          VERIF_OK(this->expr.updiff.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.updiff.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '<>', les objets n'ont pas le même type.");
+             return -7;
+             }
+
+          val.t = PBoolean;
+          switch (e1.t) 
+          {
+                 case PBoolean: val.val.b = (e1.val.b != e2.val.b); break;
+                 case PInteger: val.val.b = (e1.val.i != e2.val.i);break;
+                 case PReal: val.val.b = (e1.val.r != e2.val.r);break;
+                 case PPointeur: val.val.b = (e1.val.ptr.ptr != e2.val.ptr.ptr);break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un diff, type inconnu utilisé (erreur interne)");
+                  return -8;
+          }
+          
+          break;
+          
+
+     case PInf:
+          VERIF_OK(this->expr.upinf.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upinf.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '<', les objets n'ont pas le même type.");
+             return -9;
+             }
+
+          val.t = PBoolean;
+          switch (e1.t) 
+          {
+                 case PBoolean: val.val.b = (e1.val.b < e2.val.b); break;
+                 case PInteger: val.val.b = (e1.val.i < e2.val.i);break;
+                 case PReal: val.val.b = (e1.val.r < e2.val.r);break;
+                 case PPointeur: 
+                      //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un inf, tentative de comparaison de pointeurs !!!.");
+                      //val.val.b = (e1.val.ptr.ptr < e2.val.ptr.ptr);break;
+                      return -10;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un inf, type inconnu utilisé (erreur interne)");
+                  return -11;
+          }
+          
+          break;
+          
+
+     case PSup:
+          VERIF_OK(this->expr.upsup.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upsup.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '>', les objets n'ont pas le même type.");
+             return -12;
+             }
+
+          val.t = PBoolean;
+          switch (e1.t) 
+          {
+                 case PBoolean: val.val.b = (e1.val.b > e2.val.b); break;
+                 case PInteger: val.val.b = (e1.val.i > e2.val.i);break;
+                 case PReal: val.val.b = (e1.val.r > e2.val.r);break;
+                 case PPointeur: 
+                      //val.val.b = (e1.val.ptr.ptr > e2.val.ptr.ptr);
+                      //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un sup, tentative de comparaison de pointeurs !!!.");
+                      return -13;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un sup, type inconnu utilisé (erreur interne)");
+                  return -14;
+          }
+          
+          break;
+          
+
+
+
+     case PInfEq:
+          VERIF_OK(this->expr.upinfeq.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upinfeq.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '<=', les objets n'ont pas le même type.");
+             return -15;
+             }
+
+          val.t = PBoolean;
+          switch (e1.t) 
+          {
+                 case PBoolean: val.val.b = (e1.val.b <= e2.val.b); break;
+                 case PInteger: val.val.b = (e1.val.i <= e2.val.i);break;
+                 case PReal: val.val.b = (e1.val.r <= e2.val.r);break;
+                 case PPointeur: 
+                      //val.val.b = (e1.val.ptr.ptr <= e2.val.ptr.ptr);
+                      //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un infeq, tentative de comparaison de pointeurs !!!.");
+                      return -16;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un infeq, type inconnu utilisé (erreur interne)");
+                  return -17;
+          }
+          
+          break;
+          
+
+
+
+     case PSupEq:
+          VERIF_OK(this->expr.upsupeq.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upsupeq.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '>=', les objets n'ont pas le même type.");
+             return -18;
+             }
+
+          val.t = PBoolean;
+          switch (e1.t) 
+          {
+                 case PBoolean: val.val.b = (e1.val.b >= e2.val.b); break;
+                 case PInteger: val.val.b = (e1.val.i >= e2.val.i);break;
+                 case PReal: val.val.b = (e1.val.r >= e2.val.r);break;
+                 case PPointeur: 
+                      //val.val.b = (e1.val.ptr.ptr >= e2.val.ptr.ptr);
+                      //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un supeq, tentative de comparaison de pointeurs !!!.");
+                      return -19;                      
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un supeq, type inconnu utilisé (erreur interne)");
+                  return -20;
+          }
+          
+          break;
+          
+
+
+
+
+
+
+     case PPlus:
+          VERIF_OK(this->expr.upplus.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upplus.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '+', les objets n'ont pas le même type.");
+             return -21;
+             }
+
+          switch (e1.t) 
+          {
+                 case PInteger: 
+                      val.t = PInteger;
+                      val.val.i = (e1.val.i + e2.val.i);
+                      break;
+                 case PReal:
+                      val.t = PReal;
+                      val.val.r = e1.val.r + e2.val.r;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un plus, addition de deux types non conformes (PTR + PTR ; BOOL + BOOL).");
+                  return -22;
+          }
+          
+          break;
+          
+
+
+
+
+
+
+     case PMoins:
+          VERIF_OK(this->expr.upmoins.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upmoins.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '+', les objets n'ont pas le même type.");
+             return -23;
+             }
+
+          switch (e1.t) 
+          {
+                 case PInteger: 
+                      val.t = PInteger;
+                      val.val.i = (e1.val.i - e2.val.i);
+                      break;
+                 case PReal:
+                      val.t = PReal;
+                      val.val.r = e1.val.r - e2.val.r;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un moins, soustraction de deux types non conformes (BOOL - BOOL ; PTR - PTR).");
+                  return -24;
+          }
+          
+          break;
+          
+
+
+
+
+
+
+
+
+     case PMult:
+          VERIF_OK(this->expr.upmult.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upmult.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un '*', les objets n'ont pas le même type.");
+             return -25;
+             }
+
+          switch (e1.t) 
+          {
+                 case PInteger: 
+                      val.t = PInteger;
+                      val.val.i = (e1.val.i * e2.val.i);
+                      break;
+                 case PReal:
+                      val.t = PReal;
+                      val.val.r = e1.val.r * e2.val.r;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un mult, multiplication de deux types non conformes (BOOL * BOOL ; PTR * PTR).");
+                  return -26;
+          }
+          
+          break;
+          
+
+
+
+
+
+     case PDiv:
+          VERIF_OK(this->expr.updiv.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.updiv.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un 'div', les objets n'ont pas le même type.");
+             return -27;
+             }
+
+          switch (e1.t) 
+          {
+                 case PInteger: 
+                      val.t = PInteger;
+                      val.val.i = (e1.val.i / e2.val.i);
+                      break;
+                 case PReal:
+                      val.t = PReal;
+                      val.val.r = e1.val.r / e2.val.r;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un div, division de deux types non conformes (BOOL div BOOL ; PTR div PTR).");
+                  return -28;
+          }
+          
+          break;
+          
+
+
+
+
+
+
+     case PMod:
+          VERIF_OK(this->expr.upmod.e1->r_evaluate(e1));
+          VERIF_OK(this->expr.upmod.e2->r_evaluate(e2));
+          
+          if (e1.t != e2.t) {
+             //messerr("Erreur d'évaluation d'une expression d'un script. De chaque côté d'un 'mod', les objets n'ont pas le même type.");
+             return -29;
+             }
+
+          switch (e1.t) 
+          {
+                 case PInteger: 
+                      val.t = PInteger;
+                      val.val.i = (e1.val.i % e2.val.i);
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un mod, calcul du reste de deux types non conformes (BOOL mod BOOL ; REAL mod REAL ; PTR mod PTR).");
+                  //messerr("Toutefois, nous espérons un jour pouvoir supporter la division euclidienne sur R.");
+                  return -30;
+          }
+          
+          break;
+          
+
+
+
+
+
+     case PNot:
+          VERIF_OK(this->expr.upnot.e->r_evaluate(e));
+          
+          switch (e.t) 
+          {
+                 case PBoolean: 
+                      val.t = PBoolean;
+                      val.val.b = !(e.val.b);
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un not, calcul du not d'une valeur non booléenne.");
+                  return -31;
+          }
+          
+          break;
+          
+
+
+
+
+
+
+
+     case PUPlus:
+          VERIF_OK(this->expr.upuplus.e->r_evaluate(e));
+          
+          switch (e.t) 
+          {
+                 case PInteger: 
+                      val.t = PInteger;
+                      val.val.i = e.val.i;
+                      break;
+                 case PReal:
+                      val.t = PReal;
+                      val.val.r = e.val.r;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un uplus, calcul du plus unaire sur un bool ou un real.");
+                  return -32;
+          }
+          
+          break;
+          
+
+
+
+
+     case PUMoins:
+          VERIF_OK(this->expr.upumoins.e->r_evaluate(e));
+          
+          switch (e.t) 
+          {
+                 case PInteger: 
+                      val.t = PInteger;
+                      val.val.i = - e.val.i;
+                      break;
+                 case PReal:
+                      val.t = PReal;
+                      val.val.r = - e.val.r;
+                      break;
+                 default: 
+                  //messerr("Erreur d'évaluation d'une expression d'un script. Lors d'un umoins, calcul du moins unaire sur un bool ou un real.");
+                  return -33;
+          }
+          
+          break;
+          
+
+
+
+
+
+
+
+
+
+     case PIdent:
+          int i = envlookup(this->expr.upident.pident);
+          if (i < 0)
+          {
+             //messerr("Impossible d'évaluer l'expression car l'identifiant n'a pas trouvé dans la table des symboles.");
+             return -34;
+          }
+
+
+
+          switch (env[i].t)
+          {
+                 case PDConstante:
+                      val = env[i].contenu.c;
+                      //val = env[i].contenu;
+                      break;
+                 case PDMemoire:
+                      {
+                       SMemCell xc = mem[env[i].contenu.m.adr];
+                      
+                      if (xc.t != PSValeur)
+                      {
+                         //messerr("les pointeurs sur les fonctions ne sont pas encore implémentés. Unpeu de patience je vous prie.");
+                         return -135;
+                      }
+                      val = xc.v.val;
+                      }
+                      /*
+                      val.t = PPointeur;
+                      
+                      val.val.ptr.lptype = env[i].contenu.m.pt;
+                      val.val.ptr.ptr = .v;
+                      */
+                      break;
+                 default:
+                         //messerr("Type DVal inconnu dans Ident. (Erreur Interne)");
+                         return -35;
+          }
+          break;
+
+     }
+     return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Renvoie un code d'erreur.
+   0 oki
+   négatif : dtc
+   -1 : lors d'un ET, l'opérande de gauche n'était pas du type booléen ;
+   -2 : lors d'un ET, l'opérande de droite n'était pas du type booléen ;
+*/
+/*
+enum pascal_expression {PEt, POu, PEqual, PDiff, PInf, PSup, PInfEq, PSupEq, \
+     PPlus, PMoins, PMult, PDiv, PMod, PNot, PUPlus, PUMoins, PIdent};
+*/
+int CPexpr::l_evaluate(PValeur &val)
+{
+    PValeur e, e1, e2;
+    int ret;
+    #define VERIF_OK(a) {if ((ret = (a)) < 0){return ret;}}
+    
+    switch(this->t)
+    {
+     case PEt:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Et sur une LValue n'a aucun sens.");
+          return -10;
+          break;
+          
+     case POu:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Ou sur une LValue n'a aucun sens.");
+          return -20;
+          break;
+
+     case PEqual:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Equal sur une LValue n'a aucun sens.");
+          return -30;
+          break;
+
+     case PDiff:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Equal sur une LValue n'a aucun sens.");
+          return -40;
+          break;
+
+     case PInf:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Inf sur une LValue n'a aucun sens.");
+          return -50;
+          break;
+
+     case PSup:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Sup sur une LValue n'a aucun sens.");
+          return -60;
+          break;
+
+     case PInfEq:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération InfEq sur une LValue n'a aucun sens.");
+          return -70;
+          break;
+
+     case PSupEq:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération SupEq sur une LValue n'a aucun sens.");
+          return -80;
+          break;
+
+     case PPlus:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération + entre une adresse et un scalaire a un sens, mais ici on fait du Pascal, pas du C, que diable !!!");
+          return -90;
+          break;
+
+     case PMoins:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération - entre une adresse et un scalaire a un sens, mais ici on fait du Pascal, pas du C, que diable !!!");
+          return -100;
+          break;
+
+     case PMult:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Mult sur une LValue n'a aucun sens.");
+          return -110;
+          break;
+
+     case PDiv:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération Div sur une LValue n'a aucun sens.");
+          return -120;
+          break;
+
+     case PMod:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération modulo entre deux adresses a un sens, mais ici on fait du Pascal, pas du C, que diable !!!");
+          return -130;
+          break;
+
+     case PNot:
+          //messerr("Erreur de l_evaluation d'une expression. Une opération not sur une adresse a un sens, mais ici on fait du Pascal, pas du C, que diable !!!");
+          return -140;
+          break;
+
+     case PUPlus:
+          //messerr("Ecoute, tu m'expliques ce que tu veux faire avec Plus unaire et une adresse, après on dicute.");
+          return -150;
+          break;
+
+     case PUMoins:
+          //mess("Un moins unaire sur une adresse !!?? mais t'as trop fumé mon gars.");
+          return -160;
+          break;
+
+     case PIdent:
+          int i = envlookup(this->expr.upident.pident);
+
+          if (i < 0)
+          {
+             //messerr("Impossible de L_évaluer l'expression car l'identifiant n'a pas trouvé dans la table des symboles.");
+             return -170;
+          }
+
+
+
+          switch (env[i].t)
+          {
+                 case PDConstante:
+                      //messerr("Mais enfin t'es con ou quoi ? C'est pas possible de prendre l'adresse d'une constante.");
+                      return -171;
+                      break;
+                 case PDMemoire:
+                      {
+                       pam p = env[i].contenu.m.adr;
+                       
+                       val.t = PPointeur;
+                       val.val.ptr.lptype = 
+                       val.val.ptr.ptr = p;
+                       SMemCell xc = mem[p];
+                      
+                      if (xc.t != PSValeur)
+                      {
+                         //messerr("les pointeurs sur les fonctions ne sont pas encore implémentés. Unpeu de patience je vous prie.");
+                         return -135;
+                      }
+                      val = xc.v.val;
+                      }
+                      /*
+                      val.t = PPointeur;
+                      
+                      val.val.ptr.lptype = env[i].contenu.m.pt;
+                      val.val.ptr.ptr = .v;
+                      */
+                      break;
+                 default:
+                         //messerr("Type DVal inconnu dans Ident. (Erreur Interne)");
+                         return -35;
+          }
+          break;
+
+     }
+     return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

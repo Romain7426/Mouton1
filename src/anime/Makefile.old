@@ -1,0 +1,57 @@
+CDIR = ..
+HDIR = ../../include
+
+PREFIX = anime.
+
+CC = /cygdrive/g/Programmes/Dev-Cpp/bin/g++.exe
+CFLAGSL = -Wall -g -D SDL_INCLUDE -I $(HDIR)
+CFLAGS = -ansi $(CFLAGSL)
+LEX = flex
+LEXFLAGS = -Pyyanime
+YACC = yacc
+YACCFLAGS = -d -t -p yyanime
+
+
+parser-lexer: $(PREFIX)parser.hpp $(PREFIX)parser.cpp $(PREFIX)lexer.cpp
+
+
+all: $(PREFIX)global.o $(PREFIX)parser.o $(PREFIX)lexer.o $(PREFIX)o
+
+
+clean:
+	rm *~ *.o 
+
+superclean: clean
+	rm $(PREFIX)parser.hpp $(PREFIX)parser.cpp $(PREFIX)lexer.cpp
+
+
+truc: truc.cpp
+	$(CC) $(CFLAGS) -o truc.exe truc.cpp
+
+
+
+
+
+$(PREFIX)o: $(PREFIX)cpp $(PREFIX)global.hpp
+	$(CC) $(CFLAGS) -c $(PREFIX)cpp
+
+
+$(PREFIX)global.o: $(PREFIX)global.cpp $(PREFIX)global.hpp
+	$(CC) $(CFLAGS) -c $(PREFIX)global.cpp
+
+
+$(PREFIX)parser.o: $(PREFIX)parser.cpp $(PREFIX)global.hpp
+	$(CC) $(CFLAGS) -c $(PREFIX)parser.cpp
+
+$(PREFIX)parser.cpp $(PREFIX)parser.h: $(PREFIX)parser.y $(PREFIX)global.hpp
+	$(YACC) $(YACCFLAGS) -o $(PREFIX)parser.cpp $(PREFIX)parser.y
+
+$(PREFIX)parser.hpp: $(PREFIX)parser.cpp $(PREFIX)parser.h
+	mv $(PREFIX)parser.h $(PREFIX)parser.hpp
+
+# La compilation de lexer.c nécessite l'enlevement de l'option -ansi car la fonction int fileno(FILE *) est dans stdio.h sans être ANSI. 
+$(PREFIX)lexer.o: $(PREFIX)lexer.cpp $(PREFIX)global.hpp $(PREFIX)parser.hpp
+	$(CC) $(CFLAGSL) -c $(PREFIX)lexer.cpp
+
+$(PREFIX)lexer.cpp: $(PREFIX)lexer.l $(PREFIX)global.hpp $(PREFIX)parser.hpp
+	$(LEX) $(LEXFLAGS) -o$(PREFIX)lexer.cpp $(PREFIX)lexer.l
