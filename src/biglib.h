@@ -72,7 +72,7 @@ extern void bzero(void *s, size_t n);
 
 
 
-enum { CR = ('\r'), LF ('\n') };
+enum { CR = ('\r'), LF = ('\n') };
 
 
 extern char * str_alloc(int char_nb);
@@ -209,13 +209,9 @@ extern unsigned int puissance2_tab[32];
 
 
 
-//extern void texte_en_ligne(const char * str, unsigned int * lignes_nombre, char * * * ligne_tableau);
-extern str_tableau_t * texte_en_ligne(const char * str);
-extern unsigned int texte_lignes_nombre(const char * str);
-extern str_tableau_t * texte_en_mot(const char * str);
-extern unsigned int texte_mots_nombre(const char * str);
+extern int texte_lignes_nombre(const char * str);
+extern int texte_mots_nombre(const char * str);
 
-extern char * str_liste_concat(const str_liste_t * l);
 extern bool string_contains_char_huh(const char * str, const char c);
 extern char * string_char_replace(const char * str, const char c1, const char c2);
 extern void string_char_replace_nocopy(char * str, const char c1, const char c2);
