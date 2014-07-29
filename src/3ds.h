@@ -22,6 +22,7 @@ struct CVector3 {
   float x, y, z;
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(CVector3);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CVector3);
 
 
 // This is our 2D point struct.  This will be used to store the UV coordinates.
@@ -30,6 +31,7 @@ struct CVector2 {
   float x, y;
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(CVector2);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CVector2);
 
 // This is our face structure.  This is is used for indexing into the vertex 
 // and texture coordinate arrays.  From this information we know which vertices
@@ -39,6 +41,7 @@ struct tFace {
   int coordIndex[3];          // indicies for the tex coords to texture this face
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(tFace);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(tFace);
 
 // This holds the information for a material.  It may be a texture map of a color.
 // Some of these are not used, but I left them because you will want to eventually
@@ -54,6 +57,7 @@ struct tMaterialInfo {
   float vOffset;              // v offset of texture  (Currently not used)
 } ;
 DEFINE_NEW_OPERATOR_FOR_STRUCT(tMaterialInfo);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(tMaterialInfo);;
 
 // This holds all the information for our model/scene. 
 // You should eventually turn into a robust struct that 
@@ -72,6 +76,7 @@ struct t3DObject {
   tFace *pFaces;              // The faces information of the object
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(t3DObject);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(t3DObject);
 
 // This holds our model information.  This should also turn into a robust struct.
 // We use STL's (Standard Template Library) vector struct to ease our link list burdens. :)
@@ -87,6 +92,7 @@ struct t3DModel {
 #endif
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(t3DModel);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(t3DModel);
 
 
 //////////// *** NEW *** ////////// *** NEW *** ///////////// *** NEW *** ////////////////////
@@ -206,6 +212,7 @@ struct tIndices {
   // This will hold point1, 2, and 3 index's into the vertex array plus a visible flag
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(tIndices);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(tIndices);
 
 // This holds the chunk info
 struct tChunk {
@@ -214,6 +221,7 @@ struct tChunk {
   unsigned int bytesRead;                 // The amount of bytes read within that chunk
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(tChunk);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(tChunk);
 
 // This struct handles all of the loading code
 struct CLoad3DS {

@@ -2,9 +2,6 @@
 #define UTILITIES_H
 
 
-#define RGBA(r,v,b,a) (((a * 256 + v) * 256 + b) * 256 + r)
-#define sqr(a) ((a)*(a))
-
 #define STRING(s) STRINGX(s)
 #define STRINGX(s) #s
 

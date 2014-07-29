@@ -177,7 +177,11 @@ typedef char str_t;
 #define SCREEN_WIDTH 1024
 #define SCREEN_HEIGHT 768
 #endif
+
 #define SCREEN_DEPTH 24
+
+#define RGBA(r,v,b,a) (((a * 256 + v) * 256 + b) * 256 + r)
+
 
 #ifndef MACOSX
 #define SCREEN_MODE SDL_RESIZABLE/*SDL_RESIZABLE, SDL_FULLSCREEN*/
