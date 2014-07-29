@@ -1,15 +1,8 @@
-#ifndef _3DS_HPP
-#define _3DS_HPP
+#ifndef _3DS_H
+#define _3DS_H
 
-#include "global.hpp"
 
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
 
-using namespace std;
 
 typedef unsigned char BYTE;
 
@@ -21,19 +14,22 @@ typedef unsigned char BYTE;
 // to this.  These structures only support the information that is needed
 // to load the objects in the scene and their associative materials.
 
-#define MAX_TEXTURES 100  // The maximum amount of textures to load
+enum { MAX_TEXTURES = 100 };  // The maximum amount of textures to load
 
 // This is our 3D point class.  This will be used to store the vertices of our model.
-class CVector3 {
-public:
+struct CVector3 {
+//public:
   float x, y, z;
 };
+DEFINE_NEW_OPERATOR_FOR_STRUCT(CVector3);
 
-// This is our 2D point class.  This will be used to store the UV coordinates.
-class CVector2 {
-public:
+
+// This is our 2D point struct.  This will be used to store the UV coordinates.
+struct CVector2 {
+//public:
   float x, y;
 };
+DEFINE_NEW_OPERATOR_FOR_STRUCT(CVector2);
 
 // This is our face structure.  This is is used for indexing into the vertex 
 // and texture coordinate arrays.  From this information we know which vertices
@@ -42,6 +38,7 @@ struct tFace {
   int vertIndex[3];           // indicies for the verts that make up this triangle
   int coordIndex[3];          // indicies for the tex coords to texture this face
 };
+DEFINE_NEW_OPERATOR_FOR_STRUCT(tFace);
 
 // This holds the information for a material.  It may be a texture map of a color.
 // Some of these are not used, but I left them because you will want to eventually
@@ -56,9 +53,10 @@ struct tMaterialInfo {
   float uOffset;              // u offset of texture  (Currently not used)
   float vOffset;              // v offset of texture  (Currently not used)
 } ;
+DEFINE_NEW_OPERATOR_FOR_STRUCT(tMaterialInfo);
 
 // This holds all the information for our model/scene. 
-// You should eventually turn into a robust class that 
+// You should eventually turn into a robust struct that 
 // has loading/drawing/querying functions like:
 // LoadModel(...); DrawObject(...); DrawModel(...); DestroyModel(...);
 struct t3DObject {
@@ -73,15 +71,22 @@ struct t3DObject {
   CVector2  *pTexVerts;       // The texture's UV coordinates
   tFace *pFaces;              // The faces information of the object
 };
+DEFINE_NEW_OPERATOR_FOR_STRUCT(t3DObject);
 
-// This holds our model information.  This should also turn into a robust class.
-// We use STL's (Standard Template Library) vector class to ease our link list burdens. :)
+// This holds our model information.  This should also turn into a robust struct.
+// We use STL's (Standard Template Library) vector struct to ease our link list burdens. :)
 struct t3DModel {
   int numOfObjects;                   // The number of objects in the model
   int numOfMaterials;                 // The number of materials for the model
+#if 0
   vector<tMaterialInfo> pMaterials;   // The list of material information (Textures and colors)
   vector<t3DObject> pObject;          // The object list for our model
+#else
+  tMaterialInfo * pMaterials;   // The list of material information (Textures and colors)
+  t3DObject * pObject;          // The object list for our model
+#endif
 };
+DEFINE_NEW_OPERATOR_FOR_STRUCT(t3DModel);
 
 
 //////////// *** NEW *** ////////// *** NEW *** ///////////// *** NEW *** ////////////////////
@@ -100,14 +105,14 @@ struct t3DModel {
 ////
 //// This file includes all the structures that you need to hold the model data.
 //// Of course, if you want a robust loader, you need some more things for animation, etc..
-//// If you intend to use this code, I would make the model and object structures classes.
+//// If you intend to use this code, I would make the model and object structures structes.
 //// This way you can have a bunch of helper functions like Import(), Translate(), Render()...
 ////
 //// * What's An STL (Standard Template Library) Vector? *
 //// Let me quickly explain the STL vector for those of you who are not familiar with them.
 //// To use a vector you must include <vector> and use the std namespace: using namespace std;
 //// A vector is an array based link list.  It allows you to dynamically add and remove nodes.
-//// This is a template class so it can be a list of ANY type.  To create a vector of type
+//// This is a template struct so it can be a list of ANY type.  To create a vector of type
 //// "int" you would say:  vector<int> myIntList;
 //// Now you can add a integer to the dynamic array by saying: myIntList.push_back(10);
 //// or you can say:  myIntList.push_back(num);.  The more you push back, the larger
@@ -200,6 +205,7 @@ struct tIndices {
   unsigned short a, b, c, bVisible;       
   // This will hold point1, 2, and 3 index's into the vertex array plus a visible flag
 };
+DEFINE_NEW_OPERATOR_FOR_STRUCT(tIndices);
 
 // This holds the chunk info
 struct tChunk {
@@ -207,59 +213,71 @@ struct tChunk {
   unsigned int length;                    // The length of the chunk
   unsigned int bytesRead;                 // The amount of bytes read within that chunk
 };
+DEFINE_NEW_OPERATOR_FOR_STRUCT(tChunk);
 
-// This class handles all of the loading code
-class CLoad3DS {
-public:
-  CLoad3DS(void);                             // This inits the data members
+// This struct handles all of the loading code
+struct CLoad3DS {
+//public:
+  struct CLoad3DS * (*CLoad3DS)(void);                             // This inits the data members
 
-  // This is the function that you call to load the 3DS
-  bool Import3DS(t3DModel *pModel, const char * strFileName);
-
-private:
-  // This reads in a string and saves it in the char array passed in
-  int GetString(char *);
-
-  // This reads the next chunk
-  void ReadChunk(tChunk *);
-
-  // This reads the next large chunk
-  void ProcessNextChunk(t3DModel *pModel, tChunk *);
-
-  // This reads the object chunks
-  void ProcessNextObjectChunk(t3DModel *pModel, t3DObject *pObject, tChunk *);
-
-  // This reads the material chunks
-  void ProcessNextMaterialChunk(t3DModel *pModel, tChunk *);
-
-  // This reads the RGB value for the object's color
-  void ReadColorChunk(tMaterialInfo *pMaterial, tChunk *pChunk);
-
-  // This reads the objects vertices
-  void ReadVertices(t3DObject *pObject, tChunk *);
-
-  // This reads the objects face information
-  void ReadVertexIndices(t3DObject *pObject, tChunk *);
-
-  // This reads the texture coodinates of the object
-  void ReadUVCoordinates(t3DObject *pObject, tChunk *);
-
-  // This reads in the material name assigned to the object and sets the materialID
-  void ReadObjectMaterial(t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk);
-    
-  // This computes the vertex normals for the object (used for lighting)
-  void ComputeNormals(t3DModel *pModel);
-
-  // This frees memory and closes the file
-  void CleanUp(void);
-  
+//private:
   // The file pointer
-  FILE *m_FilePointer;
+  FILE * m_FilePointer;
   
   // These are used through the loading process to hold the chunk information
-  tChunk *m_CurrentChunk;
-  tChunk *m_TempChunk;
+  tChunk * m_CurrentChunk;
+  tChunk * m_TempChunk;
+
+
+//public:
+  // This is the function that you call to load the 3DS
+  bool Import3DS(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
+
+//private:
+  // This reads in a string and saves it in the char array passed in
+  int GetString(struct CLoad3DS * this, char *);
+
+  // This reads the next chunk
+  void ReadChunk(struct CLoad3DS * this, tChunk *);
+
+  // This reads the next large chunk
+  void ProcessNextChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
+
+  // This reads the object chunks
+  void ProcessNextObjectChunk(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *);
+
+  // This reads the material chunks
+  void ProcessNextMaterialChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
+
+  // This reads the RGB value for the object's color
+  void ReadColorChunk(struct CLoad3DS * this, tMaterialInfo *pMaterial, tChunk *pChunk);
+
+  // This reads the objects vertices
+  void ReadVertices(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+
+  // This reads the objects face information
+  void ReadVertexIndices(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+
+  // This reads the texture coodinates of the object
+  void ReadUVCoordinates(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+
+  // This reads in the material name assigned to the object and sets the materialID
+  void ReadObjectMaterial(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk);
+    
+  // This computes the vertex normals for the object (used for lighting)
+  void ComputeNormals(struct CLoad3DS * this, t3DModel *pModel);
+
+  // This frees memory and closes the file
+  void CleanUp(struct CLoad3DS * this);
 };
+
+//DEFINE_NEW_OPERATOR_FOR_STRUCT(CLoad3DS);
+static struct CLoad3DS * new_CLoad3DS(void) {
+  return CLoad3DS();
+}
+
+
+  
 
 
 
@@ -281,5 +299,5 @@ private:
 
 
 
-#endif /* _3DS_HPP */
+#endif /* _3DS_H */
 

@@ -1,28 +1,38 @@
 #ifndef GLOBAL_HPP
 #define GLOBAL_HPP
 
-using namespace std;
-
 /* 
-   GLOBAL.HPP contient les références à SDL, et OpenGL…
-   tous les fichiers du projets peuvent utiliser ce fichier, 
-   dès qu'ils veulent utiliser SDL ou OpenGL
-*/
+ * GLOBAL.H contient les références à SDL, et OpenGL… tous les
+ * fichiers du projets peuvent utiliser ce fichier, dès qu'ils veulent
+ * utiliser SDL ou OpenGL
+ */
 /*
-  IMPORTANT: dans les options de compilations de DevCpp,
-  il faut que la case ANSI C soit décochée.
-  Le jeu perd ainsi 500ko d'un coup,
-  et les fichiers stdout.txt et stderr.txt sont
-  générés.
+* IMPORTANT: dans les options de compilations de DevCpp, il faut que
+* la case ANSI C soit décochée.  Le jeu perd ainsi 500ko d'un coup, et
+* les fichiers stdout.txt et stderr.txt sont générés.
 */
+
+
+#define DEFINE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)		\
+  static struct TYPENAME * glue(new_,TYPENAME)(void) {		\
+    struct TYPENAME * this = NULL;				\
+    this = (struct TYPENAME *) malloc(sizeof struct NAME);	\
+    bzero(this, sizeof struct NAME);				\
+    return this;						\
+  }
 
 
 
 #define AFFICHER_CUBE_DEBUG true
 #define DEBUG_MOTEUR_PHYSIQUE true
 
+#if 0
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
+#else
+#define SCREEN_WIDTH 1024
+#define SCREEN_HEIGHT 768
+#endif
 #define SCREEN_DEPTH 24
 
 #ifndef MACOSX

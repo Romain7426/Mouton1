@@ -10,21 +10,36 @@
 //                                                                       //
 //***********************************************************************//
 
-#include "3ds.hpp"
+#include "global.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "3ds.h"
+
+
+static struct CLoad3DS * CLoad3DS(void);
+static bool Import3DS(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
+static int GetString(struct CLoad3DS * this, char *);
+static void ReadChunk(struct CLoad3DS * this, tChunk *);
+static void ProcessNextChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
+static void ProcessNextObjectChunk(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *);
+static void ProcessNextMaterialChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
+static void ReadColorChunk(struct CLoad3DS * this, tMaterialInfo *pMaterial, tChunk *pChunk);
+static void ReadVertices(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+static void ReadVertexIndices(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+static void ReadUVCoordinates(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+static void ReadObjectMaterial(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk);
+static void ComputeNormals(struct CLoad3DS * this, t3DModel *pModel);
+static void CleanUp(struct CLoad3DS * this);
 
 
 
 
+#ifdef BIG_ENDIAN
 
-// Je définis ici une fonction fread_ pour un portage Mac OS X.
-// Le problème qui se pose ici est les fichiers sont enregistrés en petit boutien (little endian)
-// alors que le mac les lit en gros boutien (big endian), ce qui donne beaucoup de problème.
-// On espère très fortement que la fonction fread fait du tamponage en interne.
-#ifdef LIBPROG_ENDIAN_BIG
+static size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream);
 
-size_t fread_(void * ptr, size_t size, size_t nmemb, FILE * stream);
-
-size_t fread_(void * ptr, size_t size, size_t nmemb, FILE * stream) {
+size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream) {
   size_t i, j, nblus, nblustemp;
   char *temp;
   
@@ -34,36 +49,28 @@ size_t fread_(void * ptr, size_t size, size_t nmemb, FILE * stream) {
 
   //printf("size = %u, nmemb = %u \n", (unsigned) size, (unsigned) nmemb);
 
-  if (size == 0 || nmemb == 0)
-    {
-      return 0;
+  if (size == 0 || nmemb == 0) {
+    return 0;
+  }
+  for (i = 0; i < nmemb; i++) {
+    for (j = size; j > 0; j--) {
+      nblustemp = fread(temp + j, 1, 1, stream);
+      if (nblustemp == 0) {
+	return nblus;
+      }
+      nblus += nblustemp;
     }
-  for (i = 0; i < nmemb; i++)
-    {
-      for (j = size; j > 0; j--)
-        {
-          nblustemp = fread(temp + j, 1, 1, stream);
-          if (nblustemp == 0)
-            {
-              return nblus;
-            }
-          nblus += nblustemp;
-        }
-      temp += size;
-      //printf("fread_  ptr * = %p \n", temp);
-    }
+    temp += size;
+    //printf("fread_  ptr * = %p \n", temp);
+  }
   return nmemb;
-
 }
-
-
-
 
 #else
 
-#define fread_ fread
+#define fread_big_endian fread
 
-#endif // LIBPROG_ENDIAN_BIG
+#endif 
 
 
 
@@ -86,10 +93,28 @@ size_t fread_(void * ptr, size_t size, size_t nmemb, FILE * stream) {
 /////
 ///////////////////////////////// CLOAD3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-CLoad3DS::CLoad3DS()
-{
-  m_CurrentChunk = new tChunk;                // Initialize and allocate our current chunk
-  m_TempChunk = new tChunk;                   // Initialize and allocate a temporary chunk
+struct CLoad3DS * CLoad3DS(void) {
+  struct CLoad3DS * this = NULL;
+  this = (struct CLoad3DS *) malloc(sizeof struct CLoad3DS);
+  bzero(this, sizeof struct CLoad3DS);
+
+  this -> CLoad3DS = CLoad3DS;
+  this -> Import3DS = Import3DS;
+  this -> GetString = GetString;
+  this -> ReadChunk = ReadChunk;
+  this -> ProcessNextChunk = ProcessNextChunk;
+  this -> ProcessNextObjectChunk = ProcessNextObjectChunk;
+  this -> ProcessNextMaterialChunk = ProcessNextMaterialChunk;
+  this -> ReadColorChunk = ReadColorChunk;
+  this -> ReadVertices = ReadVertices;
+  this -> ReadVertexIndices = ReadVertexIndices;
+  this -> ReadUVCoordinates = ReadUVCoordinates;
+  this -> ReadObjectMaterial = ReadObjectMaterial;
+  this -> ComputeNormals = ComputeNormals;
+  this -> CleanUp = CleanUp;
+  
+  this -> m_CurrentChunk = new_tChunk();                // Initialize and allocate our current chunk
+  this -> m_TempChunk = new_tChunk();                   // Initialize and allocate a temporary chunk
 }
 
 ///////////////////////////////// IMPORT 3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
