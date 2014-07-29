@@ -239,44 +239,44 @@ struct CLoad3DS {
 
 //public:
   // This is the function that you call to load the 3DS
-  bool Import3DS(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
+  bool (* Import3DS)(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
 
 //private:
   // This reads in a string and saves it in the char array passed in
-  int GetString(struct CLoad3DS * this, char *);
+  int (* GetString)(struct CLoad3DS * this, char *);
 
   // This reads the next chunk
-  void ReadChunk(struct CLoad3DS * this, tChunk *);
+  void (* ReadChunk)(struct CLoad3DS * this, tChunk *);
 
   // This reads the next large chunk
-  void ProcessNextChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
+  void (* ProcessNextChunk)(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
 
   // This reads the object chunks
-  void ProcessNextObjectChunk(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *);
+  void (* ProcessNextObjectChunk)(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *);
 
   // This reads the material chunks
-  void ProcessNextMaterialChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
+  void (* ProcessNextMaterialChunk)(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
 
   // This reads the RGB value for the object's color
-  void ReadColorChunk(struct CLoad3DS * this, tMaterialInfo *pMaterial, tChunk *pChunk);
+  void (* ReadColorChunk)(struct CLoad3DS * this, tMaterialInfo *pMaterial, tChunk *pChunk);
 
   // This reads the objects vertices
-  void ReadVertices(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+  void (* ReadVertices)(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
 
   // This reads the objects face information
-  void ReadVertexIndices(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+  void (* ReadVertexIndices)(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
 
   // This reads the texture coodinates of the object
-  void ReadUVCoordinates(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
+  void (* ReadUVCoordinates)(struct CLoad3DS * this, t3DObject *pObject, tChunk *);
 
   // This reads in the material name assigned to the object and sets the materialID
-  void ReadObjectMaterial(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk);
+  void (* ReadObjectMaterial)(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk);
     
   // This computes the vertex normals for the object (used for lighting)
-  void ComputeNormals(struct CLoad3DS * this, t3DModel *pModel);
+  void (* ComputeNormals)(struct CLoad3DS * this, t3DModel *pModel);
 
   // This frees memory and closes the file
-  void CleanUp(struct CLoad3DS * this);
+  void (* CleanUp)(struct CLoad3DS * this);
 };
 
 //DEFINE_NEW_OPERATOR_FOR_STRUCT(CLoad3DS);
