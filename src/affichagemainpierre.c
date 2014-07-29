@@ -1,15 +1,20 @@
-#include "global.hpp"
-#include "affichagemainpierre.hpp"
-#include "text.hpp"
-#include "map.hpp"
+#include "global.h"
+#include "affichagemainpierre.h"
+#include "text.h"
+#include "map.h"
 
 
-CAffichageMainPierre::CAffichageMainPierre(void) {
-   main = new CTexture("main.png");   
-   pierre = new CTexture("pierre.png");    
+static void Render(const struct CAffichageMainPierre * this, const float y, const CMap * Map);
+DEFINE_NEW_OPERATOR_FOR_STRUCT1(CAffichageMainPierre,Render);
+
+
+CAffichageMainPierre * CAffichageMainPierre(void) {
+  CAffichageMainPierre * this = new_CAffichageMainPierre();
+  this -> main = new CTexture("main.png");   
+  this -> pierre = new CTexture("pierre.png");    
 }    
 
-void CAffichageMainPierre::Render(const float y, const CMap * Map) const {
+void Render(const CAffichageMainPierre * this, const float y, const CMap * Map) {
   #define MAIN_PIERRE_X 550
   #define MAIN_PIERRE_Y 340  
   #define PIERRE_X 30

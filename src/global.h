@@ -151,16 +151,30 @@ typedef char str_t;
 #include "biglib_suppl.h"
 #include "biglib.h"
 
-#define DEFINE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)		\
-  static struct TYPENAME * glue(new_,TYPENAME)(void) {		\
+#define TYPEDEF_TYPENAME_WITHOUT_STRUCT(TYPENAME)	\
+  typedef struct TYPENAME TYPENAME;
+
+#define DECLARE_NEW_OPERATOR_FOR_STRUCT(TYPENAME)		\
+  extern struct TYPENAME * glue(new_,TYPENAME)(void);			\
+
+#define DEFINE_NEW_OPERATOR_FOR_STRUCT0 DEFINE_NEW_OPERATOR_FOR_STRUCT0
+
+#define DEFINE_NEW_OPERATOR_FOR_STRUCT0(TYPENAME)		\
+  struct TYPENAME * glue(new_,TYPENAME)(void) {			\
     struct TYPENAME * this = NULL;				\
     this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME)); \
     bzero(this, sizeof(struct TYPENAME));			\
     return this;						\
   }
 
-#define TYPEDEF_TYPENAME_WITHOUT_STRUCT(TYPENAME)	\
-  typedef struct TYPENAME TYPENAME;
+#define DEFINE_NEW_OPERATOR_FOR_STRUCT1(TYPENAME,FIELDNAME1)	\
+  struct TYPENAME * glue(new_,TYPENAME)(void) {			\
+    struct TYPENAME * this = NULL;				\
+    this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME)); \
+    bzero(this, sizeof(struct TYPENAME));			\
+    this -> FIELDNAME1 = FIELDNAME1;				\
+    return this;						\
+  }
 
 
 

@@ -1,11 +1,12 @@
-#ifndef ACTION_HPP
-#define ACTION_HPP
+#if 0
+//#ifndef ACTION_H
+#define ACTION_H
 
-#include "ressource.hpp"
+#include "ressource.h"
 
 class CMenuAbstrait;
 
-#include "menu.hpp"
+#include "menu.h"
 
 
 
@@ -21,10 +22,10 @@ class CMenuAbstrait;
   
 
 class CScriptLauncher {
-private:
+  //private:
   char * proc;
 
-public:
+  //public:
   ressource<CPascal> * resPascal;
 
   CScriptLauncher(const char * const filename, const char * const procedure_name);
@@ -42,14 +43,16 @@ public:
 
 
 
-#define ACTIONS_MENU_X 100
-#define ACTIONS_MENU_Y 400
+
+
+enum { ACTIONS_MENU_X = 100, ACTIONS_MENU_Y = 400 };
 
 // CActionsMenu c'est un menu qui gere legerement plus les actions
 class CActionsMenu : public CMenuAbstrait {    
-public:
+  //public:
   bool InputAndRender(void);
 };
+
 
 
 /* cette classe gère un CActionsMenu à l'intérieur éventuellement NULL
@@ -57,10 +60,10 @@ public:
    ex : les arbres de toute la carte ne vont pas chacun avoir un CActionsMenu
    alloue!!!! sinon, je me pends !!*/
 class CObjActionnable {
-private:
+  //private:
   CActionsMenu * actions; 
   
-public:
+  //public:
   CObjActionnable(void);
   ~CObjActionnable(void);  
   void InputAndRenderActionMenu(void);  
@@ -74,4 +77,4 @@ extern void free_actions(void);
 
 
 
-#endif /* ACTION_HPP */
+#endif /* ACTION_H */

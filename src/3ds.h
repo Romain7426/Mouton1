@@ -279,6 +279,8 @@ struct CLoad3DS {
   void (* CleanUp)(struct CLoad3DS * this);
 };
 
+extern struct CLoad3DS * CLoad3DS(void);
+
 //DEFINE_NEW_OPERATOR_FOR_STRUCT(CLoad3DS);
 static struct CLoad3DS * new_CLoad3DS(void) {
   return CLoad3DS();
