@@ -1,0 +1,188 @@
+#!/opt/local/bin/gmake -r -R -S --warn-undefined-variables 
+SHELL:= /bin/sh
+MAKEFLAGS:= $(MAKEFLAGS) --warn-undefined-variables 
+#MAKEFLAGS:= $(filter-out  --warn-undefined-variables,$(MAKEFLAGS)) 
+.SUFFIXES: 
+.SILENT:
+.NOTPARALLEL:
+.EXPORT_ALL_VARIABLES:
+.SECONDARY:
+.PRECIOUS:
+.ONESHELL:
+
+SVN_REVISION := $(shell svn-revision.sh)
+#GIT_REVISION := $(shell git-revision.sh)
+#DATE := $(shell date "+%Y-%m-%d--%H-%M-%S")
+
+.PHONY: default
+default: 
+default: COPYING_at_start_of_c_files src-tarball-$(SVN_REVISION) src-tarball-$(SVN_REVISION).tar.gz # src-tarball-$(SVN_REVISION).img.gz 
+
+
+.PHONY: clean
+clean:
+	rm -Rf src-tarball src-tarball-$(SVN_REVISION).tar.gz 
+
+
+PROJECT_NAME := $(shell dir-name.sh $$PWD)
+SUBDIRS:=$(shell cd src; ldir | newline2space)
+SUBLIBS:=$(SUBDIRS)
+SUBLIBS_A:=$(patsubst %,lib%.a,$(SUBLIBS))
+SUBLIBS_A:=$(patsubst liblib%,lib%,$(SUBLIBS_A))
+UNAME:=$(shell uname)
+UNAME_M:=$(shell uname -m)
+PROJECT_TOOLS := $(shell echo $$PROJECT_TOOLS)
+
+#$(error $(SUBLIBS_A))
+
+# DEBUG OPT INLINE GC PROF
+#   DEBUG  [yes/no] -> mode de compilation du programme
+#   OPT    [yes/no] -> optimise-t-on le programme? 
+#   INLINE [yes/no] -> optimise-t-on le programme? 
+#   GC     [yes/no] -> gc'ed-t-on le code? 
+#   PROF   [yes/no] -> profile-t-on le code? 
+DEBUG := yes
+OPT := no
+INLINE := no
+GC := no
+PROF := no
+
+SYSTEME := $(shell uname)
+ENDIAN := $(shell endianness-detect)
+ARCH := $(shell arch)
+MACHINE := $(shell machine)
+HARDWARE := $(shell uname -m)
+
+UNAME_LIST := FreeBSD NetBSD OpenBSD Darwin Linux MINGW32_NT-6.1 MINGW32_NT-5.1 windows DOS
+OS_LIST := freebsd netbsd openbsd macosx linux windows windows windows dos
+ifneq ($(words $(UNAME_LIST)),$(words $(OS_LIST)))
+  $(error XXX)
+endif
+UNAME_IDX := $(shell tools/bin/list-match $(SYSTEME) $(UNAME_LIST) $(SYSTEME))
+OS := $(word $(UNAME_IDX), $(OS_LIST) unknown_os)
+
+HW_LIST := i386 amd64 x86_64 i686 386 8086
+INTSIZE_LIST := 32 64 64 32 32 16
+ifneq ($(words $(HW_LIST)),$(words $(INTSIZE_LIST)))
+  $(error XXX)
+endif
+HW_IDX := $(shell tools/bin/list-match $(HARDWARE) $(HW_LIST) $(HARDWARE))
+INTSIZE := $(word $(HW_IDX), $(INTSIZE_LIST) unknown_intsize)
+
+$(info OS $(OS))
+$(info INTSIZE $(INTSIZE))
+
+GCC_FLAGS := -std=c99 -D_THREAD_SAFE -D_REENTRANT -O0 -Wall -fmessage-length=0 -fno-exceptions -Werror -W  -Wparentheses -fverbose-asm  -D __DEBUG__ -D DEBUG -gstabs+3 -fno-omit-frame-pointer -Wmissing-prototypes -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type  -Wstrict-prototypes -Wmissing-prototypes -Wpacked -Wcast-qual -Wcast-align -Wsystem-headers -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wmissing-declarations -Wunknown-pragmas -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function 
+
+BISON_FLAGS := --report=all,state,look-ahead,itemset --token-table --debug #--graph 
+
+LIBPROG_CFLAGS := 
+LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_SYS_$(shell toupper $(OS))  
+LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_ENDIAN_$(shell toupper $(ENDIAN))  
+LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_DEBUG_$(shell toupper $(DEBUG))
+LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_OPT_$(shell toupper $(OPT))
+LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_INLINE_$(shell toupper $(INLINE))
+LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_GC_$(shell toupper $(GC))
+LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_PROF_$(shell toupper $(PROF))
+LIBPROG_LIBS := build/libprog/libprog.a
+
+#EDITLINE_CFLAGS := $(shell pkg-config libedit --cflags)
+#EDITLINE_LFLAGS := 
+#EDITLINE_LIBS := $(shell pkg-config libedit --libs) -bind_at_load
+#EDITLINE_CFLAGS := -I $(PROJECT_TOOLS)/libedit-20090923-3.0/destroot/include
+#EDITLINE_LIBS :=  $(PROJECT_TOOLS)/libedit-20090923-3.0/destroot/lib/libedit.a -ltermcap
+EDITLINE_CFLAGS := 
+EDITLINE_LIBS :=  #build/libedit-20090923-3.0/libedit-20090923-3.0--sys_macosx--endian_little--debug_yes--opt_no--inline_no--gc_no--prof_no.a -ltermcap
+
+
+CFLAGS := $(GCC_FLAGS) $(LIBPROG_CFLAGS) $(EDITLINE_CFLAGS) -I src/libprog
+LIBS   := $(LIBS_LIBPROG) $(EDITLINE_LIBS) -lm 
+
+
+
+PROG := $(PROJECT_NAME)
+SRC_C := $(patsubst src/%.c,%,$(wildcard src/*.c))
+SRC_H := $(patsubst src/%.h,%,$(wildcard src/*.h))
+SRC_Y := $(patsubst src/%.y,%,$(wildcard src/*.y))
+SRC_CT := $(patsubst src/%.ct,%,$(wildcard src/*.ct))
+#SRC_C := $(sort $(SRC_C) $(SRC_Y)) # removes duplicates
+SRC_C := $(filter-out $(SRC_Y),$(SRC_C)) 
+SRC_C := $(filter-out liste,$(SRC_C)) 
+SRC_H := $(filter-out liste,$(SRC_H)) 
+#OBJ := $(patsubst %,build/$(PROG)$(FLAVOR)--%.o, $(SRC_C) $(SRC_Y))
+OBJ := $(patsubst %,build/%.o, $(SRC_C) $(SRC_Y))
+#LIB := build/$(PROG)$(FLAVOR).a
+LIB := build/$(PROG).a
+#BIN := build/$(PROG)$(FLAVOR).exe
+BIN := build/$(PROG).exe
+#BIN_STRIPPED := build/$(PROG)$(FLAVOR)_stripped.exe
+BIN_STRIPPED := build/$(PROG)_stripped.exe
+#FILES := $(patsubst src/%.c,%, $(SRC))
+
+
+
+
+
+
+
+FUN_LOCAL_FLAGS := function local_flags { \
+  case $$1 in  \
+    parser.c) \
+      echo -Wno-redundant-decls -Wno-switch-default \
+      ;; \
+    coeurs.cpp) \
+      echo $(if $(filter $(GCC_VERSION_MAJOR),4), -Wno-sequence-point) \
+      ;; \
+  esac \
+}
+
+
+.PHONY: COPYING_at_start_of_c_files
+COPYING_at_start_of_c_files:
+	COPYING_at_start_of_c_files.sh COPYING 
+
+.PHONY: src-tarball-$(SVN_REVISION)
+src-tarball-$(SVN_REVISION): COPYING_at_start_of_c_files
+	rm -Rf src-tarball-$(SVN_REVISION)
+	mkdir -p src-tarball-$(SVN_REVISION) 2>&1
+	mkdir -p src-tarball-$(SVN_REVISION)/src
+	cp -fp src/*.c src-tarball-$(SVN_REVISION)/src/
+	cp -fp src/*.h src-tarball-$(SVN_REVISION)/src/
+	cp -fp src/*.i src-tarball-$(SVN_REVISION)/src/
+	cp -fp src/*.ct src-tarball-$(SVN_REVISION)/src/
+	cp -fp src/*.y src-tarball-$(SVN_REVISION)/src/
+	$(foreach sublib_i,$(SUBLIBS), \
+	  mkdir -p src-tarball-$(SVN_REVISION)/$(sublib_i) 2>&1 \
+	)
+	$(foreach sublib_i,$(SUBLIBS), \
+	  cp -fp src/$(sublib_i)/*.c src-tarball-$(SVN_REVISION)/src/$(sublib_i)/ 2>&1 ; \
+	  cp -fp src/$(sublib_i)/*.h src-tarball-$(SVN_REVISION)/src/$(sublib_i)/ 2>&1 ; \
+	  cp -fp src/$(sublib_i)/*.i src-tarball-$(SVN_REVISION)/src/$(sublib_i)/ 2>1& ; \
+	  cp -fp src/$(sublib_i)/*.ct src-tarball-$(SVN_REVISION)/src/$(sublib_i)/ 2>&1 ; \
+	  cp -fp src/$(sublib_i)/*.y src-tarball-$(SVN_REVISION)/src/$(sublib_i)/ 2>1& ; \
+	)
+	mkdir -p src-tarball-$(SVN_REVISION)/tools
+	mkdir -p src-tarball-$(SVN_REVISION)/tools/src
+	cp -fp tools/src/*.c src-tarball-$(SVN_REVISION)/tools/src/
+	$(foreach file_i,$(shell lrec src-tarball-$(SVN_REVISION)), \
+	  cp -fp COPYING_at_start_of_c_files tmp ; \
+	  echo "" >> tmp ; \
+	  cat $(file_i) >> tmp ; \
+	  mv -f tmp $(file_i) \
+	)
+	cp -p COPYING src-tarball-$(SVN_REVISION)/
+	cp -p configure src-tarball-$(SVN_REVISION)/
+	cp -p Makefile-gen.mkf src-tarball-$(SVN_REVISION)/
+
+
+
+
+.PHONY: src-tarball-$(SVN_REVISION).tar.gz
+src-tarball-$(SVN_REVISION).tar.gz: src-tarball
+	rm -f $@
+	tar cf src-tarball-$(SVN_REVISION).tar src-tarball-$(SVN_REVISION)
+	gzip src-tarball-$(SVN_REVISION).tar 
+
+
+
+

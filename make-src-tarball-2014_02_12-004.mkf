@@ -1,0 +1,142 @@
+#!/opt/local/bin/gmake -r -R -S -j 1 --warn-undefined-variables -f 
+SHELL:= /bin/sh
+.SHELLFLAGS: -u -e  
+.SUFFIXES: 
+.SILENT:
+.NOTPARALLEL:
+.EXPORT_ALL_VARIABLES:
+.SECONDARY:
+.PRECIOUS:
+.ONESHELL:
+
+SVN_REVISION := $(shell svn-revision.sh)
+#GIT_REVISION := $(shell git-revision.sh)
+#DATE := $(shell date "+%Y-%m-%d--%H-%M-%S")
+
+.PHONY: default
+default: 
+default: COPYING_at_start_of_c_files src-tarball-$(SVN_REVISION) src-tarball-$(SVN_REVISION).tar.gz src-tarball-$(SVN_REVISION).img.gz 
+
+
+.PHONY: clean
+clean:
+	rm -Rf COPYING_at_start_of_c_files src-tarball-$(SVN_REVISION) src-tarball-$(SVN_REVISION).tar.gz src-tarball-$(SVN_REVISION).img.gz 
+
+
+PROJECT_NAME := $(shell dir-name.sh $$PWD)
+PROJECT_NAME_UPPER := $(shell toupper $(PROJECT_NAME))
+
+SYSTEME := $(shell uname)
+ENDIAN := $(shell endianness-detect)
+ARCH := $(shell arch)
+MACHINE := $(shell machine)
+HARDWARE := $(shell uname -m)
+GCC_VERSION_MAJOR := $(shell tools/bin/gcc-version-major)
+
+UNAME_LIST := FreeBSD NetBSD OpenBSD Darwin Linux MINGW32_NT-6.1 MINGW32_NT-5.1 windows DOS
+OS_LIST := freebsd netbsd openbsd macosx linux windows windows windows dos
+ifneq ($(words $(UNAME_LIST)),$(words $(OS_LIST)))
+  $(error XXX)
+endif
+UNAME_IDX := $(shell tools/bin/list-match $(SYSTEME) $(UNAME_LIST) $(SYSTEME))
+OS := $(word $(UNAME_IDX), $(OS_LIST) unknown_os)
+
+HW_LIST := i386 amd64 x86_64 i686 386 8086
+INTSIZE_LIST := 32 64 64 32 32 16
+ifneq ($(words $(HW_LIST)),$(words $(INTSIZE_LIST)))
+  $(error XXX)
+endif
+HW_IDX := $(shell tools/bin/list-match $(HARDWARE) $(HW_LIST) $(HARDWARE))
+INTSIZE := $(word $(HW_IDX), $(INTSIZE_LIST) unknown_intsize)
+
+$(info OS $(OS))
+$(info INTSIZE $(INTSIZE))
+
+
+
+.PHONY: COPYING_at_start_of_c_files
+COPYING_at_start_of_c_files:
+	COPYING_at_start_of_c_files.sh COPYING 
+
+.PHONY: src-tarball-$(SVN_REVISION)
+src-tarball-$(SVN_REVISION): COPYING_at_start_of_c_files
+	rm -Rf src-tarball-$(SVN_REVISION) 2>&1
+	mkdir -p src-tarball-$(SVN_REVISION) 2>&1
+	mkdir -p src-tarball-$(SVN_REVISION)/src  2>&1
+	cp -fp src/*.c src-tarball-$(SVN_REVISION)/src/  2>&1
+	cp -fp src/*.h src-tarball-$(SVN_REVISION)/src/ 2>&1
+#	cp -fp src/*.i src-tarball-$(SVN_REVISION)/src/ 2>&1
+	cp -fp src/*.ct src-tarball-$(SVN_REVISION)/src/ 2>&1
+	cp -fp src/*.y src-tarball-$(SVN_REVISION)/src/ 2>&1
+	mkdir -p src-tarball-$(SVN_REVISION)/tools
+	mkdir -p src-tarball-$(SVN_REVISION)/tools/src
+	cp -fp tools/src/*.c src-tarball-$(SVN_REVISION)/tools/src/
+	for file_i in `lrec src-tarball-$(SVN_REVISION)`; do \
+	  cp -fp COPYING_at_start_of_c_files tmp ; \
+	  echo "" >> tmp ; \
+	  cat $$file_i >> tmp ; \
+	  mv -f tmp $$file_i ; \
+	done
+#	  echo "COPYING for $(file_i)"; 
+	cp -p COPYING src-tarball-$(SVN_REVISION)/
+	cp -p configure src-tarball-$(SVN_REVISION)/
+	cp -p Makefile-gen.mkf src-tarball-$(SVN_REVISION)/
+
+
+
+
+.PHONY: src-tarball-$(SVN_REVISION).tar.gz
+src-tarball-$(SVN_REVISION).tar.gz: src-tarball-$(SVN_REVISION)
+	rm -f $@
+	tar cf src-tarball-$(SVN_REVISION).tar src-tarball-$(SVN_REVISION)
+	gzip src-tarball-$(SVN_REVISION).tar 
+
+
+.PHONY: src-tarball-$(SVN_REVISION).img
+src-tarball-$(SVN_REVISION).img: src-tarball-$(SVN_REVISION).img-$(OS)
+
+.PHONY: src-tarball-$(SVN_REVISION).img.gz
+src-tarball-$(SVN_REVISION).img.gz: src-tarball-$(SVN_REVISION).img
+	rm -f $@
+	gzip src-tarball-$(SVN_REVISION).img
+
+
+.PHONY: src-tarball-$(SVN_REVISION).img-macosx
+src-tarball-$(SVN_REVISION).img-macosx: src-tarball-$(SVN_REVISION)
+	rm -f src-tarball-$(SVN_REVISION).img  2>&1
+	$(foreach img_size_in_k,$(shell expr `du -sk src-tarball-$(SVN_REVISION) | sed -e 's/s.*//'` "*" "12" "/" "10"), \
+	  hdiutil create -size $(img_size_in_k)k  -layout MBRSPUD -fs MS-DOS -volname "$(PROJECT_NAME_UPPER)" src-tarball-$(SVN_REVISION)  2>&1 ; \
+	)
+	mv src-tarball-$(SVN_REVISION).dmg src-tarball-$(SVN_REVISION).img  2>&1
+#	hdiutil mount src-tarball-$(SVN_REVISION).img
+	mkdir -p mountpoint  2>&1
+	hdiutil mount -mountpoint ./mountpoint src-tarball-$(SVN_REVISION).img  2>&1
+#	rsync --progress -ha src-tarball-$(SVN_REVISION) /Volumes/$(PROJECT_NAME)/
+#	rsync -ha src-tarball-$(SVN_REVISION) /Volumes/$(PROJECT_NAME_UPPER)/
+	rsync -ha src-tarball-$(SVN_REVISION) mountpoint/  2>&1
+#	hdiutil unmount /Volumes/$(PROJECT_NAME_UPPER)
+	hdiutil eject ./mountpoint   2>&1
+#	hdiutil detach src-tarball-$(SVN_REVISION).img 
+
+
+.PHONY: src-tarball-$(SVN_REVISION).img-openbsd
+src-tarball-$(SVN_REVISION).img-openbsd: src-tarball-$(SVN_REVISION)
+	rm -f $@
+	$(foreach img_size_in_k,$(shell expr `du -sk src-tarball-$(SVN_REVISION) | sed -e 's/s.*//'` "*" "12" "/" "10"), \
+	  dd if=/dev/zero of=myhdd0.img bs=1024 count=$(img_size_in_k); \
+	)
+	sudo vnconfig svnd0 myhdd0.img 
+	sudo fdisk -i -y svnd0
+	printf "e 3\n0C\nn\n\n\nw\nq\n" | sudo fdisk -e svnd0
+	sudo newfs_msdos -L "$(PROJECT_NAME_UPPER)" svnd0i
+	mkdir mnt0
+	sudo mount_msdos /dev/svnd0i mnt0
+	rsync --progress -ha src-tarball-$(SVN_REVISION) mnt0/
+	sudo umount mnt0
+	rmdir mnt0
+	sudo vnconfig -u svnd0
+	mv -f myhdd0.img src-tarball-$(SVN_REVISION).img
+
+
+
+

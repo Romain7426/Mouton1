@@ -1,0 +1,201 @@
+
+#ifndef LEXER_FOR_C_LANGUAGE_H
+#define LEXER_FOR_C_LANGUAGE_H
+
+
+#ifndef LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_T
+#define LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_T
+enum lexer_lexer_for_c_language_token_type_t;
+#ifndef __cplusplus
+typedef enum lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type_t;
+#endif
+#endif /* LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_T */
+
+enum lexer_lexer_for_c_language_token_type_t {
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_BLANK,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_COMMENT_MULTILINES,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_COMMENT_ONELINE_CPP,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_DIRECTIVE_MONO_LINE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_DIRECTIVE_MULTI_LINES,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_IDENT,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INTEGER_ZERO,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INTEGER_DEC,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INTEGER_DEC_V2,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INTEGER_HEX,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INTEGER_BIN,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INTEGER_OCT_VCC,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INTEGER_OCT_VC,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_REAL_DEC_SIMPLE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_REAL_DEC_WITH_EXP,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_REAL_HEX_WITH_EXP,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CHAR_SIMPLE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CHAR_SIMPLE_NEWLINE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CHAR_EMPTY,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CHAR_ESCAPE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CHAR_WIDE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_STRING,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_STRING_ENDED_BY_NEWLINE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_STRING_WIDE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_STRING_WIDE_ENDED_BY_NEWLINE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_OPEN_PAR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CLOSE_PAR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_OPEN_BRACKET,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CLOSE_BRACKET,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_OPEN_BRACE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_CLOSE_BRACE,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_COMMA,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_POINT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ARROW_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_SEMICOLON,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_STAR_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_PLUS_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_MINUS_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_RDIV_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_TILDE_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_SIMPLE_PERLUETE_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_DOUBLE_PERLUETE_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_SIMPLE_PIPE_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_DOUBLE_PIPE_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_EQUAL_HUH_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_HAT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_PERCENT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_BANG_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_DIFFERENT_HUH_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INF_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_SUP_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_INF_OR_EQUAL_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_SUP_OR_EQUAL_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_PLUS_PLUS_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_MINUS_MINUS_OPERARTOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_LSHIFT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_RSHIFT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_HUH_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_COLON_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ELLIPSIS,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_STAR_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_RDIV_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_PERCENT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_PLUS_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_MINUS_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_LSHIFT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_RSHIFT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_PERLUETE_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_HAT_OPERATOR,
+  LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_ASSIGN_PIPE_OPERATOR
+};
+
+#define LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_NOMBRE 71
+extern const int lexer_lexer_for_c_language_token_type_nombre;
+extern const char * lexer_lexer_for_c_language_token_type_string_tab[LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_TYPE_NOMBRE];
+
+extern lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type_make(void);
+extern void lexer_lexer_for_c_language_token_type_free(lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type);
+extern lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type_copy(const lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type);
+extern char * lexer_lexer_for_c_language_token_type_string(const lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type);
+extern const char * lexer_lexer_for_c_language_token_type_string_const(const lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type);
+extern int lexer_lexer_for_c_language_token_type_equal(const lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type1, const lexer_lexer_for_c_language_token_type_t lexer_lexer_for_c_language_token_type2);
+
+
+
+#ifndef STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T_DECLARED
+#define STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T_DECLARED
+struct lexer_lexer_for_c_language_token_t;
+#endif /* STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T_DECLARED */
+
+#ifndef LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T
+#define LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T
+#ifndef __cplusplus
+typedef struct lexer_lexer_for_c_language_token_t lexer_lexer_for_c_language_token_t;
+#endif /* __cplusplus */
+#endif /* LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T */
+
+#ifndef STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T
+#define STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T
+struct lexer_lexer_for_c_language_token_t {
+  lexer_lexer_for_c_language_token_type_t type;
+  char * value;
+};
+#endif /* STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_T */
+
+
+extern lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token_make(const lexer_lexer_for_c_language_token_type_t type, const char * value);
+extern lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token_make_nocopy(lexer_lexer_for_c_language_token_type_t type, char * value);
+extern void lexer_lexer_for_c_language_token_free(lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token);
+extern lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token_copy(const lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token);
+extern char * lexer_lexer_for_c_language_token_string(const lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token);
+extern int lexer_lexer_for_c_language_token_equal(const lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token1, const lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token2);
+
+
+
+#ifndef STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_LISTE_T
+#define STRUCT_LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_LISTE_T
+struct lexer_lexer_for_c_language_token_liste_t {
+  struct lexer_lexer_for_c_language_token_liste_t * cdr;
+  lexer_lexer_for_c_language_token_t * car;
+};
+#endif
+#ifndef LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_LISTE_T
+#define LEXER_LEXER_FOR_C_LANGUAGE_TOKEN_LISTE_T
+#ifndef __cplusplus
+typedef struct lexer_lexer_for_c_language_token_liste_t lexer_lexer_for_c_language_token_liste_t;
+#endif
+#endif
+
+
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_vide(void);
+extern int lexer_lexer_for_c_language_token_liste_vide_huh(const lexer_lexer_for_c_language_token_liste_t * l);
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_cons(const lexer_lexer_for_c_language_token_t * a, const lexer_lexer_for_c_language_token_liste_t * l);
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_cons_nocopy(lexer_lexer_for_c_language_token_t * a, lexer_lexer_for_c_language_token_liste_t * l);
+
+extern void lexer_lexer_for_c_language_token_liste_free(lexer_lexer_for_c_language_token_liste_t * l);
+extern void lexer_lexer_for_c_language_token_liste_free_nocopy(lexer_lexer_for_c_language_token_liste_t * l);
+
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_copy(const lexer_lexer_for_c_language_token_liste_t * l);
+extern int lexer_lexer_for_c_language_token_liste_longueur(const lexer_lexer_for_c_language_token_liste_t * l);
+
+extern char * lexer_lexer_for_c_language_token_liste_string(const lexer_lexer_for_c_language_token_liste_t * l);
+
+#if 0
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_list(int n, ...);
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_vlist(int n, va_list args); 
+#endif
+
+extern int lexer_lexer_for_c_language_token_liste_equal(const lexer_lexer_for_c_language_token_liste_t * liste1, const lexer_lexer_for_c_language_token_liste_t * liste2); 
+
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_reverse(const lexer_lexer_for_c_language_token_liste_t * l);
+
+extern void lexer_lexer_for_c_language_token_liste_reverse_surplace(lexer_lexer_for_c_language_token_liste_t * * liste); 
+
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_append(const lexer_lexer_for_c_language_token_liste_t * l, const lexer_lexer_for_c_language_token_liste_t * m);
+extern void lexer_lexer_for_c_language_token_liste_append_nocopy(lexer_lexer_for_c_language_token_liste_t * * l, lexer_lexer_for_c_language_token_liste_t * m);
+
+
+extern int lexer_lexer_for_c_language_token_liste_member(const lexer_lexer_for_c_language_token_t * a, const lexer_lexer_for_c_language_token_liste_t * liste);
+
+extern int lexer_lexer_for_c_language_token_liste_member_iteratif(const lexer_lexer_for_c_language_token_t * a, const lexer_lexer_for_c_language_token_liste_t * liste);
+
+extern lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token_liste_pop(lexer_lexer_for_c_language_token_liste_t * * l);
+
+
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_token_liste_map(lexer_lexer_for_c_language_token_t * (* f)(const lexer_lexer_for_c_language_token_t *), const lexer_lexer_for_c_language_token_liste_t * l);
+
+extern lexer_lexer_for_c_language_token_t * lexer_lexer_for_c_language_token_liste_fold(lexer_lexer_for_c_language_token_t * (* f)(const lexer_lexer_for_c_language_token_t *, const lexer_lexer_for_c_language_token_t *), const lexer_lexer_for_c_language_token_t * a, const lexer_lexer_for_c_language_token_liste_t * l);
+
+
+extern int lexer_lexer_for_c_language_token_liste_count(const lexer_lexer_for_c_language_token_t * a, const lexer_lexer_for_c_language_token_liste_t * l);
+
+
+
+
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_analyse_de_la_ligne(const char * mot, int * nb_lettres_qui_ont_ete_reconnues_ptr);
+
+
+
+
+extern lexer_lexer_for_c_language_token_liste_t * lexer_lexer_for_c_language_do_the_job_bang(const char * mot);
+
+
+
+#endif /* LEXER_FOR_C_LANGUAGE_H*/
+
