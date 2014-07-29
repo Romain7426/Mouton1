@@ -167,13 +167,14 @@ typedef char str_t;
     return this;						\
   }
 
-#define DEFINE_NEW_OPERATOR_FOR_STRUCT1(TYPENAME,FIELDNAME1)	\
-  struct TYPENAME * glue(new_,TYPENAME)(void) {			\
-    struct TYPENAME * this = NULL;				\
-    this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME)); \
-    bzero(this, sizeof(struct TYPENAME));			\
-    this -> FIELDNAME1 = FIELDNAME1;				\
-    return this;						\
+#define DEFINE_NEW_OPERATOR_FOR_STRUCT1(TYPENAME,FIELDNAME1,FUNNAME_FOR_ATTRIBUTS) \
+  struct TYPENAME * glue(new_,TYPENAME)(void) {				\
+    struct TYPENAME * this = NULL;					\
+    this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME));		\
+    bzero(this, sizeof(struct TYPENAME));				\
+    this -> FIELDNAME1 = FIELDNAME1;					\
+    FUNNAME_FOR_ATTRIBUTS(this);					\
+    return this;							\
   }
 
 

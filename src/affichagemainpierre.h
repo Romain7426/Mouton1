@@ -22,7 +22,6 @@ struct CAffichageMainPierre {
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CAffichageMainPierre);
 DECLARE_NEW_OPERATOR_FOR_STRUCT(CAffichageMainPierre);
 
-extern CAffichageMainPierre * CAffichageMainPierre(void);
 
 
 #endif

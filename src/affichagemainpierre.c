@@ -4,12 +4,13 @@
 #include "map.h"
 
 
+static CAffichageMainPierre * CAffichageMainPierre_set_attributs(void);
 static void Render(const struct CAffichageMainPierre * this, const float y, const CMap * Map);
-DEFINE_NEW_OPERATOR_FOR_STRUCT1(CAffichageMainPierre,Render);
+
+DEFINE_NEW_OPERATOR_FOR_STRUCT1(CAffichageMainPierre,Render,CAffichageMainPierre_set_attributs);
 
 
-CAffichageMainPierre * CAffichageMainPierre(void) {
-  CAffichageMainPierre * this = new_CAffichageMainPierre();
+CAffichageMainPierre * CAffichageMainPierre_set_attributs(CAffichageMainPierre * this) {
   this -> main = new CTexture("main.png");   
   this -> pierre = new CTexture("pierre.png");    
 }    
