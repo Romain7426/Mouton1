@@ -1,0 +1,4733 @@
+physique {
+ /* Pour l'instant il n'y a rien dans la physique d'une carte. */
+}
+gameplay {
+ arme := vrai ; // A-t-on le droit de porter une arme ?
+ musique := "avion.mid"; // musique de fond
+ niveau eau := 45.8; // niveau de l'eau
+ vie eau :=  23; // point de vie gagné lorsqu'on saute dans l'eau
+	         // Un nombre negatif indique qu'on en perds
+	         // un nombre positif qu'on en gagne.
+ 		 // Seul pb : on ne gere pas encore les nombre negatifs.
+teleportation IDENT {
+  destination := "pyramide.carte";
+  position := {
+     x := 29;
+     y := 4;
+     z := 0;
+  };
+  dimension := {
+     longueur := 2;  // x
+     largeur := 2;   // y
+     hauteur := 80;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 10;
+     y := 10;
+     z := 0;
+  };
+  destination direction parcours := bas;
+}
+teleportation IDENT {
+  destination := "foret.carte";
+  position := {
+     x := 45;
+     y := 4;
+     z := 0;
+  };
+  dimension := {
+     longueur := 2;  // x
+     largeur := 2;   // y
+     hauteur := 80;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 52;
+     y := 62;
+     z := 0;
+  };
+  destination direction parcours := bas;
+}
+}
+graphique {
+ fichier de zone de niveau := "tore.niveau.bmp";
+ fichier de zone de texture := "tore.textures.png";
+//vert
+ texture herbe {
+  image := "herbe.jpg";
+  indice := 65280;
+ }
+//vert foncé
+ texture herbe {
+  image := "mur03.jpg";
+  indice := 32768;
+ }
+//jaune
+ texture desert {
+  image := "bois02.jpg";
+  indice := 65535;
+ }
+//rouge
+ texture route {
+  image := "feuilles.jpg";
+  indice := 255;
+ }
+//brun
+ texture route {
+  image := "1oldwood.jpg";
+  indice := 128;
+ }
+//bleu
+ texture route {
+  image := "bois03.jpg";
+  indice := 16711680;
+ }
+//cyan
+ texture route {
+  image := "bois04.jpg";
+  indice := 16776960;
+ }
+objet poteau1 {
+anime := faux;
+fichier := "poteau.nonanime";
+position := {
+x := 19.;
+y := 27.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+objet pyramini {
+anime := faux;
+fichier := "pyramini.nonanime";
+position := {
+x := 30.;
+y := 5.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+objet pyramini {
+anime := faux;
+fichier := "village.nonanime";
+position := {
+x := 45.;
+y := 5.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 0.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 0.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 0.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 0.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 0.;
+y := 47.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 0.;
+y := 52.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 1.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 1.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 1.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 2.;
+y := 39.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 2.;
+y := 46.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 3.;
+y := 40.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 3.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 3.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 3.;
+y := 63.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 4.;
+y := 35.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 4.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 4.;
+y := 40.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 4.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 5.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 5.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 6.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 6.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 6.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 6.;
+y := 60.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 39.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 40.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 7.;
+y := 62.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 8.;
+y := 5.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 8.;
+y := 36.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 8.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 8.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 9.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 9.;
+y := 40.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 9.;
+y := 62.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 9.;
+y := 63.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 10.;
+y := 8.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 10.;
+y := 9.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 10.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 10.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 10.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 10.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 11.;
+y := 6.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 11.;
+y := 7.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 11.;
+y := 63.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 12.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 12.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 12.;
+y := 55.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 13.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 13.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 13.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 13.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 13.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 13.;
+y := 60.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 13.;
+y := 63.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 14.;
+y := 13.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 14.;
+y := 14.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 14.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 14.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 14.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 14.;
+y := 58.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 15.;
+y := 14.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 15.;
+y := 48.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 15.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 15.;
+y := 54.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 15.;
+y := 60.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 15.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 16.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 17.;
+y := 20.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 17.;
+y := 26.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 17.;
+y := 54.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 17.;
+y := 62.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 18.;
+y := 0.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 18.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 18.;
+y := 58.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 19.;
+y := 21.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 19.;
+y := 25.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 19.;
+y := 26.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 19.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 19.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 19.;
+y := 48.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 1.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 19.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 36.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 42.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 20.;
+y := 60.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 21.;
+y := 32.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 21.;
+y := 42.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 21.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 21.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 21.;
+y := 58.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 22.;
+y := 32.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 22.;
+y := 35.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 22.;
+y := 46.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 22.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 22.;
+y := 54.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 22.;
+y := 55.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 22.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 23.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 23.;
+y := 47.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 23.;
+y := 48.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 0.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 29.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 52.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 24.;
+y := 54.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 25.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 25.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 25.;
+y := 48.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 25.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 26.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 26.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 26.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 26.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 26.;
+y := 63.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 27.;
+y := 8.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 27.;
+y := 42.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 27.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 27.;
+y := 47.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 27.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 27.;
+y := 55.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 27.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 28.;
+y := 2.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 28.;
+y := 8.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 28.;
+y := 9.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 29.;
+y := 24.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 29.;
+y := 25.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 3.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 4.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 35.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 47.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 30.;
+y := 55.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 31.;
+y := 5.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 31.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 31.;
+y := 35.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 31.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 32.;
+y := 5.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 32.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 32.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 32.;
+y := 32.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 32.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 32.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 33.;
+y := 0.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 33.;
+y := 21.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 33.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 33.;
+y := 39.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 34.;
+y := 21.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 34.;
+y := 24.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 34.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 34.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 34.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 34.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 35.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 35.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 35.;
+y := 48.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 35.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 36.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 36.;
+y := 55.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 36.;
+y := 59.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 37.;
+y := 0.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 37.;
+y := 15.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 37.;
+y := 42.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 37.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 38.;
+y := 26.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 38.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 38.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 38.;
+y := 58.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 39.;
+y := 17.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 39.;
+y := 23.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 39.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 39.;
+y := 54.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 39.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 40.;
+y := 13.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 40.;
+y := 19.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 40.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 40.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 40.;
+y := 35.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 40.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 40.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 15.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 32.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 42.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 59.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 41.;
+y := 60.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 42.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 42.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 42.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 42.;
+y := 47.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 43.;
+y := 11.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 43.;
+y := 27.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 43.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 44.;
+y := 9.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 44.;
+y := 42.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 44.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 44.;
+y := 60.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 44.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 45.;
+y := 13.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 45.;
+y := 22.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 45.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 45.;
+y := 42.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 45.;
+y := 62.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 15.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 21.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 29.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 32.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 36.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 41.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 56.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 59.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 46.;
+y := 61.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 47.;
+y := 14.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 47.;
+y := 15.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 47.;
+y := 26.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 1.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 13.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 15.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 26.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 28.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 58.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 48.;
+y := 59.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 49.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 49.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 49.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 49.;
+y := 62.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 50.;
+y := 15.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 50.;
+y := 20.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 50.;
+y := 22.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 50.;
+y := 27.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 50.;
+y := 36.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 50.;
+y := 45.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 50.;
+y := 55.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 51.;
+y := 12.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 51.;
+y := 13.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 51.;
+y := 20.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 51.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 51.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 51.;
+y := 54.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 0.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 3.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 11.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 26.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 32.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 52.;
+y := 46.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 53.;
+y := 12.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 53.;
+y := 18.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 54.;
+y := 6.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 54.;
+y := 9.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 54.;
+y := 28.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 54.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 54.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 54.;
+y := 48.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 54.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 55.;
+y := 20.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 55.;
+y := 21.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 55.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 55.;
+y := 34.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 55.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 55.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 55.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 56.;
+y := 14.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 56.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 56.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 1.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 18.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 23.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 30.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 35.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 51.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 57.;
+y := 59.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 58.;
+y := 0.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 58.;
+y := 3.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 58.;
+y := 13.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 58.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 58.;
+y := 36.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 58.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 58.;
+y := 54.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 59.;
+y := 14.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 59.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 59.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 59.;
+y := 50.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 11.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 17.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 19.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 28.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 33.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 46.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 60.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 61.;
+y := 10.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 61.;
+y := 29.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 61.;
+y := 43.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 61.;
+y := 57.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 62.;
+y := 7.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 62.;
+y := 38.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 62.;
+y := 44.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 62.;
+y := 49.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 62.;
+y := 52.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 62.;
+y := 60.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 63.;
+y := 3.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 63.;
+y := 4.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 63.;
+y := 31.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 63.;
+y := 37.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+objet arbre0 {
+anime := faux;
+fichier := "arbrepetit.nonanime";
+position := {
+x := 63.;
+y := 53.;
+z := 0.;
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+
+
+}

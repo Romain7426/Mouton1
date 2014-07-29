@@ -1,0 +1,49 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+ zone de choc := {
+  longueur := 0.5;
+  largeur := 0.5;
+  hauteur := 100.;
+ };
+ MaSSe := 240.;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+ hostile := vrai;
+ 
+
+}
+
+
+graphique {
+ membre corps {
+  fils := ;
+  image := "./mouton.png";
+  largeur := 31.;
+  hauteur := 29.;
+  angle max y := 0.;
+ }
+
+ membres racines := 
+	{qui := corps;         x := 0.; y := 0.;   z := 29.; angle y := 0.;};
+
+
+
+}
+
+
+
+Et tout ce qui se passe après, on s'en fout !!!!!!!
+
+
+
+!!
+
+
+
+

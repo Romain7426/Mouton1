@@ -1,0 +1,32 @@
+physique {
+ zone de choc := {
+  longueur := 2.;
+  largeur := 2.;
+  hauteur := 10.;
+ };
+ MaSSe := 240.;
+ compressible := vrai;
+ fixe := vrai;
+ coefficient de rebondissement := 0.23;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+
+}
+
+
+graphique {
+ 
+ element arbre {
+  fils := ;
+  image := "arbuste01.3ds" ;
+ }
+
+
+ elements racines := {qui := arbre; x := 0.; y := 0.; z := 0.; angle x := 0.; angle y := 0.; angle z := .0;};
+}
+
+
+

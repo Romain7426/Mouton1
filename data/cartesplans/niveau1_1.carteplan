@@ -1,0 +1,86 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "pyramide.mid"; 
+ niveau eau := 0.0; 
+ vie eau :=  0; 
+
+//sortie
+teleportation IDENT {
+  destination := "pyramide.carte";
+  position := {
+     x := 13;
+     y := 0;
+     z := 0;
+  };
+  dimension := {
+     longueur := 4;  // x
+     largeur := 1;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 13;
+     y := 13;
+     z := 0;
+  };
+  destination direction parcours := bas;
+} 
+
+
+
+
+teleportation IDENT {
+  destination := "niveau1_2.carte";
+  position := {
+     x := 16;
+     y := 30;
+     z := 0;
+  };
+  dimension := {
+     longueur := 6;  // x
+     largeur := 2;   // y
+     hauteur := 200;   // z
+  };
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 18;
+     y := 20;
+     z := 0;
+  };
+  destination direction parcours := haut;
+} 
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "niveau1_1.niveau.png";
+ fichier de zone de texture := "niveau1_1.textures.png";
+
+ texture herbe {
+  image := "pierre.jpg";
+  indice := 0;
+ }
+
+ texture herbe {
+  image := "feuilles.jpg";
+  indice := 16777215;
+ }
+
+
+%pecu.anime
+%vrai
+%..\cartes\niveau1_1.textures.png
+%0
+%5
+
+
+}

@@ -1,0 +1,79 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "village.mid"; 
+ niveau eau := -.10.0; 
+ vie eau :=  0; 
+
+
+teleportation IDENT {
+  destination := "village.carte";
+  position := {
+     x := 6;
+     y := 0;
+     z := 0;
+  };
+  dimension := {
+     longueur := 4;  // x
+     largeur := 1;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 25;
+     y := 30;
+     z := 0;
+  };
+  destination direction parcours := bas;
+} 
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "cimetiere.niveau.png";
+ fichier de zone de texture := "cimetiere.textures.png";
+
+ texture herbe {
+  image := "herbe.jpg";
+  indice := 16777215;
+ }
+
+ texture route {
+  image := "pierre.jpg";
+  indice := 12632256;
+ }
+ 
+ 
+ texture feuilles {
+  image := "feuilles.jpg";
+  indice := 65280;
+ }
+
+
+
+
+%arbre01.nonanime
+%faux
+%..\cartes\cimetiere.textures.png
+%65280
+%50
+
+%tombe.nonanime
+%faux
+%..\cartes\cimetiere.textures.png
+%255
+%100
+
+
+
+
+
+}

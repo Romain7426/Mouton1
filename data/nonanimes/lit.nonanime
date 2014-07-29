@@ -1,0 +1,44 @@
+physique {
+ zone de choc := {
+  longueur := 2.;
+  largeur := 2.;
+  hauteur := 100.;
+ };
+ MaSSe := 240.;
+ compressible := faux;
+ fixe := vrai;
+ coefficient de rebondissement := 0.23;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+ 
+ action parler {
+  affichage := "Faire le lit" ;
+  icone := "";
+  gestionnaire := { fichier := "script.pml"; procedure := "faire_le_lit"; } ;
+ }
+
+ action parler {
+  affichage := "Dormir" ;
+  icone := "";
+  gestionnaire := { fichier := "script.pml"; procedure := "dormir_sur_lit"; } ;
+ }
+
+}
+
+
+graphique {
+ 
+ element lit {
+  fils := ;
+  image := "lit.3ds" ;
+ }
+
+
+ elements racines := {qui := lit; x := 0.; y := 0.; z := 0.; angle x := 0.; angle y := 0.; angle z := .0;};
+}
+
+
+

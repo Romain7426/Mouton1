@@ -1,0 +1,33 @@
+physique {
+ zone de choc := {
+  longueur := 1.;
+  largeur := 1.;
+  hauteur := 100.;
+ };
+ MaSSe := 240.;
+ compressible := faux;
+ fixe := vrai;
+ coefficient de rebondissement := 0.23;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+  
+
+}
+
+
+graphique {
+ 
+ element clef {
+  fils := ;
+  image := "clef.3ds" ;
+ }
+
+
+ elements racines := {qui := clef; x := 0.; y := 0.; z := 0.; angle x := 0.; angle y := 0.; angle z := .0;};
+}
+
+
+

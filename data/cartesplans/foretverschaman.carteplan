@@ -1,0 +1,103 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "foret.mid"; 
+ niveau eau := -.10.0; 
+ vie eau :=  0; 
+
+teleportation IDENT {
+  destination := "foret.carte";
+  position := {
+     x := 62;
+     y := 10;
+     z := 0;
+  };
+  dimension := {
+     longueur := 3;  // x
+     largeur := 10;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := droite; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 1;
+     y := 34;
+     z := 0;
+  };
+  destination direction parcours := droite;
+} 
+
+
+
+teleportation IDENT {
+  destination := "chaman.carte";
+  position := {
+     x := 0;
+     y := 20;
+     z := 0;
+  };
+  dimension := {
+     longueur := 2;  // x
+     largeur := 15;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := gauche; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 63;
+     y := 6;
+     z := 0;
+  };
+  destination direction parcours := gauche;
+} 
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "foretverschaman.niveau.png";
+ fichier de zone de texture := "foretverschaman.textures.png";
+
+ texture herbe {
+  image := "herbe.jpg";
+  indice := 16777215;
+ }
+
+ texture route {
+  image := "pierre.jpg";
+  indice := 12632256;
+ }
+ 
+ texture feuilles {
+  image := "feuilles.jpg";
+  indice := 65280;
+ }
+
+
+
+%arbre01.nonanime
+%faux
+%foretverschaman.textures.bmp
+%65280
+%10
+
+
+%pierres01.nonanime
+%faux
+%foretverschaman.textures.bmp
+%8421504
+%100
+
+%pecu.anime
+%vrai
+%foretverschaman.textures.bmp
+%16777215
+%1
+
+}
+

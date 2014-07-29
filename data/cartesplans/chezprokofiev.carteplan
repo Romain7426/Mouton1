@@ -1,0 +1,81 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "marrant.mid"; 
+ niveau eau := -.10.0; 
+ vie eau :=  0; 
+
+teleportation IDENT {
+  destination := "village.carte";
+  position := {
+     x := 8;
+     y := 0;
+     z := 0;
+  };
+  dimension := {
+     longueur := 1;  // x
+     largeur := 1;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 8;
+     y := 24;
+     z := 0;
+  };
+  destination direction parcours := bas;
+} 
+
+
+
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "chezprokofiev.niveau.png";
+ fichier de zone de texture := "chezprokofiev.textures.png";
+
+ texture herbe {
+  image := "parquet.jpg";
+  indice := 0;
+ }
+
+
+//brun
+%lit.nonanime
+%faux
+%..\cartes\chezprokofiev.textures.png
+%128
+%100
+
+//vert
+%chaise.nonanime
+%faux
+%..\cartes\chezprokofiev.textures.png
+%65280
+%100
+
+//bleu
+%table.nonanime
+%faux
+%..\cartes\chezprokofiev.textures.png
+%16711680
+%100
+
+%lit.nonanime
+%faux
+%..\cartes\chezprokofiev.textures.png
+%128
+%100
+
+
+
+}

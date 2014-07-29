@@ -1,0 +1,68 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+ zone de choc := {
+  longueur := 1.;
+  largeur := 1.;
+  hauteur := 50.;
+ };
+ MaSSe := 240.;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+ hostile := vrai;
+ 
+
+}
+
+
+graphique {
+ membre tete {
+  fils := ;
+  image := "./pecu/tete.png";
+  largeur := 58.;
+  hauteur := 68.;
+  angle max y := 20.;
+ }
+
+
+
+ membre jambe_gauche {
+  fils := ;
+  image := "./pecu/jambe.png";
+  largeur := 22.;
+  hauteur := 50.;
+  angle max y := 45.;
+ }
+
+ membre jambe_droite {
+  fils := ;
+  image := "./pecu/jambe.png";
+  largeur := 22.;
+  hauteur := 50.;
+  angle max y := -.45.;
+ }
+
+ membres racines := 
+	{qui := tete;         x := 0.; y := 0.;   z := 75.; angle y := 0.;},
+	{qui := jambe_gauche; x := 0.; y := 15.;  z := 30.; angle y := 0.;},
+	{qui := jambe_droite; x := 0.; y := -.15.;   z := 30.; angle y := 0.;};
+
+
+}
+
+
+
+Et tout ce qui se passe après, on s'en fout !!!!!!!
+
+
+
+!!
+
+
+
+

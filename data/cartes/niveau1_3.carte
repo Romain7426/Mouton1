@@ -1,0 +1,91 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+physique {
+}
+gameplay {
+ arme := vrai ; 
+ musique := "pyramide.mid"; 
+ niveau eau := 0.0; 
+ vie eau :=  0; 
+teleportation IDENT {
+  destination := "niveau1_2.carte";
+  position := {
+     x := 7;
+     y := 14;
+     z := 0;
+  };
+  dimension := {
+     longueur := 3;  // x
+     largeur := 3;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 7;
+     y := 14;
+     z := 0;
+  };
+  destination direction parcours := bas;
+}
+}
+graphique {
+ fichier de zone de niveau := "niveau1_3.niveau.png";
+ fichier de zone de texture := "niveau1_3.textures.png";
+ texture herbe {
+  image := "pierre.jpg";
+  indice := 0;
+ }
+ texture herbe {
+  image := "feuilles.jpg";
+  indice := 16777215;
+ }
+objet albert {
+anime := faux;
+fichier := "pancarte.nonanime";
+position := {
+x := 18.;
+y := 31.;
+z := 0.;//
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+objet albert {
+anime := faux;
+fichier := "pancarte.nonanime";
+position := {
+x := 22.;
+y := 30.;
+z := 0.;//
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+objet albert {
+anime := faux;
+fichier := "pancarte.nonanime";
+position := {
+x := 22.;
+y := 25.;
+z := 0.;//
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+objet albert {
+anime := faux;
+fichier := "pancarte.nonanime";
+position := {
+x := 22.;
+y := 20.;
+z := 0.;//
+angle x := 0.;
+angle y := 0.;
+angle z := 0.;
+};
+}
+}

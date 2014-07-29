@@ -1,0 +1,609 @@
+/* Ceci est un commentaire. */
+
+// Ceci est encore un commentaire.
+
+# C'est encore un commentaire.
+
+
+
+physique {
+
+
+
+}
+
+
+
+gameplay {
+
+ arme := vrai ; 
+
+ musique := "village.mid"; 
+
+ niveau eau := -.10.0; 
+
+ vie eau :=  0; 
+
+
+
+teleportation IDENT {
+
+  destination := "cimetiere.carte";
+
+  position := {
+
+     x := 23;
+
+     y := 30;
+
+     z := 0;
+
+  };
+
+  dimension := {
+
+     longueur := 4;  // x
+
+     largeur := 1;   // y
+
+     hauteur := 100;   // z
+
+  };
+
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+
+  destination position := {
+
+     x := 8;
+
+     y := 1;
+
+     z := 0;
+
+  };
+
+  destination direction parcours := haut;
+
+} 
+
+
+
+
+
+teleportation IDENT {
+
+  destination := "chezmoi.carte";
+
+  position := {
+
+     x := 9;
+
+     y := 13;
+
+     z := 0;
+
+  };
+
+  dimension := {
+
+     longueur := 1;  // x
+
+     largeur := 1;   // y
+
+     hauteur := 100;   // z
+
+  };
+
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+
+  destination position := {
+
+     x := 8;
+
+     y := 1;
+
+     z := 0;
+
+  };
+
+  destination direction parcours := haut;
+
+} 
+
+
+
+teleportation IDENT {
+
+  destination := "chezprokofiev.carte";
+
+  position := {
+
+     x := 8;
+
+     y := 25;
+
+     z := 0;
+
+  };
+
+  dimension := {
+
+     longueur := 1;  // x
+
+     largeur := 1;   // y
+
+     hauteur := 100;   // z
+
+  };
+
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+
+  destination position := {
+
+     x := 8;
+
+     y := 1;
+
+     z := 0;
+
+  };
+
+  destination direction parcours := haut;
+
+} 
+
+
+
+
+
+teleportation IDENT {
+
+  destination := "chezbob.carte";
+
+  position := {
+
+     x := 25;
+
+     y := 12;
+
+     z := 0;
+
+  };
+
+  dimension := {
+
+     longueur := 1;  // x
+
+     largeur := 1;   // y
+
+     hauteur := 100;   // z
+
+  };
+
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+
+  destination position := {
+
+     x := 8;
+
+     y := 1;
+
+     z := 0;
+
+  };
+
+  destination direction parcours := haut;
+
+} 
+
+
+
+teleportation IDENT {
+
+  destination := "foret.carte";
+
+  position := {
+
+     x := 10;
+
+     y := 0;
+
+     z := 0;
+
+  };
+
+  dimension := {
+
+     longueur := 40;  // x
+
+     largeur := 3;   // y
+
+     hauteur := 100;   // z
+
+  };
+
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+
+  destination position := {
+
+     x := 52;
+
+     y := 62;
+
+     z := 0;
+
+  };
+
+  destination direction parcours := bas;
+
+} 
+
+
+
+ evenement event1 {
+
+  genere par := 1 ;
+
+  traitement := { fichier := "script.pml"; procedure := "village_chargement"; } ;
+
+ }
+
+
+
+ evenement event1 {
+
+  genere par := 2 ;
+
+  traitement := { fichier := "script.pml"; procedure := "village_entree_carte"; } ;
+
+ }
+
+
+
+}
+
+
+
+
+
+graphique {
+
+ fichier de zone de niveau := "village.niveau.png";
+
+ fichier de zone de texture := "village.textures.png";
+
+
+
+ texture herbe {
+
+  image := "herbe.jpg";
+
+  indice := 16777215;
+
+ }
+
+
+
+ texture route {
+
+  image := "pierre.jpg";
+
+  indice := 12632256;
+
+ }
+
+ 
+
+ 
+
+ texture feuilles {
+
+  image := "feuilles.jpg";
+
+  indice := 65280;
+
+ }
+
+
+
+
+
+
+
+
+
+
+
+objet bob {
+
+anime := vrai;
+
+fichier := "bob.anime";
+
+position := {
+
+x := 15.;
+
+y := 10.;
+
+z := 10.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+objet brigitte {
+
+anime := vrai;
+
+fichier := "brigitte.anime";
+
+position := {
+
+x := 16.;
+
+y := 10.;
+
+z := 10.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+objet squelette {
+
+anime := vrai;
+
+fichier := "squelette.anime";
+
+position := {
+
+x := 5.;
+
+y := 10.;
+
+z := 10.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+
+
+objet prokofiev {
+
+anime := vrai;
+
+fichier := "prokofiev.anime";
+
+position := {
+
+x := 6.;
+
+y := 11.;
+
+z := 10.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+objet juliette {
+
+anime := vrai;
+
+fichier := "juliette.anime";
+
+position := {
+
+x := 5.;
+
+y := 12.;
+
+z := 10.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+objet pierre {
+
+anime := vrai;
+
+fichier := "pierre.anime";
+
+position := {
+
+x := 5.;
+
+y := 12.;
+
+z := 12.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+
+
+objet puits {
+
+anime := faux;
+
+fichier := "puits.nonanime";
+
+position := {
+
+x := 22.;
+
+y := 8.;
+
+z := 0.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+objet tetuytye {
+
+anime := faux;
+
+fichier := "maison03.nonanime";
+
+position := {
+
+x := 8.;
+
+y := 28.;
+
+z := -.10.;
+
+angle x := 0.;
+
+
+
+
+
+
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+objet maison {
+
+anime := faux;
+
+fichier := "maison03.nonanime";
+
+position := {
+
+x := 9.;
+
+y := 16.;
+
+z := -.10.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+objet maison {
+
+anime := faux;
+
+fichier := "maison03.nonanime";
+
+position := {
+
+x := 25.;
+
+y := 15.;
+
+z := -.10.;
+
+angle x := 0.;
+
+angle y := 0.;
+
+angle z := 0.;
+
+};
+
+}
+
+
+
+
+
+
+
+%arbre01.nonanime
+
+%faux
+
+%..\cartes\village.textures.png
+
+%65280
+
+%50
+
+
+
+
+
+
+
+
+
+}

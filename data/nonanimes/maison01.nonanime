@@ -1,0 +1,46 @@
+physique {
+ zone de choc := {
+  longueur := 2.;
+  largeur := 2.;
+  hauteur := 100.;
+ };
+ MaSSe := 240.;
+ compressible := faux;
+ fixe := vrai;
+ coefficient de rebondissement := 0.23;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+
+ /* 
+ action voler {
+  affichage := "Tu vas la mettre dans ta poche la maison ???";
+  icone := "herbe.jpg";
+  gestionnaire := { fichier := "script.pml"; procedure := "voler"; } ;
+ }
+
+ action parler {
+  affichage := "Mais c'est un objet, comment veux-tu que je lui parle espèce d'abruti !?! Tu me prends pour Mahatma Gandhi ou quoi ?" ;
+  icone := "herbe.jpg";
+  gestionnaire := { fichier := "script.pml"; procedure := "parler"; } ;
+ }
+*/
+
+}
+
+
+graphique {
+ 
+ element maison01 {
+  fils := ;
+  image := "maison01.3ds" ;
+ }
+
+
+ elements racines := {qui := maison01; x := 0.; y := 0.; z := 0.; angle x := 0.; angle y := 0.; angle z := .0;};
+}
+
+
+

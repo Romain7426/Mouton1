@@ -1,0 +1,40 @@
+physique {
+ zone de choc := {
+  longueur := 2.;
+  largeur := 2.;
+  hauteur := 100.;
+ };
+ MaSSe := 240.;
+ compressible := faux;
+ fixe := vrai;
+ coefficient de rebondissement := 0.23;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+
+/* 
+ action voler {
+  affichage := "Et si nous allions faire un peu le tour du propriétaire...";
+  icone := "herbe.jpg";
+  gestionnaire := { fichier := "script.pml"; procedure := "voler"; } ;
+ }
+*/
+
+}
+
+
+graphique {
+ 
+ element arbre {
+  fils := ;
+  image := "pierres01.3ds" ;
+ }
+
+
+ elements racines := {qui := arbre; x := 0.; y := 0.; z := 0.; angle x := 0.; angle y := 0.; angle z := .0;};
+}
+
+
+

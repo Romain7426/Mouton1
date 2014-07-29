@@ -1,0 +1,95 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+ zone de choc := {
+  longueur := 0.5;
+  largeur := 0.5;
+  hauteur := 50.;
+ };
+ MaSSe := 240.;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+ hostile := vrai;
+ 
+
+
+}
+
+
+graphique {
+ membre corps {
+  fils := ;
+  image := "./chapin/chapincorps.png";
+  largeur := 21.;
+  hauteur := 11.;
+  angle max y := 0.;
+ }
+
+ membre patte_avant_gauche {
+  fils := ;
+  image := "./chapin/chapinpatte.png";
+  largeur := 5.;
+  hauteur := 12.;
+  angle max y := -.30.;
+ }
+
+ membre patte_avant_droite {
+  fils := ;
+  image := "./chapin/chapinpatte.png";
+  largeur := 5.;
+  hauteur := 12.;
+  angle max y := -.30.;
+ }
+
+ membre patte_arriere_gauche {
+  fils := ;
+  image := "./chapin/chapinpatte.png";
+  largeur := 5.;
+  hauteur := 12.;
+  angle max y := -.30.;
+ }
+
+ membre patte_arriere_droite {
+  fils := ;
+  image := "./chapin/chapinpatte.png";
+  largeur := 5.;
+  hauteur := 12.;
+  angle max y := -.30.;
+ }
+ 
+
+ membre tete {
+  fils := ;
+  image := "./chapin/chapintete.png";
+  largeur := 23.;
+  hauteur := 19.;
+  angle max y := 0.;
+ }
+
+ membres racines := 
+	{qui := corps;        x := 0.; y := 0.;   z := 21.; angle y := 0.;},
+	{qui := tete;         x := 1.; y := 0.;   z := 32.; angle y := 0.;},
+	{qui := patte_avant_gauche; x := 0.; y := 5.;  z := 12.; angle y := 0.;},
+	{qui := patte_avant_droite; x := 0.; y := -.5.;   z := 12.; angle y := 0.;},
+	{qui := patte_arriere_gauche;  x := 10.; y := 5.; z := 12.; angle y := 0.;},
+	{qui := patte_arriere_droite;   x := -.10.; y := -.5.;  z := 12.; angle y := 0.;};
+
+
+}
+
+
+
+Et tout ce qui se passe après, on s'en fout !!!!!!!
+
+
+
+!!
+
+
+
+

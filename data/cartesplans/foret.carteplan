@@ -1,0 +1,113 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "foret.mid"; 
+ niveau eau := -.10.0; 
+ vie eau :=  0; 
+
+teleportation IDENT {
+  destination := "village.carte";
+  position := {
+     x := 40;
+     y := 62;
+     z := 0;
+  };
+  dimension := {
+     longueur := 20;  // x
+     largeur := 2;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 16;
+     y := 2;
+     z := 0;
+  };
+  destination direction parcours := haut;
+} 
+
+
+teleportation IDENT {
+  destination := "foretverschaman.carte";
+  position := {
+     x := 0;
+     y := 30;
+     z := 0;
+  };
+  dimension := {
+     longueur := 2;  // x
+     largeur := 8;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := gauche; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 62;
+     y := 16;
+     z := 0;
+  };
+  destination direction parcours := gauche;
+} 
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "foret.niveau.png";
+ fichier de zone de texture := "foret.textures.png";
+
+ texture herbe {
+  image := "herbe.jpg";
+  indice := 16777215;
+ }
+
+ texture route {
+  image := "pierre.jpg";
+  indice := 12632256;
+ }
+ 
+ texture feuilles {
+  image := "feuilles.jpg";
+  indice := 65280;
+ }
+
+
+
+%arbre01.nonanime
+%faux
+%..\cartes\foret.textures.png
+%65280
+%50
+
+
+%pecu.anime
+%vrai
+%..\cartes\foret.textures.png
+%16777215
+%0.5
+
+%dinotore.anime
+%vrai
+%..\cartes\foret.textures.png
+%16777215
+%0.5
+
+%mouton.anime
+%vrai
+%..\cartes\foret.textures.png
+%16777215
+%0.5
+
+%chapin.anime
+%vrai
+%..\cartes\foret.textures.png
+%16777215
+%0.5
+
+}

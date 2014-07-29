@@ -1,0 +1,40 @@
+physique {
+ zone de choc := {
+  longueur := 2.;
+  largeur := 2.;
+  hauteur := 100.;
+ };
+ MaSSe := 240.;
+ compressible := faux;
+ fixe := vrai;
+ coefficient de rebondissement := 0.23;
+}
+
+gameplay {
+ points de vie := 9999;
+ invinsible := vrai;
+ 
+
+ action parler {
+  affichage := "Chercher de l'eau" ;
+  icone := "";
+  gestionnaire := { fichier := "script.pml"; procedure := "chercher_de_leau"; } ;
+ }
+
+
+}
+
+
+graphique {
+ 
+ element arbre {
+  fils := ;
+  image := "puits.3ds" ;
+ }
+
+
+ elements racines := {qui := arbre; x := 0.; y := 0.; z := 0.; angle x := 0.; angle y := 0.; angle z := .0;};
+}
+
+
+

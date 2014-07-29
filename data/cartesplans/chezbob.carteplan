@@ -1,0 +1,80 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "marrant.mid"; 
+ niveau eau := -.10.0; 
+ vie eau :=  0; 
+
+teleportation IDENT {
+  destination := "village.carte";
+  position := {
+     x := 8;
+     y := 0;
+     z := 0;
+  };
+  dimension := {
+     longueur := 1;  // x
+     largeur := 1;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 25;
+     y := 11;
+     z := 0;
+  };
+  destination direction parcours := bas;
+} 
+
+
+
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "chezbob.niveau.png";
+ fichier de zone de texture := "chezbob.textures.png";
+
+ texture herbe {
+  image := "parquet.jpg";
+  indice := 0;
+ }
+
+
+%lit.nonanime
+%faux
+%..\cartes\chezbob.textures.png
+%128
+%100
+
+//vert
+%chaise.nonanime
+%faux
+%..\cartes\chezbob.textures.png
+%65280
+%100
+
+//jaune
+%chaiseb.nonanime
+%faux
+%..\cartes\chezbob.textures.png
+%65535
+%100
+
+//bleu
+%table.nonanime
+%faux
+%..\cartes\chezbob.textures.png
+%16711680
+%100
+
+
+}

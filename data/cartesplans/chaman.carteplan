@@ -1,0 +1,110 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "foret.mid"; 
+ niveau eau := -.10.0; 
+ vie eau :=  0; 
+
+teleportation IDENT {
+  destination := "foretverschaman.carte";
+  position := {
+     x := 62;
+     y := 0;
+     z := 0;
+  };
+  dimension := {
+     longueur := 3;  // x
+     largeur := 15;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := droite; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 0;
+     y := 27;
+     z := 0;
+  };
+  destination direction parcours := droite;
+} 
+
+
+
+teleportation IDENT {
+  destination := "pyramide.carte";
+  position := {
+     x := 12;
+     y := 62;
+     z := 0;
+  };
+  dimension := {
+     longueur := 10;  // x
+     largeur := 3;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 25;
+     y := 1;
+     z := 0;
+  };
+  destination direction parcours := haut;
+} 
+
+
+ evenement event1 {
+  genere par := 2 ;
+  traitement := { fichier := "script.pml"; procedure := "chaman_entree_carte"; } ;
+ }
+
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "chaman.niveau.png";
+ fichier de zone de texture := "chaman.textures.png";
+
+ texture herbe {
+  image := "herbe.jpg";
+  indice := 16777215;
+ }
+
+ texture route {
+  image := "pierre.jpg";
+  indice := 12632256;
+ }
+ 
+ texture feuilles {
+  image := "feuilles.jpg";
+  indice := 65280;
+ }
+
+
+
+%arbre01.nonanime
+%faux
+%chaman.textures.bmp
+%65280
+%10
+
+%pecu.anime
+%vrai
+%chaman.textures.bmp
+%16777215
+%1
+
+%maison02.nonanime
+%faux
+%chaman.textures.bmp
+%255
+%100
+
+
+
+}

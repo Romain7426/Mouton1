@@ -1,0 +1,83 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "boss.mid"; 
+ niveau eau := 0.0; 
+ vie eau :=  0; 
+
+teleportation IDENT {
+  destination := "niveau1_1.carte";
+  position := {
+     x := 5;
+     y := 24;
+     z := 0;
+  };
+  dimension := {
+     longueur := 2;  // x
+     largeur := 2;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 6;
+     y := 30;
+     z := 0;
+  };
+  destination direction parcours := bas;
+} 
+
+
+teleportation IDENT {
+  destination := "niveau1_1.carte";
+  position := {
+     x := 5;
+     y := 15;
+     z := 0;
+  };
+  dimension := {
+     longueur := 2;  // x
+     largeur := 2;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 16;
+     y := 1;
+     z := 0;
+  };
+  destination direction parcours := haut;
+} 
+
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "niveau1_boss.niveau.png";
+ fichier de zone de texture := "niveau1_boss.textures.png";
+
+ texture herbe {
+  image := "pierre.jpg";
+  indice := 0;
+ }
+
+ texture herbe {
+  image := "feuilles.jpg";
+  indice := 16777215;
+ }
+
+%pecu.anime
+%vrai
+%..\cartes\niveau1_1.textures.png
+%0
+%5
+
+
+}

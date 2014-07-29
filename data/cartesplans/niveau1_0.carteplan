@@ -1,0 +1,44 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "boss.mid"; 
+ niveau eau := 0.0; 
+ vie eau :=  0; 
+
+
+ evenement event1 {
+  genere par := 3 ;
+  traitement := { fichier := "script.pml"; procedure := "tue_boss"; } ;
+ }
+
+
+
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "niveau1_0.niveau.png";
+ fichier de zone de texture := "niveau1_0.textures.png";
+
+ texture herbe {
+  image := "pierre.jpg";
+  indice := 0;
+ }
+
+ texture herbe {
+  image := "feuilles.jpg";
+  indice := 16777215;
+ }
+
+
+
+
+}

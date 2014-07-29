@@ -1,0 +1,105 @@
+/* Ceci est un commentaire. */
+// Ceci est encore un commentaire.
+# C'est encore un commentaire.
+
+physique {
+
+}
+
+gameplay {
+ arme := vrai ; 
+ musique := "foret.mid"; 
+ niveau eau := -.10.0; 
+ vie eau :=  0; 
+
+
+
+
+teleportation IDENT {
+  destination := "chaman.carte";
+  position := {
+     x := 20;
+     y := 0;
+     z := 0;
+  };
+  dimension := {
+     longueur := 10;  // x
+     largeur := 2;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 17;
+     y := 63;
+     z := 0;
+  };
+  destination direction parcours := bas;
+} 
+
+teleportation IDENT {
+  destination := "niveau1_1.carte";
+  position := {
+     x := 13;
+     y := 14;
+     z := 0;
+  };
+  dimension := {
+     longueur := 2;  // x
+     largeur := 3;   // y
+     hauteur := 100;   // z
+  };
+  direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
+  destination position := {
+     x := 16;
+     y := 1;
+     z := 0;
+  };
+  destination direction parcours := haut;
+} 
+
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "pyramide.niveau.png";
+ fichier de zone de texture := "pyramide.textures.png";
+
+ texture herbe {
+  image := "herbe.jpg";
+  indice := 16777215;
+ }
+
+ texture route {
+  image := "pierre.jpg";
+  indice := 12632256;
+ }
+ 
+ texture feuilles {
+  image := "feuilles.jpg";
+  indice := 65280;
+ }
+
+
+
+
+
+%arbre01.nonanime
+%faux
+%..\cartes\pyramide.textures.png
+%65280
+%10
+
+%pecu.anime
+%vrai
+%..\cartes\pyramide.textures.png
+%16777215
+%1
+
+%pyramide.nonanime
+%faux
+%..\cartes\pyramide.textures.png
+%255
+%100
+
+}

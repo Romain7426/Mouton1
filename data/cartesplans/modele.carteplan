@@ -1,0 +1,40 @@
+physique {
+ /* Pour l'instant il n'y a rien dans la physique d'une carte. */
+}
+
+gameplay {
+ arme := vrai ; // A-t-on le droit de porter une arme ?
+ musique := "zelda.mid"; // musique de fond
+ niveau eau := 45.8; // niveau de l'eau
+ vie eau :=  23; // point de vie gagné lorsqu'on saute dans l'eau
+	         // Un nombre negatif indique qu'on en perds
+	         // un nombre positif qu'on en gagne.
+ 		 // Seul pb : on ne gere pas encore les nombre negatifs.
+
+
+}
+
+
+graphique {
+ fichier de zone de niveau := "riviere.niveau.bmp";
+ fichier de zone de texture := "riviere.textures.bmp";
+
+ texture herbe {
+  image := "herbe.jpg";
+  indice := 16777215;
+ }
+
+ texture route {
+  //image := "main.png";
+  image := "pierre.jpg";
+  indice := 0;
+ }
+
+
+
+%arbre01.nonanime
+%toreoulesarbres.bmp
+%255
+%10
+
+}
