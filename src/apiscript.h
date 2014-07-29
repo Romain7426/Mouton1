@@ -10,6 +10,8 @@ struct CMusique;
 struct CMoteurTeleportation;
 struct CMenuEntreeNom;
 
+#include "physicalobj.h"
+
 
 enum TTypeInstructionCourante {
   ticInstructionScript, /*instruction genre if, + etc... géré par le script*/
@@ -21,29 +23,30 @@ enum TTypeInstructionCourante {
   ticWaitFor,
   ticNOMBRE
 };
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TTypeInstructionCourante);
 
 
 
 
 struct api_contexte_t {
-  TModeJeu * ModeJeu;
+  enum TModeJeu * ModeJeu;
 
   bool * SCRIPT_SystemeRendMainAuScript;
   
-  CMap * * Map;
-  CMusique * * Musique;
+  struct CMap * * Map;
+  struct CMusique * * Musique;
   
-  CMenuAbstrait * * Menu;
-  CBonhomme * * Hero;
+  struct CMenuAbstrait * * Menu;
+  struct CBonhomme * * Hero;
 
   float * Temps;
   float * marche_compression;
   
-  TTypeInstructionCourante * TypeInstructionCourante;
+  enum TTypeInstructionCourante * TypeInstructionCourante;
 
-  CMenuAbstrait * * MiniMenu;
+  struct CMenuAbstrait * * MiniMenu;
   int nbpasses;
-  CBonhomme * b;
+  struct CBonhomme * b;
 };
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(api_contexte_t);
 DEFINE_NEW_OPERATOR_FOR_STRUCT(api_contexte_t);
@@ -66,21 +69,21 @@ extern int SCRIPT_AfficherMenu(const char * msg);
 extern void SCRIPT_JouerMusique(const char* fichier);
 extern void SCRIPT_RecevoirUneArme(const char* nom_arme);
 //extern void SCRIPT_ChangerDeCarte(CZoneTeleportation zt);
-extern void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, CZoneTeleportation ZoneTeleportation);
-extern void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, const char* nom_carte,
-                                  float x, float y,
-                                  TDirection direction);
+extern void SCRIPT_ChangerDeCarte_vZT(struct CMoteurTeleportation * MoteurTeleportation, struct CZoneTeleportation ZoneTeleportation);
+extern void SCRIPT_ChangerDeCarte_vXY(struct CMoteurTeleportation * MoteurTeleportation, const char* nom_carte,
+				      float x, float y,
+				      TDirection direction);
                                   
-extern void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, const char* nom_carte,
-                                  float x, float y, float z,
-                                  TDirection direction);
+extern void SCRIPT_ChangerDeCarte_vXYZ(struct CMoteurTeleportation * MoteurTeleportation, const char* nom_carte,
+				       float x, float y, float z,
+				       TDirection direction);
 
 
 extern void SCRIPT_AjouterObjetAnime(const char* qui, const char* filename);
 extern void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename);
 
-extern void SCRIPT_SetPosition(const char* qui, TPoint3D position);
-extern void SCRIPT_SetPosition(const char* qui, float x, float y, TMethodePlacement mp);
+extern void SCRIPT_SetPosition_vTPoint3d(const char* qui, TPoint3D position);
+extern void SCRIPT_SetPosition_vTMethodePlacement(const char* qui, float x, float y, enum TMethodePlacement mp);
 extern void SCRIPT_SetZ(const char* qui, float z, TMethodePlacement mp);
 extern void SCRIPT_SetDirection(const char* qui, TDirection d);
 

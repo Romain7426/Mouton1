@@ -1,9 +1,53 @@
-#include "global.hpp"
-#include "physicalobj.hpp"
-#include "text.hpp"
-#include "map.hpp"
+#include "global.h"
+#include "physicalobj.h"
+#include "text.h"
+#include "map.h"
 
 //extern CMap * Map;
+
+CPhysicalObj(CPhysicalObj * this);
+CPhysicalObj(CPhysicalObj * this, const char * filename);
+virtual ~CPhysicalObj(CPhysicalObj * this) {}
+
+bool IsVolumeNul(CPhysicalObj * this) const;
+TPoint3D GetDimension(CPhysicalObj * this, const CSol * Map) const;
+float NormeVitesse(CPhysicalObj * this) const;
+TPoint3D GetPosition(CPhysicalObj * this) const;
+void SetPosition(CPhysicalObj * this, TPoint3D pos);
+void SetPosition(CPhysicalObj * this, float x, float y, TMethodePlacement mp, const CMap * CMap);
+void SetZ(CPhysicalObj * this, float z, TMethodePlacement mp);
+void SetDimension(CPhysicalObj * this, float dx, float dy, float dz);
+void InitForce(CPhysicalObj * this);
+void AddForce(CPhysicalObj * this, TPoint3D f);
+void AddForce(CPhysicalObj * this, float fx, float fy, float fz);
+TPoint3D GetVitesse(CPhysicalObj * this) const;
+TPoint3D GetForce(CPhysicalObj * this) const;
+void CalcNewPosition(CPhysicalObj * this);
+void ValiderPosition(CPhysicalObj * this, const bool MoteurPhysiqueActif);
+void TesterSol(CPhysicalObj * this, const CSol * Map);
+bool TesterPosition(CPhysicalObj * this, const CSol * Map, const CPhysicalObj * po);
+bool IsBloque(CPhysicalObj * this) const;
+virtual void Render(CPhysicalObj * this, const CSol * Map) const;
+void PerdrePV(CPhysicalObj * this, int nbpv);
+bool Is0PV(CPhysicalObj * this) const;
+void SetPVMax(CPhysicalObj * this, int nbpv);
+void GagnerPV(CPhysicalObj * this, int nbpv);
+int GetPV(CPhysicalObj * this) const;
+void SetObjetEphemere(CPhysicalObj * this, int nbPV); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #define D_T 0.1f

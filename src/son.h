@@ -1,5 +1,5 @@
-#ifndef SON_HPP
-#define SON_HPP
+#ifndef SON_H
+#define SON_H
 
 
 
@@ -7,11 +7,11 @@
 extern int init_audio(void);
 extern void close_audio(void);
 
-class CSon;
-class CMusique;
+struct CSon;
+struct CMusique;
 
 
-class CSon {
+struct CSon {
 private:
   Mix_Chunk * son;
     
@@ -20,11 +20,12 @@ public:
   ~CSon(void);
   void Jouer(void);
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CSon);
 
 
 
 
-class CMusique {
+struct CMusique {
 private:
   Mix_Music * music;
   
@@ -34,11 +35,12 @@ public:
   ~CMusique(void);
   void Jouer(void);
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CMusique);
 
 
 //extern void mixaudio(void * unused, Uint8 * stream, int len);
 
 
 
-#endif /* SON_HPP */
+#endif /* SON_H */
 
