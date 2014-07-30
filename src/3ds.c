@@ -17,7 +17,7 @@
 #include "3ds.h"
 
 
-static struct CLoad3DS * CLoad3DS(void);
+struct CLoad3DS * CLoad3DS(void);
 static bool Import3DS(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
 static int GetString(struct CLoad3DS * this, char *);
 static void ReadChunk(struct CLoad3DS * this, tChunk *);
