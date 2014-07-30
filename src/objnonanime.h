@@ -1,37 +1,40 @@
-#ifndef OBJNONANIME_HPP
-#define OBJNONANIME_HPP
+#ifndef OBJNONANIME_H
+#define OBJNONANIME_H
 
-#include "ressource.hpp"
+//#include "ressource.hpp"
 
-class CPhysicalObj;
-#include "physicalobj.hpp"
+struct CPhysicalObj;
+#include "physicalobj.h"
 
 
 
 // Un objet non animé (arbre, maison...) est un objet physique... plus des données graphiques!!
-class CObjNonAnime : public CPhysicalObj {
-private:
-  friend int yynonanimeparse(void);
-  ressource<C3DS> * resobj3ds;
-  int parse(const char * dir, const char * filename);
+struct CObjNonAnime /* : public CPhysicalObj */ {
+  struct CPhysicalObj parent;
+  //private:
+  //friend int yynonanimeparse(void);
+  //ressource<C3DS> * resobj3ds;
+  struct C3DS * resobj3ds[128];
   float angleZ;
+  //public:
+  const char * const filename;
     
-public:
+  //public:
+#if 0
   //* chargement d'un objet non animé (par exemple : arbre.nonanime) */
   CObjNonAnime(const char * filename);
   CObjNonAnime(const CObjNonAnime * o);
-  
-  void SetAngleZ(float thetaZ);
   ~CObjNonAnime(void);
-        
-  void Render(const CSol * sol) const;
+#endif
+  
+  int (* parse)(struct CObjNonAnime * this, const char * dir, const char * filename);
+  void (* SetAngleZ)(struct CObjNonAnime * this, float thetaZ);
+  void (* Render)(const struct CObjNonAnime * this, const CSol * sol);
 
-public:
-  const char * const filename;
 };    
 
 
 
 
 
-#endif /* OBJNONANIME_HPP */
+#endif /* OBJNONANIME_H */
