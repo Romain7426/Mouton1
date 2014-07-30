@@ -72,10 +72,11 @@ struct CPhysicalObj {
   float CoeffFrottementFluide, CoeffFrottementFluideZ; 
 
 
-  
+#if   
   CPhysicalObj(CPhysicalObj * this);
   CPhysicalObj(CPhysicalObj * this, const char * filename);
   virtual ~CPhysicalObj(CPhysicalObj * this) {}
+#endif
 
   bool IsVolumeNul(CPhysicalObj * this) const;
     
