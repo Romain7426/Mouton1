@@ -11,14 +11,14 @@ extern void RaiseRender(void);
 
 struct api_contexte_t;
 //extern const api_contexte_t api_contexte;
-extern api_contexte_t api_contexte;
+extern struct api_contexte_t api_contexte;
 
-class CCamera;
-class CMoteurTeleportation;
-class CMenuEntreeNom;
-extern CCamera Camera;
-extern CMoteurTeleportation MoteurTeleportation;
-extern CMenuEntreeNom * MenuEntreeNom;
+struct CCamera;
+struct CMoteurTeleportation;
+struct CMenuEntreeNom;
+extern struct CCamera Camera;
+extern struct CMoteurTeleportation MoteurTeleportation;
+extern struct CMenuEntreeNom * MenuEntreeNom;
 
 
 

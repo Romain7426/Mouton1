@@ -1,5 +1,7 @@
-#ifndef LISTE_HPP
-#define LISTE_HPP
+#ifndef LISTE_H
+#define LISTE_H
+
+#if 0
 
 #include <stdlib.h> // NULL
 #include <stdio.h> // printf
@@ -204,8 +206,8 @@ template <class T> void CAccesseur<T>::DetruireElementCourant(void) {
 
 
 
+#endif
 
 
-
-#endif /* LISTE_HPP */
+#endif /* LISTE_H */
 

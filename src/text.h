@@ -1,7 +1,13 @@
 #ifndef TEXT_HPP
 #define TEXT_HPP
 
-#include "texture.hpp"
+#include "texture.h"
+
+
+struct CText;
+struct CMessageTexte;
+
+
 
 
 /*
@@ -14,25 +20,29 @@
  * Attention : le repère est en bas à gauche (comme en maths d'habitude)
  */
 
-class CText {
-private:
+struct CText {
+  //private:
   int rx, ry, rw, rh; 
   int cx, cy;
   
   // la police est une texture... ohlàlà ! si les poulets me lisaient...
-  CTexture * tex;
+  struct CTexture * tex;
 
-public:
-  CText();
-  void print(int x, int y, int w, int h, const char* s);
-  float print(float l, int nblignes,int nbcaracmax,
-              int x, int y, int w, int h, 
-              const char * s, bool& toutaffiche);
+  //public:
+#if 0
+  struct CText();
+  ~struct CText();
+#endif
+  void (* print1)(struct CText * this, int x, int y, int w, int h, const char* s);
+  float (* print2)(struct CText * this, float l, int nblignes, int nbcaracmax, int x, int y, int w, int h, const char * s, bool * toutaffiche_ptr);
   // l ligne courante
-  
-  ~CText();
-   
+
 };
+
+
+
+
+
 
 
 /* 
@@ -54,8 +64,8 @@ public:
  *              ...
  */
 
-class CMessageTexte {
-private:
+struct CMessageTexte {
+  //private:
   float lignedebut;
   // pour faire le défilement
         
@@ -65,28 +75,34 @@ private:
   // Si nbcaracaffiche est trop petit l'appui sur Entree ne fera rien :
   // il faut qd ^m en lire un minimum!!!
         
-  CTexture * texfond;
-  CTexture * texFlecheBas;
+  struct CTexture * texfond;
+  struct CTexture * texFlecheBas;
         
   // pour stocker le parchemin
         
   const char * s;
   // pointeur vers la chaîne à afficher
         
-public:
-  CMessageTexte();
-  ~CMessageTexte();
-  void SetMsg(const char* inS);
+  //public:
+#if 0
+  struct CMessageTexte();
+  ~struct CMessageTexte();
+#endif
+  void (* SetMsg)(struct CMessageTexte * this, const char* inS);
   // dis, maintenant, on va afficher cette chaîne
         
-  void Render();
+  void (* Render)(struct CMessageTexte * this);
   // s'occupe d'afficher le message... ne récupère aucun code clavier
         
     
-  bool InputAndRender();
+  bool (* InputAndRender)(struct CMessageTexte * this);
   // s'occupe d'afficher, de récupérer le clavier...
     
 };   
+
+
+
+
 
 
 
@@ -96,11 +112,11 @@ public:
  * (comme les coeurs, les minimenus...)
  * Attention : le repère est en BAS à gauche et est en pixel
  */
-extern void glEnable2D();
-extern void glDisable2D();
+extern void glEnable2D(void);
+extern void glDisable2D(void);
 
-extern CText * Text;
-extern CMessageTexte * MessageTexte;
+extern struct CText * Text;
+extern struct CMessageTexte * MessageTexte;
 
               
 /*

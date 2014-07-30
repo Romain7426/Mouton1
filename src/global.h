@@ -86,6 +86,9 @@
 #include <SDL_image.h> /* pour ouvrir des images d'autres formats que BMP (notamment des images au format PNG) */
 #include <SDL_mixer.h>
 
+#include <OpenGL/gl.h>
+
+
 #ifdef SYS_MACOSX
   #include <OpenGL/gl.h>
   #include <OpenGL/glu.h>

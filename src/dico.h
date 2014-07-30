@@ -1,5 +1,7 @@
 /*un dictionnaire permet de stocker de manière efficace une table 
  clé (char*) -valeur (type T quelconque)*/
+
+#if 0
  
 //typedef long char * LPSTR;  // Putain François tu avais oublié la déclaration de ce type de merde !!!!
 typedef char * LPSTR;
@@ -184,3 +186,4 @@ template <class T> CDico<T>::~CDico()
 
 
 
+#endif

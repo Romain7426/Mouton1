@@ -1,9 +1,9 @@
-#ifndef EVENEMENTS_HPP
-#define EVENEMENTS_HPP
+#ifndef EVENEMENTS_H
+#define EVENEMENTS_H
 
-extern void EVENEMENT_ChargementCarte();
-extern void EVENEMENT_PlusDEnnemi();
+extern void EVENEMENT_ChargementCarte(void);
+extern void EVENEMENT_PlusDEnnemi(void);
 
 
-#endif /* EVENEMENTS.HPP */
+#endif /* EVENEMENTS_H */
 

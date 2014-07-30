@@ -18,6 +18,7 @@ struct CAffichageCoeur;
 
 
 enum TCoeurTypeAnimation {caONNEFAITRIEN, caECLATERGROSCOEUR, caPERDREGROSCOEUR, caPERDREPETITSCOEURS};
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TCoeurTypeAnimation);
 
 
 

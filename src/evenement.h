@@ -1,9 +1,10 @@
-#ifndef EVENEMENT_HPP
-#define EVENEMENT_HPP
+#ifndef EVENEMENT_H
+#define EVENEMENT_H
 
-class CScriptLauncher;
-#include "liste.hpp"
-#include "action.hpp" // class CScriptLauncher;
+struct CScriptLauncher;
+
+//#include "liste.h"
+#include "action.h" // class CScriptLauncher;
 
 
 
@@ -32,29 +33,34 @@ enum type_evt {
   EVT_Epouvantail,
   EVT_NOMBRE
 };
+TYPEDEF_TYPENAME_WITHOUT_ENUM(type_evt);
 
-typedef enum type_evt type_evt;
 extern const unsigned int nb_evts;
 
 
-class CEvenement {
-private:
-  CListe<CScriptLauncher> * liste_traitement;
-public:
+struct CEvenement {
+  //private:
+  //CListe<CScriptLauncher> * liste_traitement;
+  CScriptLauncher * liste_traitement[132];
+  //public:
+#if 0
   CEvenement(void) : liste_traitement(new CListe<CScriptLauncher>()) {};
   ~CEvenement(void) { delete liste_traitement; };
+#endif
 
-  void AjouterTraitement(const char * file, const char * proc);
-  void Vider(void);
-  void execute(void);
+  void (* AjouterTraitement)(struct CEvenement * this, const char * file, const char * proc);
+  void (* Vider)(struct CEvenement * this);
+  void (* execute)(struct CEvenement * this);
 };
 
 
 
 
 
+
+
 // Le type 'evenements' qui est pour le traitement des evt.
-typedef CEvenement evenements_t[EVT_NOMBRE];
+typedef struct CEvenement evenements_t[EVT_NOMBRE];
 
 // Les evts globaux.
 extern evenements_t evts;
@@ -63,13 +69,14 @@ extern evenements_t evts;
 //static bool tab
 struct tab_evt_bool {
   bool tab[EVT_NOMBRE];
+};
+#if 0
   tab_evt_bool(void) {
     //printf("tab_evt_bool::tab_evt_bool()\n");
     for (unsigned int i = 0; i < nb_evts; i++)
       tab[i] = false;
   }
-};
-
+#endif
 
 
 // Déclenche un événement (en fait, ça le fait pas de suite, ça met juste un flag puis après c'est traité dans handle_evts
@@ -88,5 +95,5 @@ extern void handle_evts(void);
 
 
 
-#endif /* EVENEMENT.HPP */
+#endif /* EVENEMENT_H */
 
