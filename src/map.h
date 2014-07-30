@@ -1,36 +1,38 @@
-#ifndef MAP_HPP
-#define MAP_HPP
+#ifndef MAP_H
+#define MAP_H
 
 
 
-#include "liste.hpp"
-#include "dico.hpp"
+//#include "liste.h"
+//#include "dico.h"
 
 
 //enum TDirection;
 struct TPoint2D;
 struct TPoint3D;
-class CSol;
-class CPhysicalObj;
-class CBonhomme;
-class CEvenement;
+struct CSol;
+struct CPhysicalObj;
+struct CBonhomme;
+struct CEvenement;
 
-#include "vectors.hpp"
-#include "sol.hpp"
-#include "evenement.hpp"
+#include "vectors.h"
+#include "sol.h"
+#include "evenement.h"
 
 struct TVoisinage;
-class CZoneTeleportation;
+struct CZoneTeleportation;
 
 
 
 struct TVoisinage {
-  CListe<CPhysicalObj> Objets;     
+  //CListe<CPhysicalObj> Objets;     
+  struct CPhysicalObj * Objets;     
 };
 
 
-class CZoneTeleportation {
-public:
+
+struct CZoneTeleportation {
+  //public:
   TPoint3D position;
   TPoint3D dimension;
   TDirection depart_direction;
@@ -38,18 +40,21 @@ public:
   TPoint3D destination_position;
   TDirection destination_direction;         
   
+#if 0
   CZoneTeleportation(void) {};
   CZoneTeleportation(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction);    
+#endif
 };
 
 
 //#define VOISINAGE_IS_TAB
 
-class CMap : public CSol {
-private:
+struct CMap {
+  // private:
+  struct CSol parent;
   const char * const NomCarte;
 
-public:
+  //public:
   // c un tableau de liste
   //  -> pour chaque case, il y a un voisinage,
   //     le voisinage étant la liste des objets proches
@@ -58,13 +63,22 @@ public:
   //CPhysicalObj * * Voisinages;
 #else
 #define VOISINAGE_TAILLE 8192
-    CPhysicalObj * (* Voisinages)[VOISINAGE_TAILLE];
+  struct CPhysicalObj * (* Voisinages)[VOISINAGE_TAILLE];
 #endif
   
-  CDico<CPhysicalObj> DicoObjets;
-  CListe<CZoneTeleportation> ZonesTeleportation;
+  //CDico<CPhysicalObj> DicoObjets;
+  struct CPhysicalObj * DicoObjets[2048];
+
+
+  //CListe<CZoneTeleportation> ZonesTeleportation;
+  struct CZoneTeleportation * ZonesTeleportation[32];
   /*le dictionnaire répertorie les objets qui ont un nom. (utile pour les scripts)
      invariant : le dico ne contient que des pointeurs vers des éléments déjà dans Objets*/
+
+
+  // Ça c pour la gestion des eveneents.
+  evenements_t evt_carte;
+
   
   /* Cette fonction lance le parser d'un fichier .carte.
      Elle met toutes les variables à jour.
@@ -89,9 +103,11 @@ public:
   friend int yycarteparse(void);
 
 
-public:
+  //public:
+#if 0
   CMap(const char * filename, const bool EnVaisseau);
   ~CMap(void);
+#endif
 
   const char * GetNomCarte(void) const;
 
@@ -115,15 +131,13 @@ public:
   
   CZoneTeleportation * VaTonBouger(CPhysicalObj * aHero);
   
-  // Ça c pour la gestion des eveneents.
-  evenements_t evt_carte;
   tab_evt_bool tab_evt_carte(void);
 };
 
 
 
 
-#endif /* MAP_HPP */
+#endif /* MAP_H */
 
 
 
