@@ -1,26 +1,31 @@
-class CMenu;
-#include "menu.hpp"
+struct CMenu;
+#include "menu.h"
 
 
 
 
 #define MAX_LONGUEUR_BUFFER 16
 
-class CMenuEntreeNom : public CMenu
-{
-private:
-     int poscur;
-     void RetArr();
-     
-public:
-     char buffer[MAX_LONGUEUR_BUFFER];
-     
-     CMenuEntreeNom();
-     ~CMenuEntreeNom();
-     
-     void Init();
-         
-     bool InputAndRender(); 
+struct CMenuEntreeNom /* : public CMenu */ {
+  CMenu parent;
+  
+  //private:
+  int poscur;
+  char buffer[MAX_LONGUEUR_BUFFER];
+  
+  
+  
+  void (* RetArr)(struct CMenuEntreeNom * this);
+  
+  //public:
+#if 0
+  CMenuEntreeNom();
+  ~CMenuEntreeNom();
+#endif
+  
+  void (* Init)(struct CMenuEntreeNom * this);
+  
+  bool (* InputAndRender)(struct CMenuEntreeNom * this); 
 };
 
 

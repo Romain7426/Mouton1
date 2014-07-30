@@ -46,11 +46,13 @@ struct CTexture;
 ******************************************************************************/
 
 // structure pour stocker un élément du menu
-struct Item {
+struct MenuItem {
   const char * nom; //par convention nom = NULL ==> pas d'item !!
   CTexture * texture;
   void * qch; //pour stocker des choses (comme un ScriptLauncher) dans ActionMenu
 };    
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(MenuItem);
+DEFINE_NEW_OPERATOR_FOR_STRUCT(MenuItem);
 
   
 struct CMenuAbstrait {
@@ -61,7 +63,7 @@ struct CMenuAbstrait {
   int anim_theta[NB_SOUS_MENU];
   int anim_phi; // c'est pas le vrai indice de menu, mais un indice plus grand pour faire les animations
   
-  Item Items[NB_SOUS_MENU][NB_ITEM_MAX];
+  MenuItem Items[NB_SOUS_MENU][NB_ITEM_MAX];
   
   /*ici, on récupère en sortie le numéro de sous-menu (iphi) et le numéro
     de l'élément sélectionné (itheta). Utile pour savoir quelle action faire
@@ -83,22 +85,23 @@ struct CMenuAbstrait {
   virtual ~CMenuAbstrait(void);
 #endif
       
-  void (* Add)(struct CMenuAbstrait * this, int ssMenu, const char * nom, const char * nom_texture);
+  void (* Add1)(struct CMenuAbstrait * this, int ssMenu, const char * nom, const char * nom_texture);
   /*ajoute un élément au menu... sur le sous-menu ssMenu
     (ssMenu doit être dans [0, NB_SOUS_MENU-1] sinon ça plante !)
     nom_texture est le nom de fichier d'une image
     ex : "./haricot.png"*/ 
     
-  void (* Add)(struct CMenuAbstrait * this, int ssMenu, const char * nom, const char * nom_texture, void * qch);
+  void (* Add2)(struct CMenuAbstrait * this, int ssMenu, const char * nom, const char * nom_texture, void * qch);
       
   //virtual bool InputAndRender(void);
-  bool (* InputAndRender)(struct CMenuAbstrait * this, void);
+  bool (* InputAndRender)(struct CMenuAbstrait * this);
   /*On appelle ça pour faire vivre le menu (dans RaiseRender)
     pour appeler cette fonction, il faut ABSOLUMENT que le menu ne soit pas vide
     (avoir au moins fait un appel de Add avant)
     sinon elle plante (à coup sûr)*/
  
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CMenuAbstrait);
 
 
 
@@ -107,20 +110,23 @@ struct CMenuAbstrait {
   MENU
 ******************************************************************************/
     
-struct CMenu : public CMenuAbstrait {
-private:    
-  
-public:
+struct CMenu /* : public CMenuAbstrait */ {
+  CMenuAbstrait parent;
+
+#if 0
   CMenu(void); /*on construit le menu*/
   ~CMenu(void) {}
+#endif
   
-  virtual bool InputAndRender(void);
+  //virtual bool InputAndRender(void);
+  bool (* InputAndRender)(struct CMenu * this);
   /*On appelle ça pour faire vivre le menu (dans RaiseRender)
     pour appeler cette fonction, il faut ABSOLUMENT que le menu ne soit pas vide
     (avoir au moins fait un appel de Add avant)
     sinon elle plante (à coup sûr)*/
       
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CMenu);
 
 
 
@@ -129,17 +135,22 @@ public:
   MINIMENU
 ******************************************************************************/
 
-struct CMiniMenu : public CMenuAbstrait {
-private:
+struct CMiniMenu /* : public CMenuAbstrait */ {
+  CMenuAbstrait parent;
+
+  //private:
   int X, Y, W;
   CTexture * Curseur;
   
-public:
+  //public:
+#if 0
   CMiniMenu(int inX, int inY, int inW);
   ~CMiniMenu(void);
+#endif
   
-  bool InputAndRender(void);
+  bool (* InputAndRender)(struct CMiniMenu * this);
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CMiniMenu);
 
 
 #endif /* MENU_H */

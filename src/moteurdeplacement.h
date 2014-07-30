@@ -1,16 +1,15 @@
-#include "bonhomme.hpp"
-#include "liste.hpp"
+#include "bonhomme.h"
+#include "liste.h"
 //#include "
 
 
-class COrdresDeplacement {
-private:
- 
-public:
+struct COrdresDeplacement {
+#if 0
   COrdresDeplacement(void);
   ~COrdresDeplacement(void);
+#endif
   
-  void AjouterOrdreDeplacement(TPoint3D pos);
-  void AppliquerOrdresA(CBonhomme * b);
+  void (* AjouterOrdreDeplacement)(struct COrdresDeplacement * this, TPoint3D pos);
+  void (* AppliquerOrdresA)(struct COrdresDeplacement * this, struct CBonhomme * b);
 };
 
