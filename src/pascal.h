@@ -1,9 +1,9 @@
-#ifndef PASCAL_HPP
-#define PASCAL_HPP
+#ifndef PASCAL_H
+#define PASCAL_H
 
-class CPprog;
+struct CPprog;
 
-#include "global.hpp"
+#include "global.h"
 #include "pascal/pascal.mem.hpp"
 #include "pascal/pascal.env.hpp"
 #include "pascal/pascal.prog.hpp"
@@ -34,9 +34,12 @@ class CPprog;
 */
 
 
+struct CPascal;
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPascal);
 
-class CPascal {
-private:
+
+struct CPascal {
+  //private:
   // Le fichier que l'on lit.
   const char * const filename;
       
@@ -58,12 +61,13 @@ private:
   int code_erreur;
 
 
-public:
+  //public:
   // programme en cours d'exécution
   CPprog * prog_exec;
   //void * prog_exec;
   penv env_exec;
 
+#if 0
   // Le constructeur.
   // Le code d'erreur rend un nombre négatif en cas d'erreur.
   CPascal(const char * const filename);
@@ -72,6 +76,7 @@ public:
   // Etant donné que j'ai beaucoup merdé sur la structure générale du machin,
   // ca ne libérera pas beaucoup de mémoire.
   ~CPascal(void);
+#endif
        
        
   // Fonction qui donne la valeur du code de retour.
@@ -158,4 +163,4 @@ public:
 };
        
 
-#endif /* PASCAL_HPP */
+#endif /* PASCAL_H */
