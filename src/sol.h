@@ -2,6 +2,7 @@
 #define SOL_H
 
 //#include "ressource.h"
+#include "action.h"
 
 struct CTexture;
 struct TPoint2D;

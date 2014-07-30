@@ -151,8 +151,19 @@ typedef char str_t;
 #include "biglib_suppl.h"
 #include "biglib.h"
 
+
+#if 0
 #define TYPEDEF_TYPENAME_WITHOUT_STRUCT(TYPENAME)	\
-  typedef struct TYPENAME TYPENAME;
+  struct TYPENAME;					\
+  #ifndef glue3(TYPE_,TYPENAME,_IS_DEFINED)		\
+  #define glue3(TYPE_,TYPENAME,_IS_DEFINED)		\
+  typedef struct TYPENAME TYPENAME;			\
+  #endif
+#else
+#define TYPEDEF_TYPENAME_WITHOUT_STRUCT(TYPENAME)	\
+  struct TYPENAME;					\
+  typedef struct TYPENAME TYPENAME;			
+#endif
 
 #define TYPEDEF_TYPENAME_WITHOUT_ENUM(TYPENAME)	\
   typedef enum TYPENAME TYPENAME;

@@ -7,7 +7,7 @@
 #if 0
 #define glue3(a,b,c) glue(glue(a,b),c)
 #else
-#define xglue3(a,b,c) a ## b ## c
+#define xglue3(a,b,c) a##b##c
 #define glue3(a,b,c) xglue3(a,b,c)
 #endif
 
