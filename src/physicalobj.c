@@ -44,6 +44,50 @@ void SetObjetEphemere(CPhysicalObj * this, int nbPV);
 
 
 
+#if   0
+  struct CPhysicalObj(struct CPhysicalObj * this);
+  struct CPhysicalObj(struct CPhysicalObj * this, const char * filename);
+  virtual ~struct CPhysicalObj(struct CPhysicalObj * this) {}
+
+
+  virtual void Render(struct CPhysicalObj * this, const CSol * Map) const
+  {
+#if AFFICHER_CUBE_DEBUG == true
+          
+    TPoint3D d = GetDimension(struct CPhysicalObj * this, Map);      
+
+    /* les cubes pour lesquels on a rejeté la position, sont rouges */
+    if (struct CPhysicalObj * this, !nvalid_position) {
+      glColor3f(struct CPhysicalObj * this, 1.0f, 0.0f, 0.0f);
+    }
+         
+    if (struct CPhysicalObj * this, Immerge) {
+      glColor3f(struct CPhysicalObj * this, 0.0f, 0.0f, 1.0f); 
+    }
+         
+#if 0
+    if (struct CPhysicalObj * this, IsVolumeNul(struct CPhysicalObj * this, )) {
+      glColor3f(struct CPhysicalObj * this, 0.0f, 0.0f, 0.0f);   
+      d.x = 0.2f;
+      d.y = 0.2f;
+      d.z = 10.0f;
+    }
+#endif
+    
+#if 1
+    Map -> AfficherCube(struct CPhysicalObj * this, p.x - d.x, p.y - d.y, p.z, 2*d.x, 2*d.y, d.z);
+         
+    glColor3f(struct CPhysicalObj * this, 1.0f, 1.0f, 1.0f);
+#endif
+#endif /* AFFICHER_CUBE_DEBUG */       
+  };
+   
+
+#endif
+
+
+
+
 
 
 
