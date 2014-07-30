@@ -1,5 +1,47 @@
-#include "global.hpp"
-#include "sol.hpp"
+#include "global.h"
+#include "sol.h"
+
+
+
+static CSol(CSol * this, const bool EnVaisseau);
+static ~CSol(CSol * this, );
+
+static void SETZ(CSol * this, int x, int y, float z);
+static void SETINDTEXTURE(CSol * this, int x, int y, int ind);
+static void AjouterTextureSol(CSol * this, const char * s, int indice_dans_bitmap);
+static void ChargerIndiceTextureBitmap(CSol * this, const char * fichier_bitmap);
+static void Blit(CSol * this, float i, float j, float z, CTexture* tex, float taillex, float tailleh);
+static void Cube(CSol * this, float i, float j, float z, float taillex, float tailleh);
+static void MatricePourDessiner(CSol * this, float i, float j);
+static void ChargerZ(CSol * this, const char * filename);	
+static void SetTemps(CSol * this, float temps);
+
+static int GETINDTEXTURE(const CSol * this, int x, int y);
+static TPoint3D GetPoint3D(const CSol * this, float i, float j, float z);
+static void tore(const CSol * this, int i,int j);
+static void tore0(const CSol * this, int i,int j);
+static void CalcPoints(const CSol * this, int i1, int j1, int i2, int j2);
+static int GetTailleX(const CSol * this);
+static int GetTailleY(const CSol * this);
+static void AfficherCube(const CSol * this, float x1, float y1, float z1, float dx, float dy, float dz);
+static float FacteurCompression(const CSol * this, float j);
+static float IndiceTemps(const CSol * this, float j);
+static void LookAt(const CSol * this, float i, float j, float z); /*place la caméra au dessus du point (const CSol * this, i, j)*/
+static void LookAt(const CSol * this, float i, float j, float z, float dist, float AngleXY, float AngleZ); /*place la caméra au dessus du point (const CSol * this, i, j)*/
+static void Render(const CSol * this, int i1, int j1, int i2, int j2); /*dessine la partie du tore entre (const CSol * this, i1, j1) et (const CSol * this, i2, j2)*/
+static void RenderEau(const CSol * this, int i1, int j1, int i2, int j2);
+static bool yatilEau(const CSol * this, float i, float j, float z);
+static void PositionModulo(const CSol * this, float& i, float& j);
+static TPoint2D Differentiel(const CSol * this, TPoint3D pos);
+static float GETZ(const CSol * this, float x, float y);
+static void MatricePour2D(const CSol * this, float i, float j, float z);
+static void glVertexTore(const CSol * this, float x, float y, float z);
+static float GetTemps(const CSol * this);
+
+
+
+
+
 
 
 #define theta_vue_blit -1.3f

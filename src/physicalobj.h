@@ -3,15 +3,15 @@
 
 struct TPoint2D;
 struct TPoint3D;
-class CSol;
-class CPhysicalObj;
-class CBonhomme;
-class CEvenement;
-class CObjActionnable;
-class CMap;
+struct CSol;
+struct CPhysicalObj;
+struct CBonhomme;
+struct CEvenement;
+struct CObjActionnable;
+struct CMap;
 
-#include "action.hpp"
-#include "sol.hpp"
+#include "action.h"
+#include "sol.h"
 
 
 
@@ -21,10 +21,10 @@ TYPEDEF_TYPENAME_WITHOUT_ENUM(TMethodePlacement);
 
 
 /* 
-   Ceci est une classe abstraite pour définir des choses matérielles.
+   Ceci est une structe abstraite pour définir des choses matérielles.
    But : modéliser un point matériel (position, vitesse, forces...)
 */
-//class CPhysicalObj : public CObjActionnable {
+//struct CPhysicalObj : public CObjActionnable {
 struct CPhysicalObj {
   CObjActionnable parent1;
   //protected:
