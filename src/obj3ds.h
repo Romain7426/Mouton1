@@ -1,12 +1,12 @@
-#ifndef OBJ3DS_HPP
-#define OBJ3DS_HPP
+#ifndef OBJ3DS_H
+#define OBJ3DS_H
 
-#include "3ds.hpp"
+#include "3ds.h"
 
-class CTexture;
+struct CTexture;
 
 typedef unsigned char byte;
-/*Cette classe permet de gérer un objet 3D stocké dans un fichier 3DS.
+/*Cette structe permet de gérer un objet 3D stocké dans un fichier 3DS.
   Pour l'utiliser :
   - pour charger : C3DS* momo = new C3DS("momo.3ds");
   - pour afficher : momo->Render() (avec éventuellement des changements de
@@ -14,8 +14,8 @@ typedef unsigned char byte;
   - puis à la fin delete momo;
 */
 
-class C3DS {
-private:
+struct C3DS {
+  //private:
   /*le parallélépipède englobant*/
   TPoint3D minPE, maxPE;
      
@@ -24,18 +24,16 @@ private:
   CTexture * g_Texture[MAX_TEXTURES];   //là où on stocke les textures
   int g_ViewMode; //mode d'affichage
   unsigned Liste; //liste d'affichage (pour optimiser l'affichage OpenGL)
-  void RenderGL();
    
-  void CalcPE();
-   
-public:
-
+  //public:
+#if 0
   C3DS(const char * filename);
   ~C3DS();
-  void Render() const;
-    
-
+#endif
+  void (* Render)(const struct C3DS * this) const;
+  void (* RenderGL)(const struct C3DS * this);
+  void (* CalcPE)(struct C3DS * this);
 }; 
  
  
-#endif /* OBJ3DS_HPP */
+#endif /* OBJ3DS_H */
