@@ -1,7 +1,7 @@
-#include "global.hpp"
-#include "text.hpp"
-#include "action.hpp"
-#include "apiscript.hpp"
+#include "global.h"
+#include "text.h"
+#include "action.h"
+#include "apiscript.h"
 
 CTexture * texAction1 = NULL;
 CTexture * texAction2 = NULL;

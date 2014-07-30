@@ -17,7 +17,7 @@
 #include "3ds.h"
 
 
-struct CLoad3DS * CLoad3DS(void);
+//struct CLoad3DS * new_CLoad3DS(void);
 static bool Import3DS(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
 static int GetString(struct CLoad3DS * this, char *);
 static void ReadChunk(struct CLoad3DS * this, tChunk *);
@@ -34,8 +34,6 @@ static void CleanUp(struct CLoad3DS * this);
 
 
 
-
-#ifdef BIG_ENDIAN
 
 static size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream);
 
@@ -66,10 +64,10 @@ size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream) {
   return nmemb;
 }
 
+#ifdef BIG_ENDIAN
+#define fread_ fread_big_endian
 #else
-
-#define fread_big_endian fread
-
+#define fread_ fread
 #endif 
 
 
@@ -93,12 +91,11 @@ size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream) {
 /////
 ///////////////////////////////// CLOAD3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-struct CLoad3DS * CLoad3DS(void) {
+struct CLoad3DS * new_CLoad3DS(void) {
   struct CLoad3DS * this = NULL;
-  this = (struct CLoad3DS *) malloc(sizeof struct CLoad3DS);
-  bzero(this, sizeof struct CLoad3DS);
+  this = (struct CLoad3DS *) malloc(sizeof(struct CLoad3DS));
+  bzero(this, sizeof(struct CLoad3DS));
 
-  this -> CLoad3DS = CLoad3DS;
   this -> Import3DS = Import3DS;
   this -> GetString = GetString;
   this -> ReadChunk = ReadChunk;
@@ -115,6 +112,8 @@ struct CLoad3DS * CLoad3DS(void) {
   
   this -> m_CurrentChunk = new_tChunk();                // Initialize and allocate our current chunk
   this -> m_TempChunk = new_tChunk();                   // Initialize and allocate a temporary chunk
+
+  return this;
 }
 
 ///////////////////////////////// IMPORT 3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
@@ -123,8 +122,8 @@ struct CLoad3DS * CLoad3DS(void) {
 /////
 ///////////////////////////////// IMPORT 3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-bool CLoad3DS::Import3DS(t3DModel *pModel, const char * strFileName)
-{
+//bool CLoad3DS::Import3DS(t3DModel *pModel, const char * strFileName)
+bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
   char strMessage[255] = {0};
     
   //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
@@ -135,42 +134,39 @@ bool CLoad3DS::Import3DS(t3DModel *pModel, const char * strFileName)
   //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
     
   // Open the 3DS file
-  m_FilePointer = fopen(strFileName, "rb");
+  this -> m_FilePointer = fopen(strFileName, "rb");
 
   // Make sure we have a valid file pointer (we found the file)
-  if (!m_FilePointer) 
-    {
-      printf("Unable to find the file: %s!\n", strFileName);
-    }
+  if (!this -> m_FilePointer) {
+    printf("Unable to find the file: %s!\n", strFileName);
+  }
 
   // Once we have the file open, we need to read the very first data chunk
   // to see if it's a 3DS file.  That way we don't read an invalid file.
   // If it is a 3DS file, then the first chunk ID will be equal to PRIMARY (some hex num)
 
   // Read the first chuck of the file to see if it's a 3DS file
-  ReadChunk(m_CurrentChunk);
+  ReadChunk(this, this -> m_CurrentChunk);
 
   // Make sure this is a 3DS file
-  if (m_CurrentChunk->ID != PRIMARY)
-    {
-      sprintf(strMessage, "Unable to load PRIMARY chuck from file: %s!", strFileName);
-      cout << strMessage << endl;
-
-    }
-  printf("Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", m_CurrentChunk->ID, PRIMARY, m_FilePointer);
+  if (this -> m_CurrentChunk->ID != PRIMARY) {
+    sprintf(strMessage, "Unable to load PRIMARY chuck from file: %s!", strFileName);
+    printf("%s\n", strMessage);  
+  }
+  printf("Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
 
   // Now we actually start reading in the data.  ProcessNextChunk() is recursive
 
   // Begin loading objects, by calling this recursive function
   printf("   ProcessNextChunk...\n");
-  ProcessNextChunk(pModel, m_CurrentChunk);
+  ProcessNextChunk(this, pModel, this -> m_CurrentChunk);
 
   // After we have read the whole 3DS file, we want to calculate our own vertex normals.
   printf("   ComputeNormals...\n");
-  ComputeNormals(pModel);
+  ComputeNormals(this, pModel);
 
   // Clean up after everything
-  CleanUp();
+  CleanUp(this);
 
   return true;
 }
@@ -181,12 +177,11 @@ bool CLoad3DS::Import3DS(t3DModel *pModel, const char * strFileName)
 /////
 ///////////////////////////////// CLEAN UP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::CleanUp()
-{
+void CleanUp(struct CLoad3DS * this) {
 
-  fclose(m_FilePointer);                      // Close the current file pointer
-  delete m_CurrentChunk;                      // Free the current chunk
-  delete m_TempChunk;                         // Free our temporary chunk
+  fclose(this -> m_FilePointer);                      // Close the current file pointer
+  free(this -> m_CurrentChunk);                      // Free the current chunk
+  free(this -> m_TempChunk);                         // Free our temporary chunk
 }
 
 
@@ -196,9 +191,7 @@ void CLoad3DS::CleanUp()
 /////
 ///////////////////////////////// PROCESS NEXT CHUNK\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
-{
-
+void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk) {
   t3DObject newObject;// = {0};
   //3DObject newObject; // = {0, 0, 0, 0, 0, 0};                  // This is used to add to our object list
   newObject.numOfVerts = 0;
@@ -225,15 +218,15 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
   /*INITIALISATION MANQUANTE QUI MAINTENANT NE MANQUE PLUS*/
   /* pModel->numOfMaterials = 0;
      pModel->numOfObjects = 0;*/
-    
+  
   printf("appel à processchunk : pModel->numOfObjects = %i\n", pModel->numOfObjects);
 
     
   unsigned int version = 0;                   // This will hold the file version
   //int buffer[5000] = {0};                    // This is used to read past unwanted data
 
-  m_CurrentChunk = new tChunk;                // Allocate a new chunk             
-
+  this -> m_CurrentChunk = new_tChunk();                // Allocate a new chunk             
+  
   // Below we check our chunk ID each time we read a new chunk.  Then, if
   // we want to extract the information from that chunk, we do so.
   // If we don't want a chunk, we just read past it.  
@@ -245,11 +238,11 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
   while (pPreviousChunk->bytesRead < pPreviousChunk->length) {
       // Read next Chunk
       printf("   on lit un chunk...\n");
-      ReadChunk(m_CurrentChunk);
+      ReadChunk(this, this -> m_CurrentChunk);
 
       printf("    chunk lu avec succès...\n");
       // Check the chunk ID
-      switch (m_CurrentChunk->ID) {
+      switch (this -> m_CurrentChunk->ID) {
         case VERSION:                           // This holds the version of the file
           printf("    chunk VERSION... %X\n", VERSION);
           // This chunk has an unsigned short that holds the file version.
@@ -258,16 +251,16 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
 
           // Read the file version and add the bytes read to our bytesRead variable
           //m_CurrentChunk->bytesRead += fread(&version, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
-          m_CurrentChunk->bytesRead += 4 * fread_(&version, 4, 1, m_FilePointer);
+          this -> m_CurrentChunk->bytesRead += 4 * fread_(&version, 4, 1, this -> m_FilePointer);
           // On skippe s'il en reste.
-          if (fseek(m_FilePointer, m_CurrentChunk->length - m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
+          if (fseek(this -> m_FilePointer, this -> m_CurrentChunk->length - this -> m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
-          m_CurrentChunk->bytesRead = m_CurrentChunk->length;
+          this -> m_CurrentChunk->bytesRead = this -> m_CurrentChunk->length;
           printf("Version: %X\n", version);
 
           // If the file version is over 3, give a warning that there could be a problem
           if (version > 0x03)
-            cout << "This 3DS file is over version 3 so it may load incorrectly" << endl;
+            printf("This 3DS file is over version 3 so it may load incorrectly\n");
           break;
 
         case OBJECTINFO:                        // This holds the version of the mesh
@@ -276,23 +269,23 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
           // and OBJECT chunks.  From here on we start reading in the material and object info.
 
           // Read the next chunk
-          ReadChunk(m_TempChunk);
+          ReadChunk(this, this -> m_TempChunk);
 
           // Get the version of the mesh
           //m_TempChunk->bytesRead += fread(&version, 1, m_TempChunk->length - m_TempChunk->bytesRead, m_FilePointer);
-          m_TempChunk->bytesRead += 4 * fread_(&version, 4, 1, m_FilePointer);
+          this -> m_TempChunk->bytesRead += 4 * fread_(&version, 4, 1, this -> m_FilePointer);
           // On skippe s'il en reste.
-          if (fseek(m_FilePointer, m_TempChunk->length - m_TempChunk->bytesRead, SEEK_CUR) != 0)
+          if (fseek(this -> m_FilePointer, this -> m_TempChunk->length - this -> m_TempChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement Mesh."); }
           printf("Version Mesh: %X\n", version);
           //printf("m_TempChunk->length = %u\n", m_TempChunk->length); fflush(NULL);
 
           // Increase the bytesRead by the bytes read from the last chunk
           //m_CurrentChunk->bytesRead += m_TempChunk->bytesRead;
-          m_CurrentChunk->bytesRead += m_TempChunk->length;
+          this -> m_CurrentChunk->bytesRead += this -> m_TempChunk->length;
 
           // Go to the next chunk, which is the object has a texture, it should be MATERIAL, then OBJECT.
-          ProcessNextChunk(pModel, m_CurrentChunk);
+          ProcessNextChunk(this, pModel, this -> m_CurrentChunk);
           break;
 
         case MATERIAL:                          // This holds the material information
@@ -306,10 +299,11 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
           // If you are unfamiliar with STL's "vector" class, all push_back()
           // does is add a new node onto the list.  I used the vector class
           // so I didn't need to write my own link list functions.  
-          pModel->pMaterials.push_back(newTexture);
+          //pModel->pMaterials.push_back(newTexture);
+          pModel->pMaterials[pModel->pMaterials_nb++] = (newTexture);
 
           // Proceed to the material loading function
-          ProcessNextMaterialChunk(pModel, m_CurrentChunk);
+          ProcessNextMaterialChunk(this, pModel, this -> m_CurrentChunk);
           break;
 
         case OBJECT:                            // This holds the name of the object being read
@@ -321,17 +315,18 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
           pModel->numOfObjects++;
         
           // Add a new tObject node to our list of objects (like a link list)
-          pModel->pObject.push_back(newObject);
+          //pModel->pObject.push_back(newObject);
+          pModel->pObject[pModel->pObject_nb++] = (newObject);
             
           // Initialize the object and all it's data members
           printf("    on initialise à 0 le pObject[%i]...\n",  pModel->numOfObjects - 1); 
           memset(&(pModel->pObject[pModel->numOfObjects - 1]), 0, sizeof(t3DObject));
           printf("    initialisation à 0 du pObject[%i] réussi...\n", pModel->numOfObjects - 1);  
           // Get the name of the object and store it, then add the read bytes to our byte counter.
-          m_CurrentChunk->bytesRead += GetString(pModel->pObject[pModel->numOfObjects - 1].strName);
+          this -> m_CurrentChunk->bytesRead += GetString(this, pModel->pObject[pModel->numOfObjects - 1].strName);
             
           // Now proceed to read in the rest of the object information
-          ProcessNextObjectChunk(pModel, &(pModel->pObject[pModel->numOfObjects - 1]), m_CurrentChunk);
+          ProcessNextObjectChunk(this, pModel, &(pModel->pObject[pModel->numOfObjects - 1]), this -> m_CurrentChunk);
           break;
 
         case EDITKEYFRAME:
@@ -345,31 +340,31 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
           // Read past this chunk and add the bytes read to the byte counter
           //m_CurrentChunk->bytesRead += fread(buffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
     
-          if (fseek(m_FilePointer, m_CurrentChunk->length - m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
+          if (fseek(this -> m_FilePointer, this -> m_CurrentChunk->length - this -> m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
     
-          m_CurrentChunk->bytesRead = m_CurrentChunk->length;
+          this -> m_CurrentChunk->bytesRead = this -> m_CurrentChunk->length;
           break;
 
         default: 
-          printf("    chunk non identifié, tant pis on passe au suivant... %X\n", m_CurrentChunk->ID);    
+          printf("    chunk non identifié, tant pis on passe au suivant... %X\n", this -> m_CurrentChunk->ID);    
           // If we didn't care about a chunk, then we get here.  We still need
           // to read past the unknown or ignored chunk and add the bytes read to the byte counter.
           //m_CurrentChunk->bytesRead += fread(buffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
     
-          if (fseek(m_FilePointer, m_CurrentChunk->length - m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
+          if (fseek(this -> m_FilePointer, this -> m_CurrentChunk->length - this -> m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
-          m_CurrentChunk->bytesRead = m_CurrentChunk->length;
+          this -> m_CurrentChunk->bytesRead = this -> m_CurrentChunk->length;
           break;
         }
 
       // Add the bytes read from the last chunk to the previous chunk passed in.
-      pPreviousChunk->bytesRead += m_CurrentChunk->bytesRead;
+      pPreviousChunk->bytesRead += this -> m_CurrentChunk->bytesRead;
     }
 
   // Free the current chunk and set it back to the previous chunk (since it started that way)
-  delete m_CurrentChunk;
-  m_CurrentChunk = pPreviousChunk;
+  free(this -> m_CurrentChunk);
+  this -> m_CurrentChunk = pPreviousChunk;
   printf("fin chunk...\n");
 }
 
@@ -380,38 +375,37 @@ void CLoad3DS::ProcessNextChunk(t3DModel *pModel, tChunk *pPreviousChunk)
 /////
 ///////////////////////////////// PROCESS NEXT OBJECT CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ProcessNextObjectChunk(t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk) {
+void ProcessNextObjectChunk(CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk) {
   //int buffer[50000] = {0};                    // This is used to read past unwanted data
  
   // Allocate a new chunk to work with
   printf("    Appel ProcessNextObjectChunk...\n");   
-  m_CurrentChunk = new tChunk;
+  this->m_CurrentChunk = new_tChunk();
 
   // Continue to read these chunks until we read the end of this sub chunk
-  while (pPreviousChunk->bytesRead < pPreviousChunk->length)
-    {
+  while (pPreviousChunk->bytesRead < pPreviousChunk->length) {
       // Read the next chunk
       printf("      on lit chunk (object chunk)...\n");  
-      ReadChunk(m_CurrentChunk);
+      ReadChunk(this, this->m_CurrentChunk);
       printf("      chunk lu (object chunk) avec succès...\n");  
       // Check which chunk we just read
-      switch (m_CurrentChunk->ID)
+      switch (this->m_CurrentChunk->ID)
         {
         case OBJECT_MESH:                   // This lets us know that we are reading a new object
           printf("      object-chunk OBJECT_MESH... %X\n", OBJECT_MESH);  
           // We found a new object, so let's read in it's info using recursion
-          ProcessNextObjectChunk(pModel, pObject, m_CurrentChunk);
+          ProcessNextObjectChunk(this, pModel, pObject, this->m_CurrentChunk);
           break;
 
         case OBJECT_VERTICES:               // This is the objects vertices
           printf("      object-chunk OBJECT_VERTICES... %X\n", OBJECT_VERTICES);  
-          ReadVertices(pObject, m_CurrentChunk);
+          ReadVertices(this, pObject, this->m_CurrentChunk);
           break;
 
         case OBJECT_FACES:                  // This is the objects face information
           printf("      object-chunk OBJECT_FACES... %X\n", OBJECT_FACES);  
-          ReadVertexIndices(pObject, m_CurrentChunk);
-          printf("OBJECT_FACES: Read = %u ; Length = %u\n", m_CurrentChunk->bytesRead, m_CurrentChunk->length);
+          ReadVertexIndices(this, pObject, this->m_CurrentChunk);
+          printf("OBJECT_FACES: Read = %u ; Length = %u\n", this->m_CurrentChunk->bytesRead, this->m_CurrentChunk->length);
           break;
 
         case OBJECT_MATERIAL:               // This holds the material name that the object has
@@ -424,34 +418,34 @@ void CLoad3DS::ProcessNextObjectChunk(t3DModel *pModel, t3DObject *pObject, tChu
           // they aren't multitextured, I just want the material name.
 
           // We now will read the name of the material assigned to this object
-          ReadObjectMaterial(pModel, pObject, m_CurrentChunk);            
+          ReadObjectMaterial(this, pModel, pObject, this->m_CurrentChunk);            
           break;
 
         case OBJECT_UV:                     // This holds the UV texture coordinates for the object
           printf("      object-chunk OBJECT_UV... %X\n", OBJECT_UV);  
           // This chunk holds all of the UV coordinates for our object.  Let's read them in.
-          ReadUVCoordinates(pObject, m_CurrentChunk);
+          ReadUVCoordinates(this, pObject, this->m_CurrentChunk);
           break;
 
         default:  
-          printf("      object-chunk non reconnu : on l'ignore... %X\n", m_CurrentChunk->ID);   
+          printf("      object-chunk non reconnu : on l'ignore... %X\n", this->m_CurrentChunk->ID);   
           // Read past the ignored or unknown chunks
-          //m_CurrentChunk->bytesRead += fread(buffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
+          //this->m_CurrentChunk->bytesRead += fread(buffer, 1, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, m_FilePointer);
           // On skippe s'il en reste.
-          if (fseek(m_FilePointer, m_CurrentChunk->length - m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
+          if (fseek(this->m_FilePointer, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement OBJECT.");}
-          m_CurrentChunk->bytesRead = m_CurrentChunk->length;
+          this->m_CurrentChunk->bytesRead = this->m_CurrentChunk->length;
     
           break;
         }
 
       // Add the bytes read from the last chunk to the previous chunk passed in.
-      pPreviousChunk->bytesRead += m_CurrentChunk->bytesRead;
+      pPreviousChunk->bytesRead += this->m_CurrentChunk->bytesRead;
     }
 
   // Free the current chunk and set it back to the previous chunk (since it started that way)
-  delete m_CurrentChunk;
-  m_CurrentChunk = pPreviousChunk;
+  free(this->m_CurrentChunk);
+  this->m_CurrentChunk = pPreviousChunk;
 }
 
 
@@ -461,72 +455,71 @@ void CLoad3DS::ProcessNextObjectChunk(t3DModel *pModel, t3DObject *pObject, tChu
 /////
 ///////////////////////////////// PROCESS NEXT MATERIAL CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ProcessNextMaterialChunk(t3DModel *pModel, tChunk *pPreviousChunk)
-{
+void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk) {
   //int buffer[50000] = {0};                    // This is used to read past unwanted data
 
   // Allocate a new chunk to work with
-  m_CurrentChunk = new tChunk;
+  this->m_CurrentChunk = new_tChunk();
 
   // Continue to read these chunks until we read the end of this sub chunk
   while (pPreviousChunk->bytesRead < pPreviousChunk->length)
     {
       // Read the next chunk
-      ReadChunk(m_CurrentChunk);
+      ReadChunk(this, this->m_CurrentChunk);
 
       // Check which chunk we just read in
-      switch (m_CurrentChunk->ID)
+      switch (this->m_CurrentChunk->ID)
         {
         case MATNAME:                           // This chunk holds the name of the material
           printf("  Chunk Material Name %X\n", MATNAME);
           // Here we read in the material name
-          //m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strName, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
-          m_CurrentChunk->bytesRead += GetString(pModel->pMaterials[pModel->numOfMaterials - 1].strName);
-          if (fseek(m_FilePointer, m_CurrentChunk->length - m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
+          //this->m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strName, 1, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, this->m_FilePointer);
+          this->m_CurrentChunk->bytesRead += GetString(this, pModel->pMaterials[pModel->numOfMaterials - 1].strName);
+          if (fseek(this->m_FilePointer, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
-          m_CurrentChunk->bytesRead = m_CurrentChunk->length;
+          this->m_CurrentChunk->bytesRead = this->m_CurrentChunk->length;
           printf("  Chunk Material Name: %s\n", pModel->pMaterials[pModel->numOfMaterials - 1].strName);
           break;
 
         case MATDIFFUSE:                        // This holds the R G B color of our object
           printf("   Chunk Material Diffuse %X\n", MATDIFFUSE);
-          ReadColorChunk(&(pModel->pMaterials[pModel->numOfMaterials - 1]), m_CurrentChunk);
+          ReadColorChunk(this, &(pModel->pMaterials[pModel->numOfMaterials - 1]), this->m_CurrentChunk);
           break;
         
         case MATMAP:                            // This is the header for the texture info
           printf("   Chunk Material Map %X\n", MATMAP);
           // Proceed to read in the material information
-          ProcessNextMaterialChunk(pModel, m_CurrentChunk);
+          ProcessNextMaterialChunk(this, pModel, this->m_CurrentChunk);
           break;
 
         case MATMAPFILE:                        // This stores the file name of the material
           printf("   Chunk Material Map File %X\n", MATMAPFILE);
           // Here we read in the material's file name
-          //m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strFile, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
-          m_CurrentChunk->bytesRead += GetString(pModel->pMaterials[pModel->numOfMaterials - 1].strFile);
-          if (fseek(m_FilePointer, m_CurrentChunk->length - m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
+          //this->m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strFile, 1, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, this->m_FilePointer);
+          this->m_CurrentChunk->bytesRead += GetString(this, pModel->pMaterials[pModel->numOfMaterials - 1].strFile);
+          if (fseek(this->m_FilePointer, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
-          m_CurrentChunk->bytesRead = m_CurrentChunk->length;
+          this->m_CurrentChunk->bytesRead = this->m_CurrentChunk->length;
           printf("Nom du File Materials: %s", (pModel->pMaterials[pModel->numOfMaterials - 1].strFile));
           break;
         
         default:  
-          printf("    Chunk Material Unknown %X\n", m_CurrentChunk->ID);
+          printf("    Chunk Material Unknown %X\n", this->m_CurrentChunk->ID);
           // Read past the ignored or unknown chunks
-          //m_CurrentChunk->bytesRead += fread(buffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
-          if (fseek(m_FilePointer, m_CurrentChunk->length - m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
+          //this->m_CurrentChunk->bytesRead += fread(buffer, 1, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, this->m_FilePointer);
+          if (fseek(this->m_FilePointer, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
-          m_CurrentChunk->bytesRead = m_CurrentChunk->length;
+          this->m_CurrentChunk->bytesRead = this->m_CurrentChunk->length;
           break;
         }
 
       // Add the bytes read from the last chunk to the previous chunk passed in.
-      pPreviousChunk->bytesRead += m_CurrentChunk->bytesRead;
+      pPreviousChunk->bytesRead += this->m_CurrentChunk->bytesRead;
     }
 
   // Free the current chunk and set it back to the previous chunk (since it started that way)
-  delete m_CurrentChunk;
-  m_CurrentChunk = pPreviousChunk;
+  free(this->m_CurrentChunk);
+  this->m_CurrentChunk = pPreviousChunk;
 }
 
 ///////////////////////////////// READ CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
@@ -535,19 +528,18 @@ void CLoad3DS::ProcessNextMaterialChunk(t3DModel *pModel, tChunk *pPreviousChunk
 /////
 ///////////////////////////////// READ CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ReadChunk(tChunk *pChunk)
-{
+void ReadChunk(CLoad3DS * this, tChunk *pChunk) {
   // This reads the chunk ID which is 2 bytes.
   // The chunk ID is like OBJECT or MATERIAL.  It tells what data is
   // able to be read in within the chunks section.  
-  //pChunk->bytesRead = fread(&pChunk->ID, 1, 2, m_FilePointer);
-  pChunk->bytesRead = 2 * fread_(&pChunk->ID, 2, 1, m_FilePointer);
+  //pChunk->bytesRead = fread(&pChunk->ID, 1, 2, this->m_FilePointer);
+  pChunk->bytesRead = 2 * fread_(&pChunk->ID, 2, 1, this->m_FilePointer);
   printf("ChunkID: %X\n", (unsigned int) pChunk->ID);
 
   // Then, we read the length of the chunk which is 4 bytes.
   // This is how we know how much to read in, or read past.
-  //pChunk->bytesRead += fread(&pChunk->length, 1, 4, m_FilePointer);
-  pChunk->bytesRead += 4 * fread_(&pChunk->length, 4, 1, m_FilePointer);
+  //pChunk->bytesRead += fread(&pChunk->length, 1, 4, this->m_FilePointer);
+  pChunk->bytesRead += 4 * fread_(&pChunk->length, 4, 1, this->m_FilePointer);
   printf("ChunkLength: %u\n", pChunk->length);
   printf("Lecture En-Tete Chunk oki.\n");
 
@@ -559,18 +551,17 @@ void CLoad3DS::ReadChunk(tChunk *pChunk)
 /////
 ///////////////////////////////// GET STRING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-int CLoad3DS::GetString(char *pBuffer)
-{
+int GetString(CLoad3DS * this, char *pBuffer) {
   int index = 0;
 
   // Read 1 byte of data which is the first letter of the string
-  fread(pBuffer, 1, 1, m_FilePointer);
+  fread(pBuffer, 1, 1, this->m_FilePointer);
 
   // Loop until we get NULL
   while (*(pBuffer + index++) != 0) {
 
     // Read in a character at a time until we hit NULL.
-    fread(pBuffer + index, 1, 1, m_FilePointer);
+    fread(pBuffer + index, 1, 1, this->m_FilePointer);
   }
 
   // Return the string length, which is how many bytes we read in (including the NULL)
@@ -585,21 +576,20 @@ int CLoad3DS::GetString(char *pBuffer)
 /////
 ///////////////////////////////// READ COLOR \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ReadColorChunk(tMaterialInfo *pMaterial, tChunk *pChunk)
-{
+void ReadColorChunk(CLoad3DS * this, tMaterialInfo *pMaterial, tChunk *pChunk) {
   // Read the color chunk info
-  ReadChunk(m_TempChunk);
+  ReadChunk(this, this->m_TempChunk);
 
   // Read in the R G B color (3 bytes - 0 through 255)
-  //m_TempChunk->bytesRead += fread(pMaterial->color, 1, m_TempChunk->length - m_TempChunk->bytesRead, m_FilePointer);
-  m_TempChunk->bytesRead += 1 * fread(pMaterial->color, 1, 3, m_FilePointer);
+  //this->m_TempChunk->bytesRead += fread(pMaterial->color, 1, this->m_TempChunk->length - this->m_TempChunk->bytesRead, this->m_FilePointer);
+  this->m_TempChunk->bytesRead += 1 * fread(pMaterial->color, 1, 3, this->m_FilePointer);
   // On skippe s'il en reste.
-  if (fseek(m_FilePointer, m_TempChunk->length - m_TempChunk->bytesRead, SEEK_CUR) != 0)
+  if (fseek(this->m_FilePointer, this->m_TempChunk->length - this->m_TempChunk->bytesRead, SEEK_CUR) != 0)
     { printf("Erreur de positionnement ReadColorChunk."); }
-  m_TempChunk->bytesRead = m_TempChunk->length;
+  this->m_TempChunk->bytesRead = this->m_TempChunk->length;
 
   // Add the bytes read to our chunk
-  pChunk->bytesRead += m_TempChunk->bytesRead;
+  pChunk->bytesRead += this->m_TempChunk->bytesRead;
 }
 
 
@@ -609,7 +599,7 @@ void CLoad3DS::ReadColorChunk(tMaterialInfo *pMaterial, tChunk *pChunk)
 /////
 ///////////////////////////////// READ VERTEX INDECES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ReadVertexIndices(t3DObject * pObject, tChunk * pPreviousChunk) {
+void ReadVertexIndices(CLoad3DS * this, t3DObject * pObject, tChunk * pPreviousChunk) {
   unsigned short index = 0; // This is used to read in the current face index
 
   // In order to read in the vertex indices for the object, we need to first
@@ -619,17 +609,18 @@ void CLoad3DS::ReadVertexIndices(t3DObject * pObject, tChunk * pPreviousChunk) {
 
   // Read in the number of faces that are in this object (int)
   // un unsigned short en realite --- Connard
-  //pPreviousChunk->bytesRead += fread(&pObject->numOfFaces, 1, 2, m_FilePointer);
+  //pPreviousChunk->bytesRead += fread(&pObject->numOfFaces, 1, 2, this->m_FilePointer);
 #ifndef LIBPROG_ENDIAN_BIG
-  pPreviousChunk->bytesRead += 2 * fread_(&pObject->numOfFaces, 2, 1, m_FilePointer);
+  pPreviousChunk->bytesRead += 2 * fread_(&pObject->numOfFaces, 2, 1, this->m_FilePointer);
 #else
   pObject->numOfFaces = 0;
-  pPreviousChunk->bytesRead += 2 * fread_((((unsigned short *)(&((pObject)->numOfFaces))) + 1), 2, 1, m_FilePointer);
+  pPreviousChunk->bytesRead += 2 * fread_((((unsigned short *)(&((pObject)->numOfFaces))) + 1), 2, 1, this->m_FilePointer);
 #endif
   printf("Number of vertices: %d\n",  pObject->numOfFaces);
 
   // Alloc enough memory for the faces and initialize the structure
-  pObject->pFaces = new tFace [pObject->numOfFaces];
+  //pObject->pFaces = new tFace [pObject->numOfFaces];
+  pObject->pFaces = malloc(pObject->numOfFaces * sizeof(tFace));
   memset(pObject->pFaces, 0, sizeof(tFace) * pObject->numOfFaces);
 
   // Go through all of the faces in this object
@@ -640,8 +631,8 @@ void CLoad3DS::ReadVertexIndices(t3DObject * pObject, tChunk * pPreviousChunk) {
       for (int j = 0; j < 4; j++)
         {
           // Read the first vertice index for the current face 
-          //pPreviousChunk->bytesRead += fread(&index, 1, sizeof(index), m_FilePointer);
-          pPreviousChunk->bytesRead += 2 * fread_(&index, 2, 1, m_FilePointer);
+          //pPreviousChunk->bytesRead += fread(&index, 1, sizeof(index), this->m_FilePointer);
+          pPreviousChunk->bytesRead += 2 * fread_(&index, 2, 1, this->m_FilePointer);
           printf("ReadVertexIndices: index = %d\n", (int) index);
 
           if (j < 3)
@@ -660,19 +651,18 @@ void CLoad3DS::ReadVertexIndices(t3DObject * pObject, tChunk * pPreviousChunk) {
 /////
 ///////////////////////////////// READ UV COORDINATES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ReadUVCoordinates(t3DObject *pObject, tChunk *pPreviousChunk)
-{
+void ReadUVCoordinates(CLoad3DS * this, t3DObject *pObject, tChunk *pPreviousChunk) {
   // In order to read in the UV indices for the object, we need to first
   // read in the amount there are, then read them in.
 
   // Read in the number of UV coordinates there are (int)
-  //pPreviousChunk->bytesRead += fread(&pObject->numTexVertex, 1, 2, m_FilePointer);
+  //pPreviousChunk->bytesRead += fread(&pObject->numTexVertex, 1, 2, this->m_FilePointer);
 
   pObject->numTexVertex = 0;
 #ifndef LIBPROG_ENDIAN_BIG
-  pPreviousChunk->bytesRead += 2 * fread_(&pObject->numTexVertex, 2, 1, m_FilePointer);
+  pPreviousChunk->bytesRead += 2 * fread_(&pObject->numTexVertex, 2, 1, this->m_FilePointer);
 #else
-  pPreviousChunk->bytesRead += 2 * fread_(( (unsigned short *) (&(pObject->numTexVertex))) + 1, 2, 1, m_FilePointer);
+  pPreviousChunk->bytesRead += 2 * fread_(( (unsigned short *) (&(pObject->numTexVertex))) + 1, 2, 1, this->m_FilePointer);
 #endif
   printf("  Number of Vertices: %d --- \n", pObject->numTexVertex); fflush(NULL);
   
@@ -686,17 +676,18 @@ void CLoad3DS::ReadUVCoordinates(t3DObject *pObject, tChunk *pPreviousChunk)
   else
     pObject->pTexVerts = NULL;
 #else
-  pObject->pTexVerts = new CVector2 [pObject->numTexVertex];
+  //pObject->pTexVerts = new CVector2 [pObject->numTexVertex];
+  pObject->pTexVerts = malloc(pObject->numTexVertex * sizeof(CVector2));
 #endif
 
   // Read in the texture coodinates (an array 2 float)
   // Un float ici c'est 4.
   // Attention, ici tableau de vecteur...
   //messerr("ReadUVCoordinates:  pPreviousChunk->length = %u,  pPreviousChunk->bytesRead = %u\n", pPreviousChunk->length, pPreviousChunk->bytesRead);
-  //pPreviousChunk->bytesRead += fread(pObject->pTexVerts, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, m_FilePointer);
-  pPreviousChunk->bytesRead += 4 * fread_(pObject->pTexVerts, 4, (pPreviousChunk->length - pPreviousChunk->bytesRead) / 4, m_FilePointer);
+  //pPreviousChunk->bytesRead += fread(pObject->pTexVerts, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, this->m_FilePointer);
+  pPreviousChunk->bytesRead += 4 * fread_(pObject->pTexVerts, 4, (pPreviousChunk->length - pPreviousChunk->bytesRead) / 4, this->m_FilePointer);
   // On skippe s'il en reste.
-  if (fseek(m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
+  if (fseek(this->m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
     { printf("Erreur de positionnement ReadUVCoordinates."); }
   pPreviousChunk->bytesRead = pPreviousChunk->length;
 
@@ -709,32 +700,32 @@ void CLoad3DS::ReadUVCoordinates(t3DObject *pObject, tChunk *pPreviousChunk)
 /////
 ///////////////////////////////// READ VERTICES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ReadVertices(t3DObject *pObject, tChunk *pPreviousChunk)
-{
+void ReadVertices(CLoad3DS * this, t3DObject *pObject, tChunk *pPreviousChunk) {
   // Like most chunks, before we read in the actual vertices, we need
   // to find out how many there are to read in.  Once we have that number
   // we then fread() them into our vertice array.
 
   // Read in the number of vertices (int)
-  //pPreviousChunk->bytesRead += fread(&(pObject->numOfVerts), 1, 2, m_FilePointer);
+  //pPreviousChunk->bytesRead += fread(&(pObject->numOfVerts), 1, 2, this->m_FilePointer);
 #ifndef LIBPROG_ENDIAN_BIG
-  pPreviousChunk->bytesRead += 2 * fread_(&(pObject->numOfVerts), 2, 1, m_FilePointer);
+  pPreviousChunk->bytesRead += 2 * fread_(&(pObject->numOfVerts), 2, 1, this->m_FilePointer);
 #else
-  pPreviousChunk->bytesRead += 2 * fread_(( (unsigned short *) &(pObject->numOfVerts)) + 1, 2, 1, m_FilePointer);
+  pPreviousChunk->bytesRead += 2 * fread_(( (unsigned short *) &(pObject->numOfVerts)) + 1, 2, 1, this->m_FilePointer);
 #endif
 
 
   // Allocate the memory for the verts and initialize the structure
-  pObject->pVerts = new CVector3 [pObject->numOfVerts];
+  //pObject->pVerts = new CVector3 [pObject->numOfVerts];
+  pObject->pVerts = malloc(pObject->numOfVerts * sizeof(CVector3));
   memset(pObject->pVerts, 0, sizeof(CVector3) * pObject->numOfVerts);
 
   // Read in the array of vertices (an array of 3 floats)
   // C'est un tableau !!!!
   // Un float c 4.
-  //pPreviousChunk->bytesRead += fread(pObject->pVerts, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, m_FilePointer);
-  pPreviousChunk->bytesRead += 4 * fread_(pObject->pVerts, 4, (pPreviousChunk->length - pPreviousChunk->bytesRead) / 4, m_FilePointer);
+  //pPreviousChunk->bytesRead += fread(pObject->pVerts, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, this->m_FilePointer);
+  pPreviousChunk->bytesRead += 4 * fread_(pObject->pVerts, 4, (pPreviousChunk->length - pPreviousChunk->bytesRead) / 4, this->m_FilePointer);
   // On skippe s'il en reste.
-  if (fseek(m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
+  if (fseek(this->m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
     { printf("Erreur de positionnement ReadVertices."); }
   pPreviousChunk->bytesRead = pPreviousChunk->length;
 
@@ -768,8 +759,7 @@ void CLoad3DS::ReadVertices(t3DObject *pObject, tChunk *pPreviousChunk)
 /////
 ///////////////////////////////// READ OBJECT MATERIAL \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ReadObjectMaterial(t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk)
-{
+void ReadObjectMaterial(CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *pPreviousChunk) {
   char strMaterial[255] = {0};            // This is used to hold the objects material name
   //int buffer[50000] = {0};                // This is used to read past unwanted data
 
@@ -779,7 +769,7 @@ void CLoad3DS::ReadObjectMaterial(t3DModel *pModel, t3DObject *pObject, tChunk *
 
   // Here we read the material name that is assigned to the current object.
   // strMaterial should now have a string of the material name, like "Material #2" etc..
-  pPreviousChunk->bytesRead += GetString(strMaterial);
+  pPreviousChunk->bytesRead += GetString(this, strMaterial);
 
   // Now that we have a material name, we need to go through all of the materials
   // and check the name against each material.  When we find a material in our material
@@ -815,9 +805,9 @@ void CLoad3DS::ReadObjectMaterial(t3DModel *pModel, t3DObject *pObject, tChunk *
 
   // Read past the rest of the chunk since we don't care about shared vertices
   // You will notice we subtract the bytes already read in this chunk from the total length.
-  //pPreviousChunk->bytesRead += fread(buffer, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, m_FilePointer);
+  //pPreviousChunk->bytesRead += fread(buffer, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, this->m_FilePointer);
   // On skippe s'il en reste.
-  if (fseek(m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
+  if (fseek(this->m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
     { printf("Erreur de positionnement ReadObjectMaterial."); }
   pPreviousChunk->bytesRead = pPreviousChunk->length;
 
@@ -905,7 +895,7 @@ CVector3 Normalize(CVector3 vNormal)
 /////
 ///////////////////////////////// COMPUTER NORMALS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CLoad3DS::ComputeNormals(t3DModel *pModel) {
+void ComputeNormals(CLoad3DS * this, t3DModel *pModel) {
   CVector3 vVector1, vVector2, vNormal, vPoly[3];
 
   // If there are no objects, we can skip this part
@@ -928,9 +918,15 @@ void CLoad3DS::ComputeNormals(t3DModel *pModel) {
       t3DObject *pObject = &(pModel->pObject[index]);
 
       // Here we allocate all the memory we need to calculate the normals
+#if 0
       CVector3 *pNormals      = new CVector3 [pObject->numOfFaces];
       CVector3 *pTempNormals  = new CVector3 [pObject->numOfFaces];
       pObject->pNormals       = new CVector3 [pObject->numOfVerts];
+#else
+      CVector3 *pNormals      = malloc(pObject->numOfFaces * sizeof(CVector3));
+      CVector3 *pTempNormals  = malloc(pObject->numOfFaces * sizeof(CVector3));
+      pObject->pNormals       = malloc(pObject->numOfVerts * sizeof(CVector3));
+#endif
 
       // Go though all of the faces of this object
       for (int i=0; i < pObject->numOfFaces; i++)
@@ -972,7 +968,8 @@ void CLoad3DS::ComputeNormals(t3DModel *pModel) {
             }      
             
           // Get the normal by dividing the sum by the shared.  We negate the shared so it has the normals pointing out.
-          pObject->pNormals[i] = DivideVectorByScaler(vSum, float(-shared));
+          //pObject->pNormals[i] = DivideVectorByScaler(vSum, float(-shared));
+          pObject->pNormals[i] = DivideVectorByScaler(vSum, (-shared));
 
           // Normalize the normal for the final vertex normal
           pObject->pNormals[i] = Normalize(pObject->pNormals[i]); 
@@ -982,8 +979,8 @@ void CLoad3DS::ComputeNormals(t3DModel *pModel) {
         }
     
       // Free our memory and start over on the next object
-      delete [] pTempNormals;
-      delete [] pNormals;
+      free(pTempNormals);
+      free(pNormals);
     }
 }
 

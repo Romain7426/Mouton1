@@ -87,8 +87,10 @@ struct t3DModel {
   vector<tMaterialInfo> pMaterials;   // The list of material information (Textures and colors)
   vector<t3DObject> pObject;          // The object list for our model
 #else
-  tMaterialInfo * pMaterials;   // The list of material information (Textures and colors)
-  t3DObject * pObject;          // The object list for our model
+  tMaterialInfo pMaterials[1024];   // The list of material information (Textures and colors)
+  int pMaterials_nb;
+  t3DObject pObject[1024];          // The object list for our model
+  int pObject_nb;
 #endif
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(t3DModel);
@@ -226,7 +228,7 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(tChunk);
 // This struct handles all of the loading code
 struct CLoad3DS {
 //public:
-  struct CLoad3DS * (*CLoad3DS)(void);                             // This inits the data members
+  //struct CLoad3DS * (*CLoad3DS)(void);                             // This inits the data members
 
 //private:
   // The file pointer
@@ -278,13 +280,11 @@ struct CLoad3DS {
   // This frees memory and closes the file
   void (* CleanUp)(struct CLoad3DS * this);
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CLoad3DS);
+DECLARE_NEW_OPERATOR_FOR_STRUCT(CLoad3DS);
 
-extern struct CLoad3DS * CLoad3DS(void);
+extern struct CLoad3DS * new_CLoad3DS(void);
 
-//DEFINE_NEW_OPERATOR_FOR_STRUCT(CLoad3DS);
-static struct CLoad3DS * new_CLoad3DS(void) {
-  return CLoad3DS();
-}
 
 
   
