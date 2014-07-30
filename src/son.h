@@ -12,13 +12,15 @@ struct CMusique;
 
 
 struct CSon {
-private:
+  //private:
   Mix_Chunk * son;
     
-public:
+  //public:
+#if 0
   CSon(const char * filename);   
   ~CSon(void);
-  void Jouer(void);
+#endif
+  void (* Jouer)(struct CSon * this);
 };
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CSon);
 
@@ -26,14 +28,16 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(CSon);
 
 
 struct CMusique {
-private:
+  //private:
   Mix_Music * music;
   
-public:
+  //public:
   const char * NomMusique;
+#if 0
   CMusique(const char * filename);
   ~CMusique(void);
-  void Jouer(void);
+#endif
+  void (* Jouer)(struct CMusique * this);
 };
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CMusique);
 

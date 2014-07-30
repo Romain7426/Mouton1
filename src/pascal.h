@@ -2,7 +2,13 @@
 #define PASCAL_H
 
 struct CPprog;
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CProg);
 
+struct CPascal;
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPascal);
+
+
+#if 0
 #include "global.h"
 #include "pascal/pascal.mem.hpp"
 #include "pascal/pascal.env.hpp"
@@ -34,8 +40,6 @@ struct CPprog;
 */
 
 
-struct CPascal;
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPascal);
 
 
 struct CPascal {
@@ -161,6 +165,10 @@ struct CPascal {
 
        
 };
+
+
+#endif
+
        
 
 #endif /* PASCAL_H */

@@ -1,6 +1,8 @@
-#ifndef RESSOURCE_HPP
-#define RESSOURCE_HPP
+#ifndef RESSOURCE_H
+#define RESSOURCE_H
 
+
+#if 0
 /*
   Ce fichier contient la définition d'un alpha-gestionnaire de ressource,
   et de la alpha-ressource associée.
@@ -382,6 +384,7 @@ extern gestionnaire<C3DS> gestion3DS;
 extern gestionnaire<CTexture> gestionTexture;
 extern gestionnaire<CPascal> gestionPascal;
 
+#endif
 
 
 #endif /* RESSOURCE_HPP */
