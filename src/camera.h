@@ -1,32 +1,32 @@
-#ifndef CAMERA_HPP
-#define CAMERA_HPP
+#ifndef CAMERA_H
+#define CAMERA_H
 
 
 struct TPoint2D;
 struct TPoint3D;
 
-#include "structures.hpp"
-#include "vectors.hpp"
+#include "structures.h"
+#include "vectors.h"
 
-class CBonhomme;
-class CMap;
+struct CBonhomme;
+struct CMap;
 
-class CCamera;
+struct CCamera;
 
-TDirection ConvertirDirectionAvecVue(TDirection d, CCamera Camera);
-TDirection ConvertirDirectionAvecVue2(TDirection d, CCamera Camera);
+TDirection ConvertirDirectionAvecVue(TDirection d, struct CCamera Camera);
+TDirection ConvertirDirectionAvecVue2(TDirection d, struct CCamera Camera);
 
 #define dist_defaut 150.0f
 
 
 
-class CCamera {
-private://pas touche !!
+struct CCamera {
+  //private://pas touche !!
   bool solidaire_au_heros;
   float a_dist, dist;
   int anim;
   
-public:
+  //public:
   /********* les paramètres cools**************/
 
   /*le point que regarde la caméra (prévoir une instruction pour affecter
@@ -36,31 +36,33 @@ public:
   /*les angles de vues en radian... angleXY pour touner autour de uz... angleHB
     pour regarder de plus haut ou plus bas*/
   float angleXY, angleHB;
+
+
+  //struct CCamera(void);
   
-  bool IsSolidaireAuHeros(void) const;
+  
+  bool (* IsSolidaireAuHeros)(const struct CCamera * this);
  
-  void InitCamera(void);
+  void (* InitCamera)(struct CCamera * this);
   //initialise les paramètres pour une vue de jeu normal
 
   //attache la caméra au héros
-  void SolidariserAuHeros(void);
+  void (* SolidariserAuHeros)(struct CCamera * this);
   
   /*désattache la caméra au héros.
     le point courant est alors la dernier position du héros lorsqu'il 
     était encore lié à la caméra*/
-  void DeSolidariser(void);
+  void (* DeSolidariser)(struct CCamera * this);
   
   /**** ne pas prévoir d'instructions pascal pour ça... 
-	CalcCamera est automatiquement appelé dans RaiseRender(void)*/
-  void CalcCamera(const CBonhomme * Hero, const CMap * Map);
+	CalcCamera est automatiquement appelé dans RaiseRender)(struct CCamera * this)*/
+  void (* CalcCamera)(struct CCamera * this, const struct CBonhomme * Hero, const struct CMap * Map);
   
   
-  void EffetPsychadelique(void);
+  void (* EffetPsychadelique)(struct CCamera * this);
   /*c'est nul*/
   
-  CCamera(void);
-  
-  void SetDist(float d);
+  void (* SetDist)(struct CCamera * this, float d);
   /*distance de laquelle on regarde. plus c petit, plus on est près du point qu'on regarde*/
 
 };
@@ -68,4 +70,4 @@ public:
 
 
 
-#endif /* CAMERA_HPP */
+#endif /* CAMERA_H */
