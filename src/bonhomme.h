@@ -72,16 +72,16 @@ struct CPantin {
   */
           
   // renvoit le numéro du membre
-  int (* AjouterMembre)(CPantin * this, const char * fichier_image, float px, float py, float pz, float tx, float ty, float angle);
-  CPantin * (* GetPantinFils)(CPantin * this, int i);
+  int (* AjouterMembre)(struct CPantin * this, const char * fichier_image, float px, float py, float pz, float tx, float ty, float angle);
+  CPantin * (* GetPantinFils)(struct CPantin * this, int i);
   /*définit un pantin fils au membre n° i*/
-  void (* SetPantinFils)(CPantin * this, int i, CPantin * pantin);
-  void (* DetruirePantinFils)(CPantin * this, int i);
+  void (* SetPantinFils)(struct CPantin * this, int i, struct CPantin * pantin);
+  void (* DetruirePantinFils)(struct CPantin * this, int i);
   /*définit le pantin fils du dernier membre ajouté*/
-  void (* SetPantinFilsAuDernierMembre)(CPantin * this, CPantin * pantin);
+  void (* SetPantinFilsAuDernierMembre)(struct CPantin * this, struct CPantin * pantin);
   /*procédure pour modifier l'angle d'un membre (utile pour animer le pantin)*/
-  void (* SetAngleMembre)(CPantin * this, int i, float angle);
-  int (* GetNbMembres)(const CPantin * this);
+  void (* SetAngleMembre)(struct CPantin * this, int i, float angle);
+  int (* GetNbMembres)(const struct CPantin * this);
 };    
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPantin);
 DECLARE_NEW_OPERATOR_FOR_STRUCT(CPantin);
