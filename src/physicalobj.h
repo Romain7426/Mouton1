@@ -94,16 +94,8 @@ struct CPhysicalObj {
 
   /* retourne vrai ssi il n'y a pas de colision */
   bool (* TesterPosition)(struct CPhysicalObj * this, const CSol * Map, const struct CPhysicalObj * po);
-    
-  
   bool (* IsBloque)(const struct CPhysicalObj * this);
-
-  /* 
-     un objet physique pur ne s'affiche pas...
-     mais ses descendants )(struct CPhysicalObj * this, bonhomme et objnonanime oui)
-     d'où le mot clé "virtual" 
-  */
-  virtual void (* Render)(const struct CPhysicalObj * this, const CSol * Map);
+  void (* Render)(const struct CPhysicalObj * this, const CSol * Map);
 
   // gestion des points de vies
   void (* PerdrePV)(struct CPhysicalObj * this, int nbpv);
