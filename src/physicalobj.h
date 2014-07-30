@@ -72,93 +72,88 @@ struct CPhysicalObj {
   float CoeffFrottementFluide, CoeffFrottementFluideZ; 
 
 
-#if   
-  CPhysicalObj(CPhysicalObj * this);
-  CPhysicalObj(CPhysicalObj * this, const char * filename);
-  virtual ~CPhysicalObj(CPhysicalObj * this) {}
-#endif
+  bool IsVolumeNul(const struct CPhysicalObj * this);
+    
+  TPoint3D GetDimension(const struct CPhysicalObj * this, const CSol * Map);
+  float NormeVitesse(const struct CPhysicalObj * this);
 
-  bool IsVolumeNul(CPhysicalObj * this) const;
+  TPoint3D GetPosition(const struct CPhysicalObj * this);
     
-  TPoint3D GetDimension(CPhysicalObj * this, const CSol * Map) const;
-  float NormeVitesse(CPhysicalObj * this) const;
-
-  TPoint3D GetPosition(CPhysicalObj * this) const;
-    
-  void SetPosition(CPhysicalObj * this, TPoint3D pos);
+  void SetPosition(struct CPhysicalObj * this, TPoint3D pos);
   
-  void SetPosition(CPhysicalObj * this, float x, float y, TMethodePlacement mp, const CMap * CMap);
-  void SetZ(CPhysicalObj * this, float z, TMethodePlacement mp);
+  void SetPosition(struct CPhysicalObj * this, float x, float y, TMethodePlacement mp, const CMap * CMap);
+  void SetZ(struct CPhysicalObj * this, float z, TMethodePlacement mp);
   
-  void SetDimension(CPhysicalObj * this, float dx, float dy, float dz);
+  void SetDimension(struct CPhysicalObj * this, float dx, float dy, float dz);
     
-  /* pour gérer les forces dans le moteur physique (CPhysicalObj * this, appelé à chaque boucle) */
-  void InitForce(CPhysicalObj * this);
-  void AddForce(CPhysicalObj * this, TPoint3D f);
-  void AddForce(CPhysicalObj * this, float fx, float fy, float fz);
-  TPoint3D GetVitesse(CPhysicalObj * this) const;
-  TPoint3D GetForce(CPhysicalObj * this) const;
-  void CalcNewPosition(CPhysicalObj * this);
-  void ValiderPosition(CPhysicalObj * this, const bool MoteurPhysiqueActif);
+  /* pour gérer les forces dans le moteur physique (struct CPhysicalObj * this, appelé à chaque boucle) */
+  void InitForce(struct CPhysicalObj * this);
+  void AddForce(struct CPhysicalObj * this, TPoint3D f);
+  void AddForce(struct CPhysicalObj * this, float fx, float fy, float fz);
+  TPoint3D GetVitesse(const struct CPhysicalObj * this);
+  TPoint3D GetForce(const struct CPhysicalObj * this);
+  void CalcNewPosition(struct CPhysicalObj * this);
+  void ValiderPosition(const struct CPhysicalObj * this, const bool MoteurPhysiqueActif);
     
-  void TesterSol(CPhysicalObj * this, const CSol * Map);
-  // friend void TesterPosition(CPhysicalObj * this, CPhysicalObj * po);
+  void TesterSol(struct CPhysicalObj * this, const CSol * Map);
+  // friend void TesterPosition(struct CPhysicalObj * this, struct CPhysicalObj * po);
     
   /* retourne vrai ssi il n'y a pas de colision */
-  bool TesterPosition(CPhysicalObj * this, const CSol * Map, const CPhysicalObj * po);
+  bool TesterPosition(struct CPhysicalObj * this, const CSol * Map, const struct CPhysicalObj * po);
     
   
-  bool IsBloque(CPhysicalObj * this) const;
+  bool IsBloque(const struct CPhysicalObj * this);
 
 
 
   /* 
      un objet physique pur ne s'affiche pas...
-     mais ses descendants (CPhysicalObj * this, bonhomme et objnonanime oui)
+     mais ses descendants (struct CPhysicalObj * this, bonhomme et objnonanime oui)
      d'où le mot clé "virtual" 
   */
-  virtual void Render(CPhysicalObj * this, const CSol * Map) const;
+  virtual void Render(const struct CPhysicalObj * this, const CSol * Map);
 
  
   // gestion des points de vies
-  void PerdrePV(CPhysicalObj * this, int nbpv);
-  bool Is0PV(CPhysicalObj * this) const;
-  void SetPVMax(CPhysicalObj * this, int nbpv);
-  void GagnerPV(CPhysicalObj * this, int nbpv);
-  int GetPV(CPhysicalObj * this) const;
+  void PerdrePV(struct CPhysicalObj * this, int nbpv);
+  bool Is0PV(const struct CPhysicalObj * this);
+  void SetPVMax(struct CPhysicalObj * this, int nbpv);
+  void GagnerPV(struct CPhysicalObj * this, int nbpv);
+  int GetPV(const struct CPhysicalObj * this);
 
-  void SetObjetEphemere(CPhysicalObj * this, int nbPV); 
+  void SetObjetEphemere(struct CPhysicalObj * this, int nbPV); 
 
 
 
 
 };
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPhysicalObj * this, CPhysicalObj);
-DECLARE_NEW_OPERATOR_FOR_STRUCT(CPhysicalObj * this, CPhysicalObj);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(struct CPhysicalObj * this, struct CPhysicalObj);
+DECLARE_NEW_OPERATOR_FOR_STRUCT(struct CPhysicalObj * this, struct CPhysicalObj);
+
+#if   0
+  struct CPhysicalObj(struct CPhysicalObj * this);
+  struct CPhysicalObj(struct CPhysicalObj * this, const char * filename);
+  virtual ~struct CPhysicalObj(struct CPhysicalObj * this) {}
 
 
-
-
-
-
-  virtual void Render(CPhysicalObj * this, const CSol * Map) const
+  virtual void Render(struct CPhysicalObj * this, const CSol * Map) const
   {
 #if AFFICHER_CUBE_DEBUG == true
           
-    TPoint3D d = GetDimension(CPhysicalObj * this, Map);      
+    TPoint3D d = GetDimension(struct CPhysicalObj * this, Map);      
 
     /* les cubes pour lesquels on a rejeté la position, sont rouges */
-    if (CPhysicalObj * this, !nvalid_position) {
-      glColor3f(CPhysicalObj * this, 1.0f, 0.0f, 0.0f);
+    if (struct CPhysicalObj * this, !nvalid_position) {
+      glColor3f(struct CPhysicalObj * this, 1.0f, 0.0f, 0.0f);
     }
          
-    if (CPhysicalObj * this, Immerge) {
-      glColor3f(CPhysicalObj * this, 0.0f, 0.0f, 1.0f); 
+    if (struct CPhysicalObj * this, Immerge) {
+      glColor3f(struct CPhysicalObj * this, 0.0f, 0.0f, 1.0f); 
     }
          
 #if 0
-    if (CPhysicalObj * this, IsVolumeNul(CPhysicalObj * this, )) {
-      glColor3f(CPhysicalObj * this, 0.0f, 0.0f, 0.0f);   
+    if (struct CPhysicalObj * this, IsVolumeNul(struct CPhysicalObj * this, )) {
+      glColor3f(struct CPhysicalObj * this, 0.0f, 0.0f, 0.0f);   
       d.x = 0.2f;
       d.y = 0.2f;
       d.z = 10.0f;
@@ -166,13 +161,18 @@ DECLARE_NEW_OPERATOR_FOR_STRUCT(CPhysicalObj * this, CPhysicalObj);
 #endif
     
 #if 1
-    Map -> AfficherCube(CPhysicalObj * this, p.x - d.x, p.y - d.y, p.z, 2*d.x, 2*d.y, d.z);
+    Map -> AfficherCube(struct CPhysicalObj * this, p.x - d.x, p.y - d.y, p.z, 2*d.x, 2*d.y, d.z);
          
-    glColor3f(CPhysicalObj * this, 1.0f, 1.0f, 1.0f);
+    glColor3f(struct CPhysicalObj * this, 1.0f, 1.0f, 1.0f);
 #endif
 #endif /* AFFICHER_CUBE_DEBUG */       
   };
    
+
+#endif
+
+
+
 
 
 
