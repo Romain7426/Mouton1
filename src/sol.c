@@ -1,10 +1,21 @@
 #include "global.h"
 #include "sol.h"
 
+#define marche_compression_defaut 0.0050f
+
+/* précision, nb_phi, nb_theta pour le tore */
 
 
+#define nb_cases_afficheesX 25
+#define nb_cases_afficheesYfond 20
+#define nb_cases_afficheesYdevant 10
+
+
+
+#if 0
 static CSol(CSol * this, const bool EnVaisseau);
 static ~CSol(CSol * this, );
+#endif
 
 static void SETZ(CSol * this, int x, int y, float z);
 static void SETINDTEXTURE(CSol * this, int x, int y, int ind);

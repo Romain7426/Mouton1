@@ -15,17 +15,13 @@ struct TPointEcran {
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(TPointEcran);
 DEFINE_NEW_OPERATOR_FOR_STRUCT(TPointEcran);
 
-#define marche_compression_defaut 0.0050f
-
-/* précision, nb_phi, nb_theta pour le tore */
 
 
-#define nb_cases_afficheesX 25
-#define nb_cases_afficheesYfond 20
-#define nb_cases_afficheesYdevant 10
-#define NB_MAX_TEXTURESOL 10
+enum { NB_MAX_TEXTURESOL =  10 };
 
 
+
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CSol);
 // Cette structe stocke une carte
 struct CSol {
   //protected:
@@ -56,77 +52,85 @@ struct CSol {
 
 
 
-  
-  void SETZ(int x, int y, float z);
+
+
+
+
+
+
+  void (*SETZ)(CSol * this, int x, int y, float z);
   /*en privée, un élément de l'extérieur n'a pas le droit de modifier le terrain
     utiliser "ChargerZ" pour cela*/
   
+  void (* SETINDTEXTURE)(CSol * this, int x, int y, int ind);
+  int (* GETINDTEXTURE)(const CSol * this, int x, int y);
   
-  void SETINDTEXTURE(int x, int y, int ind);
-  int GETINDTEXTURE(int x, int y) const;
-  
-  TPoint3D GetPoint3D(float i, float j, float z) const;
-  void tore(int i,int j) const;
-  void tore0(int i,int j) const;
+  TPoint3D (* GetPoint3D)(const CSol * this, float i, float j, float z);
+  void (* tore)(const CSol * this, int i,int j);
+  void (* tore0)(const CSol * this, int i,int j);
   
   
-  void CalcPoints(int i1, int j1, int i2, int j2) const;
+  void (* CalcPoints)(const CSol * this, int i1, int j1, int i2, int j2);
 
-  //public:
-  CSol(const bool EnVaisseau);
-  ~CSol();
+  int (* GetTailleX)(const CSol * this);
+  int (* GetTailleY)(const CSol * this);
   
-  int GetTailleX(void) const;
-  int GetTailleY(void) const;
-  
-  void AfficherCube(float x1, float y1, float z1, float dx, float dy, float dz) const;
+  void (* AfficherCube)(const CSol * this, float x1, float y1, float z1, float dx, float dy, float dz);
   //utiliser pour Debuguer
   
-  float FacteurCompression(float j) const;
-  float IndiceTemps(float j) const;
-  /*ajouter une texture de sol (fichier s)
-  indice_dans_bitmap représente la couleur des zones de cette texture dans le fichier
-  chargé après dans ChargerIndiceTextureBitmap*/
-  void AjouterTextureSol(const char * s, int indice_dans_bitmap);
+  float (* FacteurCompression)(const CSol * this, float j);
+  float (* IndiceTemps)(const CSol * this, float j);
+  /*ajouter une texture de sol (CSol * this, fichier s)
+    indice_dans_bitmap représente la couleur des zones de cette texture dans le fichier
+    chargé après dans ChargerIndiceTextureBitmap*/
+  void (* AjouterTextureSol)(CSol * this, const char * s, int indice_dans_bitmap);
   
   /*charge le fichier bitmap qui contient les zones pour les textures
     il faut faire appel à ChargerIndiceTextureBitmap après avoir fait les
     AjouterTextureSol
-    (à priori fichier_bitmap désigne un fichier dans le répertoire
+    (CSol * this, à priori fichier_bitmap désigne un fichier dans le répertoire
     "../cartes/")*/
-  void ChargerIndiceTextureBitmap(const char * fichier_bitmap);
-  
-  void LookAt(float i, float j, float z) const; /*place la caméra au dessus du point (i, j)*/
-  void LookAt(float i, float j, float z, float dist, float AngleXY, float AngleZ) const; /*place la caméra au dessus du point (i, j)*/
-  void Render(int i1, int j1, int i2, int j2) const; /*dessine la partie du tore entre (i1, j1) et (i2, j2)*/
-  void RenderEau(int i1, int j1, int i2, int j2) const;
-  bool yatilEau(float i, float j, float z) const;
+  void (* ChargerIndiceTextureBitmap)(CSol * this, const char * fichier_bitmap);
+#if 0  
+  void (* LookAt)(const CSol * this, float i, float j, float z); /*place la caméra au dessus du point (CSol * this, i, j)*/
+  void (* LookAt)(const CSol * this, float i, float j, float z, float dist, float AngleXY, float AngleZ); /*place la caméra au dessus du point )(CSol * this, i, j)*/
+#else
+  void (* LookAt_vSimple)(const CSol * this, float i, float j, float z);
+  void (* LookAt_vCompliquee)(const CSol * this, float i, float j, float z, float dist, float AngleXY, float AngleZ);
+#endif
+  void (* Render)(const CSol * this, int i1, int j1, int i2, int j2); /*dessine la partie du tore entre )(CSol * this, i1, j1) et )(CSol * this, i2, j2)*/
+  void (* RenderEau)(const CSol * this, int i1, int j1, int i2, int j2);
+  bool (* yatilEau)(const CSol * this, float i, float j, float z);
 	
-  /*affiche une image 2D en (i, j) (position centrale au sol), d'altitude z, de texture tex,
+  /*affiche une image 2D en )(CSol * this, i, j) )(CSol * this, position centrale au sol), d'altitude z, de texture tex,
     et de taille définie*/
-  void Blit(float i, float j, float z, CTexture* tex, float taillex, float tailleh);
-  void Cube(float i, float j, float z, float taillex, float tailleh);
-  void PositionModulo(float& i, float& j) const;
-  void MatricePourDessiner(float i, float j);
-  TPoint2D Differentiel(TPoint3D pos) const;
+  void (* Blit)(CSol * this, float i, float j, float z, CTexture* tex, float taillex, float tailleh);
+  void (* Cube)(CSol * this, float i, float j, float z, float taillex, float tailleh);
+  //void (* PositionModulo)(const CSol * this, float& i, float& j);
+  void (* PositionModulo)(const CSol * this, float * i_ptr, float * j_ptr);
+  void (* MatricePourDessiner)(CSol * this, float i, float j);
+  TPoint2D (* Differentiel)(const CSol * this, TPoint3D pos);
 
   
 	
   /*donne en fonction de la position en theta le facteur de compression
     il est le plus élevé à l'extérieur du tore, le plus petit à l'intérieur
     et vaut 1 sur le dessus, ou le dessous*/
-  void ChargerZ(const char * filename);
-  float GETZ(float x, float y) const;
+  void (* ChargerZ)(CSol * this, const char * filename);
+  float (* GETZ)(const CSol * this, float x, float y);
 	
-  void MatricePour2D(float i, float j, float z) const;
+  void (* MatricePour2D)(const CSol * this, float i, float j, float z);
 	
-  void glVertexTore(float x, float y, float z) const;
+  void (* glVertexTore)(const CSol * this, float x, float y, float z);
 	
-  void SetTemps(float temps);
-  float GetTemps(void) const;
+  void (* SetTemps)(CSol * this, float temps);
+  float (* GetTemps)(const CSol * this);
 	
+
+
+
+  
 };
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(CSol);
 DEFINE_NEW_OPERATOR_FOR_STRUCT(CSol);
 
 
@@ -138,4 +142,6 @@ DEFINE_NEW_OPERATOR_FOR_STRUCT(CSol);
 
 
 
-#endif /* SOL_HPP */
+
+
+#endif /* SOL_H */
