@@ -9,10 +9,13 @@
 /******************************************************************************
      page de titre
 ******************************************************************************/
+
+enum TPageTitreAction {ptFADEIN, ptTITRE, ptFADEOUT};
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TPageTitreAction);
+
 struct CPageTitre {
 #define NB_ETAPE_FADING 64
   //private:  
-  enum TPageTitreAction {ptFADEIN, ptTITRE, ptFADEOUT};
   TPageTitreAction Action;
   CTexture* DessineMoiUnMouton;
   CTexture* Titre;
@@ -26,7 +29,7 @@ struct CPageTitre {
   ~CPageTitre();
 #endif
 
-  void (* Render)(const struct CPageTitre * this) const;
+  void (* Render)(const struct CPageTitre * this);
   bool (* Life)(struct CPageTitre * this);
 };
 
