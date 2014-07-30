@@ -1,10 +1,10 @@
-#ifndef MENU_HPP
-#define MENU_HPP
+#ifndef MENU_H
+#define MENU_H
 
 /*
-  classe pour gérer des menus
+  structe pour gérer des menus
 
-  CMenuAbstrait: classe abstraite pour gérer les menus etc...
+  CMenuAbstrait: structe abstraite pour gérer les menus etc...
   CMenu: menu torique
   CMiniMenu: menu normal
 
@@ -22,7 +22,7 @@
   - Dans Free, on pense à détruire le menu
 */
 
-class CTexture;
+struct CTexture;
 
 
 
@@ -45,45 +45,24 @@ class CTexture;
   MENU ABSTRAIT
 ******************************************************************************/
 
-class CMenuAbstrait {
-protected:
+// structure pour stocker un élément du menu
+struct Item {
+  const char * nom; //par convention nom = NULL ==> pas d'item !!
+  CTexture * texture;
+  void * qch; //pour stocker des choses (comme un ScriptLauncher) dans ActionMenu
+};    
+
+  
+struct CMenuAbstrait {
+  //protected:
   
   int Action; // détermine le mode du menu (= rien, en train de tourner vers la gauche, tourner vers le haut...)
-  
-  // structure pour stocker un élément du menu
-  struct Item {
-    const char * nom; //par convention nom = NULL ==> pas d'item !!
-    CTexture * texture;
-    void * qch; //pour stocker des choses (comme un ScriptLauncher) dans ActionMenu
-  };    
   
   int anim_theta[NB_SOUS_MENU];
   int anim_phi; // c'est pas le vrai indice de menu, mais un indice plus grand pour faire les animations
   
   Item Items[NB_SOUS_MENU][NB_ITEM_MAX];
   
-  int ProchainIndice(int ssMenu);      
-
-    
-public:
-  CMenuAbstrait(void); 
-  virtual ~CMenuAbstrait(void);
-      
-  char * NomSousMenu[NB_SOUS_MENU];
-  void Add(int ssMenu, const char * nom, const char * nom_texture);
-  /*ajoute un élément au menu... sur le sous-menu ssMenu
-    (ssMenu doit être dans [0, NB_SOUS_MENU-1] sinon ça plante !)
-    nom_texture est le nom de fichier d'une image
-    ex : "./haricot.png"*/ 
-    
-  void Add(int ssMenu, const char * nom, const char * nom_texture, void * qch);
-      
-  virtual bool InputAndRender(void);
-  /*On appelle ça pour faire vivre le menu (dans RaiseRender)
-    pour appeler cette fonction, il faut ABSOLUMENT que le menu ne soit pas vide
-    (avoir au moins fait un appel de Add avant)
-    sinon elle plante (à coup sûr)*/
- 
   /*ici, on récupère en sortie le numéro de sous-menu (iphi) et le numéro
     de l'élément sélectionné (itheta). Utile pour savoir quelle action faire
     après un choix dans un menu :)*/
@@ -91,6 +70,34 @@ public:
   int itheta;
   bool Canceled;
   
+  char * NomSousMenu[NB_SOUS_MENU];
+
+
+
+  int (* ProchainIndice)(struct CMenuAbstrait * this, int ssMenu);      
+
+    
+  //public:
+#if 0
+  CMenuAbstrait(void); 
+  virtual ~CMenuAbstrait(void);
+#endif
+      
+  void (* Add)(struct CMenuAbstrait * this, int ssMenu, const char * nom, const char * nom_texture);
+  /*ajoute un élément au menu... sur le sous-menu ssMenu
+    (ssMenu doit être dans [0, NB_SOUS_MENU-1] sinon ça plante !)
+    nom_texture est le nom de fichier d'une image
+    ex : "./haricot.png"*/ 
+    
+  void (* Add)(struct CMenuAbstrait * this, int ssMenu, const char * nom, const char * nom_texture, void * qch);
+      
+  //virtual bool InputAndRender(void);
+  bool (* InputAndRender)(struct CMenuAbstrait * this, void);
+  /*On appelle ça pour faire vivre le menu (dans RaiseRender)
+    pour appeler cette fonction, il faut ABSOLUMENT que le menu ne soit pas vide
+    (avoir au moins fait un appel de Add avant)
+    sinon elle plante (à coup sûr)*/
+ 
 };
 
 
@@ -100,7 +107,7 @@ public:
   MENU
 ******************************************************************************/
     
-class CMenu : public CMenuAbstrait {
+struct CMenu : public CMenuAbstrait {
 private:    
   
 public:
@@ -122,7 +129,7 @@ public:
   MINIMENU
 ******************************************************************************/
 
-class CMiniMenu : public CMenuAbstrait {
+struct CMiniMenu : public CMenuAbstrait {
 private:
   int X, Y, W;
   CTexture * Curseur;
@@ -135,4 +142,4 @@ public:
 };
 
 
-#endif /* MENU_HPP */
+#endif /* MENU_H */
