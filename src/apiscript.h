@@ -93,8 +93,8 @@ extern void SCRIPT_SupprimerObjet(const char* qui);
 
 extern void SCRIPT_Wait(int nbpasses);
 extern void SCRIPT_WaitFor(const char* qui);
-extern void SCRIPT_SetCouleurFondu(CMoteurTeleportation * MoteurTeleportation, int color);
-extern void SCRIPT_fondu(CMoteurTeleportation * MoteurTeleportation);
+extern void SCRIPT_SetCouleurFondu(struct CMoteurTeleportation * MoteurTeleportation, int color);
+extern void SCRIPT_fondu(struct CMoteurTeleportation * MoteurTeleportation);
 //extern void SCRIPT_SetCouleurFondu(int color);
 //extern void SCRIPT_fondu(void);
 
@@ -113,7 +113,7 @@ extern void SCRIPT_SetTemps(float t);
 
 //extern const char * SCRIPT_Readln(void);
 //extern char * SCRIPT_Readln(CMenuEntreeNom * MenuEntreeNom);
-extern void SCRIPT_Readln(CMenuEntreeNom * MenuEntreeNom);
+extern void SCRIPT_Readln(struct CMenuEntreeNom * MenuEntreeNom);
 
 
 extern void EVENEMENT_ChargementCarte(void);

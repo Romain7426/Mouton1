@@ -1,20 +1,19 @@
-#ifndef BONHOMME_HPP
-#define BONHOMME_HPP
+#ifndef BONHOMME_H
+#define BONHOMME_H
 
 
-#include "ressource.hpp"
-#include "liste.hpp"
+//#include "ressource.hpp"
+//#include "liste.hpp"
 
-class CMap;
-class CPhysicalObj;
+struct CMap;
+struct CPhysicalObj;
 
-#include "physicalobj.hpp"
+#include "physicalobj.h"
 
 
 
 #define MAX_MEMBRE 10
 #define MEMBRE_AVEC_ARME 0
-
 #define MAX_IND_ANGLE 10
 
 
@@ -22,17 +21,18 @@ TPoint3D DirectionToVecteur(TDirection d);
 
 
 struct TMembre;
-class COrdreDeplacement;
-class CPantin;
+struct COrdreDeplacement;
+struct CPantin;
 
 
-class COrdreDeplacement {
-public:
+struct COrdreDeplacement {
 /*ordre de déplacement vers le point destination (on ne l'atteint pas forcément)
 (en fait on ne l'atteint que sur une coordonnée*/
     TDirection direction;
     TPoint3D destination;
 };
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(COrdreDeplacement);
+DEFINE_NEW_OPERATOR_FOR_STRUCT(COrdreDeplacement);
 
 
 struct TMembre { 
@@ -43,56 +43,63 @@ struct TMembre {
   float taille_y;
   float taille_pixelx, taille_pixely;
   
-  ressource<CTexture> * resTexture;
+  //ressource<CTexture> * resTexture;
+  CTexture * Texture;
   
   CPantin * Pantin;
 };    
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(TMembre);
+DEFINE_NEW_OPERATOR_FOR_STRUCT(TMembre);
+
 
 
 // Un pantin est une liste de membres où chaque membre peut éventuellement contenir un pantin fils
-class CPantin {
-public:
+struct CPantin {
+  //public:
   int NbMembres;
   TMembre Membre[MAX_MEMBRE];  
        
-public:
+  //public:
+#if 0
   CPantin(void);
   ~CPantin(void); 
+#endif
   /*pour ajouter la tête, le corps, les bras, les oreilles etc...
     mais aussi une épée au bout d'un bras etc...*/
   /* fichier_image : fichier image par exemple "tete.bmp" (contenant
-     les images des vues (face, profilD, dos)
-     px, py, pz : position supérieure au milieu
-     tx, ty : taille d'une image en pixel
+     les images des vues (face, profilD, dos) px, py, pz : position
+     supérieure au milieu tx, ty : taille d'une image en pixel
+  */
           
-     renvoit le numéro du membre*/
-  int AjouterMembre(const char * fichier_image, float px, float py, float pz, float tx, float ty, float angle);
-                          
-  CPantin * GetPantinFils(int i);
-       
+  // renvoit le numéro du membre
+  int (* AjouterMembre)(CPantin * this, const char * fichier_image, float px, float py, float pz, float tx, float ty, float angle);
+  CPantin * (* GetPantinFils)(CPantin * this, int i);
   /*définit un pantin fils au membre n° i*/
-  void SetPantinFils(int i, CPantin * pantin);
-  void DetruirePantinFils(int i);
-       
+  void (* SetPantinFils)(CPantin * this, int i, CPantin * pantin);
+  void (* DetruirePantinFils)(CPantin * this, int i);
   /*définit le pantin fils du dernier membre ajouté*/
-  void SetPantinFilsAuDernierMembre(CPantin * pantin);
-
+  void (* SetPantinFilsAuDernierMembre)(CPantin * this, CPantin * pantin);
   /*procédure pour modifier l'angle d'un membre (utile pour animer le pantin)*/
-  void SetAngleMembre(int i, float angle);
-       
-  int GetNbMembres(void) const;
-  
+  void (* SetAngleMembre)(CPantin * this, int i, float angle);
+  int (* GetNbMembres)(const CPantin * this);
 };    
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPantin);
+DECLARE_NEW_OPERATOR_FOR_STRUCT(CPantin);
 
 
 
 
 
 
+
+
+
+
+#if 0
 /*un bonhomme (le héros, chaque ennemi, des gens du village...)
   est un pantin (car ils ont des membres), et est un objet physique
   (ie ont une position, une vitesse, un parallépipède de choc...)*/
-class CBonhomme : public CPhysicalObj, public CPantin {
+struct CBonhomme : public CPhysicalObj, public CPantin {
 private:
   float iangle;
   int sens_iangle;
@@ -148,6 +155,8 @@ public:
   
   
 };
+#endif
 
 
-#endif /* BONHOMME_HPP */
+
+#endif /* BONHOMME_H */

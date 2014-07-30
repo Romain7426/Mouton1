@@ -76,15 +76,16 @@ struct CPhysicalObj {
   TPoint3D (* GetDimension)(const struct CPhysicalObj * this, const CSol * Map);
   float (* NormeVitesse)(const struct CPhysicalObj * this);
   TPoint3D (* GetPosition)(const struct CPhysicalObj * this);
-  void (* SetPosition)(struct CPhysicalObj * this, TPoint3D pos);
-  void (* SetPosition)(struct CPhysicalObj * this, float x, float y, TMethodePlacement mp, const CMap * CMap);
+  void (* SetPosition_vTPoint3D)(struct CPhysicalObj * this, TPoint3D pos);
+  void (* SetPosition_vExpanded)(struct CPhysicalObj * this, float x, float y, TMethodePlacement mp, const CMap * CMap);
   void (* SetZ)(struct CPhysicalObj * this, float z, TMethodePlacement mp);
   void (* SetDimension)(struct CPhysicalObj * this, float dx, float dy, float dz);
     
   /* pour gérer les forces dans le moteur physique )(struct CPhysicalObj * this, appelé à chaque boucle) */
   void (* InitForce)(struct CPhysicalObj * this);
   void (* AddForce)(struct CPhysicalObj * this, TPoint3D f);
-  void (* AddForce)(struct CPhysicalObj * this, float fx, float fy, float fz);
+  //void (* AddForce_vTPoint3D)(struct CPhysicalObj * this, TPoint3D f);
+  //void (* AddForce_vExpanded)(struct CPhysicalObj * this, float fx, float fy, float fz);
   TPoint3D (* GetVitesse)(const struct CPhysicalObj * this);
   TPoint3D (* GetForce)(const struct CPhysicalObj * this);
   void (* CalcNewPosition)(struct CPhysicalObj * this);
