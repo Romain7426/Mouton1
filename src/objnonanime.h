@@ -1,40 +1,24 @@
 #ifndef OBJNONANIME_H
 #define OBJNONANIME_H
 
-//#include "ressource.hpp"
-
-struct CPhysicalObj;
-#include "physicalobj.h"
-
-
-
 // Un objet non animé (arbre, maison...) est un objet physique... plus des données graphiques!!
 struct CObjNonAnime /* : public CPhysicalObj */ {
-  struct CPhysicalObj parent;
-  //private:
-  //friend int yynonanimeparse(void);
+  CPhysicalObj parent;
   //ressource<C3DS> * resobj3ds;
-  struct C3DS * resobj3ds[128];
+  C3DS * resobj3ds;
   float angleZ;
-  //public:
-  const char * const filename;
-    
-  //public:
-#if 0
-  //* chargement d'un objet non animé (par exemple : arbre.nonanime) */
-  CObjNonAnime(const char * filename);
-  CObjNonAnime(const CObjNonAnime * o);
-  ~CObjNonAnime(void);
-#endif
+  char * filename;
   
-  int (* parse)(struct CObjNonAnime * this, const char * dir, const char * filename);
-  void (* SetAngleZ)(struct CObjNonAnime * this, float thetaZ);
+  int (* ReadDescriptionFile)(struct CObjNonAnime * this, const char * dir, const char * filename);
+  void (* SetAngleZ)(struct CObjNonAnime * this, const float thetaZ);
   void (* Render)(const struct CObjNonAnime * this, const CSol * sol);
-
 };    
-
-
-
-
+  //* chargement d'un objet non animé (par exemple : arbre.nonanime) */
+extern CObjNonAnime * CObjNonAnime_make(const char * filename);
+extern CObjNonAnime * CObjNonAnime_copy(const CObjNonAnime * o);
+extern void CObjNonAnime_delete(CObjNonAnime * this);
+extern int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, const char * filename);
+extern void CObjNonAnime__SetAngleZ(CObjNonAnime * this, const float thetaZ);
+extern void CObjNonAnime__Render(const CObjNonAnime * this, const CSol * sol);
 
 #endif /* OBJNONANIME_H */

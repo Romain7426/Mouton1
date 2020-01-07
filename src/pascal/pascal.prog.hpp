@@ -1,12 +1,12 @@
 #ifndef PASCAL_PROG_HPP
 #define PASCAL_PROG_HPP
 
-
+#if 0
 #include "pascal/pascal.tools.hpp"
 #include "pascal/pascal.mem.hpp"
 #include "pascal/pascal.env.hpp"
 #include "pascal/pascal.expr.hpp"
-
+#endif 
 
 
 /*
@@ -14,16 +14,60 @@
  * La classe qui va définir ce qu'est qu'un programme Pascal!!!!
  */
 
-class CPprog;
+//class CPprog;
 enum direction {HAUT, BAS, GAUCHE, DROITE};
 enum methode {ABSOLU, RELATIF};
 
+enum CPprog__etype { PStop, PSkip, PSeq, PIf, PWhile, PFor, PRepeat, PBegin, PVar, PConst, PAffectation, PWrite, PWriteln, PRead, PReadln, PType, PNew, PCall, PMusique, PWait, PHalt, PRestart, PFondu, PRecObjet, PRecArme, PSupObjet, PCarte, PSetPosition, PSetPositionZ, PDeplacer, PDeplacerZ, PSetHerosPosition, PSetHerosPositionZ, PHerosDeplacer, PHerosDeplacerZ, PSetCameraPosition, PCameraDeplacer, PCameraRotate, PCameraSolidariser, PCameraDesolidariser, PCameraDefaut, PCameraZoom, PFrapper, PAjouterAnime, PAjouterNonAnime, PSetTemps, PSetOrientation, PWaitFor, PBloquerTemps, PDebloquerTemps, PCarteZ,
+              PExprStack, PIfStack, PWhileStack, PForStack, PConstStack, PAffectationStack, PWritelnStack, PReadlnStack, PCallStack, PMusiqueStack, PWaitStack, PFonduStack, PRecArmeStack, PSupObjetStack, PCarteStack, PCarteZStack, PSetPositionStack, PSetPositionZStack, PDeplacerStack, PSetCameraPositionStack, PCameraRotateStack, PCameraZoomStack, PFrapperStack, PAjouterAnimeStack, PAjouterNonAnimeStack, PSetTempsStack, PSetOrientationStack, PWaitForStack };
 
 
-class CPprog {
-public:
-  enum etype {PStop, PSkip, PSeq, PIf, PWhile, PFor, PRepeat, PBegin, PVar, PConst, PAffectation, PWrite, PWriteln, PRead, PReadln, PType, PNew, PCall, PMusique, PWait, PHalt, PRestart, PFondu, PRecObjet, PRecArme, PSupObjet, PCarte, PSetPosition, PSetPositionZ, PDeplacer, PDeplacerZ, PSetHerosPosition, PSetHerosPositionZ, PHerosDeplacer, PHerosDeplacerZ, PSetCameraPosition, PCameraDeplacer, PCameraRotate, PCameraSolidariser, PCameraDesolidariser, PCameraDefaut, PCameraZoom, PFrapper, PAjouterAnime, PAjouterNonAnime, PSetTemps, PSetOrientation, PWaitFor, PBloquerTemps, PDebloquerTemps, PCarteZ,
-              PExprStack, PIfStack, PWhileStack, PForStack, PConstStack, PAffectationStack, PWritelnStack, PReadlnStack, PCallStack, PMusiqueStack, PWaitStack, PFonduStack, PRecArmeStack, PSupObjetStack, PCarteStack, PCarteZStack, PSetPositionStack, PSetPositionZStack, PDeplacerStack, PSetCameraPositionStack, PCameraRotateStack, PCameraZoomStack, PFrapperStack, PAjouterAnimeStack, PAjouterNonAnimeStack, PSetTempsStack, PSetOrientationStack, PWaitForStack};
+
+
+
+struct CPprog {
+  enum CPprog__etype type;
+
+  // La position dans le code de cette commande.
+  ppos position;
+
+  // La vrai fonction d'exécution.
+  // Elle rend un code d'erreur selon les conventions usuelles.
+  // Contrairement aux expressions, une instruction modifie l'environnement et la mémoire.
+  // Ainsi, là on n'a pas un const, mais carrément un passage par référence.
+  // Cependant, lors d'un BEGIN, l'environnement n'est pas modifié, seul la mémoire
+  // peut l'être. Toutes les variables qui y sont déclarées sont locales 
+  // et sont désalloués à la fin du bloc.
+  // Toutefois, en Pascal, le begin end au milieu d'un bloc n'a pas trop de sens 
+  // car la définition de variables locales n'est pas trop possible.
+  // C'est donc juste global et lors de la définition de fonction.
+  // Aussi, on peut à priori définir des procédures locales.
+  int (* execute)(CPprog * this, penv * env, pmem  * mem);
+
+  //int execute_step(penv &env, pmem &mem, CPprog * &futur);
+  int (* execute_step)(CPprog * this, penv * env, pmem * mem, pascal_stack_t * stack, CPprog * * futur);
+
+  // La fonction de conversion en chaîne de caractère.
+  char * (* toString)(const CPprog * this);
+
+  // Un programme Pascal ne possède pas de réponse si ce n'est l'état de la mémoire et des E/S.
+  // Code d'erreur comme d'habitude.
+  //int (* execute)(CPprog * this);
+}; 
+
+#if 0
+  // Constructeurs.
+  CPprog(unsigned int deb_ligne, unsigned int fin_ligne, unsigned int deb_car, unsigned int fin_car, unsigned int deb_car_tot, unsigned int fin_car_tot) : position(pascal_position(deb_ligne, fin_ligne, deb_car, fin_car, deb_car_tot, fin_car_tot)) { }
+
+  CPprog(ppos position) : position(position) { }
+#endif 
+
+
+
+
+#if 0 
+struct CPprog {
+//public:
 
 
   union utype {
@@ -234,12 +278,12 @@ public:
 
 
 
-  enum etype type;
+  enum CPprog_etype type;
   union utype val;
 
 
   
-public:
+//public:
   // La vrai fonction d'exécution.
   // Elle rend un code d'erreur selon les conventions usuelles.
   // Contrairement aux expressions, une instruction modifie l'environnement et la mémoire.
@@ -303,7 +347,7 @@ extern bool futur_expr_to_futur_prog(pascal_expr_futur_t * futur_expr, pascal_pr
 
 extern const char * cprog_type_string(enum CPprog::etype type);
 
-
+#endif 
 
 
 #endif /* PASCAL_PROG_HPP */

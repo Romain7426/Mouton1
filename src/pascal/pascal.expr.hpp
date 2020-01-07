@@ -1,6 +1,212 @@
 #ifndef PASCAL_EXPR_HPP
 #define PASCAL_EXPR_HPP
 
+/* Ce fichier contient la d√©finition d'une valeur rendue par une expression,
+   ainsi que la d√©finition d'une expression.
+   Ainsi, dans les fonctions d'√©valuations associ√©es (R & L),
+   on aura l'interpr√©teur du moteur pascal pour les expressions.
+*/
+/* Au fait, dor√©nanvant on sp√©cifie bien la politique pour le passage de param√®tre.
+   Tout ce qui est pass√© en param√®tre est plus que susceptible d'√™tre chang√©,
+   et mettre d'√™tre utilis√© d√©finitivement.
+   C'est source de tr√®s gros ennuis, notamment pour 
+   toutes les structures allou√©es sur la pile et non sur le tas.
+   Cela permet d'√©viter d'√©crire un constructeur de recopie pour chaque type d√©fini.
+   Aussi, cela permet d'utiliser la recopie quand cela n'est pas n√©cessaire.
+   En th√©orie, c'est ce que l'on devrait faire.
+   Dans les scenarios, on met donc un jour, v√©rifier que la recopie se passe bien.
+   En plus cela pose le probl√®me de savoir qui en est le responsable
+   et qui doit donc le d√©truire? (probl√®me de toute variable partag√©es.)
+*/
+
+enum pascal_etype { PETDummy, PETBoolean, PETInteger, PETSubrange, PETReal, PETString, PETPointer, PETArray, PETRecord, PETVide, /*PETUser*/ };
+
+enum { pascal_record_maxfields = 15 }; 
+
+struct pascal_utype {
+  //typedef void tpetdummy;
+  //typedef void tpetboolean;
+  //typedef void tpetinteger;
+  //typedef void tpetsubrange;
+  //struct tpetsubrange { int min, max;  };
+  //typedef void tpetreal;
+  //typedef void tpetstring;
+  //typedef void tpetpointer;
+  //typedef pascal_eval_type *tpetpointer;
+  //typedef void tpetarray;
+  //struct tpetarray {
+  //  struct pascal_eval_type *type;
+  //  struct tpetsubrange indice;
+  //};
+  //typedef void tpetrecord;
+  //struct tpetrecord {
+  //  struct champ {
+  //    char *nom;
+  //    struct pascal_eval_type *type;
+  //  };
+  //  class pliste<struct champ> *champs;
+  //};
+  //typedef const char *const tpetuser;
+  
+  //tpetdummy d;
+  //tpetboolean b;
+  //tpetinteger i;
+  //tpetsubrange s;
+  //int subrange[2]; 
+  int subrange_min;
+  int subrange_max;
+  //tpetreal r;
+  //tpetstring str;
+  //tpetpointer ptr;
+  struct pascal_eval_type * ptr; 
+  //tpetarray array;
+  struct pascal_eval_type * array_item_type;
+  //tpetrecord record;
+  char * record_nom[pascal_record_maxfields]; 
+  struct pascal_eval_type * record_type[pascal_record_maxfields];
+  //tpetuser user;
+  //tpetcall call;
+};
+
+// D'abord la d√©finition du type EVal.
+// C'est un type en union disjointe, il suit donc la d√©finition habituelle.
+// PETVide est uniquement l√† pour typer le pointeur nil; nil est un pointeur vers tous les types.
+// Et il est impossible d'acc√©der directement √† ce type.
+struct pascal_eval_type {
+  enum pascal_etype type;
+  struct pascal_utype val;
+  // fonction qui convertit un type en chaine de caract√®re
+  char * (* toString)(const struct pascal_eval_type * this);
+};
+extern pevalt * pevalt_make(void); 
+
+
+
+#define PASCAL_STACK_SIZE 2048
+struct pascal_stack_t {
+  pevalt * tab[PASCAL_STACK_SIZE];
+  int nb;
+};
+
+extern pascal_stack_t * pascal_stack_make(void);
+extern void pascal_stack_free(pascal_stack_t * stack);
+extern void pascal_stack_push(pascal_stack_t * stack, pevalt * e);
+extern pevalt * pascal_stack_pop(pascal_stack_t * stack);
+
+
+
+
+enum CPexpr_etype { 
+  CPexpr_PEt, CPexpr_POu, CPexpr_PEqual, CPexpr_PDiff, CPexpr_PInf, 
+  CPexpr_PSup, CPexpr_PInfEq, CPexpr_PSupEq, CPexpr_PIPlus, CPexpr_PIMoins, CPexpr_PIMult, 
+  CPexpr_PIDiv, CPexpr_PIMod, CPexpr_PRPlus, CPexpr_PRMoins, CPexpr_PRMult, CPexpr_PRDiv, 
+  CPexpr_PTab, CPexpr_PRecord, CPexpr_PNot, CPexpr_PUIPlus, CPexpr_PUIMoins, CPexpr_PURPlus, 
+  CPexpr_PURMoins, CPexpr_PRef, CPexpr_PInd, CPexpr_PIdent, CPexpr_PConst, CPexpr_PCall, 
+  CPexpr_PMenu, CPexpr_PDummy, CPexpr_PNomCarte,
+  CPexpr__PIdentRef, CPexpr_PTabRef, CPexpr_PRecordRef};
+
+enum { SPCall_size = 63 }; 
+struct SPCall {
+  char * ident;
+  CPexpr * args[SPCall_size];
+  int args_nb;
+};
+
+union CPexpr_utype {
+  int a; 
+  struct SPCall upcall;
+};
+
+struct CPexpr {
+  enum CPexpr_etype type;
+  union CPexpr_utype val;
+  
+
+  // La fonction de conversion vers une chaine de caract√®re.
+  char * (* toString)(const CPexpr * this);
+  
+  // Contient la position de l'expression dans le fichier.
+  ppos position;
+
+  // Les fonctions d'√©valuations.
+  // Renvoie comme d'habitude un code d'erreur, avec les m√™mes conventions.
+  // Une L-√©valuation est comme une R-√©valuation, sauf qu'on rend des adresses,
+  // surtout pour les variables, et tous les machins qui ont √† voir avec la m√©moire.
+  // En Pascal, une expression ne modifie rien du tout, que ce soit l'environnement
+  // ou la m√©moire. Comme une v√©ritable expression, il n'y a que de la lecture qui est
+  // r√©alis√©e ici. L'√©criture dans l'une des deux est faite par une instruction,
+  // souvent sp√©cialis√©. 
+  // M√™me avec les √©critures et les lectures sur les entr√©es sorties.
+  //
+  // En th√©orie, y a des const pour mem et env dans r_, √©tant donn√© que pas d'effet
+  // de bord. En pratique, d√©claration de variables temporaires.
+  int (* r_evaluate)(CPexpr * this, const penv * env,       pmem * mem, pevalt * res_ref);
+  int (* l_evaluate)(CPexpr * this, const penv * env, const pmem * mem, pevalt * res_ref);
+};
+
+extern CPexpr * CPexpr_make(unsigned int deb_ligne, unsigned int fin_ligne, unsigned int deb_car, unsigned int fin_car, unsigned int deb_car_tot, unsigned int fin_car_tot);
+
+
+
+//typedef void tpedummy;
+typedef bool tpeboolean;
+typedef int tpeinteger;
+typedef int tpesubrange;
+typedef corps tpereal;
+typedef char * tpestring;
+typedef ploc tpepointer;
+typedef ploc tpearray;
+typedef ploc tperecord;
+
+union pascal_eval_utype {
+  //tpedummy;
+  tpeboolean b;
+  tpeinteger i;
+  tpesubrange s;
+  tpereal r;
+  tpestring str;
+  tpepointer ptr;
+  tpearray array;
+  tperecord record;
+};
+
+struct pascal_eval {
+  //enum etype type;
+  union pascal_eval_utype val;
+};
+
+struct pascal_eval;
+typedef struct pascal_eval peval;
+
+
+
+struct pascal_evalt {
+  pevaltype type;
+  peval val;
+
+#if 0
+  char * toString(void) const;
+  int toPSVal(psval &sval);
+  int fromPSVal(const psval sval); // La fonction ne fait que ajuster la partie "val" 
+                                   // On suppose (tr√®s important!!!!) que la partie "type" est remplie et correcte.
+  int r_fromPDValt(const pmem mem, const pdvalt dvalt);
+  int l_fromPDValt(const pmem mem, const pdvalt dvalt);
+  int fromPDValt(const pmem mem, const pdvalt dvalt);
+  static bool equal(const pevaltype type,  const pascal_eval e1, const pascal_eval e2);
+#endif 
+};
+
+#if 0
+  // Les constructeurs.
+  CPexpr(unsigned int deb_ligne, unsigned int fin_ligne, unsigned int deb_car, unsigned int fin_car, unsigned int deb_car_tot, unsigned int fin_car_tot) : position(pascal_position(deb_ligne, fin_ligne, deb_car, fin_car, deb_car_tot, fin_car_tot)) { }
+
+  CPexpr(ppos position) : position(position) { }
+#endif
+
+
+
+
+#if 0
 #ifndef PASCAL_PROG_HPP
 #define PASCAL_PROG_HPP
 
@@ -12,163 +218,38 @@
 #endif
 
 
-
-/* Ce fichier contient la dÈfinition d'une valeur rendue par une expression,
-   ainsi que la dÈfinition d'une expression.
-   Ainsi, dans les fonctions d'Èvaluations associÈes (R & L),
-   on aura l'interprÈteur du moteur pascal pour les expressions.
-*/
-/* Au fait, dorÈnanvant on spÈcifie bien la politique pour le passage de paramËtre.
-   Tout ce qui est passÈ en paramËtre est plus que susceptible d'Ítre changÈ,
-   et mettre d'Ítre utilisÈ dÈfinitivement.
-   C'est source de trËs gros ennuis, notamment pour 
-   toutes les structures allouÈes sur la pile et non sur le tas.
-   Cela permet d'Èviter d'Ècrire un constructeur de recopie pour chaque type dÈfini.
-   Aussi, cela permet d'utiliser la recopie quand cela n'est pas nÈcessaire.
-   En thÈorie, c'est ce que l'on devrait faire.
-   Dans les scenarios, on met donc un jour, vÈrifier que la recopie se passe bien.
-   En plus cela pose le problËme de savoir qui en est le responsable
-   et qui doit donc le dÈtruire? (problËme de toute variable partagÈes.)
-*/
-   
-
-
-struct pascal_eval_type;
-typedef struct pascal_eval_type pevaltype;
-
 struct pascal_eval;
 typedef struct pascal_eval peval;
 
-struct pascal_evalt;
-typedef struct pascal_evalt pevalt;
-
-class CPexpr;
+   
 
 
-// D'abord la dÈfinition du type EVal.
-// C'est un type en union disjointe, il suit donc la dÈfinition habituelle.
-// PETVide est uniquement l‡ pour typer le pointeur nil; nil est un pointeur vers tous les types.
-// Et il est impossible d'accÈder directement ‡ ce type.
-struct pascal_eval_type {
-  enum etype {PETDummy, PETBoolean, PETInteger, PETSubrange, PETReal, PETString, PETPointer, PETArray, PETRecord, PETVide, /*PETUser*/};
 
-  union utype {
-    //typedef void tpetdummy;
-    //typedef void tpetboolean;
-    //typedef void tpetinteger;
-    //typedef void tpetsubrange;
-    struct tpetsubrange {
-      int min, max;
-    };
-    //typedef void tpetreal;
-    //typedef void tpetstring;
-    //typedef void tpetpointer;
-    typedef pascal_eval_type *tpetpointer;
-    //typedef void tpetarray;
-    struct tpetarray {
-      struct pascal_eval_type *type;
-      struct tpetsubrange indice;
-    };
-    //typedef void tpetrecord;
-    struct tpetrecord {
-      struct champ {
-	char *nom;
-	struct pascal_eval_type *type;
-      };
-      class pliste<struct champ> *champs;
-    };
-    //typedef const char *const tpetuser;
-
-
-    //tpetdummy d;
-    //tpetboolean b;
-    //tpetinteger i;
-    tpetsubrange s;
-    //tpetreal r;
-    //tpetstring str;
-    tpetpointer ptr;
-    tpetarray array;
-    tpetrecord record;
-    //tpetuser user;
-    //tpetcall call;
-  };
-
-  enum etype type;
-  union utype val;
-
-
-  // fonction qui dit si deux types sont Ègaux
-  friend bool pevaltype_equal(struct pascal_eval_type a, struct pascal_eval_type b);
-
-  // fonction qui convertit un type en chaine de caractËre
-  char * toString(void) const;
-
-  // Fonction qui retourne la taille d'un type en nombre de cases.
-  // Notamment, lors d'un malloc, cela donne la taille ‡ allouer dans la mÈmoire.
-  static unsigned int pevaltype_sizeof(const struct pascal_eval_type a);
-
-  // fonction qui ‡ partir d'un pevaltype crÈe un pdvaltype
-  static int pdvaltype_of_pevaltype(const pascal_eval_type evaltype, pdvaltype &dvaltype);
-
-  // Fonction qui crÈe une nouvelle PDValTypÈe ‡ partir d'un PEValType.
-  // Code d'erreur comme d'habitude.
-  static int pdvalt_of_pevaltype(const pascal_eval_type evaltype, ploc i, pdvalt &dvalt);
-
-  // Fonction qui crÈe un nouveau PEValtype ‡ partir d'un PDValtype.
-  static int pevaltype_of_pdvaltype(const pascal_dval_type dvaltype, pascal_eval_type &evaltype);
-
-};
 
 extern bool pevaltype_equal(struct pascal_eval_type a, struct pascal_eval_type b);
 
+// Fonction qui retourne la taille d'un type en nombre de cases.
+// Notamment, lors d'un malloc, cela donne la taille √† allouer dans la m√©moire.
+extern unsigned int pevaltype_sizeof(const struct pascal_eval_type a);
 
+// fonction qui √† partir d'un pevaltype cr√©e un pdvaltype
+extern int pdvaltype_of_pevaltype(const pascal_eval_type evaltype, pdvaltype &dvaltype);
 
+// Fonction qui cr√©e une nouvelle PDValTyp√©e √† partir d'un PEValType.
+// Code d'erreur comme d'habitude.
+extern int pdvalt_of_pevaltype(const pascal_eval_type evaltype, ploc i, pdvalt &dvalt);
 
-struct pascal_eval {
-  //enum etype {PEDummy, PEBoolean, PEInteger, PESubrange, PEReal, PEString, PEPointer, PEArray, PERecord};
-
-  union utype {
-    //typedef void tpedummy;
-    typedef bool tpeboolean;
-    typedef int tpeinteger;
-    typedef int tpesubrange;
-    typedef corps tpereal;
-    typedef char * tpestring;
-    typedef ploc tpepointer;
-    typedef ploc tpearray;
-    typedef ploc tperecord;
-
-    //tpedummy;
-    tpeboolean b;
-    tpeinteger i;
-    tpesubrange s;
-    tpereal r;
-    tpestring str;
-    tpepointer ptr;
-    tpearray array;
-    tperecord record;
-  };
-
-  //enum etype type;
-  union utype val;
-};
+// Fonction qui cr√©e un nouveau PEValtype √† partir d'un PDValtype.
+extern int pevaltype_of_pdvaltype(const pascal_dval_type dvaltype, pascal_eval_type &evaltype);
 
 
 
 
-struct pascal_evalt {
-  pevaltype type;
-  peval val;
 
-  char * toString(void) const;
-  int toPSVal(psval &sval);
-  int fromPSVal(const psval sval); // La fonction ne fait que ajuster la partie "val" 
-                                   // On suppose (trËs important!!!!) que la partie "type" est remplie et correcte.
-  int r_fromPDValt(const pmem mem, const pdvalt dvalt);
-  int l_fromPDValt(const pmem mem, const pdvalt dvalt);
-  int fromPDValt(const pmem mem, const pdvalt dvalt);
-  static bool equal(const pevaltype type,  const pascal_eval e1, const pascal_eval e2);
-};
+
+
+
+
 
 
 
@@ -176,12 +257,10 @@ struct pascal_evalt {
 
 
 // enfin les expressions !!!!!!!
-// Comme le reste c'est un type union disjointe ‡ la OCaml.
+// Comme le reste c'est un type union disjointe √† la OCaml.
 // Pour cela, on fait comme d'habitude.
 class CPexpr {
 public:
-  enum etype {PEt, POu, PEqual, PDiff, PInf, PSup, PInfEq, PSupEq, PIPlus, PIMoins, PIMult, PIDiv, PIMod, PRPlus, PRMoins, PRMult, PRDiv, PTab, PRecord, PNot, PUIPlus, PUIMoins, PURPlus, PURMoins, PRef, PInd, PIdent, PConst, PCall, PMenu, PDummy, PNomCarte,
-              PIdentRef, PTabRef, PRecordRef};
 
 
   union utype {
@@ -285,24 +364,24 @@ public:
 
   CPexpr(ppos position) : position(position) { }
 
-  // La fonction de conversion vers une chaine de caractËre.
+  // La fonction de conversion vers une chaine de caract√®re.
   char * toString(void) const;
   
   // Contient la position de l'expression dans le fichier.
   ppos position;
 
-  // Les fonctions d'Èvaluations.
-  // Renvoie comme d'habitude un code d'erreur, avec les mÍmes conventions.
-  // Une L-Èvaluation est comme une R-Èvaluation, sauf qu'on rend des adresses,
-  // surtout pour les variables, et tous les machins qui ont ‡ voir avec la mÈmoire.
+  // Les fonctions d'√©valuations.
+  // Renvoie comme d'habitude un code d'erreur, avec les m√™mes conventions.
+  // Une L-√©valuation est comme une R-√©valuation, sauf qu'on rend des adresses,
+  // surtout pour les variables, et tous les machins qui ont √† voir avec la m√©moire.
   // En Pascal, une expression ne modifie rien du tout, que ce soit l'environnement
-  // ou la mÈmoire. Comme une vÈritable expression, il n'y a que de la lecture qui est
-  // rÈalisÈe ici. L'Ècriture dans l'une des deux est faite par une instruction,
-  // souvent spÈcialisÈ. 
-  // MÍme avec les Ècritures et les lectures sur les entrÈes sorties.
+  // ou la m√©moire. Comme une v√©ritable expression, il n'y a que de la lecture qui est
+  // r√©alis√©e ici. L'√©criture dans l'une des deux est faite par une instruction,
+  // souvent sp√©cialis√©. 
+  // M√™me avec les √©critures et les lectures sur les entr√©es sorties.
   //
-  // En thÈorie, y a des const pour mem et env dans r_, Ètant donnÈ que pas d'effet
-  // de bord. En pratique, dÈclaration de variables temporaires.
+  // En th√©orie, y a des const pour mem et env dans r_, √©tant donn√© que pas d'effet
+  // de bord. En pratique, d√©claration de variables temporaires.
   int r_evaluate(const penv env, pmem mem, pevalt &res);
   int l_evaluate(const penv env, const pmem mem, pevalt &res);
 
@@ -329,17 +408,6 @@ extern bool pascal_expr_compile(const CPexpr * expr, pascal_expr_futur_t * &futu
 extern bool pascal_expr_compile_l(const CPexpr * expr, pascal_expr_futur_t * &futur);
 
 
-#define PASCAL_STACK_SIZE 2048
-struct pascal_stack_t {
-  pevalt * tab[PASCAL_STACK_SIZE];
-  int nb;
-};
-
-extern pascal_stack_t * pascal_stack_make(void);
-extern void pascal_stack_free(pascal_stack_t * stack);
-extern void pascal_stack_push(pascal_stack_t * stack, pevalt * e);
-extern pevalt * pascal_stack_pop(pascal_stack_t * stack);
-
 
 extern bool r_evaluate_futur(const pascal_expr_futur_t * futur, pascal_stack_t * stack, const penv env, pmem mem, const pascal_expr_futur_t * &futur_next);
 extern bool r_evaluate_futur_step(const pascal_expr_futur_cell_t * futur_cell, pascal_stack_t * stack, const penv env, pmem mem);
@@ -350,5 +418,6 @@ extern bool l_evaluate_futur_step(const pascal_expr_futur_cell_t * futur_cell, p
 
 
 
+#endif 
 
 #endif /* PASCAL_EXPR_HPP */

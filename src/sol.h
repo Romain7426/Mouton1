@@ -1,20 +1,15 @@
 #ifndef SOL_H
 #define SOL_H
 
-//#include "ressource.h"
-#include "action.h"
-
-struct CTexture;
-struct TPoint2D;
-struct TPoint3D;
-
-struct TPointEcran;
+#define marche_compression_defaut 0.0050f
+#define nb_cases_afficheesX 25
+#define nb_cases_afficheesYfond 20
+#define nb_cases_afficheesYdevant 10
 
 struct TPointEcran {
   TPoint3D pt, normal;       
-};
+}; 
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(TPointEcran);
-DEFINE_NEW_OPERATOR_FOR_STRUCT(TPointEcran);
 
 
 
@@ -22,9 +17,11 @@ enum { NB_MAX_TEXTURESOL =  10 };
 
 
 
+//struct CSol; 
+//typedef struct CSol CSol; 
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CSol);
 // Cette structe stocke une carte
-struct CSol {
+struct CSol { 
   //protected:
   float ybase;
   float R, a;
@@ -41,7 +38,7 @@ struct CSol {
   // données de la carte
   float * Z; // tableaud de taille TailleX * TailleY
   
-  TPointEcran * PointsEcran;
+  struct TPointEcran * PointsEcran;
   int * indices_texture;
 
   // taille en case de la carte, c'est ChargerZ qui s'occupe de remplir ça
@@ -95,9 +92,12 @@ struct CSol {
 #if 0  
   void (* LookAt)(const CSol * this, float i, float j, float z); /*place la caméra au dessus du point (CSol * this, i, j)*/
   void (* LookAt)(const CSol * this, float i, float j, float z, float dist, float AngleXY, float AngleZ); /*place la caméra au dessus du point )(CSol * this, i, j)*/
-#else
+#elif 0 
   void (* LookAt_vSimple)(const CSol * this, float i, float j, float z);
   void (* LookAt_vCompliquee)(const CSol * this, float i, float j, float z, float dist, float AngleXY, float AngleZ);
+#else 
+  void (* LookAt)(const CSol * this, float i, float j, float z);
+  void (* LookAt_angle)(const CSol * this, float i, float j, float z, float dist, float AngleXY, float AngleZ);
 #endif
   void (* Render)(const CSol * this, int i1, int j1, int i2, int j2); /*dessine la partie du tore entre )(CSol * this, i1, j1) et )(CSol * this, i2, j2)*/
   void (* RenderEau)(const CSol * this, int i1, int j1, int i2, int j2);
@@ -131,9 +131,10 @@ struct CSol {
 
 
   
-};
-DEFINE_NEW_OPERATOR_FOR_STRUCT(CSol);
-
+}; 
+extern CSol * CSol_make(const bool EnVaisseau); 
+extern CSol * CSol_make_aux(CSol * this, const bool EnVaisseau); 
+extern void CSol_delete(CSol * this); 
 
 
 

@@ -8,180 +8,242 @@ CTexture * texAction2 = NULL;
 CTexture * texAction3 = NULL;
 
 void init_actions(void) {
-  texAction1 = new CTexture("action/action1.png");
-  texAction2 = new CTexture("action/action2.png");
-  texAction3 = new CTexture("action/action3.png");   
+  texAction1 = CTexture_make("action/action1.png"); 
+  texAction2 = CTexture_make("action/action2.png"); 
+  texAction3 = CTexture_make("action/action3.png"); 
 };
 
 
 void free_actions(void) {
-  delete texAction1;
-  delete texAction2;
-  delete texAction3;    
+  CTexture_delete(texAction1);
+  CTexture_delete(texAction2);
+  CTexture_delete(texAction3);    
 };
 
 
 static char * CopyString(const char * const filename) {
-  char* s = new char[strlen(filename)+1];
+  //char* s = new char[strlen(filename)+1];
+  char * s = (char *) malloc((sizeof(char)) * (strlen(filename)+1));
   strcpy(s, filename);
-  
   return s; 
-}
-
-CScriptLauncher::CScriptLauncher(const char * const filename, const char * const procedure_name) {
-  printf("DÈbut Constructeur CScriptLauncher::CScriptLauncher(%s, %s)\n", filename, procedure_name);
+}; 
+ 
+CScriptLauncher * CScriptLauncher_make(const char * const filename, const char * const procedure_name) {
+  printf("D√©but Constructeur CScriptLauncher::CScriptLauncher(%s, %s)\n", filename, procedure_name);
+  
+  CScriptLauncher * this = NULL; 
+  this = (CScriptLauncher *) malloc(sizeof(CScriptLauncher)); 
+  
   //resPascal = gestionPascal.prendre(filename);
   //char * newfilename = CopyString(filename);
   //P = new CPascal(filename);
-  resPascal = gestionPascal.prendre(filename);
+  //this -> resPascal = gestionPascal.prendre(filename);
+  //this -> resPascal = new CPascal(filename);
+  this -> resPascal = CPascal_make(filename);
   
-  printf("   cool on a captÈ la ressource pascal!!\n");
-  proc = CopyString(procedure_name);
+  printf("   cool on a capt√© la ressource pascal!!\n");
+  this -> proc = CopyString(procedure_name);
 
 
+
+  this -> Execute = CScriptLauncher__Execute; 
+  this -> init_step = CScriptLauncher__init_step; 
+  this -> execute_step = CScriptLauncher__execute_step; 
+  this -> stack_push_int = CScriptLauncher__stack_push_int; 
+  this -> stack_push_string = CScriptLauncher__stack_push_string; 
+
+  
   printf("Fin Constructeur CScriptLauncher\n");             
+  
+  return this; 
+}; 
 
-}
 
+void CScriptLauncher_delete(CScriptLauncher * this) {
+  free(this -> proc); 
+  CPascal_delete(this -> resPascal); 
+}; 
 
-CScriptLauncher::~CScriptLauncher(void) {
-  //delete resPascal;                               
-}
-
-void CScriptLauncher::Execute(void) {
-  printf("ExÈcution du ScriptLauncher...");   
+void CScriptLauncher__Execute(CScriptLauncher * this) {
+  printf("Ex√©cution du ScriptLauncher...");   
   SCRIPT_Init();
-  printf("      on va executer la procÈdure %s...\n", proc);
-  resPascal->getObject()->execProcedure(proc);
+  printf("      on va executer la proc√©dure %s...\n", this -> proc);
+  //this -> resPascal->getObject()->execProcedure(proc);
+  this -> resPascal -> execProcedure(this -> resPascal, this -> proc);
   //P->execProcedure(proc);
-  printf("      fin de l'exÈcution\n");
+  printf("      fin de l'ex√©cution\n");
   SCRIPT_Quit();
-  printf("      ExÈcution du ScriptLauncher rÈussie!!!");   
+  printf("      Ex√©cution du ScriptLauncher r√©ussie!!!");   
 }
 
-void CScriptLauncher::init_step(void) {
+void CScriptLauncher__init_step(CScriptLauncher * this) {
   SCRIPT_Init();
 
-  resPascal->getObject()->execProcedure_step(proc);
+  this -> resPascal -> execProcedure_step(this -> resPascal, this -> proc);
 }
 
-bool CScriptLauncher::execute_step(void) {
+bool CScriptLauncher__execute_step(CScriptLauncher * this) {
   bool fini_huh;
   int ret;
 
-  ret = resPascal->getObject()->next_step(fini_huh);
+  ret = this -> resPascal -> next_step(this -> resPascal, &fini_huh);
 
   return (fini_huh || ret != 0);
 }
 
-void CScriptLauncher::stack_push_int(int a) {
-  resPascal->getObject()->stack_push_int(a);
+void CScriptLauncher__stack_push_int(CScriptLauncher * this, int a) {
+  this -> resPascal -> stack_push_int(this -> resPascal, a);
 }
 
-void CScriptLauncher::stack_push_string(const char * str) {
-  resPascal->getObject()->stack_push_string(str);
+void CScriptLauncher__stack_push_string(CScriptLauncher * this, const char * str) {
+  this -> resPascal -> stack_push_string(this -> resPascal, str);
 }
 
 
 
 
 
+CActionsMenu * CActionsMenu_make(void) {
+  MALLOC_BZERO(CActionsMenu,this); 
+  this -> InputAndRender = CActionsMenu__InputAndRender; 
+  CMenuAbstrait_make_aux(&this -> parent); 
+  return this; 
+}; 
 
-bool CActionsMenu::InputAndRender(void) {
-  glEnable2D();   
-  int i = 0; //iphi = 0  
+void CActionsMenu_delete(CActionsMenu * this) {
+  CMenuAbstrait_delete_aux(&this -> parent); 
+  free(this); 
+}; 
+
+CActionsMenu * CActionsMenu_copy(const CActionsMenu * src) {
+  MALLOC_BZERO(CActionsMenu,this); 
+  *this = *src; 
+  CMenuAbstrait_copy_aux(&this -> parent, &src -> parent); 
+  return this; 
+}; 
+
+bool CActionsMenu__InputAndRender(CActionsMenu * this) { 
+  //MenuItem (* Items)[7][8] = &this -> parent.Items; 
+  MenuItem (* Items)[8] = this -> parent.Items; 
+  glEnable2D(); { 
+    int i = 0; //iphi = 0  
 #define NB_PIXEL_HAUTEUR_LIGNE 32.0f
 #define NB_PIXEL_DECAL_X 20
-  // on parcourt les items du sous-menus
-  int num_item_max = ProchainIndice(i);
-  for (int j = 0; j < num_item_max; j++) {
-#define  yy ACTIONS_MENU_Y - (int) (j*NB_PIXEL_HAUTEUR_LIGNE)
+    // on parcourt les items du sous-menus
+    int num_item_max = this -> parent.ProchainIndice(&this -> parent, i);
+    for (int j = 0; j < num_item_max; j++) {
+#define yy ACTIONS_MENU_Y - (int) (j*NB_PIXEL_HAUTEUR_LIGNE)
 #define xx ACTIONS_MENU_X+j*NB_PIXEL_DECAL_X
-    Text->print(xx+40, yy, 1000,1000,Items[i][j].nom);
-                    
-    if(Items[i][j].texture != NULL)
-      {
-        glEnable(GL_TEXTURE_2D);
-        Items[i][j].texture->GLTextureCourante();
-   
-        BEGIN_BLIT_END(xx, yy, 32,32, 0.0f, 0.0f, 1.0f, 1.0f);
+      Text -> print1(Text, xx+40, yy, 1000,1000, Items[i][j].nom);
+      
+      if (Items[i][j].texture != NULL) {
+	glEnable(GL_TEXTURE_2D);
+	Items[i][j].texture -> GLTextureCourante(Items[i][j].texture);
+	
+	BEGIN_BLIT_END(xx, yy, 32,32, 0.0f, 0.0f, 1.0f, 1.0f);
       } 
-    else
-      {
-        switch(j) {
-        case 0: texAction1->GLTextureCourante();  break;       
-        case 1: texAction2->GLTextureCourante();  break;      
-        case 2: texAction3->GLTextureCourante();  break;      
-        default: assert(false);
-        }
-        BEGIN_BLIT_END(xx, yy, 32,32, 0.0f, 0.0f, 1.0f, 1.0f);
-      }
-                
-  }   
+      else {
+	switch(j) {
+	case 0: texAction1 -> GLTextureCourante(texAction1);  break;       
+	case 1: texAction2 -> GLTextureCourante(texAction2);  break;      
+	case 2: texAction3 -> GLTextureCourante(texAction3);  break;      
+	default: assert(false);
+	}; 
+	BEGIN_BLIT_END(xx, yy, 32,32, 0.0f, 0.0f, 1.0f, 1.0f);
+      }; 
+      
+    }; 
     
     
-  if(KEY_ACTION1)
-    ((CScriptLauncher*) (Items[0][0 /*action n∞ 1 - 1*/].qch))->Execute();
-         
-  if(KEY_ACTION2)
-    if (CScriptLauncher* c = (CScriptLauncher*) (Items[0][1 /*action n∞ 2 - 1*/].qch))
-      c->Execute();
-  if(KEY_ACTION3)
-    if (CScriptLauncher*c = (CScriptLauncher*) (Items[0][2 /*action n∞ 3 - 1*/].qch))
-      c->Execute();
-
-  glDisable2D();
-        
-     
+    if (KEY_ACTION1) { 
+      CScriptLauncher * c = Items[0][0 /*action n¬∞ 1 - 1*/].qch; 
+      if (NULL != c) c -> Execute(c); 
+    }; 
+    
+    if(KEY_ACTION2) {
+      CScriptLauncher * c = (CScriptLauncher *) (Items[0][1 /*action n¬∞ 2 - 1*/].qch); 
+      if (NULL != c) c -> Execute(c); 
+    }; 
+    
+    if(KEY_ACTION3) { 
+      CScriptLauncher * c = (CScriptLauncher *) (Items[0][2 /*action n¬∞ 3 - 1*/].qch); 
+      if (NULL != c) c -> Execute(c); 
+    }; 
+  
+  } glDisable2D();
+  
+  
   return false;
-}
+}; 
 
 
 
+CObjActionnable * CObjActionnable_make_aux(CObjActionnable * this) { 
+  this -> InputAndRenderActionMenu = CObjActionnable__InputAndRenderActionMenu; 
+  this -> AjouterAction = CObjActionnable__AjouterAction; 
+  this -> actions = NULL; 
+  return this; 
+}; 
 
-CObjActionnable::CObjActionnable() : actions(NULL) {}
+CObjActionnable * CObjActionnable_make(void) { 
+  CObjActionnable * this = NULL; 
+  this = (CObjActionnable *) malloc(sizeof(CObjActionnable)); 
+  return CObjActionnable_make_aux(this); 
+}; 
 /*pourquoi ne pas allouer actions ????
-  parce que si un objet n'a pas d'actions, c'est dÈbile de gaspiller de la mÈmoire
-  Si tous les arbres de la carte avaient leur menu d'actions allouÈ, Áa
+  parce que si un objet n'a pas d'actions, c'est d√©bile de gaspiller de la m√©moire
+  Si tous les arbres de la carte avaient leur menu d'actions allou√©, √ßa
   serait la fin du monde*/
- 
- 
-CObjActionnable::~CObjActionnable()
-{
-  delete actions; /*rem : delete NULL Áa marche*/                                   
-                                   
-}
- 
- 
-void CObjActionnable::InputAndRenderActionMenu()
-{
-  if(actions!= NULL)
-    actions->InputAndRender();
-     
-}
 
-void CObjActionnable::AjouterAction(const char * caption,
+ 
+CObjActionnable * CObjActionnable_copy_aux(CObjActionnable * this, const CObjActionnable * src) {
+  *this = *src;
+  if (src -> actions != NULL) {
+    this -> actions = CActionsMenu_copy(src -> actions); 
+  }; 
+  return this;
+}; 
+
+CObjActionnable * CObjActionnable_copy(const CObjActionnable * src) {
+  MALLOC_BZERO(CObjActionnable,this); 
+  return CObjActionnable_copy_aux(this, src); 
+}; 
+ 
+
+ 
+void CObjActionnable_delete_aux(CObjActionnable * this) {
+  if (this -> actions != NULL) {
+    CActionsMenu_delete(this -> actions); 
+  };
+}; 
+ 
+void CObjActionnable_delete(CObjActionnable * this) {
+  CObjActionnable_delete_aux(this);
+  free(this); 
+}; 
+ 
+void CObjActionnable__InputAndRenderActionMenu(CObjActionnable * this) {
+  if (this -> actions != NULL)
+    this -> actions -> InputAndRender(this -> actions); 
+};
+
+void CObjActionnable__AjouterAction(CObjActionnable * this, const char * caption,
                                     const char * nom_texture,
                                     const char * fichier_pascal,
                                     const char * proc)
-/*spÈcification d'entrÈe : si nom_texture == NULL ou nom_texture == "" alors 
+/*sp√©cification d'entr√©e : si nom_texture == NULL ou nom_texture == "" alors 
   il n'y a pas de textures*/
 {
-  printf("CObjActionnable::CObjActionnable(...)\n");       
-  if(actions == NULL) {
-    printf("Pour ajouter l'action, je dois d'abord crÈer un menu pour l'accueillir.\n");           
-    actions = new CActionsMenu();
-    printf("     CrÈation du menu action rÈussi : pointeur = %p\n", actions); 
-  }
+  printf("CObjActionnable__AjouterAction(...)\n");       
+  if (this -> actions == NULL) {
+    printf("Pour ajouter l'action, je dois d'abord cr√©er un menu pour l'accueillir.\n");           
+    this -> actions = CActionsMenu_make();
+    printf("     Cr√©ation du menu action r√©ussi : pointeur = %p\n", this -> actions); 
+  }; 
   
-  /*  printf("     CrÈ");         
-      CPascal* P = new CPascal( fichier_pascal);
-      printf("     aze");*/
-  
-  CScriptLauncher * sl = new CScriptLauncher(fichier_pascal, proc);
-  actions->Add(0, caption, nom_texture, sl);    
-  printf("     Action ajoutÈe !!!\n");        
-                   
-}
+  CScriptLauncher * sl = CScriptLauncher_make(fichier_pascal, proc);
+  this -> actions -> parent.Add_qch(&this -> actions -> parent, 0, caption, nom_texture, sl);    
+  printf("     Action ajout√©e !!!\n");        
+}; 
 
 

@@ -1,54 +1,42 @@
 #include "global.h"
 #include "sol.h"
 
-#define marche_compression_defaut 0.0050f
 
 /* précision, nb_phi, nb_theta pour le tore */
 
-
-#define nb_cases_afficheesX 25
-#define nb_cases_afficheesYfond 20
-#define nb_cases_afficheesYdevant 10
-
-
-
-#if 0
-static CSol(CSol * this, const bool EnVaisseau);
-static ~CSol(CSol * this, );
-#endif
-
-static void SETZ(CSol * this, int x, int y, float z);
+#if 0 
+static void SETZ(CSol * this, int x, int y, const float z);
 static void SETINDTEXTURE(CSol * this, int x, int y, int ind);
 static void AjouterTextureSol(CSol * this, const char * s, int indice_dans_bitmap);
 static void ChargerIndiceTextureBitmap(CSol * this, const char * fichier_bitmap);
-static void Blit(CSol * this, float i, float j, float z, CTexture* tex, float taillex, float tailleh);
-static void Cube(CSol * this, float i, float j, float z, float taillex, float tailleh);
-static void MatricePourDessiner(CSol * this, float i, float j);
+static void Blit(CSol * this, const float i, const float j, const float z, CTexture* tex, const float taillex, const float tailleh);
+static void Cube(CSol * this, const float i, const float j, const float z, const float taillex, const float tailleh);
+static void MatricePourDessiner(CSol * this, const float i, const float j);
 static void ChargerZ(CSol * this, const char * filename);	
-static void SetTemps(CSol * this, float temps);
+static void SetTemps(CSol * this, const float temps);
 
 static int GETINDTEXTURE(const CSol * this, int x, int y);
-static TPoint3D GetPoint3D(const CSol * this, float i, float j, float z);
+static TPoint3D GetPoint3D(const CSol * this, const float i, const float j, const float z);
 static void tore(const CSol * this, int i,int j);
 static void tore0(const CSol * this, int i,int j);
 static void CalcPoints(const CSol * this, int i1, int j1, int i2, int j2);
 static int GetTailleX(const CSol * this);
 static int GetTailleY(const CSol * this);
-static void AfficherCube(const CSol * this, float x1, float y1, float z1, float dx, float dy, float dz);
-static float FacteurCompression(const CSol * this, float j);
-static float IndiceTemps(const CSol * this, float j);
-static void LookAt(const CSol * this, float i, float j, float z); /*place la caméra au dessus du point (const CSol * this, i, j)*/
-static void LookAt(const CSol * this, float i, float j, float z, float dist, float AngleXY, float AngleZ); /*place la caméra au dessus du point (const CSol * this, i, j)*/
+static void AfficherCube(const CSol * this, const float x1, const float y1, const float z1, const float dx, const float dy, const float dz);
+static float FacteurCompression(const CSol * this, const float j);
+static float IndiceTemps(const CSol * this, const float j);
+static void LookAt(const CSol * this, const float i, const float j, const float z); /*place la caméra au dessus du point (const CSol * this, i, j)*/
+static void LookAt(const CSol * this, const float i, const float j, const float z, const float dist, const float AngleXY, const float AngleZ); /*place la caméra au dessus du point (const CSol * this, i, j)*/
 static void Render(const CSol * this, int i1, int j1, int i2, int j2); /*dessine la partie du tore entre (const CSol * this, i1, j1) et (const CSol * this, i2, j2)*/
 static void RenderEau(const CSol * this, int i1, int j1, int i2, int j2);
-static bool yatilEau(const CSol * this, float i, float j, float z);
+static bool yatilEau(const CSol * this, const float i, const float j, const float z);
 static void PositionModulo(const CSol * this, float& i, float& j);
-static TPoint2D Differentiel(const CSol * this, TPoint3D pos);
-static float GETZ(const CSol * this, float x, float y);
-static void MatricePour2D(const CSol * this, float i, float j, float z);
-static void glVertexTore(const CSol * this, float x, float y, float z);
+static TPoint2D Differentiel(const CSol * this, const TPoint3D pos);
+static float GETZ(const CSol * this, const float x, const float y);
+static void MatricePour2D(const CSol * this, const float i, const float j, const float z);
+static void glVertexTore(const CSol * this, const float x, const float y, const float z);
 static float GetTemps(const CSol * this);
-
+#endif 
 
 
 
@@ -76,128 +64,174 @@ static float GetTemps(const CSol * this);
 #define RANDINT(min, max) (rand()%((max)-(min))+(min))
 
 #define float_cjsj(j) \
-  float cj = cosf(temps+(float) 2*PI*(j - ybase)/nb_theta); \
-  float sj = sinf(temps+(float)2*PI*(j - ybase)/nb_theta);
+  const float cj = cosf(this -> temps+(float) 2*PI*(j - this -> ybase)/this -> nb_theta); \
+  const float sj = sinf(this -> temps+(float) 2*PI*(j - this -> ybase)/this -> nb_theta);
 
 
 
 
 
-void CSol::AfficherCube(float x1, float y1, float z1, float dx, float dy, float dz) const {
-                         
+void CSol__AfficherCube(const CSol * this, const float x1, const float y1, const float z1, const float dx, const float dy, const float dz) {
   glBegin(GL_LINES); {
-    for (int xx = 0; xx <=1; xx++)
-      for (int yy = 0; yy <=1; yy++)
-        for (int zz = 0;zz <=1; zz++) {
-          glVertexTore(x1, y1 + yy*dy, z1 + zz*dz);
-          glVertexTore(x1, y1 + yy*dy, z1 + zz*dz);
+    for (int xx = 0; xx <= 1; xx++) {
+      for (int yy = 0; yy <= 1; yy++) {
+        for (int zz = 0;zz <= 1; zz++) {
+          this -> glVertexTore(this, x1, y1 + yy*dy, z1 + zz*dz);
+          this -> glVertexTore(this, x1, y1 + yy*dy, z1 + zz*dz);
           
-          glVertexTore(x1 + xx*dx, y1, z1 + zz*dz );
-          glVertexTore(x1 + xx*dx, y1 + dy, z1 + zz*dz);
+          this -> glVertexTore(this, x1 + xx*dx, y1, z1 + zz*dz );
+          this -> glVertexTore(this, x1 + xx*dx, y1 + dy, z1 + zz*dz);
           
-          glVertexTore(x1 + xx*dx, y1 +yy*dy, z1);
-          glVertexTore(x1 + xx*dx, y1 + yy*dy, z1 + dz);
-        }
+          this -> glVertexTore(this, x1 + xx*dx, y1 +yy*dy, z1);
+          this -> glVertexTore(this, x1 + xx*dx, y1 + yy*dy, z1 + dz);
+        };
+      };
+    };
   } glEnd();                        
-                         
-}
+}; 
 
 
-CSol::CSol(const bool EnVaisseau) : ybase(0.0f), nb_texture(0), Z(NULL), PointsEcran(NULL) {
-  printf("Constructeur CSol::CSol()\n");
-
+CSol * CSol_make_aux(CSol * this, const bool EnVaisseau) {
+  assert(false); 
+#if 0
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+  ASSIGN_METHOD(CSol,this,); 
+#endif   
+  
+  this -> ybase = 0.0f; 
+  this -> nb_texture = 0; 
+  this -> Z = NULL; 
+  this -> PointsEcran = NULL; 
+  
   if (!EnVaisseau) {
-    R = 900.0f;
-    
+    this -> R = 900.0f;
     //plus a est petit, moins on voit la compression du tore
-    a = (R/3.0f);
-  
-    nb_phi = ((int)R/4);
-    
-    nb_theta = (int) (nb_phi/1.618f);
+    this -> a = (this -> R/3.0f);
+    this -> nb_phi = ((int)this -> R/4);
+    this -> nb_theta = (int) (this -> nb_phi/1.618f);
   }
-  
   else {
-    R = 384.0f;
-    a = (R/4.0f);
-    nb_phi = 63;
-    nb_theta = 31;
-  }
- 
-}
+    this -> R = 384.0f;
+    this -> a = (this -> R/4.0f);
+    this -> nb_phi = 63;
+    this -> nb_theta = 31;
+  };
+  return this; 
+}; 
 
-CSol::~CSol() {
-     printf("Destruction du sol %p\n", this);         
-     delete [] indices_texture;
-     delete [] Z;
-     delete [] PointsEcran;
-}
+CSol * CSol_make(const bool EnVaisseau) {
+  printf("Constructeur CSol__CSol()\n");
+  MALLOC_BZERO(CSol,this); 
+  return CSol_make_aux(this, EnVaisseau); 
+};
+
+void CSol_delete(CSol * this) {
+  printf("Destruction du sol %p\n", this);         
+  //delete [] indices_texture;
+  for (int i = 0; i < this -> nb_texture; i++) {
+    CTexture_delete(this -> TextureSol[i]);
+  }; 
+  free(this -> indices_texture); 
+  free(this -> Z);
+  free(this -> PointsEcran);
+  free(this);
+};
 
 
-int CSol::GetTailleX(void) const {
-  return TailleX; 
+int CSol__GetTailleX(const CSol * this) {
+  return this -> TailleX; 
+};   
+
+
+int CSol__GetTailleY(const CSol * this) {
+  return this -> TailleY;
 }    
 
+#define TEST_X_Y(x, y) ((0<=x) && (x < this -> TailleX) && (0<=y) && (y < this -> TailleY))
 
-int CSol::GetTailleY() const {
-  return TailleY;
-}    
+void CSol__SETZ(CSol * this, const int x, const int y, const float z) {
+  if (!TEST_X_Y(x, y)) {
+    printf("ERREUR : Débordement de tableau dans Z avec (%i, %i)\n", x, y);
+    return;
+  }; 
 
-#define TEST_X_Y(x, y) ((0<=x) && (x < TailleX) && (0<=y) && (y < TailleY))
+  this -> Z[(y)*this -> TailleX+(x)] = z;
+}; 
 
-void CSol::SETZ(int x, int y, float z) {
-    if (TEST_X_Y(x, y))
-            Z[(y)*TailleX+(x)] = z;
-    else
-         printf("ERREUR : Débordement de tableau dans Z avec (%i, %i)\n", x, y);
-}
-
-
-void CSol::SETINDTEXTURE(int x, int y, int ind) {
-  if (TEST_X_Y(x, y))
-      indices_texture[(y)*TailleX+(x)] = ind;
-  else
-      printf("ERREUR : Débordement de tableau d'indice de textures en écriture avec (%i, %i)\n", x, y);
-}
+void CSol__SETINDTEXTURE(CSol * this, const int x, const int y, const int ind) {
+  if (!TEST_X_Y(x, y)) {
+    printf("ERREUR : Débordement de tableau d'indice de textures en écriture avec (%i, %i)\n", x, y);
+    return; 
+  };
+  this -> indices_texture[(y)*this -> TailleX+(x)] = ind;
+}; 
 
 
-int CSol::GETINDTEXTURE(int x, int y) const {
-   int ii = 0;
+int CSol__GETINDTEXTURE(const CSol * this, const int x, const int y) {
+  int ii = 0;
   
-    if ((0<=x) && (x < TailleX) && (0<=y) && (y < TailleY)) 
-        ii = indices_texture[(y)*TailleX+(x)];
-    else
-      printf("ERREUR : Débordement de tableau d'indice de textures en lecture avec (%i, %i)\n", x, y);
-      
-      
+  if ((0<=x) && (x < this -> TailleX) && (0<=y) && (y < this -> TailleY)) 
+    ii = this -> indices_texture[(y)*this -> TailleX+(x)];
+  else
+    printf("ERREUR : Débordement de tableau d'indice de textures en lecture avec (%i, %i)\n", x, y);
+  
+  
   return ii;
-}
+};
 
 
-float CSol::GETZ(float x, float y) const {
+float CSol__GETZ(const CSol * this, float x, float y) {
   /*x dans [0, nb_phi], y dans [0, nb_theta]*/
   /*on fait une interpolation pour connaître l'altitude (en fait, elle n'est connue que sur un maillage)*/
   
-  PositionModulo(x, y);
-  int ix = (int) floor(x);
-  int iy = (int) floor(y);
+  this -> PositionModulo(this, &x, &y);
+  const int ix = (int) floor(x);
+  const int iy = (int) floor(y);
   
-  float lx = x - ix;
-  float ly = y - iy;
+  const float lx = x - ix;
+  const float ly = y - iy;
   
 #if 0
-#define ZZ(ind) ((((ind) >= 0) && ((ind) < (TailleX+1)*(TailleY+1))) ? Z[(ind)] : 0)
-  float z00 = ZZ(iy*TailleX+ix);
-  float z10 = ZZ(iy*TailleX+ix+1);
-  float z01 = ZZ((iy+1)*TailleX+ix);
-  float z11 = ZZ((iy+1)*TailleX+ix+1);
+#define ZZ(ind) ((((ind) >= 0) && ((ind) < (this -> TailleX+1)*(this -> TailleY+1))) ? this -> Z[(ind)] : 0)
+  const float z00 = ZZ(iy*this -> TailleX+ix);
+  const float z10 = ZZ(iy*this -> TailleX+ix+1);
+  const float z01 = ZZ((iy+1)*this -> TailleX+ix);
+  const float z11 = ZZ((iy+1)*this -> TailleX+ix+1);
 #else
-#define ZIND(x,y) ((y)*TailleX+(x))
-#define ZZ(x,y) (((((x) >= 0) && ((y) >= 0) && ((x) < TailleX) && ((y) < TailleY))) ? Z[(ZIND((x),(y)))] : 0)
-  float z00 = ZZ(ix,iy);
-  float z10 = ZZ(ix+1,iy);
-  float z01 = ZZ(ix,iy+1);
-  float z11 = ZZ(ix+1,iy+1);
+#define ZIND(x,y) ((y)*this -> TailleX+(x))
+#define ZZ(x,y) (((((x) >= 0) && ((y) >= 0) && ((x) < this -> TailleX) && ((y) < this -> TailleY))) ? this -> Z[(ZIND((x),(y)))] : 0)
+  const float z00 = ZZ(ix,iy);
+  const float z10 = ZZ(ix+1,iy);
+  const float z01 = ZZ(ix,iy+1);
+  const float z11 = ZZ(ix+1,iy+1);
 #endif
 
   return ((z00 * (1 - lx) + z10 * lx) * (1 - ly) + (z01 *(1 - lx) + z11 * lx) * ly);
@@ -210,45 +244,44 @@ float CSol::GETZ(float x, float y) const {
 
 
 
-float CSol::FacteurCompression(float j) const {
-
-  return (R+a*cosf(temps+2*PI*(j - ybase)/nb_theta))/R;
-
+float CSol__FacteurCompression(const CSol * this, const float j) {
+  return (this -> R + this -> a * cosf(this -> temps+2*PI*(j - this -> ybase)/this -> nb_theta)) / this -> R;
   //return sqrt(sqr(R+a*cosf(t+2*PI*j/nb_theta)) - sqr(a*sinf(t+2*PI*j/nb_theta)) );
-}
+}; 
 
 
-float CSol::IndiceTemps(float j) const {
+float CSol__IndiceTemps(const CSol * this, const float j) {
   /*renvoie 0 la nuit et 1 quand l'anneau est au zénith*/
-  return (1.0f+cosf(temps+2*PI*(j - ybase)/nb_theta))/2.0f;
+  return (1.0f+cosf(this -> temps+2*PI*(j - this -> ybase)/this -> nb_theta))/2.0f;
   //	return sqrt(sqr(R+a*cosf(t+2*PI*j/nb_theta)) - sqr(a*sinf(t+2*PI*j/nb_theta)) );
-}
+};
 
 
-void CSol::glVertexTore(float x, float y, float z) const {
-  float cj = cosf(temps+(float) 2*PI*(y - ybase)/nb_theta);
-  float sj = sinf(temps+(float) 2*PI*(y - ybase)/nb_theta);
+void CSol__glVertexTore(const CSol * this, const float x, const float y, const float z) {
+  const float cj = cosf(this -> temps+(float) 2*PI*(y - this -> ybase)/this -> nb_theta);
+  const float sj = sinf(this -> temps+(float) 2*PI*(y - this -> ybase)/this -> nb_theta);
 
-  float ci = cosf((float)2*PI*(x)/nb_phi);
-  float si = sinf((float)2*PI*(x)/nb_phi);
+  const float ci = cosf((float)2*PI*(x)/this -> nb_phi);
+  const float si = sinf((float)2*PI*(x)/this -> nb_phi);
 	
-  glVertex3f((R + (a + z) * cj) * ci, (R + (a + z) * cj) * si, (a + z) * sj); 
-}
+  glVertex3f((this -> R + (this -> a + z) * cj) * ci, (this -> R + (this -> a + z) * cj) * si, (this -> a + z) * sj); 
+};
 
 
 
 
-void CSol::CalcPoints(int i1, int j1, int i2, int j2) const {
-  if (PointsEcran == NULL)
-    printf("ERREUR: La variable PointsEcran est à NULL. Ce n'est pas normal. Pt un problème dans le .carte. (style un - qui n'est pas -. ... vive Romain!)\n"); 
+void CSol__CalcPoints(const CSol * this, const int i1, const int j1, const int i2, const int j2) {
+  if (this -> PointsEcran == NULL)
+    //printf("ERREUR: La variable PointsEcran est à NULL. Ce n'est pas normal. Pt un problème dans le .carte. (style un - qui n'est pas -. ... vive Romain!)\n"); 
+    printf("ERREUR: La variable PointsEcran est à NULL. Ce n'est pas normal. Pt un problème dans le .carte. (style un - qui n'est pas -. !)\n"); 
 
   for (int j = j1; j<=j2; j++) {
-    float cj = cosf(temps+(float) 2*PI*(j - ybase)/nb_theta);
-    float sj = sinf(temps+(float)2*PI*(j - ybase)/nb_theta);    
+    float cj = cosf(this -> temps+(float) 2*PI*(j - this -> ybase)/this -> nb_theta);
+    float sj = sinf(this -> temps+(float) 2*PI*(j - this -> ybase)/this -> nb_theta);    
 
     for (int i = i1; i<=i2; i++) {
-      float ci = cosf((float)2*PI*(i)/nb_phi);
-      float si = sinf((float)2*PI*(i)/nb_phi);
+      float ci = cosf((float)2*PI*(i)/this -> nb_phi);
+      float si = sinf((float)2*PI*(i)/this -> nb_phi);
       
       
       /*
@@ -256,33 +289,34 @@ void CSol::CalcPoints(int i1, int j1, int i2, int j2) const {
         (R+( a+GETZ((i),(j)) ) *cosf(t+(float)2*PI*(j)/nb_theta) ) * sinf((float)2*PI*(i)/nb_phi)
         ( a+GETZ((i),(j)) ) *sinf(t+(float)2*PI*(j)/nb_theta) */
       TPoint3D df_theta, df_phi, normal;
-      float zsol = GETZ((i),(j));
-      df_theta.x = -(R+( a+zsol )*sj ) * ci;
-      df_theta.y = -(R+( a+zsol )*sj ) * si;
-      df_theta.z =     ( a+zsol )*cj ;
+      float zsol = this -> GETZ(this, (i),(j));
+      df_theta.x = -(this -> R+( this -> a+zsol )*sj ) * ci;
+      df_theta.y = -(this -> R+( this -> a+zsol )*sj ) * si;
+      df_theta.z =     ( this -> a+zsol )*cj ;
       
-      df_phi.x = -(R+( a+zsol )*cj) * si;
-      df_phi.y =  (R+( a+zsol )* cj) * ci;
+      df_phi.x = -(this -> R+( this -> a+zsol )*cj) * si;
+      df_phi.y =  (this -> R+( this -> a+zsol )* cj) * ci;
       df_phi.z =  0;
         
-      normal = df_theta ^ df_phi;
+      //normal = df_theta ^ df_phi;
+      normal = TPoint3D_normale(df_theta, df_phi);
       
-#define TESTINDICEPointsEcran(i) (!((0 <= (i)) & ((i) < (TailleX)*(TailleY))))
+#define TESTINDICEPointsEcran(i) (!((0 <= (i)) & ((i) < (this -> TailleX)*(this -> TailleY))))
           
-      if (TESTINDICEPointsEcran(j*TailleX+i))
+      if (TESTINDICEPointsEcran(j*this -> TailleX+i))
         printf("ERREUR: Ecriture dans PointsEcran incorrecte (%i, %i) \n", i, j);
       else {
-        PointsEcran[j*TailleX+i].normal = normal;
-        PointsEcran[j*TailleX+i].pt.x = (R + (a+GETZ((i),(j)) ) *cj) * ci;
-        PointsEcran[j*TailleX+i].pt.y = (R + (a+GETZ((i),(j)) ) *cj) * si;
-        PointsEcran[j*TailleX+i].pt.z =      (a+GETZ((i),(j)) ) *sj;
+        this -> PointsEcran[j*this -> TailleX+i].normal = normal;
+        this -> PointsEcran[j*this -> TailleX+i].pt.x = (this -> R + (this -> a + this -> GETZ(this, (i),(j)) ) *cj) * ci;
+        this -> PointsEcran[j*this -> TailleX+i].pt.y = (this -> R + (this -> a + this -> GETZ(this, (i),(j)) ) *cj) * si;
+        this -> PointsEcran[j*this -> TailleX+i].pt.z =              (this -> a + this -> GETZ(this, (i),(j)) ) *sj;
       }
     }
   }
-}
+};
 
 
-void CSol::tore(int i,int j) const {
+void CSol__tore(const CSol * this, const int i, const int j) {
 
 /*
   if (i < 0) i += nb_phi;
@@ -291,94 +325,96 @@ void CSol::tore(int i,int j) const {
   if (i >= nb_phi) i -= nb_phi;
   if (j >= nb_theta) j -= nb_theta;*/
 
-  if (TESTINDICEPointsEcran(j*TailleX+i))
+  if (TESTINDICEPointsEcran(j*this -> TailleX+i))
     printf("ERREUR : Lecture dans PointsEcran incorrecte (%i, %i)\n ", i, j);
 
-  glNormal3fv((float*) &PointsEcran[j*TailleX+i].normal);
-  glVertex3f(PointsEcran[j*TailleX+i].pt.x, 
-             PointsEcran[j*TailleX+i].pt.y, 
-             PointsEcran[j*TailleX+i].pt.z);
+  glNormal3fv((float*) &this -> PointsEcran[j*this -> TailleX+i].normal);
+  glVertex3f(this -> PointsEcran[j*this -> TailleX+i].pt.x, 
+             this -> PointsEcran[j*this -> TailleX+i].pt.y, 
+             this -> PointsEcran[j*this -> TailleX+i].pt.z);
 }
 
 
 
-void CSol::tore0(int i, int j) const {
-  if (i < 0) i += nb_phi;
-  if (j < 0) j += nb_theta;
+void CSol__tore0(const CSol * this, int i, int j) {
+  if (i < 0) i += this -> nb_phi;
+  if (j < 0) j += this -> nb_theta;
 
-  if (i >= nb_phi) i -= nb_phi;
-  if (j >= nb_theta) j -= nb_theta;
+  if (i >= this -> nb_phi) i -= this -> nb_phi;
+  if (j >= this -> nb_theta) j -= this -> nb_theta;
 
   float_cjsj(j);
 
-  float ci = cosf((float)2*PI*(i)/nb_phi);
-  float si = sinf((float)2*PI*(i)/nb_phi);
-  /*	(R+( a+GETZ((i),(j)) )  *cosf(t+(float)2*PI*(j)/nb_theta) ) * cosf((float)2*PI*(i)/nb_phi)
-	(R+( a+GETZ((i),(j)) ) *cosf(t+(float)2*PI*(j)/nb_theta) ) * sinf((float)2*PI*(i)/nb_phi)
-	( a+GETZ((i),(j)) ) *sinf(t+(float)2*PI*(j)/nb_theta) */
+  const float ci = cosf((float)2*PI*(i)/this -> nb_phi);
+  const float si = sinf((float)2*PI*(i)/this -> nb_phi);
+  /*	(R+( a+GETZ((i),(j)) )  *cosf(t+(float)2*PI*(j)/this -> nb_theta) ) * cosf((float)2*PI*(i)/this -> nb_phi)
+	(R+( a+GETZ((i),(j)) ) *cosf(t+(float)2*PI*(j)/this -> nb_theta) ) * sinf((float)2*PI*(i)/this -> nb_phi)
+	( a+GETZ((i),(j)) ) *sinf(t+(float)2*PI*(j)/this -> nb_theta) */
   TPoint3D df_theta, df_phi, normal;
 
-  df_theta.x = -(R + (a + ZEau) * sj) * ci;
-  df_theta.y = -(R + (a + ZEau) * sj) * si;
-  df_theta.z =       (a + ZEau) * cj;
+  df_theta.x = -(this -> R + (this -> a + this -> ZEau) * sj) * ci;
+  df_theta.y = -(this -> R + (this -> a + this -> ZEau) * sj) * si;
+  df_theta.z =               (this -> a + this -> ZEau) * cj;
 
-  df_phi.x = -(R+( a+ZEau )*cj) * si;
-  df_phi.y =  (R+( a+ZEau )* cj ) * ci;
+  df_phi.x = -(this -> R+( this -> a+this -> ZEau )*cj) * si;
+  df_phi.y =  (this -> R+( this -> a+this -> ZEau )* cj ) * ci;
   df_phi.z =  0;
 
-  normal = df_theta ^ df_phi;
+  //normal = df_theta ^ df_phi;
+  normal = TPoint3D_normale(df_theta, df_phi);
+
   glNormal3fv((float*)&normal);
-  glVertex3f((R + (a + ZEau) * cj) * ci, (R + (a + ZEau) * cj) * si, (a + ZEau) *sj);
+  glVertex3f((this -> R + (this -> a + this -> ZEau) * cj) * ci, (this -> R + (this -> a + this -> ZEau) * cj) * si, (this -> a + this -> ZEau) *sj);
 }
 
 
 
-void CSol::PositionModulo(float &i, float &j) const {
-  if (i < 0)
-    i += nb_phi;
+void CSol__PositionModulo(const CSol * this, float * i_ref, float * j_ref) {
+  if (*i_ref < 0)
+    *i_ref += this -> nb_phi;
           
-  if (i >= nb_phi)
-    i -= nb_phi;
+  if (*i_ref >= this -> nb_phi)
+    *i_ref -= this -> nb_phi;
           
           
-  if (j < 0)
-    j += nb_theta;
+  if (*j_ref < 0)
+    *j_ref += this -> nb_theta;
           
-  if (j >= nb_theta)
-    j -= nb_theta;
-}
+  if (*j_ref >= this -> nb_theta)
+    *j_ref -= this -> nb_theta;
+};
 
 
 
 
-void CSol::LookAt(float i, float j, float z) const {
+void CSol__LookAt(const CSol * this, const float i, const float j, float z) {
 #define theta_vue -0.15f
 #define phi_vue 0.0f
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
 
   float_cjsj(j);
-  float cjp = cosf(theta_vue+temps+2*PI*(j-ybase)/nb_theta);
-  float sjp = sinf(theta_vue+temps+2*PI*(j-ybase)/nb_theta);
+  const float cjp = cosf(theta_vue+this -> temps+2*PI*(j-this -> ybase)/this -> nb_theta);
+  const float sjp = sinf(theta_vue+this -> temps+2*PI*(j-this -> ybase)/this -> nb_theta);
 	
-  float cip = cosf(phi_vue+2*PI*(i)/nb_phi);
-  float sip = sinf(phi_vue+2*PI*(i)/nb_phi);
-  float ci = cosf(2*PI*(i)/nb_phi);
-  float si = sinf(2*PI*(i)/nb_phi);
+  const float cip = cosf(phi_vue+2*PI*(i)/this -> nb_phi);
+  const float sip = sinf(phi_vue+2*PI*(i)/this -> nb_phi);
+  const float ci = cosf(2*PI*(i)/this -> nb_phi);
+  const float si = sinf(2*PI*(i)/this -> nb_phi);
 
-  z = a+z;
-  gluLookAt((R+(z+HauteurCamera) *cjp )*cip, //position de la caméra
-	    (R+(z+HauteurCamera) *cjp )*sip,
+  z += this -> a;
+  gluLookAt((this -> R+(z+HauteurCamera) *cjp )*cip, //position de la caméra
+	    (this -> R+(z+HauteurCamera) *cjp )*sip,
                (z+HauteurCamera) *sjp,
 
-	    (R+(z) *cj ) * ci, //on regarde le point
-	    (R+(z) *cj ) * si,
+	    (this -> R+(z) *cj ) * ci, //on regarde le point
+	    (this -> R+(z) *cj ) * si,
 	    (z) *sj ,
 
 	    -sj*ci+0*(-si), //vecteur qui pointe vers le haut
 	    -sj*(si)+0*ci,
 	    cj);
-}
+}; 
 
 
 
@@ -386,27 +422,27 @@ void CSol::LookAt(float i, float j, float z) const {
 
 
 
-void CSol::LookAt(float i, float j, float z, float dist, float AngleXY, float AngleZ) const {
+void CSol__LookAt_angle(const CSol * this, const float i, const float j, const float z, const float dist, const float AngleXY, const float AngleZ) {
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );  
   
   
-  TPoint3D p = GetPoint3D(i, j, z); //point que l'on regarde (généralement c'est le héros !!)
+  const TPoint3D p = this -> GetPoint3D(this, i, j, z); //point que l'on regarde (généralement c'est le héros !!)
 
-  TPoint3D ux = GetPoint3D(i+1.0f, j, z) - p;
-  TPoint3D uy = GetPoint3D(i, j+1.0f, z) - p;
-  TPoint3D uz = GetPoint3D(i, j, z+1.0f) - p; 
+  TPoint3D ux = TPoint3D_sub(this -> GetPoint3D(this, i+1.0f, j, z), p);
+  TPoint3D uy = TPoint3D_sub(this -> GetPoint3D(this, i, j+1.0f, z), p);
+  TPoint3D uz = TPoint3D_sub(this -> GetPoint3D(this, i, j, z+1.0f), p); 
   
-  TPoint3D direction_horizontale = cosf(AngleXY) * ux + sinf(AngleXY) * uy;
+  TPoint3D direction_horizontale = TPoint3D_add(TPoint3D_lambda(cosf(AngleXY), ux), TPoint3D_lambda(sinf(AngleXY), uy)); 
   
-  Normer2(direction_horizontale);
-  Normer2(ux);
-  Normer2(uy);
-  Normer2(uz);
+  TPoint3D_Normer2(&direction_horizontale);
+  TPoint3D_Normer2(&ux);
+  TPoint3D_Normer2(&uy);
+  TPoint3D_Normer2(&uz);
   
-  TPoint3D u = GetPoint3D(i, j, z)
-                             - dist*(cosf(AngleZ) * direction_horizontale 
-                                    + sinf(AngleZ) * uz);
+  TPoint3D u = this -> GetPoint3D(this, i, j, z); 
+  TPoint3D_sub_self(u, TPoint3D_lambda(dist * cosf(AngleZ), direction_horizontale)); 
+  TPoint3D_sub_self(u, TPoint3D_lambda(dist * sinf(AngleZ), uz));
   
   gluLookAt(u.x, //position de la caméra
 	        u.y,
@@ -419,52 +455,46 @@ void CSol::LookAt(float i, float j, float z, float dist, float AngleXY, float An
             uz.x, //vecteur qui pointe vers le haut
             uz.y,
             uz.z);
-}
+};
 
 
 
-TPoint3D CSol::GetPoint3D(float i, float j, float z) const {
+TPoint3D CSol__GetPoint3D(const CSol * this, const float i, const float j, const float z) {
   float_cjsj(j);
+  const float ci = cosf((float)2*PI*(i)/this -> nb_phi);
+  const float si = sinf((float)2*PI*(i)/this -> nb_phi);      
 
-  float ci = cosf((float)2*PI*(i)/nb_phi);
-  float si = sinf((float)2*PI*(i)/nb_phi);      
-         
-    return Point3D( (R+( a+z )  *cj) * ci,
-	                (R+( a+z ) *cj ) * si, 
-	                ( a+z ) *sj
-                   );
-              
-}
+  return TPoint3D_make_scalar((this -> R+( this -> a + z ) *cj) * ci, 
+			      (this -> R+( this -> a + z ) *cj) * si, 
+			                 ( this -> a + z ) *sj);
+}; 
 
 
-void CSol::AjouterTextureSol(const char * s, int indice_dans_bitmap) {
-  if (nb_texture >= NB_MAX_TEXTURESOL) {
+void CSol__AjouterTextureSol(CSol * this, const char * s, const int indice_dans_bitmap) {
+  if (this -> nb_texture >= NB_MAX_TEXTURESOL) {
     printf("   ERREUR: Il y a déjà trop de textures de sol dans la carte.\n");
     return;
-  }    
-  
-  TextureSol[nb_texture] = gestionTexture.prendre(s);
-  indices_dans_bitmap[nb_texture] = indice_dans_bitmap;
-  
-  nb_texture++;
-}
+  };
+  this -> TextureSol[this -> nb_texture] = CTexture_make(s);
+  this -> indices_dans_bitmap[this -> nb_texture] = indice_dans_bitmap;
+  this -> nb_texture++;
+};
   
 
-void CSol::ChargerIndiceTextureBitmap(const char * fichier_bitmap) {
-  char * reelfile;
-  reelfile = new char[strlen(NIVEAUXDIR) + strlen(fichier_bitmap) + 1];
+void CSol__ChargerIndiceTextureBitmap(CSol * this, const char * fichier_bitmap) {
+  printf("Chargement des zones de textures (fichier %s)...\n", fichier_bitmap);
+
+  char reelfile[strlen(NIVEAUXDIR) + strlen(fichier_bitmap) + 1];
   strcat(strcpy(reelfile, NIVEAUXDIR), fichier_bitmap);
   fichier_bitmap = reelfile;
 
-  printf("Chargement des zones de textures (fichier %s)...\n", fichier_bitmap);
-
-  SDL_Surface * img;
+  SDL_Surface * img = NULL;
   img = IMG_Load(fichier_bitmap);
   
   if (img == NULL)
     printf("ERREUR : Impossible de charger le fichier image '%s'...\n", fichier_bitmap);
 
-  if ((img->w != TailleX) || (img->h != TailleY))
+  if ((img->w != this -> TailleX) || (img->h != this -> TailleY))
     printf("ERREUR: La taille de l'image %s est différente de celle spécifiée dans le fichier des altitudes.\n", fichier_bitmap);
 
 
@@ -541,46 +571,44 @@ void CSol::ChargerIndiceTextureBitmap(const char * fichier_bitmap) {
         int k;
       
       //for (k = NB_MAX_TEXTURESOL; k>=0; k--)
-      for (k = 0; k < nb_texture; k++)
+      for (k = 0; k < this -> nb_texture; k++)
         //if (indices_texture[k] ==  ind_color) break;
-        if (indices_dans_bitmap[k] ==  ind_color) break;
+        if (this -> indices_dans_bitmap[k] ==  ind_color) break;
       
       //printf("indice de texture en (i = %d ; j = %d) = %i", i, j, k);
       
       
       //if (k<0)
-        if (k >= nb_texture) {
+        if (k >= this -> nb_texture) {
           printf("   ERREUR : la couleur %i au pixel (%i, %i) n'est associée à aucune texture.\n", ind_color, i, j);
           k = 0; // le jeu continue à tourner en prenant la texture ° 0 pour ce pixel
         }
         
         // k contient l'indice de texture
-        SETINDTEXTURE(i, img->h-1-j, k);
-    }
+        this -> SETINDTEXTURE(this, i, img->h-1-j, k);
+      };
     
   SDL_FreeSurface(img);
   printf("Chargement des indices de textures terminé !! (t'es sur que c ca Fancois ?? euh non...)\n"); 
-
-  delete[] reelfile;
-}
+}; 
 
 
 
-void CSol::Render(int i1, int j1, int i2, int j2) const {
+void CSol__Render(const CSol * this, int i1, int j1, int i2, int j2) {
 
   //fprintf(stderr, "RenderSol: I am called\n");
      
-#define ARF(i1, TailleX) if (i1 < 0) i1 = 0; else if (i1 >= TailleX-1) i1 = TailleX-2;
+#define ARF(i1,TailleX) if (i1 < 0) i1 = 0; else if (i1 >= TailleX-1) i1 = TailleX-2;
   
-  ARF(i1, TailleX);
-  ARF(i2, TailleX);
-  ARF(j1, TailleY);
-  ARF(j2, TailleY);   
+  ARF(i1, this -> TailleX);
+  ARF(i2, this -> TailleX);
+  ARF(j1, this -> TailleY);
+  ARF(j2, this -> TailleY);   
 
   
-  /* spécification: i1, i2 entre 0 et TailleX-2 */
+  /* spécification: i1, i2 entre 0 et this -> TailleX-2 */
   
-  CalcPoints(i1, j1, i2+1, j2+1);
+  this -> CalcPoints(this, i1, j1, i2+1, j2+1);
 
   //glDisable(GL_DEPTH_TEST) ;
   
@@ -593,7 +621,7 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
    sinon renvoie 0.0f
 */
 #define ALPHATEX(i, j) \
- ((GETINDTEXTURE(i, j) == numtex) || (numtex == 0) ? 1.0f : 0.0f)	
+ ((this -> GETINDTEXTURE(this, i, j) == numtex) || (numtex == 0) ? 1.0f : 0.0f)	
 
   int x, y;
   
@@ -624,7 +652,7 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
   // là par défaut, il n'y a que le canal 0 d'activé
   
   /*
-    for (int numtex = 0; numtex<nb_texture; numtex++)
+    for (int numtex = 0; numtex<this -> nb_texture; numtex++)
     {
     // active le canal n° numtex 
     glActiveTextureARB( GL_TEXTURE_ARB(numtex) ); 
@@ -632,7 +660,7 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE_ARB);
     glTexEnvi(GL_TEXTURE_ENV, GL_RGB_SCALE_ARB, 2);
     
-    TextureSol[numtex]->getObject()->GLTextureCourante();     
+    this -> TextureSol[numtex]->getObject()->GLTextureCourante();     
     
     }  
   */        
@@ -640,8 +668,8 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
   //glDepthFunc(GL_LEQUAL);
   glEnable(GL_TEXTURE_2D);  
 
-  for (int numtex = 0; numtex < nb_texture; numtex++) { 
-    TextureSol[numtex] -> getObject() -> GLTextureCourante();         
+  for (int numtex = 0; numtex < this -> nb_texture; numtex++) { 
+    this -> TextureSol[numtex] -> GLTextureCourante(this -> TextureSol[numtex]);         
     /*
       if (numtex == 0)
       glBlendFunc(GL_ONE, GL_ZERO);
@@ -667,19 +695,19 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
         glBegin(GL_QUADS); {
           glColor4f(1.0f, 1.0f, 1.0f, a1);
           glTexCoord2f(0.0f,0.0f);
-          tore(x,y);
+          this -> tore(this, x,y);
           
           glColor4f(1.0f, 1.0f, 1.0f, a2);
           glTexCoord2f(1.0f,0.0f);
-          tore(x+1,y);
+          this -> tore(this, x+1,y);
           
           glColor4f(1.0f, 1.0f, 1.0f, a3);
           glTexCoord2f(1.0f,1.0f);
-          tore(x+1,y+1);
+          this -> tore(this, x+1,y+1);
           
           glColor4f(1.0f, 1.0f, 1.0f, a4);
           glTexCoord2f(0.0f,1.0f);
-          tore(x,y+1);
+          this -> tore(this, x,y+1);
         } glEnd();
       }
     }
@@ -688,7 +716,7 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
   //glDepthMask(GL_TRUE);
   
   /*
-    for (int numtex = 1; numtex<nb_texture; numtex++)
+    for (int numtex = 1; numtex<this -> nb_texture; numtex++)
     {
     glActiveTextureARB(GL_TEXTURE_ARB(numtex));
     glDisable(GL_TEXTURE_2D); // Disable the 2nd texture
@@ -704,7 +732,7 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
     {
       for (int j = j2; j >= j1; j--)
 	{
-	  TextureSol[GETINDTEXTURE(i, j)] -> getObject() -> GLTextureCourante();
+	  this -> TextureSol[GETINDTEXTURE(i, j)] -> getObject() -> GLTextureCourante();
   	  glBegin(GL_QUADS);
   	  
 	  if (GETINDTEXTURE(i, j) != 0)
@@ -749,7 +777,7 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
     */
 
   /*
-  TextureSol -> getObject() -> GLTextureCourante();
+  this -> TextureSol -> getObject() -> GLTextureCourante();
   glBegin(GL_QUADS);
   for (int i = i1; i <= i2; i++)
     {
@@ -787,28 +815,28 @@ void CSol::Render(int i1, int j1, int i2, int j2) const {
 
 
 
-void CSol::SetTemps(float in_temps) {
-  temps = in_temps;
+void CSol__SetTemps(CSol * this, const float in_temps) {
+  this -> temps = in_temps;
 }
 
 
 
-float CSol::GetTemps() const {
-  return temps;    
+float CSol__GetTemps(const CSol * this) {
+  return this -> temps;    
 }
 
-bool CSol::yatilEau(float i, float j, float z) const {
-  return (z < ZEau);
+bool CSol__yatilEau(const CSol * this, const float i, const float j, const float z) {
+  return (z < this -> ZEau);
 }    
 
 	
-void CSol::RenderEau(int i1, int j1, int i2, int j2) const {
-  ARF(i1, TailleX);
-  ARF(i2, TailleX);
-  ARF(j1, TailleY);
-  ARF(j2, TailleY);
+void CSol__RenderEau(const CSol * this, int i1, int j1, int i2, int j2) {
+  ARF(i1, this -> TailleX);
+  ARF(i2, this -> TailleX);
+  ARF(j1, this -> TailleY);
+  ARF(j2, this -> TailleY);
 
-#define COLOR_EAU(i, j) glColor4f(0.7f,0.7f,1.0f, 0.5f + 0.2f*cos(((i)+(j)+100*temps)/2.0f));
+#define COLOR_EAU(i, j) glColor4f(0.7f,0.7f,1.0f, 0.5f + 0.2f*cos(((i)+(j)+100*this -> temps)/2.0f));
 //#define COLOR_EAU(i, j) glColor4f(0.5f,0.0f,0.0f, 0.5f + 0.2f*cos(((i)+(j)+100*t)/2.0f));
 
   //fprintf(stderr, "RenderEau: I am called\n");
@@ -823,20 +851,20 @@ void CSol::RenderEau(int i1, int j1, int i2, int j2) const {
         for (int j = j1; j<=j2; j+=PREC_EAU) {
           COLOR_EAU(i, j);
           //	glTexCoord2f(0.0f + num_tex*0.5f,0.0f);
-          tore0(i,j);
+          this -> tore0(this, i,j);
 
           COLOR_EAU(i+PREC_EAU, j);
           //	glTexCoord2f(0.5f + num_tex*0.5f,0.0f);
-          tore0(i+PREC_EAU,j);
+          this -> tore0(this, i+PREC_EAU,j);
 
 #if 0
           //	glTexCoord2f(0.5f + num_tex*0.5f,1.0f);
           COLOR_EAU(i+PREC_EAU, j+PREC_EAU);
-          tore0(i+PREC_EAU,j+PREC_EAU);
+          this -> tore0(this, i+PREC_EAU,j+PREC_EAU);
 
           //	glTexCoord2f(0.0f + num_tex*0.5f,1.0f);
           COLOR_EAU(i, j+PREC_EAU);
-          tore0(i,j+PREC_EAU);
+          this -> tore0(this, i,j+PREC_EAU);
 #endif
 
 	}
@@ -848,50 +876,50 @@ void CSol::RenderEau(int i1, int j1, int i2, int j2) const {
 
 
 
-void CSol::MatricePour2D(float i, float j, float z) const {
+void CSol__MatricePour2D(const CSol * this, const float i, const float j, const float z) {
   float_cjsj(j);
 
-  float ci = cosf(2*PI*(i)/nb_phi);
-  float si = sinf(2*PI*(i)/nb_phi);
+  const float ci = cosf(2*PI*(i)/this -> nb_phi);
+  const float si = sinf(2*PI*(i)/this -> nb_phi);
          
-  glTranslatef( (R + ( a+z )  *cj) *ci, //on place la sprite sur le point du tore
-		(R+( a+z) *cj) * si, 
-		( a+z ) *sj ) ;
+  glTranslatef( (this -> R + ( this -> a + z ) *cj) * ci, //on place la sprite sur le point du tore
+		(this -> R + ( this -> a + z ) *cj) * si, 
+		(            ( this -> a + z ) *sj));
 
-  glRotatef(360.f*(float)(i)/nb_phi,0,0,1) ;
+  glRotatef(360.f*(float)(i)/this -> nb_phi,0,0,1) ;
   //on la pivote autour de (Oz)
   
-  glRotatef(90.0f-360.f*(temps+2*PI*(float)(j-ybase)/nb_theta)/(2*PI),0,1,0) ;
+  glRotatef(90.0f-360.f*(this -> temps+2*PI*(float)(j-this -> ybase)/this -> nb_theta)/(2*PI),0,1,0) ;
   //puis on la met par terre	
 }
 
 
 
-void CSol::MatricePourDessiner(float i, float j) {
+void CSol__MatricePourDessiner(const CSol * this, const float i, const float j) {
   float_cjsj(j);
 
-  float ci = cosf(2*PI*(i)/nb_phi);
-  float si = sinf(2*PI*(i)/nb_phi);
+  const float ci = cosf(2*PI*(i)/this -> nb_phi);
+  const float si = sinf(2*PI*(i)/this -> nb_phi);
   glPushMatrix() ;
          
-  glTranslatef( (R + ( a+GETZ(i,j) )  *cj) *ci, //on place la sprite sur le point du tore
-		(R+( a+GETZ(i,j) ) *cj) * si, 
-		( a+GETZ((i),(j)) ) *sj ) ;
+  glTranslatef( (this -> R + ( this -> a + this -> GETZ(this, i, j) ) *cj) * ci, //on place la sprite sur le point du tore
+		(this -> R + ( this -> a + this -> GETZ(this, i, j) ) *cj) * si, 
+		(            ( this -> a + this -> GETZ(this, i, j) ) *sj ));
 
-  glRotatef(360.f*(float)(i)/nb_phi,0,0,1) ; //on la pivote autour de (Oz)
-  glRotatef(90.0f-360.f*(temps+2*PI*(float)(j-ybase)/nb_theta)/(2*PI),0,1,0) ; //puis on la met par terre	
+  glRotatef(360.f*(float)(i)/this -> nb_phi,0,0,1) ; //on la pivote autour de (Oz)
+  glRotatef(90.0f-360.f*(this -> temps+2*PI*(float)(j-this -> ybase)/this -> nb_theta)/(2*PI),0,1,0) ; //puis on la met par terre	
          
 
 }
 
 
-void CSol::ChargerZ(const char * filename) {
-  char * reelfile;
-  reelfile = new char[strlen(NIVEAUXDIR) + strlen(filename) + 1];
+void CSol__ChargerZ(CSol * this, const char * filename) {
+  printf("Chargement du terrain de la carte...\n");
+
+  char reelfile[ARRAY_SIZE(NIVEAUXDIR)-1 + strlen(filename) + 1];
   strcat(strcpy(reelfile, NIVEAUXDIR), filename);
   filename = reelfile;
 
-  printf("Chargement du terrain de la carte...\n");
   SDL_Surface * img;
   img = IMG_Load (filename);
 
@@ -904,18 +932,18 @@ void CSol::ChargerZ(const char * filename) {
     printf("WARNING: L'image '%s' doit être dans un format niveau de gris. Elle représente les Z de la carte\n.", filename);     
   
   
-  uint8_t * p8 = (uint8_t *) img -> pixels;
+  uint8_t  * p8  = (uint8_t  *) img -> pixels;
   uint32_t * p32 = (uint32_t *) img -> pixels;
 
-  TailleX = img->w;
-  TailleY = img->h;
-  printf(" ---> on en déduit que la taille de la carte est (%i, %i).\n", TailleX, TailleY); 
+  this -> TailleX = img -> w;
+  this -> TailleY = img -> h;
+  printf(" ---> on en déduit que la taille de la carte est (%i, %i).\n", this -> TailleX, this -> TailleY); 
      
-  Z = new float [(TailleX)*(TailleY)];
-  PointsEcran = new TPointEcran[(TailleX)*(TailleY)];
+  this -> Z = (float *) malloc(sizeof(float) * ((this -> TailleX)*(this -> TailleY)));
+  this -> PointsEcran = malloc(sizeof(*this -> PointsEcran) * ((this -> TailleX)*(this -> TailleY))); 
 	
   printf("Allocation en mémoire de la table qui à un point de la carte associe l'id de la texture de ce point.\n");
-  indices_texture = new int[(TailleX)*(TailleY)];
+  this -> indices_texture = (int *) malloc(sizeof(int) * ((this -> TailleX)*(this -> TailleY)));
      
   for (int i = 0; i < img->w; i++)
     for (int j = 0; j < img->h; j++) {
@@ -939,34 +967,32 @@ void CSol::ChargerZ(const char * filename) {
         valeur = 0;
       }
 
-      SETZ(i, img->h-1-j,  ((float) valeur - 128.0f) / 1.0f);
+      this -> SETZ(this, i, img->h-1-j,  ((float) valeur - 128.0f) / 1.0f);
     }
   
   printf("On désalloue la mémoire de l'image..\n");   
   SDL_FreeSurface(img);
   printf("Chargement des Z terminés !!\n"); 
-  delete[] reelfile;
-}
+};
 
 
    
-TPoint2D CSol::Differentiel(TPoint3D pos) const {
+TPoint2D CSol__Differentiel(const CSol * this, const TPoint3D pos) {
   TPoint2D p;
 
 #define precdiff 0.5f
 
-  float z1 = GETZ(pos.x + precdiff, pos.y) - GETZ(pos.x, pos.y);
-  float z2 = GETZ(pos.x, pos.y + precdiff) - GETZ(pos.x, pos.y);
+  const float z1 = this -> GETZ(this, pos.x + precdiff, pos.y) - this -> GETZ(this, pos.x, pos.y);
+  const float z2 = this -> GETZ(this, pos.x, pos.y + precdiff) - this -> GETZ(this, pos.x, pos.y);
 
- /* printf("Calcul de différentiel : %f, %f, %f, %f\n", GETZ(pos.x+precdiff, pos.y),
-	 GETZ(pos.x, pos.x), GETZ(pos.x, pos.y+precdiff), GETZ(pos.x, pos.y));*/
+ /* printf("Calcul de différentiel : %f, %f, %f, %f\n", this -> GETZ(this, pos.x+precdiff, pos.y),
+	 this -> GETZ(this, pos.x, pos.x), this -> GETZ(this, pos.x, pos.y+precdiff), this -> GETZ(this, pos.x, pos.y));*/
 
-  p.x = z1; //GETZ(int(rx)+1, int(ry)) - GETZ(int(rx)-1, int(ry));
-  p.y = z2;//GETZ(int(rx), int(ry)+1) - GETZ(int(rx), int(ry)-1);
+  p.x = z1; //this -> GETZ(this, int(rx)+1, int(ry)) - this -> GETZ(this, int(rx)-1, int(ry));
+  p.y = z2;//this -> GETZ(this, int(rx), int(ry)+1) - this -> GETZ(this, int(rx), int(ry)-1);
 
   return p;
-
-}
+}; 
 
 
 /*

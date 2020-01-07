@@ -1,19 +1,19 @@
 #ifndef PASCAL_H
 #define PASCAL_H
 
+
+#if 0
 struct CPprog;
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CProg);
 
 struct CPascal;
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPascal);
 
-
-#if 0
 #include "global.h"
 #include "pascal/pascal.mem.hpp"
 #include "pascal/pascal.env.hpp"
 #include "pascal/pascal.prog.hpp"
-
+#endif 
 
 
 /* C'est ici qu'on fournit l'interface avec le jeu pour le moteur pascal.
@@ -40,8 +40,67 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPascal);
 */
 
 
+struct CPascal {
+  //private:
+  // Le fichier que l'on lit.
+  char * filename;
+
+  // Code de retour du constructeur.
+  int code_erreur;
+
+  // programme en cours d'exécution
+  CPprog * prog_exec;
+
+  // L'environnement du script courant.
+  penv * env;
+
+  // La mémoire du script courant.
+  pmem * mem;
+        
+  // la pile du script courant
+  pascal_stack_t * stack;
+        
+  // L'environnement des noms de type.
+  // MOI: ne pas oublier de le traiter correctement.
+  // Il suppose qu'un seul script ne peut s'exécuter à la fois.
+  pdvaltypeuser * tabdvaltypeuser;
+
+  penv * env_exec;
 
 
+
+
+  // La fonction d'exécution d'une procédure.
+  int (* execProcedure)(CPascal * this, const char * ident);
+  int (* execProcedure_step)(CPascal * this, const char * ident);
+
+  // L'exécution de code.
+  // On ne peut exécuter que des procédures et des fonctions sans paramètres.
+  // Pour le passage de parmètre, il faut utiliser les fonctions ci-dessus
+  // et prévoir une interface.
+  int (* next_step)(CPascal * this, bool * fini_huh);
+
+  void (* stack_push_int)(CPascal * this, int a);
+  void (* stack_push_string)(CPascal * this, const char * str);
+}; 
+  // Le constructeur.
+  // Le code d'erreur rend un nombre négatif en cas d'erreur.
+extern CPascal * CPascal_make(const char * filename);
+  // Le destructeur.
+  // Etant donné que j'ai beaucoup merdé sur la structure générale du machin,
+  // ca ne libérera pas beaucoup de mémoire.
+extern void CPascal_delete(CPascal * this);
+  // La fonction d'exécution d'une procédure.
+extern int CPascal__execProcedure(CPascal * this, const char * ident);
+extern int CPascal__execProcedure_step(CPascal * this, const char * ident);
+extern int CPascal__next_step(CPascal * this, bool * fini_huh);
+extern void CPascal__stack_push_int(CPascal * this, int a);
+extern void CPascal__stack_push_string(CPascal * this, const char * str);
+
+
+
+
+#if 0
 struct CPascal {
   //private:
   // Le fichier que l'on lit.
@@ -61,13 +120,9 @@ struct CPascal {
   // Il suppose qu'un seul script ne peut s'exécuter à la fois.
   ptabdvaltypeuser tabdvaltypeuser;
        
-  // Code de retour du constructeur.
-  int code_erreur;
 
 
   //public:
-  // programme en cours d'exécution
-  CPprog * prog_exec;
   //void * prog_exec;
   penv env_exec;
 
@@ -136,10 +191,6 @@ struct CPascal {
 
   int next_step(bool &fini_huh);
 
-  // La fonction d'exécution d'une procédure.
-  int execProcedure(const char *const ident);
-  int execProcedure_step(const char *const ident);
-       
   // La fonction d'exécution d'une fonction.
   // Il y a une fonction par type de valeur de retour.
 
@@ -165,9 +216,9 @@ struct CPascal {
 
        
 };
+#endif 
 
 
-#endif
 
        
 

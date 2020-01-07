@@ -1,11 +1,11 @@
-#include "global.hpp"
-#include "kernel.hpp"
-#include "main.hpp"
-#include "son.hpp" // pour l'initialisation
-#include "evenement.hpp"
-#include "keys.hpp"
+#include "global.h"
+#include "kernel.h"
+#include "main.h"
+#include "son.h" // pour l'initialisation
+#include "evenement.h"
+#include "keys.h"
 
-#include "timer.hpp"
+#include "timer.h"
 
 
 /* Ce fichier contient les trucs pas beau à voir. Il contient le main. La boucle
@@ -109,7 +109,7 @@ int main(int argc, char * argv[]) {
 #endif
   
   return retour;
-}
+};
 
 
 
@@ -128,14 +128,14 @@ void change_to_root_dir(const char * argv0) {
   free(path);
 
   //fprintf(stderr, "%s\n", getcwd(NULL, 0));
-}
+};
 
 
 
 
 void DemanderAQuitterLeJeu(void) {
   isrunning = false;
-}
+};
 
 
 
@@ -173,7 +173,7 @@ void SCRIPT_unepassedeboucle(void) {
 #ifdef COUNT
   count--;
 #endif
-}
+};
 
 
 
@@ -207,9 +207,9 @@ void process_events(void) {
       break;
       
     default: {}
-    }
-  }
-}
+    };
+  };
+};
 
 
 
@@ -265,7 +265,7 @@ void setup_opengl(int width, int height) {
    * Replace this with a call to glFrustum.
    */
   gluPerspective(60.0, ratio, 1.0, 1024.0);
-}
+};
 
 
 
@@ -279,7 +279,7 @@ bool init_sdl_opengl(void) {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1) { 
     printf("Erreur lors de l'initialisation de la SDL : %s.\n", SDL_GetError());
     return 0; // Hallucinant C'Min !!!! Comment as-tu pu ecrire ca ?
-  }
+  };
   
   printf("SDL initialisé.\n");
 
@@ -311,7 +311,7 @@ bool init_sdl_opengl(void) {
     if (SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BITSPERPIXEL, SDL_OPENGL | SCREEN_MODE | SDL_DOUBLEBUF | SDL_HWSURFACE /*| SDL_NOFRAME*/) == 0) {
       fprintf(stderr, "Video mode set failed: %s\n", SDL_GetError());
       return 0;
-    }
+    };
   
 
   //SDL_WarpMouse(320, 240);
@@ -324,10 +324,10 @@ bool init_sdl_opengl(void) {
   
   if (Screen == NULL) {
     fprintf(stderr, "La surface écran 'Screen' n'a pas pu être référencée.\n");
-  }
+  };
 
   return 1;
-}
+};
 
 
 
@@ -341,7 +341,7 @@ void free_sdl(void) {
   SDL_Quit();
   
   printf("On quitte....\n");
-}
+};
 
 
 
@@ -385,7 +385,7 @@ void main_locale_set(void) {
   // un réel n'est pas reconnu de la même façon (3,5 ou 3.5)
   //loc_val = setlocale(LC_ALL, loc);
   //printf("New locale is `%s'.", loc_val);
-}
+};
 
 
 
@@ -395,21 +395,21 @@ void main_date_print(void) {
   
   srandom(time(&date_time));
   printf("Nous sommes le %s\n", ctime_r(&date_time, date_chaine));
-}
+};
 
 void main_gcc_print(void) {
   printf("Compilé avec GCC %s.%s.%s\n", STRING(__GNUC__) , STRING(__GNUC_MINOR__), STRING(__GNUC_PATCHLEVEL__));
   printf("Le %s à %s.\n", __DATE__, __TIME__); //STRING(__DATE__), STRING(__TIME__));
   printf("GCC version: %s", __VERSION__);
-}
+};
 
 void main_args_print(int argc, char * argv[]) {
   printf("\nListe des paramètres: ");
 
   for (int i = 0; i < argc; i ++) {
     printf("\t%s\n", argv[i]);
-  }
-}
+  };
+};
 
 void main_win_print(void) {
 #ifdef _WIN32_WINNT
@@ -422,5 +422,5 @@ void main_win_print(void) {
 #elif (defined WIN)
   printf("Compilé sur un système Windows (32 bits), mais la macro C qui donne la version n'est pas définie: _WIN32_WINNT\n");
 #endif
-}
+};
 

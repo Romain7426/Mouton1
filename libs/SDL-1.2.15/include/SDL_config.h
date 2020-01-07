@@ -60,7 +60,7 @@
 #if HAVE_LIBC
 
 /* Useful headers */
-#define HAVE_ALLOCA_H 1
+/* #undef HAVE_ALLOCA_H */
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_STDIO_H 1
 #define STDC_HEADERS 1
@@ -74,7 +74,7 @@
 #define HAVE_STDINT_H 1
 #define HAVE_CTYPE_H 1
 #define HAVE_MATH_H 1
-#define HAVE_ICONV_H 1
+/* #undef HAVE_ICONV_H */
 #define HAVE_SIGNAL_H 1
 /* #undef HAVE_ALTIVEC_H */
 
@@ -138,7 +138,7 @@
 /* #undef HAVE_CLOCK_GETTIME */
 /* #undef HAVE_GETPAGESIZE */
 #define HAVE_MPROTECT 1
-/* #undef HAVE_SEM_TIMEDWAIT */
+#define HAVE_SEM_TIMEDWAIT 1
 
 #else
 /* We may need some replacement for stdarg.h here */
@@ -163,24 +163,24 @@
 /* #undef SDL_AUDIO_DRIVER_ARTS */
 /* #undef SDL_AUDIO_DRIVER_ARTS_DYNAMIC */
 /* #undef SDL_AUDIO_DRIVER_BAUDIO */
-/* #undef SDL_AUDIO_DRIVER_BSD */
-#define SDL_AUDIO_DRIVER_COREAUDIO 1
+#define SDL_AUDIO_DRIVER_BSD 1
+/* #undef SDL_AUDIO_DRIVER_COREAUDIO */
 /* #undef SDL_AUDIO_DRIVER_DART */
 /* #undef SDL_AUDIO_DRIVER_DC */
 #define SDL_AUDIO_DRIVER_DISK 1
 #define SDL_AUDIO_DRIVER_DUMMY 1
 /* #undef SDL_AUDIO_DRIVER_DMEDIA */
 /* #undef SDL_AUDIO_DRIVER_DSOUND */
-/* #undef SDL_AUDIO_DRIVER_PULSE */
-/* #undef SDL_AUDIO_DRIVER_PULSE_DYNAMIC */
+#define SDL_AUDIO_DRIVER_PULSE 1
+#define SDL_AUDIO_DRIVER_PULSE_DYNAMIC "libpulse-simple.so.1.1"
 /* #undef SDL_AUDIO_DRIVER_ESD */
 /* #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC */
 /* #undef SDL_AUDIO_DRIVER_MINT */
 /* #undef SDL_AUDIO_DRIVER_MMEAUDIO */
 /* #undef SDL_AUDIO_DRIVER_NAS */
 /* #undef SDL_AUDIO_DRIVER_NAS_DYNAMIC */
-/* #undef SDL_AUDIO_DRIVER_OSS */
-/* #undef SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H */
+#define SDL_AUDIO_DRIVER_OSS 1
+#define SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H 1
 /* #undef SDL_AUDIO_DRIVER_PAUD */
 /* #undef SDL_AUDIO_DRIVER_QNXNTO */
 /* #undef SDL_AUDIO_DRIVER_SNDMGR */
@@ -196,9 +196,9 @@
 /* #undef SDL_CDROM_FREEBSD */
 /* #undef SDL_CDROM_LINUX */
 /* #undef SDL_CDROM_MACOS */
-#define SDL_CDROM_MACOSX 1
+/* #undef SDL_CDROM_MACOSX */
 /* #undef SDL_CDROM_MINT */
-/* #undef SDL_CDROM_OPENBSD */
+#define SDL_CDROM_OPENBSD 1
 /* #undef SDL_CDROM_OS2 */
 /* #undef SDL_CDROM_OSF */
 /* #undef SDL_CDROM_QNX */
@@ -210,14 +210,14 @@
 /* #undef SDL_JOYSTICK_BEOS */
 /* #undef SDL_JOYSTICK_DC */
 /* #undef SDL_JOYSTICK_DUMMY */
-#define SDL_JOYSTICK_IOKIT 1
+/* #undef SDL_JOYSTICK_IOKIT */
 /* #undef SDL_JOYSTICK_LINUX */
 /* #undef SDL_JOYSTICK_MACOS */
 /* #undef SDL_JOYSTICK_MINT */
 /* #undef SDL_JOYSTICK_OS2 */
 /* #undef SDL_JOYSTICK_RISCOS */
 /* #undef SDL_JOYSTICK_WINMM */
-/* #undef SDL_JOYSTICK_USBHID */
+#define SDL_JOYSTICK_USBHID 1
 /* #undef SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H */
 
 /* Enable various shared object loading systems */
@@ -275,19 +275,19 @@
 /* #undef SDL_VIDEO_DRIVER_PS2GS */
 /* #undef SDL_VIDEO_DRIVER_PS3 */
 /* #undef SDL_VIDEO_DRIVER_QTOPIA */
-#define SDL_VIDEO_DRIVER_QUARTZ 1
+/* #undef SDL_VIDEO_DRIVER_QUARTZ */
 /* #undef SDL_VIDEO_DRIVER_RISCOS */
 /* #undef SDL_VIDEO_DRIVER_SVGALIB */
 /* #undef SDL_VIDEO_DRIVER_TOOLBOX */
 /* #undef SDL_VIDEO_DRIVER_VGL */
 /* #undef SDL_VIDEO_DRIVER_WINDIB */
-/* #undef SDL_VIDEO_DRIVER_WSCONS */
+#define SDL_VIDEO_DRIVER_WSCONS 1
 #define SDL_VIDEO_DRIVER_X11 1
 #define SDL_VIDEO_DRIVER_X11_DGAMOUSE 1
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC "/usr/X11R6/lib/libX11.6.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "/usr/X11R6/lib/libXext.6.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR "/usr/X11R6/lib/libXrandr.2.dylib"
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER "/usr/X11R6/lib/libXrender.1.dylib"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC "libX11.so.16.1"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "libXext.so.13.0"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR "libXrandr.so.7.1"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER "libXrender.so.6.0"
 #define SDL_VIDEO_DRIVER_X11_VIDMODE 1
 #define SDL_VIDEO_DRIVER_X11_XINERAMA 1
 #define SDL_VIDEO_DRIVER_X11_XME 1

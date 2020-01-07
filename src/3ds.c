@@ -43,7 +43,7 @@ size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream) {
   
   temp = (char *) ptr;
   nblus = 0;
-  temp--; // decremente à cause la forme de la boucle.
+  temp--; // decremente Ã  cause la forme de la boucle.
 
   //printf("size = %u, nmemb = %u \n", (unsigned) size, (unsigned) nmemb);
 
@@ -126,12 +126,12 @@ struct CLoad3DS * new_CLoad3DS(void) {
 bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
   char strMessage[255] = {0};
     
-  //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
+  //printf("appel Ã  Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
     
   pModel->numOfMaterials = 0;
   pModel->numOfObjects = 0;
     
-  //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
+  //printf("appel Ã  Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
     
   // Open the 3DS file
   this -> m_FilePointer = fopen(strFileName, "rb");
@@ -153,7 +153,7 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
     sprintf(strMessage, "Unable to load PRIMARY chuck from file: %s!", strFileName);
     printf("%s\n", strMessage);  
   }
-  printf("Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
+  printf("Le primary chunk a Ã©tÃ© loadÃ© ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
 
   // Now we actually start reading in the data.  ProcessNextChunk() is recursive
 
@@ -208,7 +208,10 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
   // tMaterialInfo newTexture; // = {0, 0, 0, 0, 0, 0, 0, 0};             // This is used to add to our material list
   newTexture.strName[0] = 0;
   newTexture.strFile[0] = 0;
-  newTexture.color[3] = 0;
+  //newTexture.color[3] = 0;
+  newTexture.color[0] = 0; 
+  newTexture.color[1] = 0; 
+  newTexture.color[2] = 0; 
   newTexture.texureId = 0;
   newTexture.uTile = 0;
   newTexture.vTile = 0;
@@ -219,7 +222,7 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
   /* pModel->numOfMaterials = 0;
      pModel->numOfObjects = 0;*/
   
-  printf("appel à processchunk : pModel->numOfObjects = %i\n", pModel->numOfObjects);
+  printf("appel Ã  processchunk : pModel->numOfObjects = %i\n", pModel->numOfObjects);
 
     
   unsigned int version = 0;                   // This will hold the file version
@@ -240,7 +243,7 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
       printf("   on lit un chunk...\n");
       ReadChunk(this, this -> m_CurrentChunk);
 
-      printf("    chunk lu avec succès...\n");
+      printf("    chunk lu avec succÃ¨s...\n");
       // Check the chunk ID
       switch (this -> m_CurrentChunk->ID) {
         case VERSION:                           // This holds the version of the file
@@ -292,15 +295,16 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
           printf("    chunk MATERIAL... %X\n", MATERIAL);
           // This chunk is the header for the material info chunks
 
-          // Increase the number of materials
-          pModel->numOfMaterials++;
-
           // Add a empty texture structure to our texture list.
           // If you are unfamiliar with STL's "vector" class, all push_back()
           // does is add a new node onto the list.  I used the vector class
           // so I didn't need to write my own link list functions.  
           //pModel->pMaterials.push_back(newTexture);
-          pModel->pMaterials[pModel->pMaterials_nb++] = (newTexture);
+          //pModel->pMaterials[pModel->pMaterials_nb++] = (newTexture);
+          pModel->pMaterials[pModel->numOfMaterials] = (newTexture);
+
+          // Increase the number of materials
+          pModel->numOfMaterials++;
 
           // Proceed to the material loading function
           ProcessNextMaterialChunk(this, pModel, this -> m_CurrentChunk);
@@ -311,17 +315,18 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
           // This chunk is the header for the object info chunks.  It also
           // holds the name of the object.
 
+          // Add a new tObject node to our list of objects (like a link list)
+          //pModel->pObject.push_back(newObject);
+          //pModel->pObject[pModel->pObject_nb++] = (newObject);
+          pModel->pObject[pModel->numOfObjects] = (newObject);
+            
           // Increase the object count
           pModel->numOfObjects++;
         
-          // Add a new tObject node to our list of objects (like a link list)
-          //pModel->pObject.push_back(newObject);
-          pModel->pObject[pModel->pObject_nb++] = (newObject);
-            
           // Initialize the object and all it's data members
-          printf("    on initialise à 0 le pObject[%i]...\n",  pModel->numOfObjects - 1); 
+          printf("    on initialise Ã  0 le pObject[%i]...\n",  pModel->numOfObjects - 1); 
           memset(&(pModel->pObject[pModel->numOfObjects - 1]), 0, sizeof(t3DObject));
-          printf("    initialisation à 0 du pObject[%i] réussi...\n", pModel->numOfObjects - 1);  
+          printf("    initialisation Ã  0 du pObject[%i] rÃ©ussi...\n", pModel->numOfObjects - 1);  
           // Get the name of the object and store it, then add the read bytes to our byte counter.
           this -> m_CurrentChunk->bytesRead += GetString(this, pModel->pObject[pModel->numOfObjects - 1].strName);
             
@@ -347,7 +352,7 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
           break;
 
         default: 
-          printf("    chunk non identifié, tant pis on passe au suivant... %X\n", this -> m_CurrentChunk->ID);    
+          printf("    chunk non identifiÃ©, tant pis on passe au suivant... %X\n", this -> m_CurrentChunk->ID);    
           // If we didn't care about a chunk, then we get here.  We still need
           // to read past the unknown or ignored chunk and add the bytes read to the byte counter.
           //m_CurrentChunk->bytesRead += fread(buffer, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
@@ -387,7 +392,7 @@ void ProcessNextObjectChunk(CLoad3DS * this, t3DModel *pModel, t3DObject *pObjec
       // Read the next chunk
       printf("      on lit chunk (object chunk)...\n");  
       ReadChunk(this, this->m_CurrentChunk);
-      printf("      chunk lu (object chunk) avec succès...\n");  
+      printf("      chunk lu (object chunk) avec succÃ¨s...\n");  
       // Check which chunk we just read
       switch (this->m_CurrentChunk->ID)
         {

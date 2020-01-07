@@ -1,6 +1,6 @@
-#include "global.hpp"
-#include "son.hpp"
-#include "pascal/pascal.tools.hpp"
+#include "global.h"
+#include "son.h"
+//#include "pascal/pascal.tools.hpp"
 
 static char * fichier_nom_sans_extension(const char * filename);
 
@@ -8,86 +8,86 @@ static Mix_Music * try_to_load(const char * rep, const char * file_sans_ext, con
 
 
 // si filename == NULL ou "", alors c'est un peu comme si on avait une musique vide
-CMusique::CMusique(const char * filename) {
-  NomMusique = NULL;
+CMusique * CMusique_make(const char * filename) {
+  MALLOC_BZERO(CMusique,this); 
+  
+  ASSIGN_METHOD(CMusique,this,Jouer); 
 
-  if (filename == NULL)
-    return;
+  this -> NomMusique = NULL;
 
-  if (0 == strcmp(filename, ""))
-    return;
+  if (NULL == filename) { return this; }; 
 
-  NomMusique = strcopy(filename);
+  if (0 == *filename) { return this; }; 
 
+  this -> NomMusique = strcopy(filename);
+  
 
   char * nom_sans_ext = fichier_nom_sans_extension(filename);
-
-  music = try_to_load(SONSDIR, nom_sans_ext, ".ogg");
-
-  if (music == NULL)
-    music = try_to_load(SONSDIR, nom_sans_ext, ".mp3");
   
-  if (music == NULL)
-    music = try_to_load(SONSDIR, nom_sans_ext, ".wav");
+  this -> music = try_to_load(SONSDIR, nom_sans_ext, ".ogg");
   
-#ifndef LIBPROG_SYS_MACOSX
-  if (music == NULL)
-    music = try_to_load(SONSDIR, nom_sans_ext, ".mid");
-#endif
+  if (this -> music == NULL)
+    this -> music = try_to_load(SONSDIR, nom_sans_ext, ".mp3");
   
-  if (music == NULL)
+  if (this -> music == NULL)
+    this -> music = try_to_load(SONSDIR, nom_sans_ext, ".wav");
+  
+  if (this -> music == NULL)
+    this -> music = try_to_load(SONSDIR, nom_sans_ext, ".mid");
+  
+  if (this -> music == NULL)
     printf("ERREUR: Impossible de charger la musique %s!\n", filename);
-
-  delete nom_sans_ext;
-}
+  
+  free(nom_sans_ext);
+  
+  return this; 
+};
 
 
 Mix_Music * try_to_load(const char * rep, const char * file_sans_ext, const char * ext) {
   char * reelfile;
   Mix_Music * retour;
 
-  reelfile = STRCAT3_(rep, file_sans_ext, ext);
+  reelfile = strconcat3(rep, file_sans_ext, ext);
   
   retour = Mix_LoadMUS(reelfile);
-
-  delete[] reelfile;
+  
+  free(reelfile); 
   
   return retour;
-}
+}; 
 
 
 char * fichier_nom_sans_extension(const char * filename) {
-  size_t len = strlen(filename);
-  if (len < 4)
-    return strcopy(filename);
-
-  if (filename[len-4] != '.')
-    return strcopy(filename);
-
+  const size_t len = strlen(filename);
   char * filename_sans_extension = strcopy(filename);
-  filename_sans_extension[len-4] = '\0';
-  return filename_sans_extension;
-}
+  char * p = filename_sans_extension + len - 1; 
+  for (size_t i = 0; i < len; i++) { 
+    if (*p != '.') { p--; continue; }; 
+    *p = '\0';
+    break; 
+  }; 
+  return filename_sans_extension; 
+}; 
 
 
-void CMusique::Jouer(void) {
-  if (NomMusique == NULL)
+void CMusique__Jouer(CMusique * this) {
+  if (this -> NomMusique == NULL)
     Mix_HaltMusic();
   else
-    if (Mix_PlayMusic(music, -1)==-1)
+    if (Mix_PlayMusic(this -> music, -1)==-1)
       printf("ERREUR: Impossible de jouer le son\n");
-}
+};
 
 
-CMusique::~CMusique(void) {
-  if (NomMusique != NULL) {                   
-    printf("Destruction de la musique...\n");  
-    Mix_HaltMusic(); 
-    Mix_FreeMusic(music);  
-    delete[] NomMusique;
-    printf("   Destruction de la musique REUSSIE !!!\n");
-  }
-}
+void CMusique_delete(CMusique * this) {
+  printf("Destruction de la musique...\n");  
+  Mix_HaltMusic(); 
+  Mix_FreeMusic(this -> music);  
+  free(this -> NomMusique); 
+  free(this); 
+  printf("   Destruction de la musique REUSSIE !!!\n");
+};
 
 
 
@@ -96,32 +96,43 @@ CMusique::~CMusique(void) {
 
 /*SON**************************************************************************/
 
-CSon::CSon(const char * filename) {
-  char * reelfile;
-  reelfile = new char[strlen(SONSDIR) + strlen(filename) + 1];
+CSon * CSon_make(const char * filename) {
+  printf("Chargement du fichier son %s...\n", filename);
+  
+  MALLOC_BZERO(CSon,this); 
+  
+  ASSIGN_METHOD(CSon,this,Jouer); 
+  
+  this -> filename = strcopy(filename); 
+  
+  char reelfile[strlen(SONSDIR) + strlen(filename) + 1];
   strcat(strcpy(reelfile, SONSDIR), filename);
   filename = reelfile;
-
-  printf("Chargement du fichier son %s...\n", filename);
-  if (!(son=Mix_LoadWAV(filename))) {
+  
+  this -> son = Mix_LoadWAV(filename);
+  if (!this -> son) {
     printf("ERREUR: Mix_LoadMUS a fait pouf!\n");
-    delete[] reelfile;
-    return;
+    return this;
   };
 
   printf("    réussi!\n");
-}    
+  return this; 
+};
 
 
-void CSon::Jouer(void) {
-  if (Mix_PlayChannel(-1, son, 0) == -1) {
+void CSon__Jouer(CSon * this) {
+  int alright_huh;
+  alright_huh = Mix_PlayChannel(-1, this -> son, 0); 
+  if (alright_huh == -1) {
     printf("ERREUR: Impossible de jouer le son\n");
-  }
-}   
+  };
+};  
 
-CSon::~CSon(void) {
-  Mix_FreeChunk(son);  
-}
+void CSon_delete(CSon * this) {
+  Mix_FreeChunk(this -> son);  
+  free(this -> filename); 
+  free(this); 
+};
 
 
 
@@ -139,7 +150,7 @@ int init_audio(void) {
   
   if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, audio_buffers) < 0) {
     printf("Mix_OpenAudio a fait pouf !\n"); // On devrait peut etre quitter la ?
-  }
+  }; 
   
   // print out some info on the audio device and stream
   
@@ -149,10 +160,10 @@ int init_audio(void) {
   printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate, bits, audio_channels > 1 ? "stereo" : "mono", audio_buffers);
   
   return 0; // ca rend quoi cette fonction ???  
-} 
+}; 
 
 
 void close_audio(void) {
   Mix_CloseAudio(); 
-}
+}; 
 

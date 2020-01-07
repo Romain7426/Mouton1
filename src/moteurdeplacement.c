@@ -1,4 +1,4 @@
-#include "global.hpp"
-#include "moteurdeplacement.hpp"
+#include "global.h"
+#include "moteurdeplacement.h"
 
 

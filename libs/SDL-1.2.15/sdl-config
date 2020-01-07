@@ -1,6 +1,6 @@
 #!/bin/sh
 
-prefix=/Users/romain/Projets/zelda-c-language/libs/SDL-1.2.15/destroot
+prefix=/home/romain/projects/zelda-c-language/libs/SDL-1.2.15/destroot/
 exec_prefix=${prefix}
 exec_prefix_set=no
 libdir=${exec_prefix}/lib
@@ -42,14 +42,14 @@ while test $# -gt 0; do
       echo 1.2.15
       ;;
     --cflags)
-      echo -I${prefix}/include/SDL -D_GNU_SOURCE=1 -D_THREAD_SAFE
+      echo -I${prefix}/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT
       ;;
     --libs)
-      echo -L${exec_prefix}/lib  -lSDLmain -lSDL   -Wl,-framework,Cocoa
+      echo -L${exec_prefix}/lib  -lSDL  -pthread
       ;;
     --static-libs)
 #    --libs|--static-libs)
-      echo -L${exec_prefix}/lib  ${libdir}/libSDLmain.a ${libdir}/libSDL.a  -Wl,-framework,OpenGL  -Wl,-framework,Cocoa -Wl,-framework,ApplicationServices -Wl,-framework,Carbon -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit -Wl,-framework,IOKit
+      echo -L${exec_prefix}/lib  -lSDL  -pthread  -lm -lossaudio  -lusbhid -pthread
       ;;
     *)
       echo "${usage}" 1>&2

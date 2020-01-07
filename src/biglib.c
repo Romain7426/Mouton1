@@ -191,7 +191,7 @@ char * strcopy(const char * str) {
   memcpy(retour, str, len_octet);
 
   return retour;
-}
+};
 
 
 
@@ -396,9 +396,9 @@ void bzero(void * s, size_t n) {
 
 
 
-char * substring(const char * str, unsigned int debut, unsigned int fin) {
-  unsigned int len;
-  unsigned int taille;
+char * substring(const char * str, int debut, int fin) {
+  int len;
+  int taille;
   char * retour;
   
   assert(debut <= fin);
@@ -737,7 +737,7 @@ extern unsigned int texte_blanc_rechercher(const char * str);
 
 
 
-
+#if 0
 //void texte_en_ligne(const char * str, unsigned int * lignes_nombre, char * * * ligne_tableau) {
 str_tableau_t * texte_en_ligne(const char * str) {
   unsigned int nb_lignes;
@@ -775,12 +775,13 @@ str_tableau_t * texte_en_ligne(const char * str) {
 
   return tableau;
 }
+#endif 
 
 
-unsigned int texte_lignes_nombre(const char * str) {
-  unsigned int len;
-  unsigned int i;
-  unsigned int nb;
+int texte_lignes_nombre(const char * str) {
+  int len;
+  int i;
+  int nb;
 
   len = strlen(str);
 
@@ -799,10 +800,10 @@ bool char_blanc_huh(char c) {
 }
 
 
-unsigned int texte_mots_nombre(const char * str) {
-  unsigned int len;
-  unsigned int i, j;
-  unsigned int nb;
+int texte_mots_nombre(const char * str) {
+  int len;
+  int i, j;
+  int nb;
 
   len = strlen(str);
 
@@ -856,7 +857,7 @@ unsigned int texte_blanc_rechercher(const char * str) {
 
 
 
-
+#if 0 
 str_tableau_t *  texte_en_mot(const char * str) {
   unsigned int nb_mots;
   unsigned int i;
@@ -894,7 +895,9 @@ str_tableau_t *  texte_en_mot(const char * str) {
 
   return tableau;
 }
+#endif 
 
+#if 0
 char * str_liste_concat(const str_liste_t * l) {
   char * cdr;
   char * res;
@@ -911,6 +914,7 @@ char * str_liste_concat(const str_liste_t * l) {
 
   return res;
 }
+#endif 
 
 bool string_contains_char_huh(const char * str, const char c) {
   unsigned int pos = 0;

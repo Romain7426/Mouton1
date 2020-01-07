@@ -57,7 +57,7 @@ struct tMaterialInfo {
   float vOffset;              // v offset of texture  (Currently not used)
 } ;
 DEFINE_NEW_OPERATOR_FOR_STRUCT(tMaterialInfo);
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(tMaterialInfo);;
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(tMaterialInfo);
 
 // This holds all the information for our model/scene. 
 // You should eventually turn into a robust struct that 
@@ -88,9 +88,9 @@ struct t3DModel {
   vector<t3DObject> pObject;          // The object list for our model
 #else
   tMaterialInfo pMaterials[1024];   // The list of material information (Textures and colors)
-  int pMaterials_nb;
+  //int pMaterials_nb;
   t3DObject pObject[1024];          // The object list for our model
-  int pObject_nb;
+  //int pObject_nb;
 #endif
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(t3DModel);

@@ -1,84 +1,74 @@
 #ifndef MAP_H
 #define MAP_H
 
-
-
-//#include "liste.h"
-//#include "dico.h"
-
-
-//enum TDirection;
-struct TPoint2D;
-struct TPoint3D;
-struct CSol;
-struct CPhysicalObj;
-struct CBonhomme;
-struct CEvenement;
-
-#include "vectors.h"
-#include "sol.h"
-#include "evenement.h"
-
-struct TVoisinage;
-struct CZoneTeleportation;
-
-
-
+#if 0
 struct TVoisinage {
   //CListe<CPhysicalObj> Objets;     
-  struct CPhysicalObj * Objets;     
+  //struct CPhysicalObj * Objets;     
+  CPhysicalObj * Objets;     
 };
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(TVoisinage);
 DEFINE_NEW_OPERATOR_FOR_STRUCT(TVoisinage);
-
+#endif 
 
 
 struct CZoneTeleportation {
-  //public:
   TPoint3D position;
   TPoint3D dimension;
   TDirection depart_direction;
-  const char * destination_carte;
+  char * destination_carte;
   TPoint3D destination_position;
   TDirection destination_direction;         
-  
-#if 0
-  CZoneTeleportation(void) {};
-  CZoneTeleportation(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction);    
-#endif
 };
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CZoneTeleportation);
+  
+//CZoneTeleportation(void) {};
+extern CZoneTeleportation * CZoneTeleportation_make(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction);  
+extern CZoneTeleportation * CZoneTeleportation_copy(const CZoneTeleportation * this); 
+extern void CZoneTeleportation_delete(CZoneTeleportation * this); 
+
 
 
 
 //#define VOISINAGE_IS_TAB
-
+enum { VOISINAGE_X_SIZE = 63 }; 
+enum { VOISINAGE_Y_SIZE = 63 }; 
+enum { VOISINAGE_SIZE = 63 }; 
+enum { DicoObjets_SIZE = 2048 }; 
+enum { ZonesTeleportation_SIZE = 32 }; 
 struct CMap {
-  // private:
   struct CSol parent;
-  const char * const NomCarte;
+  char * NomCarte;
 
-  //public:
   // c un tableau de liste
   //  -> pour chaque case, il y a un voisinage,
   //     le voisinage étant la liste des objets proches
-#ifndef VOISINAGE_IS_TAB
+#if 0
   TVoisinage * Voisinages;
   //CPhysicalObj * * Voisinages;
-#else
+#elif 0
 #define VOISINAGE_TAILLE 8192
+  //struct CPhysicalObj * (* Voisinages)[VOISINAGE_TAILLE];
   struct CPhysicalObj * (* Voisinages)[VOISINAGE_TAILLE];
+#else
+  CPhysicalObj * Voisinages_array[VOISINAGE_X_SIZE][VOISINAGE_Y_SIZE][VOISINAGE_SIZE]; 
 #endif
   
+
+
   //CDico<CPhysicalObj> DicoObjets;
-  struct CPhysicalObj * DicoObjets[2048];
+  /*le dictionnaire répertorie les objets qui ont un nom. (utile pour les scripts)
+     invariant : le dico ne contient que des pointeurs vers des éléments déjà dans Voisinage*/
+  // Donc on n'alloue pas ces objets ou ne les désalloue pas! 
+  CPhysicalObj * objets_array[DicoObjets_SIZE];
+  char * objets_noms_array[DicoObjets_SIZE];
+  int objets_nb; 
 
 
   //CListe<CZoneTeleportation> ZonesTeleportation;
-  struct CZoneTeleportation * ZonesTeleportation[32];
-  /*le dictionnaire répertorie les objets qui ont un nom. (utile pour les scripts)
-     invariant : le dico ne contient que des pointeurs vers des éléments déjà dans Objets*/
-
+  CZoneTeleportation * ZonesTeleportation_array[ZonesTeleportation_SIZE];
+  int ZonesTeleportation_nb; 
+  
 
   // Ça c pour la gestion des eveneents.
   evenements_t evt_carte;
@@ -105,14 +95,8 @@ struct CMap {
   int (* parse)(CMap * this, const char * dir, const char * filename);
   // Fonction de confiance; c'est elle qui réalise effectivement le parsing.
   //friend int yycarteparse(void);
-  int (* yycarteparse)(void);
+  int (* yycarteparse)(CMap * this);
 
-
-  //public:
-#if 0
-  CMap(const char * filename, const bool EnVaisseau);
-  ~CMap(void);
-#endif
 
   const char * (* GetNomCarte)(const struct CMap * this);
 
@@ -121,8 +105,8 @@ struct CMap {
   void (* ChargerZ)(struct CMap * this, const char * filename);
   
   // permet d'ajouter un objet (nonanimé ou animé)
-  void (* AjouterObjet1)(struct CMap * this, CPhysicalObj * o);  
-  void (* AjouterObjet2)(struct CMap * this, const char * nom, CPhysicalObj * o);
+  void (* AjouterObjet)(struct CMap * this, CPhysicalObj * o);  
+  void (* AjouterObjet_nom)(struct CMap * this, const char * nom, CPhysicalObj * o);
   
   CPhysicalObj * (* RetrouverObjetViaSonNom)(struct CMap * this, const char * nom);
 
@@ -134,10 +118,31 @@ struct CMap {
   
   void (* TraiterOrdresDeplacement)(struct CMap * this, struct CBonhomme * aHero, const bool MoteurPhysiqueActif);
   
-  struct CZoneTeleportation * (* VaTonBouger)(struct CMap * this, struct CPhysicalObj * aHero);
+  const CZoneTeleportation * (* VaTonBouger)(const CMap * this, const CPhysicalObj * aHero);
   
-  struct tab_evt_bool (* tab_evt_carte)(struct CMap * this);
-};
+  //struct tab_evt_bool (* tab_evt_carte)(struct CMap * this);
+}; 
+
+extern CMap * CMap_make(const char * filename, const bool EnVaisseau);
+extern void CMap_delete(CMap * this);
+
+//extern int CMap__parse(CMap * this, const char * dir, const char * filename);
+//extern int CMap__yycarteparse(CMap * this);
+extern int CMap__ReadDescriptionFile(CMap * this, const char * dir, const char * filename);
+extern const char * CMap__GetNomCarte(const struct CMap * this);
+extern void CMap__Render(struct CMap * this, const int i1, const int j1, const int i2, const int j2, const bool EnVaisseau);
+extern void CMap__ChargerZ(struct CMap * this, const char * filename);
+extern void CMap__AjouterObjet(struct CMap * this, CPhysicalObj * o);  
+extern void CMap__AjouterObjet_nom(struct CMap * this, const char * nom, CPhysicalObj * o);
+extern CPhysicalObj * CMap__RetrouverObjetViaSonNom(CMap * this, const char * nom);
+extern void CMap__AjouterZoneTeleportation(struct CMap * this, TPoint3D position, TPoint3D dimension, TDirection depart_direction, const char * destination_carte, TPoint3D destination_position, TDirection destination_direction);
+extern void CMap__AjouterParticules(struct CMap * this, TPoint3D p, const char * nom, const bool MoteurPhysiqueActif);
+extern void CMap__TesterPosition(struct CMap * this, CPhysicalObj * o, const bool MoteurPhysiqueActif);
+extern CPhysicalObj * CMap__TesterPositionHero(struct CMap * this, struct CPhysicalObj * o, const bool MoteurPhysiqueActif);
+extern void CMap__TraiterOrdresDeplacement(struct CMap * this, struct CBonhomme * aHero, const bool MoteurPhysiqueActif);
+extern const CZoneTeleportation * CMap__VaTonBouger(const CMap * this, const CPhysicalObj * aHero);
+//extern struct tab_evt_bool CMap__tab_evt_carte(struct CMap * this);
+
 
 
 

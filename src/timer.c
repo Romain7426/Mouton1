@@ -1,5 +1,5 @@
-#include "global.hpp"
-#include "timer.hpp"
+#include "global.h"
+#include "timer.h"
 
 
 
@@ -8,7 +8,7 @@ static int t;
 
 void DebutDePasse(void) {
   t = SDL_GetTicks();    
-}
+};
 
 
 
@@ -21,7 +21,7 @@ void FinDePasse(void) {
     SDL_Delay(nb_microsec_in_passe - diff);
 #endif
 
-}
+};
 
 
 

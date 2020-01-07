@@ -1,21 +1,21 @@
-#include "global.hpp"
-#include "main.hpp"
-#include "kernel.hpp"
-#include "map.hpp"
-#include "menu.hpp"
-#include "bonhomme.hpp"
-#include "son.hpp"
-#include "text.hpp"
-#include "objnonanime.hpp"
-#include "coeurs.hpp"
-#include "pagetitre.hpp"
-#include "affichagemainpierre.hpp"
-#include "evenement.hpp"
-#include "action.hpp"
-#include "apiscript.hpp"
-#include "moteurteleportation.hpp"
-#include "camera.hpp"
-#include "menuentreenom.hpp"
+#include "global.h"
+#include "main.h"
+#include "kernel.h"
+#include "map.h"
+#include "menu.h"
+#include "bonhomme.h"
+#include "son.h"
+#include "text.h"
+#include "objnonanime.h"
+#include "coeurs.h"
+#include "pagetitre.h"
+#include "affichagemainpierre.h"
+#include "evenement.h"
+#include "action.h"
+#include "apiscript.h"
+#include "moteurteleportation.h"
+#include "camera.h"
+#include "menuentreenom.h"
 
 
 
@@ -32,8 +32,10 @@ static bool EnVaisseau = false;
 static float AngleXY = 0;
 
 static CMap * Map = NULL;
-static CMenuAbstrait * Menu = NULL;
-CMenuAbstrait * MiniMenu = NULL; // accédé directement au sein du Pascal
+//static CMenuAbstrait * Menu = NULL;
+static CMenu * Menu = NULL;
+//CMenuAbstrait * MiniMenu = NULL; // accédé directement au sein du Pascal
+CMiniMenu * MiniMenu = NULL; // accédé directement au sein du Pascal
 static CBonhomme * Hero = NULL;
 static CMusique * Musique = NULL;
 static CObjNonAnime * Vaisseau = NULL;
@@ -66,13 +68,10 @@ static float marche_compression = marche_compression_defaut;
 
 static bool SCRIPT_SystemeRendMainAuScript = false;
 
-
 static CScriptLauncher * script = NULL;
 
-
-
-api_contexte_t api_contexte = {
-  &ModeJeu, &SCRIPT_SystemeRendMainAuScript, &Map, &Musique, &Menu, &Hero, &Temps, &marche_compression, &TypeInstructionCourante, &MiniMenu, 0, NULL
+api_contexte_t api_contexte = { 
+ &ModeJeu, &SCRIPT_SystemeRendMainAuScript, &Map, &Musique, &Menu, &Hero, &Temps, &marche_compression, &TypeInstructionCourante, &MiniMenu, 0, NULL
 };
 
 
@@ -85,26 +84,26 @@ static void DebutDePartie(void);
 void DebutDePartie(void) {
   printf("\n\n");
   printf("Création du menu\n");
-  Menu = new CMenu();
+  Menu = CMenu_make();
   //Menu = new CMiniMenu(100,300,200);
-  Menu -> NomSousMenu[0] = strcopy("Armes");
-  Menu -> NomSousMenu[1] = strcopy("Objets");
-  Menu -> NomSousMenu[2] = strcopy("Magies");
+  Menu -> parent.NomSousMenu[0] = strcopy("Armes");
+  Menu -> parent.NomSousMenu[1] = strcopy("Objets");
+  Menu -> parent.NomSousMenu[2] = strcopy("Magies");
 
   SCRIPT_RecevoirUneArme("menu/epee");
   SCRIPT_RecevoirUneArme("menu/arc");
 
 
   printf("Création du héros\n");
-  Hero = new CBonhomme("./heros.anime");
+  Hero = CBonhomme_make("./heros.anime");
   printf("Héros créé. Son pointeur est %p\n", Hero);
   //Hero -> SetPVMax(1/*3*7*/);
-  Hero -> SetPVMax(4*7);
+  Hero -> parent1.SetPVMax(&Hero -> parent1, 4*7);
 
 
   //initialisation de la caméra
-  Camera.InitCamera();
-  Camera.SolidariserAuHeros();
+  Camera.InitCamera(&Camera);
+  Camera.SolidariserAuHeros(&Camera);
   
   Map = NULL;
 
@@ -114,9 +113,9 @@ void DebutDePartie(void) {
   if (ExecuterScriptDeDebut) {
     //fprintf(stderr, "Lancement du script de démarrage...\n");
     ModeJeu = mjSCRIPT;
-    script = new CScriptLauncher("script.pml", "debut");
+    script = CScriptLauncher_make("script.pml", "debut");
     assert(script != NULL);
-    script -> init_step();
+    script -> init_step(script);
     //p.Execute();
   }
 #else
@@ -141,27 +140,27 @@ void Init(void) {
   //Musique = new CMusique("zelda.mid");
   init_actions();
 
-  Text = new CText();
-  MessageTexte = new CMessageTexte();
-  PageTitre = new CPageTitre;
-  MenuEntreeNom = new CMenuEntreeNom();
+  Text = CText_make();
+  MessageTexte = CMessageTexte_make();
+  PageTitre = CPageTitre_make();
+  MenuEntreeNom = CMenuEntreeNom_make();
 
   //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
 
-  Musique = new CMusique("intro.mid");
-  Musique -> Jouer();
-  son_bouton_espace = new CSon("./frappe.wav");
-  son_bouton_saut = new CSon("./frappe.wav");
+  Musique = CMusique_make("intro.mid");
+  Musique -> Jouer(Musique);
+  son_bouton_espace = CSon_make("./frappe.wav");
+  son_bouton_saut = CSon_make("./frappe.wav");
   //son_bouton_saut = new CSon("./plaisir.wav");
 
   //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
 
-  AffichageCoeur = new CAffichageCoeur();
-  AffichageMainPierre = new CAffichageMainPierre();  
+  AffichageCoeur = CAffichageCoeur_make();
+  AffichageMainPierre = CAffichageMainPierre_make();  
 
   //fprintf(stderr, "Init4: ModeJeu = %d\n", ModeJeu);
 
-  Vaisseau = new CObjNonAnime("vaisseau.nonanime");
+  Vaisseau = CObjNonAnime_make("vaisseau.nonanime");
 
   //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
 
@@ -211,7 +210,7 @@ void Init(void) {
   
   printf("Fin de l'initialisation!! YOUPI!!\n");
   //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
-}
+}; 
 
 
 
@@ -221,6 +220,8 @@ void Init(void) {
 // Procédure pour récupérer les commandes clavier et souris
 void RaiseInput(void) {
   //fprintf(stderr, "ModeJeu = %d\n", ModeJeu);
+
+  CPhysicalObj * Hero_o = &Hero -> parent1; 
 
   if (ModeJeu == mjJEU && !ModeMenuSysteme) {
 
@@ -238,32 +239,33 @@ void RaiseInput(void) {
         Camera.angleXY -= PI/32.0f;
       
       if (KEY_UP)
-        Hero -> Avancer(ConvertirDirectionAvecVue(DOS, Camera), Map);
+        Hero -> Avancer(Hero, ConvertirDirectionAvecVue(DOS, Camera), Map);
       
       if (KEY_DOWN) 
-        Hero -> Avancer(ConvertirDirectionAvecVue(FACE, Camera), Map);
+        Hero -> Avancer(Hero, ConvertirDirectionAvecVue(FACE, Camera), Map);
       
       if (KEY_LEFT)
-        Hero -> Avancer(ConvertirDirectionAvecVue(PROFIL_VERS_G, Camera), Map);
+        Hero -> Avancer(Hero, ConvertirDirectionAvecVue(PROFIL_VERS_G, Camera), Map);
       
       if (KEY_RIGHT)
-        Hero -> Avancer(ConvertirDirectionAvecVue(PROFIL_VERS_D, Camera), Map);
+        Hero -> Avancer(Hero, ConvertirDirectionAvecVue(PROFIL_VERS_D, Camera), Map);
       
       if (KEY_JUMP) {
         printf("On saute. (pagedown appuyé…)\n");
-   
-        if (Hero -> Immerge) {
-          if (Hero -> GetVitesse().z < 0) {
-            Hero -> AddForce(0.0f, 0.0f,50.1f);
-            son_bouton_saut -> Jouer();
+
+        if (Hero_o -> Immerge) {
+          if (Hero_o -> GetVitesse(Hero_o).z < 0) {
+            Hero_o -> AddForce_vXYZ(Hero_o, 0.0f, 0.0f, 50.1f);
+            son_bouton_saut -> Jouer(son_bouton_saut);
           }
-          else
-            Hero -> AddForce(0.0f, 0.0f,1.5f);
+          else { 
+            Hero_o -> AddForce_vXYZ(Hero_o, 0.0f, 0.0f, 1.5f);
+	  };
         } // if (Hero -> Immerge)
    
-        else if (Hero -> AuSol) {
-          son_bouton_saut -> Jouer();
-          Hero -> AddForce(0.0f, 0.0f, 180.0f);
+        else if (Hero_o -> AuSol) {
+          son_bouton_saut -> Jouer(son_bouton_saut);
+          Hero_o -> AddForce_vXYZ(Hero_o,0.0f, 0.0f, 180.0f);
         } // if (Hero -> AuSol)
 
       } // if (KEY_JUMP)
@@ -286,16 +288,16 @@ void RaiseInput(void) {
 #define force_vaisseau 10.0f
 #define force_vaisseau_altitude 80.0f
       if (KEY_UP)
-        Hero -> AddForce(Point3D(force_vaisseau*cosf(AngleXY), force_vaisseau*sinf(AngleXY), 0.0f));  
+        Hero_o -> AddForce_vXYZ(Hero_o, force_vaisseau*cosf(AngleXY), force_vaisseau*sinf(AngleXY), 0.0f);  
         
       if (KEY_DOWN)
-        Hero -> AddForce(Point3D(-force_vaisseau*cosf(AngleXY), -force_vaisseau*sinf(AngleXY), 0.0f));  
+        Hero_o -> AddForce_vXYZ(Hero_o, -force_vaisseau*cosf(AngleXY), -force_vaisseau*sinf(AngleXY), 0.0f);  
       
       if (KEY_VAISSEAU_UP)
-        Hero -> AddForce(Point3D(0.0f, 0.0f, force_vaisseau_altitude));
+        Hero_o -> AddForce_vXYZ(Hero_o, 0.0f, 0.0f, force_vaisseau_altitude);
       
       if (KEY_VAISSEAU_DOWN)
-        Hero -> AddForce(Point3D(0.0f, 0.0f, -force_vaisseau_altitude));   
+        Hero_o -> AddForce_vXYZ(Hero_o, 0.0f, 0.0f, -force_vaisseau_altitude); 
     }
 
      
@@ -304,8 +306,8 @@ void RaiseInput(void) {
       /*TPoint2D d = Map -> Differentiel(Hero -> GetPosition()); 
         printf("Ahhh je glisse dans la direction (%f, %f)\n", -d.x, -d.y);
         Hero -> AddForce(-d.x/3.0f, -d.y/3.0f, 0.0f);*/
-      son_bouton_espace -> Jouer();
-      Hero -> Frapper();
+      son_bouton_espace -> Jouer(son_bouton_espace);
+      Hero -> Frapper(Hero);
       
       /*création d'un projectile*/
       /*CPhysicalObj* projectile = new CBonhomme("sang.anime");
@@ -322,25 +324,25 @@ void RaiseInput(void) {
       
     
     if (KEY_MENU_SYSTEME) {
-      delete MiniMenu;
+      CMiniMenu_delete(MiniMenu);
       
-      MiniMenu = new CMiniMenu(100, 300,1000);         
-      MiniMenu -> Add(0,"Continuer à jouer",NULL);
-      MiniMenu -> Add(0,"Quitter",NULL);
+      MiniMenu = CMiniMenu_make(100, 300,1000);         
+      MiniMenu -> parent.Add(&MiniMenu -> parent, 0,"Continuer à jouer",NULL);
+      MiniMenu -> parent.Add(&MiniMenu -> parent, 0,"Quitter",NULL);
       
       ModeMenuSysteme = true;
-    }
+    };
 
-  }    
-
-
+  }; // if (ModeJeu == mjJEU && !ModeMenuSysteme) 
+  
+  
   // Qu'est-ce que ça fout là?
   // À quoi ça sert?
   // …
   // Après tests, ça permet au héros et aux ennemis de ne pas être sombres.
   // Bien.
   // Mais qu'est-ce que ça fout là?
-  // Nous sommes dans la fonction «RaiseInput» bordel de merde!!
+  // Nous sommes dans la fonction «RaiseInput»!!
 #if 1
   float light_diffuse[] = {0.1f, 1.0f, 1.0f, 1.0f};
   float light_amb[] = {0.4f, 0.4f, 0.4f, 1.0f};
@@ -371,17 +373,17 @@ void gestion_menu(void) {
    * là gestion_menu() s'occupe de réaliser l'action correspondante au menu
    */
   
-  if (!Menu -> Canceled) {
-    switch (Menu -> iphi) {
+  if (!Menu -> parent.Canceled) {
+    switch (Menu -> parent.iphi) {
     case ANNEAU_MENU_ARME: {
-      CPantin * Epee = new CPantin();
+      CPantin * Epee = CPantin_make();
       
-      if (Menu -> itheta == 0)      
-        Epee -> AjouterMembre("./heros/epee.png", -0.0f, 0.0f, -22.0f, 9.0f , 32.0f, 10.0f);
+      if (Menu -> parent.itheta == 0)      
+        Epee -> AjouterMembre(Epee, "./heros/epee.png", -0.0f, 0.0f, -22.0f, 9.0f , 32.0f, 10.0f);
       else
-        Epee -> AjouterMembre("./heros/arc.png", -0.0f, 0.0f, -22.0f, 7.0f , 37.0f, 10.0f);
+        Epee -> AjouterMembre(Epee, "./heros/arc.png", -0.0f, 0.0f, -22.0f, 7.0f , 37.0f, 10.0f);
       
-      Hero -> SetPantinFils(MEMBRE_AVEC_ARME , Epee);
+      Hero -> parent2.SetPantinFils(&Hero -> parent2, MEMBRE_AVEC_ARME , Epee);
     }
       break; 
       
@@ -399,7 +401,7 @@ void RaiseLife(void) {
   //fprintf(stderr, "ModeJeu = %d\n", ModeJeu);
 
   if (ModeJeu == mjTITRE) {
-    if (PageTitre -> Life()) {
+    if (PageTitre -> Life(PageTitre)) {
       ModeJeu = mjJEU;
       DebutDePartie();
     }
@@ -410,71 +412,73 @@ void RaiseLife(void) {
   if (Map != NULL) {
     // on gère le temps
     Temps += marche_compression;      
-    Map -> SetTemps(Temps);
+    Map -> parent.SetTemps(&Map -> parent, Temps);
 
 
 #if 1
     // vérifie si l'on va changer de carte…
-    if (CZoneTeleportation * pzt = Map -> VaTonBouger(Hero))
-      if (EnVaisseau || (Hero -> GetDirection() == pzt -> depart_direction))
-        if (not(MoteurTeleportation.IsTeleportationEnCours())) {
+    const CZoneTeleportation * pzt = Map -> VaTonBouger(Map, &Hero -> parent1); 
+    if (pzt) 
+      if (EnVaisseau || (Hero -> GetDirection(Hero) == pzt -> depart_direction))
+        if (not(MoteurTeleportation.IsTeleportationEnCours(&MoteurTeleportation))) {
           CZoneTeleportation zt = *pzt;
-     
+	  
           printf("On arrive sur une zone de téléportation:\n");
-          printf("Direction du héros %i, de la zone %i\n", Hero -> GetDirection(), pzt -> depart_direction);
+          printf("Direction du héros %i, de la zone %i\n", Hero -> GetDirection(Hero), pzt -> depart_direction);
           printf("   position: (%f, %f, %f)\n", zt.position.x, zt.position.y, zt.position.z);
           ModeJeu = mjTELEPORTATION;
-          SCRIPT_ChangerDeCarte(&MoteurTeleportation, zt);
+          SCRIPT_ChangerDeCarte_vZT(&MoteurTeleportation, zt);
         }
 #endif
      
 
     // *** Calculs à faire avant l'affichage ***
     if (EnVaisseau) {
-      Hero -> CoeffFrottementFluide = 1.0f;
-      Hero -> CoeffFrottementFluideZ = 0.5f;
-      Hero -> CalcNewPosition();
-      Hero -> ValiderPosition(MoteurPhysiqueActif);
-      Hero -> InitForce();
-      float zcarte = Map -> GETZ(Hero -> GetPosition().x, Hero -> GetPosition().y);
-      float z = Hero -> GetPosition().z;
+      Hero -> parent1.CoeffFrottementFluide = 1.0f;
+      Hero -> parent1.CoeffFrottementFluideZ = 0.5f;
+      Hero -> parent1.CalcNewPosition(&Hero -> parent1);
+      Hero -> parent1.ValiderPosition(&Hero -> parent1, MoteurPhysiqueActif);
+      Hero -> parent1.InitForce(&Hero -> parent1);
+      float zcarte = Map -> parent.GETZ(&Map -> parent, Hero -> parent1.GetPosition(&Hero -> parent1).x, Hero -> parent1.GetPosition(&Hero -> parent1).y);
+      float z = Hero -> parent1.GetPosition(&Hero -> parent1).z;
   
 #define ZMAXVAISSEAU 200.0f
-      if (z < zcarte)
-        z = zcarte;
+      if (z < zcarte) z = zcarte;
 
-      if (z > ZMAXVAISSEAU)
-        z = ZMAXVAISSEAU;
+      if (z > ZMAXVAISSEAU) z = ZMAXVAISSEAU;
 
-      Hero -> SetPosition(Point3D(Hero -> GetPosition().x, Hero -> GetPosition().y, z));
+      Hero -> parent1.SetPosition_vTPoint3D(&Hero -> parent1, TPoint3D_make_struct(Hero -> parent1.GetPosition(&Hero -> parent1).x, Hero -> parent1.GetPosition(&Hero -> parent1).y, z ) );
       Camera.angleXY = AngleXY;
     }
      
     else { // pas en vaisseau
 
       if (ModeJeu == mjSCRIPT)
-        Map -> TraiterOrdresDeplacement(Hero, MoteurPhysiqueActif);
+        Map -> TraiterOrdresDeplacement(Map, Hero, MoteurPhysiqueActif);
       
-      if (ModeJeu == mjJEU)
-        if (CObjActionnable * objetproche = Map -> TesterPositionHero(Hero, MoteurPhysiqueActif))
-          objetproche -> InputAndRenderActionMenu();
+      if (ModeJeu == mjJEU) {
+	CPhysicalObj * objetproche_o = Map -> TesterPositionHero(Map, &Hero -> parent1, MoteurPhysiqueActif); 
+	CObjActionnable * objetproche = (CObjActionnable *) objetproche_o; 
+        if (objetproche) 
+          objetproche -> InputAndRenderActionMenu(objetproche);
+      };
   
-      if (Hero -> Is0PV()) {
-        Hero -> SetPVMax(4*7);
+      if (Hero -> parent1.Is0PV(&Hero -> parent1)) {
+        Hero -> parent1.SetPVMax(&Hero -> parent1, 4*7);
         RaiseEvenement(EVT_Mort);
       }
   
     } // fin de «if-else (en_vaisseau)»
      
     
-    AffichageCoeur -> InformerNbPV(Hero -> GetPV());
-    AffichageCoeur -> Life();
+    AffichageCoeur -> InformerNbPV(AffichageCoeur, Hero -> parent1.GetPV(&Hero -> parent1));
+    AffichageCoeur -> Life(AffichageCoeur);
   }
 
 
   if (ModeJeu == mjTELEPORTATION) {
     bool teleportation_terminee_huh = false;
-    MoteurTeleportation.Life(Map, EnVaisseau, Hero, teleportation_terminee_huh);
+    MoteurTeleportation.Life(&MoteurTeleportation, &Map, &EnVaisseau, &Hero, &teleportation_terminee_huh);
     if (teleportation_terminee_huh) {
       //fprintf(stderr, "TELEPORTATION_TERMINEE_HUH\n");
       ModeJeu = mjJEU;
@@ -499,26 +503,26 @@ void RaiseRender(void) {
   
 
   if (ModeMenuSysteme) {
-    if (MiniMenu -> InputAndRender()) {
-      if (not(MiniMenu -> Canceled))
-        if (MiniMenu -> itheta == 1)
+    if (MiniMenu -> InputAndRender(MiniMenu)) {
+      if (not(MiniMenu -> parent.Canceled))
+        if (MiniMenu -> parent.itheta == 1)
           DemanderAQuitterLeJeu();
       
       ModeMenuSysteme = false;          
     }
-  }
+  };
   
   
   if (ModeJeu == mjTITRE) {
-    PageTitre -> Render();
+    PageTitre -> Render(PageTitre);
     SDL_GL_SwapBuffers();
     return;
-  }
+  };
 
 
   // *** affichage de l'inventaire ("menu" n'est pas un bon nom :-) ***
   if (ModeJeu == mjMENU) {
-    if (Menu -> InputAndRender()) {
+    if (Menu -> InputAndRender(Menu)) {
       gestion_menu();
       ModeJeu = mjJEU;
     }
@@ -526,7 +530,7 @@ void RaiseRender(void) {
     //fprintf(stderr, "HERE\n");
     //SDL_GL_SwapBuffers();
     //return;
-  } // mjMenu
+  }; // mjMenu
 
 
   // *** Render en mode script ***
@@ -541,7 +545,7 @@ void RaiseRender(void) {
     float i;
     float j;
     {
-      TPoint3D pp = Hero -> GetPosition();
+      TPoint3D pp = Hero -> parent1.GetPosition(&Hero -> parent1);
       i = pp.x;
       j = pp.y;
     }
@@ -549,13 +553,13 @@ void RaiseRender(void) {
     RenderCiel(Map, j);
 
     // !! Bien laisser cette instruction en premier sinon rien ne s'affiche… ???
-    Camera.CalcCamera(Hero, Map);
+    Camera.CalcCamera(&Camera, Hero, Map);
     
-    Map -> RenderEau((int) i-nb_cases_afficheesX, (int) j-nb_cases_afficheesYdevant, (int) i+nb_cases_afficheesX, (int) j+nb_cases_afficheesYfond);
+    Map -> parent.RenderEau(&Map -> parent, (int) i-nb_cases_afficheesX, (int) j-nb_cases_afficheesYdevant, (int) i+nb_cases_afficheesX, (int) j+nb_cases_afficheesYfond);
 
     if (!EnVaisseau) {
-      Map -> Render((int) i-nb_cases_afficheesX, (int) j-nb_cases_afficheesYdevant, (int) i+nb_cases_afficheesX, (int) j+nb_cases_afficheesYfond, EnVaisseau);
-      Hero -> Render(Map);
+      Map -> Render(Map, (int) i-nb_cases_afficheesX, (int) j-nb_cases_afficheesYdevant, (int) i+nb_cases_afficheesX, (int) j+nb_cases_afficheesYfond, EnVaisseau);
+      Hero -> Render(Hero, &Map -> parent);
     }
     else { // _en vaisseau_
       TPoint3D p;
@@ -564,40 +568,40 @@ void RaiseRender(void) {
        * j'utilise l'objet Hero en interface (histoire de pas tout rechanger)
        * et après je transfère la position de Hero sur le vaisseau
        */
-      p = Hero -> GetPosition();
-      Map -> PositionModulo(p.x, p.y);
-      Hero -> SetPosition(p);
+      p = Hero -> parent1.GetPosition(&Hero -> parent1);
+      Map -> parent.PositionModulo(&Map -> parent, &p.x, &p.y);
+      Hero -> parent1.SetPosition_vTPoint3D(&Hero -> parent1, p);
       p.z -= 50;
-      Vaisseau -> SetPosition(p);
-      Vaisseau -> SetAngleZ(AngleXY + 90.0f);
+      Vaisseau -> parent.SetPosition_vTPoint3D(&Vaisseau -> parent, p);
+      Vaisseau -> SetAngleZ(Vaisseau, AngleXY + 90.0f);
       //Vaisseau -> SetAngleZ(AngleXY);
       
       //Map -> LookAt(i, j, Hero -> GetPosition().z, AngleXY, 0.0f);
-      Map -> Render(0, 0, 1000, 1000, EnVaisseau);
-      Vaisseau -> Render(Map);
+      Map -> Render(Map, 0, 0, 1000, 1000, EnVaisseau);
+      Vaisseau -> Render(Vaisseau, &Map -> parent);
     } // end de else de «if (Envaisseau)»
 
     
     // *** affichage des coeurs ***
-    AffichageCoeur -> Render();
+    AffichageCoeur -> Render(AffichageCoeur);
     
     // *** affichage de la main ***
-    AffichageMainPierre -> Render(Hero -> GetPosition().y, Map);
+    AffichageMainPierre -> Render(AffichageMainPierre, Hero -> parent1.GetPosition(&Hero -> parent1).y, Map);
 
-  } // end de «if (Map != NULL)»
+  }; // end de «if (Map != NULL)»
   
 
 
 #if 1
   if (ModeJeu == mjTELEPORTATION) {
-    MoteurTeleportation.Render(Map, EnVaisseau, Hero);
-  }
+    MoteurTeleportation.Render(&MoteurTeleportation, &Map, &EnVaisseau, &Hero);
+  };
 #endif
   
   
   SDL_GL_SwapBuffers();
    
-} // RaiseRender()
+}; // RaiseRender()
 
 
 
@@ -612,45 +616,45 @@ void Free(void) {
   free_actions();
   
   printf("-------- on détruit l'interface pour entrer les noms --------\n");
-  delete MenuEntreeNom;
+  CMenuEntreeNom_delete(MenuEntreeNom);
   
   printf("-------- on détruit le héros ----------------\n");
-  delete Hero;
+  CBonhomme_delete(Hero);
   
   printf("-------- on détruit le vaisseau ----------------\n");
-  delete Vaisseau;
+  CObjNonAnime_delete(Vaisseau);
   
   printf("-------- on détruit le moteur d'affichage de texte ---------\n");
-  delete Text;
+  CText_delete(Text);
   
   printf("-------- on détruit le moteur d'affichage de message de texte ---------\n");
-  delete MessageTexte;
+  CMessageTexte_delete(MessageTexte);
   
   printf("-------- on détruit la carte courante ---------\n");
-  delete Map;
+  CMap_delete(Map);
   
   printf("-------- on détruit le moteur d'affichage de coeurs ---------\n");
-  delete AffichageCoeur;
+  CAffichageCoeur_delete(AffichageCoeur);
   
   printf("-------- on détruit les sons... ---------\n");
-  delete son_bouton_espace;
-  delete son_bouton_saut;
+  CSon_delete(son_bouton_espace);
+  CSon_delete(son_bouton_saut);
   
   printf("-------- on détruit le moteur d'affichage de pierre ---------\n");
-  delete AffichageMainPierre;
+  CAffichageMainPierre_delete(AffichageMainPierre);
   
   printf("-------- on détruit la musique ---------\n");
-  delete Musique;
+  CMusique_delete(Musique);
   
   printf("-------- on détruit le moteur d'affichage de page de titre ---------\n");
-  delete PageTitre;
-} // Free()
+  CPageTitre_delete(PageTitre);
+}; // Free()
 
 
 
 
 void RenderCiel(const CMap * Map, float heros_y) {
-  float f = Map -> IndiceTemps(heros_y);
+  float f = Map -> parent.IndiceTemps(&Map -> parent, heros_y);
   GLfloat couleurduciel[4] = {0.5f*f, 0.6f*f, 1.0f*f, 1.0f};
   glClearColor(couleurduciel[0], couleurduciel[1], couleurduciel[2], couleurduciel[3]);
   glFogfv(GL_FOG_COLOR, couleurduciel);
@@ -688,7 +692,7 @@ void RenderModeScript_step(void) {
     */
     /***********************<<<<<<<<<<<<<<<<<<<<<<<ICI*/
     //script -> Execute();
-    bool fini_huh = script -> execute_step();
+    bool fini_huh = script -> execute_step(script);
     //fprintf(stderr, "HARO!\n");
     if (fini_huh) {
       //fprintf(stderr, " -> HARO?\n");
@@ -705,42 +709,42 @@ void RenderModeScript_step(void) {
     break;
     
   case ticWaitFor: {
-    if (not (api_contexte.b -> IsSoumisADesOrdres()))
+    if (not (api_contexte.b -> IsSoumisADesOrdres(api_contexte.b)))
       TypeInstructionCourante = ticInstructionScript;
   }
     break;
     
   case ticAfficherMessage:
-    if (MessageTexte -> InputAndRender()) {
+    if (MessageTexte -> InputAndRender(MessageTexte)) {
       TypeInstructionCourante = ticInstructionScript;
     }
     break;
 
   case ticMiniMenu:
-    MessageTexte -> SetMsg("Chapitre");
-    MessageTexte -> Render();
+    MessageTexte -> SetMsg(MessageTexte, "Chapitre");
+    MessageTexte -> Render(MessageTexte);
   
-    if (MiniMenu -> InputAndRender()) {
-      script -> stack_push_int(MiniMenu -> itheta);
+    if (MiniMenu -> InputAndRender(MiniMenu)) {
+      script -> stack_push_int(script, MiniMenu -> parent.itheta);
       TypeInstructionCourante = ticInstructionScript;
-    }
+    };
     break;
   
   case ticChangerDeCarte: {
 #if 1
     //fprintf(stderr, "HERE\n");
     bool teleportation_terminee_huh = false;
-    MoteurTeleportation.Life(Map, EnVaisseau, Hero, teleportation_terminee_huh);
+    MoteurTeleportation.Life(&MoteurTeleportation, &Map, &EnVaisseau, &Hero, &teleportation_terminee_huh);
     if (teleportation_terminee_huh) {
       //fprintf(stderr, "TELEPORTATION_TERMINEE_HUH\n");
       TypeInstructionCourante = ticInstructionScript;
     }
-    MoteurTeleportation.Render(Map, EnVaisseau, Hero);
+    MoteurTeleportation.Render(&MoteurTeleportation, &Map, &EnVaisseau, &Hero);
 #else
     //fprintf(stderr, "--TELEPORTATION_TERMINEE_HUH\n");
-    delete Map;
+    CMap_delete(Map);
     Map = new CMap("./village.carte", false);
-    Hero -> SetPosition(10.0f, 10.0f, mpABSOLU, Map);
+    Hero -> parent1.SetPosition(Hero -> parent1, 10.0f, 10.0f, mpABSOLU, Map);
     TypeInstructionCourante = ticInstructionScript;
 #endif
   }
@@ -752,8 +756,8 @@ void RenderModeScript_step(void) {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 #endif
-    if (MenuEntreeNom -> InputAndRender()) {
-      script -> stack_push_string(MenuEntreeNom -> buffer);
+    if (MenuEntreeNom -> InputAndRender(MenuEntreeNom)) {
+      script -> stack_push_string(script, MenuEntreeNom -> buffer);
       // on rend la main au script
       //SCRIPT_SystemeRendMainAuScript = true;
       TypeInstructionCourante = ticInstructionScript;
@@ -764,7 +768,7 @@ void RenderModeScript_step(void) {
   default: assert(false);
   } // switch
 
-}
+}; 
 
 
 

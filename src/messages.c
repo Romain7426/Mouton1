@@ -1,9 +1,9 @@
 #include <stdarg.h>
-#include "global.hpp"
-#include "messages.hpp"
+#include "global.h"
+#include "messages.h"
 
 
-// Dans ce qui suit, on définit les fonctions de messages. */
+// Dans ce qui suit, on dÃ©finit les fonctions de messages. */
 
 #define FILENOTICE (LOGDIR "messages.log")
 #define FILEERROR  (LOGDIR "erreurs.log")
@@ -22,24 +22,24 @@ void init_message(void) {
  
   (void) (zeldafnotice = fopen(FILENOTICE, "w"));
   if (zeldafnotice == NULL) {
-      (void) fprintf(stdout, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILENOTICE);
+      (void) fprintf(stdout, "Ouverture impossible en Ã©criture du fichier \"%s\".\nFin de  l'exÃ©cution.\n", FILENOTICE);
       assert(false);
     }
  
-  (void) fprintf(stdout, "Ouverture en écriture du fichier \"%s\" réussie.\n", FILENOTICE);
-  (void) fprintf(zeldafnotice, "Ouverture en écriture du fichier \"%s\" réussie.\n", FILENOTICE);
+  (void) fprintf(stdout, "Ouverture en Ã©criture du fichier \"%s\" rÃ©ussie.\n", FILENOTICE);
+  (void) fprintf(zeldafnotice, "Ouverture en Ã©criture du fichier \"%s\" rÃ©ussie.\n", FILENOTICE);
 
   (void) (zeldaferror = fopen(FILEERROR, "w"));
   if (zeldaferror == NULL) {
-      (void) fprintf(stdout, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILEERROR);
-      (void) fprintf(zeldafnotice, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILEERROR);
+      (void) fprintf(stdout, "Ouverture impossible en Ã©criture du fichier \"%s\".\nFin de  l'exÃ©cution.\n", FILEERROR);
+      (void) fprintf(zeldafnotice, "Ouverture impossible en Ã©criture du fichier \"%s\".\nFin de  l'exÃ©cution.\n", FILEERROR);
       (void) fclose(zeldafnotice);
       assert(false);
     }
     
-  (void) fprintf(stdout, "Ouverture en écriture du fichier \"%s\" réussie.\n\n", FILEERROR);
-  (void) fprintf(zeldafnotice, "Ouverture en écriture du fichier \"%s\" réussie.\n\n\n", FILEERROR);
-  (void) fprintf(zeldaferror, "Ouverture en écriture du fichier \"%s\" réussie.\n\n\n", FILEERROR);
+  (void) fprintf(stdout, "Ouverture en Ã©criture du fichier \"%s\" rÃ©ussie.\n\n", FILEERROR);
+  (void) fprintf(zeldafnotice, "Ouverture en Ã©criture du fichier \"%s\" rÃ©ussie.\n\n\n", FILEERROR);
+  (void) fprintf(zeldaferror, "Ouverture en Ã©criture du fichier \"%s\" rÃ©ussie.\n\n\n", FILEERROR);
 
 }
 
@@ -59,7 +59,7 @@ void end_message(void) {
   (void) fclose(zeldafnotice);
   (void) (zeldafnotice = NULL); 
  
-  (void) fprintf(stdout, "Fichiers fermés.\n");
+  (void) fprintf(stdout, "Fichiers fermÃ©s.\n");
 }
 
 void vmessage(const char * mess, va_list args) {

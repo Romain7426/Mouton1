@@ -1,5 +1,5 @@
-#include "global.hpp"
-#include "utilities.hpp"
+#include "global.h"
+#include "utilities.h"
 
 
 
@@ -97,18 +97,14 @@ SDL_PixelFormat sdl_pixel_format_rgba = {
 };
 
 
+#if 0
 char * strcopy(const char * str) {
-  char * temp;
-
-  if (str == NULL) {
-    message("Passage d'un paramètre NULL à strcopy().");
-    return NULL;
-  }
-  
-  temp = strcpy(new char[strlen(str) + 1], str);
-
-  return temp;
-}
+  if (str == NULL) { return NULL; }; 
+  const size_t len = strlen(str); 
+  char * temp = (char *) malloc(sizeof(char) * (len+1));
+  return strcpy(temp, str);
+}; 
+#endif 
 
 
 
@@ -139,33 +135,26 @@ static const unsigned char table_oem2ansi[256] = {
 
 
 static inline char * factorize_oem(const unsigned char tab[], const char * str);
-char * factorize_oem(const unsigned char tab[], const char * str) {
-  char * temp, * tamp;
-  unsigned int len;
-  unsigned int i;
+char * factorize_oem(const unsigned char tab[], const char * str_) {
+  if (str_ == NULL) { return NULL; }; 
   
-  if (str == NULL) {
-    message("Passage d'une chaîne de caractère NULL; on rends NULL.");
-    return NULL;
-  }
-  
-  len = strlen(str);
-  temp = new char[len + 1];
+  const unsigned char * str = str_;     
+  const size_t len = strlen(str); 
+  unsigned char * temp = (unsigned char *) malloc(sizeof(unsigned char) * (len+1));
 
-  for (i = 0; i < len; i++) {
-    temp[i] = tab[(unsigned char) str[i]];
-  }
-
+  for (size_t i = 0; i < len; i++) {
+    temp[i] = tab[str[i]];
+  }; 
   temp[len] = '\0';
 
   return temp;
-}
+};
 
 char * ansi2oem(const char * str) {
   return factorize_oem(table_ansi2oem, str);
-}
+};
 
 char * oem2ansi(const char *str) {
   return factorize_oem(table_oem2ansi, str);
-}
+};
 

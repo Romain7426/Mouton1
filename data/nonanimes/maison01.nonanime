@@ -22,7 +22,7 @@ gameplay {
  }
 
  action parler {
-  affichage := "Mais c'est un objet, comment veux-tu que je lui parle espèce d'abruti !?! Tu me prends pour Mahatma Gandhi ou quoi ?" ;
+  affichage := "Mais c'est un objet, comment veux-tu que je lui parle espÃ¨ce d'abruti !?! Tu me prends pour Mahatma Gandhi ou quoi ?" ;
   icone := "herbe.jpg";
   gestionnaire := { fichier := "script.pml"; procedure := "parler"; } ;
  }

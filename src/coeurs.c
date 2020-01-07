@@ -1,27 +1,42 @@
-#include "global.hpp"
-#include "coeurs.hpp"
+#include "global.h"
+#include "coeurs.h"
 
-CAffichageCoeur * AffichageCoeur;
+CAffichageCoeur * AffichageCoeur = NULL;
 
+#define JeSuisEnTrainDEtreAnimeDsl (this -> JeSuisEnTrainDEtreAnimeDsl)
+#define texcoeur                   (this -> texcoeur)
+#define pv                         (this -> pv)
+#define temps                      (this -> temps)
+#define TypeAnimation              (this -> TypeAnimation)
+#define nbpetitscoeursperdus       (this -> nbpetitscoeursperdus)
+#define iAnimation                 (this -> iAnimation)
 
-CAffichageCoeur::CAffichageCoeur(void) : JeSuisEnTrainDEtreAnimeDsl(false) {
+CAffichageCoeur * CAffichageCoeur_make(void) {
+  MALLOC_BZERO(CAffichageCoeur,this);
+  
+  ASSIGN_METHOD(CAffichageCoeur,this,InformerNbPV); 
+  ASSIGN_METHOD(CAffichageCoeur,this,Render); 
+  ASSIGN_METHOD(CAffichageCoeur,this,Life); 
+  
   message("Création du module d'affichage de coeur...\n");
-  texcoeur = new CTexture("./coeur.png");
+  JeSuisEnTrainDEtreAnimeDsl = false; 
+  texcoeur = CTexture_make("./coeur.png");
   pv = 21;  
   temps = 0.0f;
   TypeAnimation = caONNEFAITRIEN;
-}    
+  
+  return this; 
+}; 
 
+void CAffichageCoeur_delete(CAffichageCoeur * this) {
+  CTexture_delete(texcoeur);
+  free(this); 
+}; 
 
-void CAffichageCoeur::InformerNbPV(int inpv) {
-
-  if (pv == inpv)
-    return;
-      
-  if (JeSuisEnTrainDEtreAnimeDsl)  
-    return;
-         
-         
+void CAffichageCoeur__InformerNbPV(CAffichageCoeur * this, int inpv) {
+  if (pv == inpv) return;
+  if (JeSuisEnTrainDEtreAnimeDsl) return;
+  
   message("Coeur : InformerNbPV(%i) (alors que l'ancien pv vaut %i)\n", inpv, pv);
 
   if (pv > inpv) {
@@ -31,7 +46,7 @@ void CAffichageCoeur::InformerNbPV(int inpv) {
       //on perd des gros coeurs (plus que 1) : le num pv / 7
       pv = (inpv / 7) * 7;
       TypeAnimation = caPERDREGROSCOEUR;
-    }
+    };
 
     if ((inpv / 7) == (pv / 7 - 1)) {
       //on perd un gros coeur : le num pv / 7
@@ -47,21 +62,21 @@ void CAffichageCoeur::InformerNbPV(int inpv) {
       pv = inpv;
       message("Coeur : On perd %i petit(s) coeur(s)\n", nbpetitscoeursperdus);
       TypeAnimation = caPERDREPETITSCOEURS;
-    }
+    };
          
          
-  }  
+  }; 
    
   iAnimation = 0;
   JeSuisEnTrainDEtreAnimeDsl = true;
    
-}
+};
 
 
 
 
 
-void CAffichageCoeur::Life(void) {
+void CAffichageCoeur__Life(CAffichageCoeur * this) {
         iAnimation++;                          
         if (iAnimation > nb_Etape_Animation)                         
           JeSuisEnTrainDEtreAnimeDsl = false;
@@ -71,16 +86,16 @@ void CAffichageCoeur::Life(void) {
   temps += 0.1f;
     
 
-}
+};
 
 
-void CAffichageCoeur::Render(void) const {
+void CAffichageCoeur__Render(const CAffichageCoeur * this) {
   int jj = 0;
   jj = 0;
   
   glEnable2D(); {
     
-    texcoeur -> GLTextureCourante();
+    texcoeur -> GLTextureCourante(texcoeur);
     
     glDisable(GL_LIGHTING);
     
@@ -101,7 +116,7 @@ void CAffichageCoeur::Render(void) const {
         // De plus, avec le jj++ dedans, TailleGrosCoeur et consort ne sont pas les mêmes
         // dans la même fonction!!!!
         BLITCX(CadreX + i * EspGrosCoeur, CadreY, TailleGrosCoeur, TailleGrosCoeur); 
-      }
+      };
       
     
    
@@ -156,7 +171,7 @@ void CAffichageCoeur::Render(void) const {
           
           
         default:
-          messerr("coeurs::render: on ne devrait pas être ici.");
+          messerr("coeurs__render: on ne devrait pas être ici.");
         }  
         
 
@@ -172,13 +187,10 @@ void CAffichageCoeur::Render(void) const {
 
   } glDisable2D();
   
-}
+};
 
 
 
-CAffichageCoeur::~CAffichageCoeur(void) {
-  delete texcoeur;
-}    
 
 
 

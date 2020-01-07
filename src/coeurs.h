@@ -1,13 +1,9 @@
 #ifndef COEURS_H
 #define COEURS_H
 
-#include "text.h"
-#include "texture.h"
-
-
 /*******************************************************************************
  Affichage des coeurs
- (animés et tout...)
+ (animÃ©s et tout...)
  ******************************************************************************/
 
 #define nb_Etape_Animation 64
@@ -32,22 +28,21 @@ struct CAffichageCoeur {
   TCoeurTypeAnimation TypeAnimation;
   bool JeSuisEnTrainDEtreAnimeDsl;
     
-    
-  //public:
-#if 0
-  struct CAffichageCoeur();
-  ~struct CAffichageCoeur();
-#endif
-  
-  /*il faut informer l'objet du nombre de pv du héros à chaque tour 
+  /*il faut informer l'objet du nombre de pv du hÃ©ros Ã  chaque tour 
     via un appel du genre : InformerNbPV(Hero->GetPV())*/
   void (* InformerNbPV)(struct CAffichageCoeur * this, int inpv);  
   
-  // affiche dans le coin supérieur gauche des coeurs
+  // affiche dans le coin supÃ©rieur gauche des coeurs
   void (* Render)(const struct CAffichageCoeur * this);
   
   void (* Life)(struct CAffichageCoeur * this);
 };
+
+extern CAffichageCoeur * CAffichageCoeur_make(void); 
+extern void CAffichageCoeur_delete(CAffichageCoeur * this); 
+extern void CAffichageCoeur__InformerNbPV(struct CAffichageCoeur * this, int inpv);  
+extern void CAffichageCoeur__Render(const struct CAffichageCoeur * this);
+extern void CAffichageCoeur__Life(struct CAffichageCoeur * this); 
 
 
 

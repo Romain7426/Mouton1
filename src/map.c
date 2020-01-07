@@ -1,9 +1,10 @@
-#include "global.hpp"
-#include "map.hpp"
-#include "physicalobj.hpp"
-#include "objnonanime.hpp"
-#include "bonhomme.hpp"
-#include "evenement.hpp"
+#include "global.h"
+#include "map.h"
+#include "physicalobj.h"
+#include "objnonanime.h"
+#include "bonhomme.h"
+#include "evenement.h"
+#include "carte.h"
 
 
 #ifdef VOISINAGE_IS_TAB
@@ -17,7 +18,7 @@ static void voisinage_detruire(CMap * map, int iii, int jjj);
 #define nb_voisinage_traitee 3
 #define nb_voisinage_traitee_toutproche 1
 
-#ifdef VOISINAGE_IS_TAB
+#if 0 
 
 #define PARCOURS_OBJETS                                         \
   if (Voisinages != NULL)                                       \
@@ -28,7 +29,7 @@ static void voisinage_detruire(CMap * map, int iii, int jjj);
           if (o_parcours == NULL)                               \
             continue;
 
-#else
+#elif 0 
 
 #define PARCOURS_OBJETS                                                 \
   if (Voisinages != NULL)                                               \
@@ -39,6 +40,17 @@ static void voisinage_detruire(CMap * map, int iii, int jjj);
           if (o_parcours == NULL)                                       \
             continue;
 
+#elif 1
+#define PARCOURS_OBJETS                                         \
+  for (int iii = 0; iii < VOISINAGE_X_SIZE; iii++)		\
+    for (int jjj = 0; jjj < VOISINAGE_Y_SIZE; jjj++)		\
+      for (int kkk = 0; kkk < VOISINAGE_SIZE; kkk++)		\
+        {                                                       \
+  CPhysicalObj * o_parcours = this -> Voisinages_array[iii][jjj][kkk];	\
+          if (o_parcours == NULL)                               \
+            continue;
+
+
 #endif
 
 
@@ -46,43 +58,75 @@ static void voisinage_detruire(CMap * map, int iii, int jjj);
 
 
 
+#if 0 
 
 #define PARCOURS_ZONESTELEPORTATIONS                                    \
   for (CAccesseur<CZoneTeleportation> a = ZonesTeleportation.ObtenirAcces(); not(a.IsFin()); a.AllerSuivant())
+ 
+#else 
+
+#define PARCOURS_ZONESTELEPORTATIONS                                    \
+  for (int izt = 0; izt < this -> ZonesTeleportation_nb; izt++) {	\
+  CZoneTeleportation * zt_parcours = this -> ZonesTeleportation_array[izt];	
+
+#define PARCOURS_ZONESTELEPORTATIONS_FIN } 
+
+#endif 
+
 
 
 //#define maxindvoisinages_fun(ttt) ((((int) (((ttt) -> TailleX) / taille_case)) + 1) * (((int) (((ttt) -> TailleY) / taille_case)) + 1))
 #define maxindvoisinages_fun(ttt) ((((int) (((ttt) -> TailleX) / taille_case))) * (((int) (((ttt) -> TailleY) / taille_case))))
-#define maxindvoisinages  maxindvoisinages_fun(this)
+#define maxindvoisinages  maxindvoisinages_fun(&this -> parent)
 #define maxindvoisinages2 maxindvoisinages_fun(map)
 
 
 // On affiche la case sur laquelle nous sommes
 // et les cases à rayon de nbnb
 // ainsi que le voisinage trivial (indicé 0)
-#define PARCOURS_OBJETS_VOISINAGES(pos_A, nbnb_A)                         \
+#define PARCOURS_OBJETS_VOISINAGES__OLD(pos_A, nbnb_A)			\
   {                                                                     \
-    const TPoint3D pos_ = (pos_A);                                             \
-    int nbnb_ = (nbnb_A);                                                 \
-    int current_case_ix = (int) (((real) pos_.x) / ((real) taille_case)); \
-    int current_case_iy = (int) (((real) pos_.y) / ((real) taille_case)); \
-    for (int biz = 0; biz <= 1; biz++)                                  \
-      for (int ix = biz*(current_case_ix - nbnb_); ix <= biz*(current_case_ix + nbnb_); ix++) \
-        if (ix >= 0)                                                    \
-          for (int iy = biz*(current_case_iy - nbnb_); iy <= biz*(current_case_iy + nbnb_); iy++) \
-            if (iy >= 0)                                                \
-              {                                                         \
-                int iii = ix + iy * ((int) (((real) TailleX) / ((real) taille_case))); \
-                if ((iii >= 0) && (iii < maxindvoisinages))             \
-                  {                                                     \
-                    iii += biz;                                         \
-                    if (Voisinages != NULL)                             \
-                      for (CAccesseur<CPhysicalObj> a = Voisinages[iii].Objets.ObtenirAcces(); not(a.IsFin()); a.AllerSuivant()) \
-                        {                                               \
-                          CPhysicalObj * o_parcours = a.Element();      \
-                          if (o_parcours == NULL)                       \
-                            continue;
+  const TPoint3D pos_ = (pos_A);					\
+  int nbnb_ = (nbnb_A);                                                 \
+  int current_case_ix = (int) (((real) pos_.x) / ((real) taille_case)); \
+  int current_case_iy = (int) (((real) pos_.y) / ((real) taille_case)); \
+  for (int biz = 0; biz <= 1; biz++)					\
+    for (int ix = biz*(current_case_ix - nbnb_); ix <= biz*(current_case_ix + nbnb_); ix++) \
+      if (ix >= 0)							\
+	for (int iy = biz*(current_case_iy - nbnb_); iy <= biz*(current_case_iy + nbnb_); iy++) \
+	  if (iy >= 0)							\
+	    {								\
+  int iii = ix + iy * ((int) (((real) TailleX) / ((real) taille_case))); \
+  if ((iii >= 0) && (iii < maxindvoisinages))				\
+    {									\
+  iii += biz;								\
+  if (Voisinages != NULL)						\
+    for (CAccesseur<CPhysicalObj> a = Voisinages[iii].Objets.ObtenirAcces(); not(a.IsFin()); a.AllerSuivant()) \
+      {									\
+  CPhysicalObj * o_parcours = a.Element();				\
+  if (o_parcours == NULL)						\
+    continue;
 
+#define PARCOURS_OBJETS_VOISINAGES_FIN__OLD }}}}
+
+#define PARCOURS_OBJETS_VOISINAGES(pos_A, nbnb_A)			\
+  {                                                                     \
+  const TPoint3D pos_ = (pos_A);					\
+  int nbnb_ = (nbnb_A);                                                 \
+  int current_case_ix = (int) (((real) pos_.x) / ((real) taille_case)); \
+  int current_case_iy = (int) (((real) pos_.y) / ((real) taille_case)); \
+  for (int biz = 0; biz <= 1; biz++)					\
+    for (int ix = biz*(current_case_ix - nbnb_); ix <= biz*(current_case_ix + nbnb_); ix++) \
+      if (ix < 0) continue; else					\
+	for (int iy = biz*(current_case_iy - nbnb_); iy <= biz*(current_case_iy + nbnb_); iy++) \
+	  if (iy < 0) continue; else					\
+	    for (int iv = 0; iv < VOISINAGE_SIZE; iv++)			\
+	      {								\
+  CPhysicalObj * o_parcours = this -> Voisinages_array[ix][iy][iv]; \
+  if (o_parcours == NULL)						\
+    continue;
+
+#define PARCOURS_OBJETS_VOISINAGES_FIN }} 
 
 
 #define PARCOURS_OBJETS_VOISINAGES_PROCHE(pos)     PARCOURS_OBJETS_VOISINAGES(pos, nb_voisinage_traitee)
@@ -98,25 +142,71 @@ static void voisinage_detruire(CMap * map, int iii, int jjj);
   if ((iii >= biz*1) && (iii < maxindvoisinages))                       \
   for (CAccesseur<CPhysicalObj> a = Voisinages[iii].Objets.ObtenirAcces(); !a.IsFin(); a.AllerSuivant())
 */
-#define PARCOURS_OBJETS_VOISINAGES_FIN }}}}
 
 
 
-CZoneTeleportation::CZoneTeleportation(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction) {
-  position = in_position;
-  dimension = in_dimension;
-  depart_direction = in_depart_direction;
+CZoneTeleportation * CZoneTeleportation_make(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction) { 
+  MALLOC_BZERO(CZoneTeleportation,this);
+  
+  this -> position = in_position;
+  this -> dimension = in_dimension;
+  this -> depart_direction = in_depart_direction;
 
-  destination_carte = strcopy(in_destination_carte);
-  destination_position = in_destination_position;
-  destination_direction = in_destination_direction;
-}
+  this -> destination_carte = strcopy(in_destination_carte);
+  this -> destination_position = in_destination_position;
+  this -> destination_direction = in_destination_direction;
+
+  return this; 
+}; 
+
+void CZoneTeleportation_delete(CZoneTeleportation * this) {
+  free(this); 
+}; 
+
+CZoneTeleportation * CZoneTeleportation_copy(const CZoneTeleportation * zt_src) {
+  MALLOC_BZERO(CZoneTeleportation,this);
+  *this = *zt_src; 
+  this -> destination_carte = strcopy(zt_src -> destination_carte); 
+  return this; 
+}; 
 
 
 
-CMap::CMap(const char * filename, const bool EnVaisseau) : CSol(EnVaisseau), NomCarte(strcopy(filename)) {
-  if (filename == NULL) return;
 
+#define NomCarte (this -> NomCarte) 
+#define ZonesTeleportation (this -> ZonesTeleportation) 
+#define evt_carte (this -> evt_carte) 
+//#define Voisinages_array[VOISINAGE_X_SIZE][VOISINAGE_Y_SIZE][VOISINAGE_SIZE]; 
+//#define DicoObjets
+
+
+CMap * CMap__make(const char * filename, const bool EnVaisseau) {
+  MALLOC_BZERO(CMap,this);
+  
+  //ASSIGN_METHOD(CMap,this,parse);
+  //ASSIGN_METHOD(CMap,this,yycarteparse);
+  ASSIGN_METHOD(CMap,this,GetNomCarte);
+  ASSIGN_METHOD(CMap,this,Render);
+  ASSIGN_METHOD(CMap,this,ChargerZ);
+  ASSIGN_METHOD(CMap,this,AjouterObjet);
+  ASSIGN_METHOD(CMap,this,AjouterObjet_nom);
+  ASSIGN_METHOD(CMap,this,RetrouverObjetViaSonNom);
+  ASSIGN_METHOD(CMap,this,AjouterZoneTeleportation);
+  ASSIGN_METHOD(CMap,this,AjouterParticules);
+  ASSIGN_METHOD(CMap,this,TesterPosition);
+  ASSIGN_METHOD(CMap,this,TesterPositionHero);
+  ASSIGN_METHOD(CMap,this,TraiterOrdresDeplacement);
+  ASSIGN_METHOD(CMap,this,VaTonBouger);
+  //ASSIGN_METHOD(CMap,this,tab_evt_carte);
+
+  // CSol(EnVaisseau)
+  CSol_make_aux(&this -> parent, EnVaisseau); 
+  
+
+  if (filename == NULL) return this;
+
+  NomCarte = strcopy(filename); 
+  
 #if 1
   ViderEvenement(EVT_ChargementCarte);
   ViderEvenement(EVT_EntreeSurCarte);
@@ -125,141 +215,77 @@ CMap::CMap(const char * filename, const bool EnVaisseau) : CSol(EnVaisseau), Nom
 
   printf("Constructeur CMap(%s)\n", filename);
 
-  char * reelfile;
-  reelfile = STRCAT2_(CARTESDIR, filename);
-  printf("nom de fichier réel: %s\n", reelfile);
-
   // Nous devons attendre avant de l'allouer car nous avons besoin de TailleX et TailleY (donc attendre le ChargerZ)
-  Voisinages = NULL;
+  //this -> Voisinages = NULL;
 
-  int ret = parse(CARTESDIR, filename);
-  if (ret){
-    messerr("pas bonne analyse du fichier \"%s\".", reelfile);
-    assert(false);
-  }
-  else {
-    message("analyse ok du fichier \"%s\".", reelfile);
-  }
+  this -> objets_nb = 0; 
+
+  this -> ZonesTeleportation_nb = 0; 
+ 
+  {
+    char * reelfile;
+    //reelfile = STRCAT2_(CARTESDIR, filename);
+    reelfile = strconcat2(CARTESDIR, filename);
+    printf("nom de fichier réel: %s\n", reelfile);
+    
+    //int ret = CMap__parse(this, CARTESDIR, filename);
+    const int ret = CMap__ReadDescriptionFile(this, CARTESDIR, filename);
+    if (ret){
+      messerr("pas bonne analyse du fichier \"%s\".", reelfile);
+      assert(false);
+    }
+    else {
+      message("analyse ok du fichier \"%s\".", reelfile);
+    }
+    free(reelfile);
+  }; 
+
+  printf("Fin de la construction CMap__CMap()\n");
+
+  return this; 
+};
 
 
-  printf("Fin de la construction CMap::CMap()\n");
-
-  delete reelfile;
-}
-
-
-CMap::~CMap(void) {
+void CMap_delete(CMap * this) {
   printf("Destruction de la carte %p\n", this);
 
-  delete[] Voisinages;
+  for (int i = 0; i < this -> ZonesTeleportation_nb; i++) { 
+    CZoneTeleportation_delete(this -> ZonesTeleportation_array[i]); 
+  }; 
+
+  for (int i = 0; i < this -> objets_nb; i++) { 
+    //CPhysicalObj_delete(this -> objets_array[i]); // Ils sont dans Voisinage. 
+    free(this -> objets_noms_array[i]); 
+  }; 
+
+  //delete[] Voisinages;
+  for (int i = 0; i < VOISINAGE_X_SIZE; i++) 
+    for (int j = 0; j < VOISINAGE_Y_SIZE; j++) 
+      for (int k = 0; k < VOISINAGE_SIZE; k++) 
+	if (NULL != this -> Voisinages_array[i][j][k]) {
+	  CPhysicalObj_delete(this -> Voisinages_array[i][j][k]);
+	}; 
+	
+  free(NomCarte); 
   // TextureSol, Objets, ZonesTeleportation sont détruits automatiquement car ce ne sont pas des pointeurs
-}
+  CSol_delete(&this -> parent);
+  free(this); 
+};
 
 
-const char * CMap::GetNomCarte(void) const {
+const char * CMap__GetNomCarte(const CMap * this) {
   return NomCarte;
-}
+};
 
 
 
-void CMap::Render(const int i1, const int j1, const int i2, const int j2, const bool EnVaisseau) {
-  // on affiche le sol (on appelle la fonction Render de la classe CSol dont hérite CMap)
-  CSol::Render(i1, j1, i2, j2);
+
+void CMap__ChargerZ(CMap * this, const char * filename) {
+  printf("CMap__ChargerZ(%s)\n", filename);
+  this -> parent.ChargerZ(&this -> parent, filename);
+
 
 #if 0
-  TPoint3D pos;
-  pos.x = (i1 + i2) / 2;
-  pos.y = (j1 + j2) / 2;
-#else
-  const TPoint3D pos = {(i1 + i2) / 2, (j1 + j2) / 2, 0., 0.};
-#endif
-
-  if (not(EnVaisseau)) {
-
-    PARCOURS_OBJETS_VOISINAGES_PROCHE(pos)
-    //PARCOURS_OBJETS
-      {
-#if 0
-        int i = (int) a.Element()->GetPosition().x;
-        int j = (int) a.Element()->GetPosition().y;
-#else
-        int i = (int) o_parcours->GetPosition().x;
-        int j = (int) o_parcours->GetPosition().y;
-#endif
-
-#if 0
-        const char * filename = o_parcours -> filename;
-        if (filename != NULL)
-          if (0 != strcmp(filename, "./heros.anime")) {
-            fprintf(stderr, "ObjPhys: Rendering: %s\n", filename);
-            fflush(NULL);
-          }
-        //fprintf(stderr, "iii = %d - jjj = %d - ", iii, jjj);
-#endif
-
-#if 1
-        //bool test = ((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
-        //if (test)
-        if (CBonhomme * b = dynamic_cast<CBonhomme *>(o_parcours)) {
-          //fprintf(stderr, "Bonhomme: Rendering: %s\n", b -> filename);
-          b -> Render(this);
-        }
-        else if (CObjNonAnime * nonanime = dynamic_cast<CObjNonAnime *>(o_parcours)) {
-          nonanime -> Render(this);
-        }
-        else
-#endif
-          o_parcours -> Render(this);
-
-      }
-    //PARCOURS_OBJETS_FIN;
-    PARCOURS_OBJETS_VOISINAGES_FIN;
-
-  }
-
-  else { // _ en vaisseau _
-    PARCOURS_OBJETS
-      {
-#if 0
-        int i = (int) a.Element()->GetPosition().x;
-        int j = (int) a.Element()->GetPosition().y;
-#endif
-        int i = (int) o_parcours->GetPosition().x;
-        int j = (int) o_parcours->GetPosition().y;
-
-
-        bool b = ((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
-        if (b)
-          o_parcours->Render(this);
-      }
-    PARCOURS_OBJETS_FIN;
-  }
-
-
-
-  {
-    //fprintf(stderr, "ZoneTeleportationBlit\n");
-    //int i = 0;
-    PARCOURS_ZONESTELEPORTATIONS
-      {
-        //fprintf(stderr, "ZoneTeleportationRender: i = %d\n", i++);
-
-        CZoneTeleportation * o = a.Element();
-        
-        AfficherCube(o->position.x, o->position.y, o->position.z, o->dimension.x, o->dimension.y, o->dimension.z);
-      }
-  }
-
-}
-
-
-
-
-void CMap::ChargerZ(const char * filename) {
-  printf("CMap::ChargerZ(%s)\n", filename);
-  CSol::ChargerZ(filename);
-
-
 #ifndef VOISINAGE_IS_TAB
   // On ne peut l'allouer que maintenant car nous avons besoin de TailleX et TailleY
   Voisinages = new TVoisinage[maxindvoisinages + 1];
@@ -269,24 +295,34 @@ void CMap::ChargerZ(const char * filename) {
     fprintf(stderr, "Voisinages[%d]: %p\n", i, Voisinages[i].Objets.debutliste);
   }
 #endif
-#else
+#elif 0 
   Voisinages = new CPhysicalObj * [maxindvoisinages + 1][VOISINAGE_TAILLE];
   for (int i = 0; i < (maxindvoisinages + 1); i++)
     for (int j = 0; j < VOISINAGE_TAILLE; j++)
       Voisinages[i][j] = NULL;
 #endif
+#endif
 
-  printf(" fin CMap::ChargerZ(%s)\n", filename);
-}
+  printf(" fin CMap__ChargerZ(%s)\n", filename);
+};
 
 
 
 
-void CMap::AjouterObjet(CPhysicalObj * o) {
+
+
+
+
+
+
+
+
+void CMap__AjouterObjet(CMap * this, CPhysicalObj * o) {
   printf("Ajout de l'objet physique (pointeur: %p; filename: %s) à la carte\n", o, o == NULL ? NULL : o -> filename);
 
-  assert(Voisinages != NULL); // ChargerZ doit avoir lieu auparavant!
+  //assert(Voisinages != NULL); // ChargerZ doit avoir lieu auparavant!
 
+#if 0
   {
     int nbelts;
 #ifndef VOISINAGE_IS_TAB
@@ -299,23 +335,25 @@ void CMap::AjouterObjet(CPhysicalObj * o) {
 #endif
     fprintf(stdout, "Ajout de l'objet physique %p (%s) - nb objets = %u\n", o, o -> filename, nbelts);
   }
+#endif 
 
+#if 0
   if (CBonhomme * b = dynamic_cast<CBonhomme *>(o)) {
     fprintf(stdout, "Ajout de Bonhomme: Adding: %s\n", b -> filename);
-  }
+  };
+#endif 
 
 
 
 
-  TPoint3D pos = o -> GetPosition();
+  TPoint3D pos = o -> GetPosition(o);
 
-  pos.z = GETZ(pos.x, pos.y);
-  o -> SetPosition(pos);
+  pos.z = this -> parent.GETZ(&this -> parent, pos.x, pos.y);
+  o -> SetPosition_vTPoint3D(o, pos);
 
 
-#if 1
-  printf("Taille de la carte en real: %d x %d\n", TailleX, TailleY);
-  printf("Taille de la carte en case: %d x %d\n", ((int) (TailleX / taille_case)), ((int) (TailleY / taille_case)));
+  printf("Taille de la carte en real: %d x %d\n", this -> parent.TailleX, this -> parent.TailleY);
+  printf("Taille de la carte en case: %d x %d\n", ((int) (this -> parent.TailleX / taille_case)), ((int) (this -> parent.TailleY / taille_case)));
   printf("Position de l'objet: %f x %f\n", pos.x, pos.y);
   printf("Coordonnées de la case contenant l'objet: %d x %d\n", ((int) (pos.x / taille_case)), ((int) (pos.y / taille_case)));
 
@@ -323,62 +361,68 @@ void CMap::AjouterObjet(CPhysicalObj * o) {
 
   if (o -> Fixe) {
     //int iii = ((int) (pos.y / taille_case)) * ((int) (TailleX / taille_case)) + ((int) pos.x / taille_case);
-    int iii = ((int) (pos.x / taille_case))  +  ((int) (pos.y / taille_case)) * ((int) (TailleX / taille_case));
-
+    //int iii = ((int) (pos.x / taille_case))  +  ((int) (pos.y / taille_case)) * ((int) (this -> parent.TailleX / taille_case));
+    const int ix = ((int) (pos.x / taille_case)); 
+    const int iy = ((int) (pos.y / taille_case)); 
+    int iii = ix + iy * ((int) (this -> parent.TailleX / taille_case)); 
+    
     if ((iii < 0) || (iii >= maxindvoisinages))
       iii = -1; // un +1 est fait ensuite, donc tout va bien :-)
 
     printf("On ajoute dans le voisinage n° %i (coord. x = %f, y %f)\n", iii, pos.x, pos.y);
-#ifndef VOISINAGE_IS_TAB
+#if 0 
     Voisinages[iii+1].Objets.Empiler_sans_copie(o);
-#else
+#elif 0
     voisinage_ajouter(this, iii+1, o);
+#elif 1 
+    for (int iv = 0; iv < VOISINAGE_SIZE; iv++) {
+      if (NULL != this -> Voisinages_array[ix][iy][iv]) continue; 
+      this -> Voisinages_array[ix][iy][iv] = o; 
+    };
 #endif
   }
 
   else {
     printf("On ajoute dans le voisinage trivial.\n");
-#ifndef VOISINAGE_IS_TAB
+#if 0 
     Voisinages[0].Objets.Empiler_sans_copie(o);
-#else
+#elif 0
     voisinage_ajouter(this, 0, o);
+#elif 1 
+    for (int iv = 0; iv < VOISINAGE_SIZE; iv++) {
+      if (NULL != this -> Voisinages_array[0][0][iv]) continue; 
+      this -> Voisinages_array[0][0][iv] = o; 
+    };
 #endif
-  }
-
-
-
-#else
-
-
-
-#ifndef VOISINAGE_IS_TAB
-  Voisinages[0].Objets.Empiler_sans_copie(o);
-#else
-  voisinage_ajouter(this, 0, o);
-#endif
-
-
-
-#endif
-
+  };
+  
+  
   printf("Ajout de l'objet physique réussi!!\n");
-}
+};
 
 
 
-void CMap::AjouterObjet(const char * nom, CPhysicalObj * o) {
+void CMap__AjouterObjet_nom(CMap * this, const char * nom, CPhysicalObj * o) {
   printf("Ajout de l'objet physique (pointeur %p) à la carte, de nom %s \n", o, nom);
-  AjouterObjet(o);
-
-  DicoObjets.Set(nom, o);
+  this -> AjouterObjet(this, o);
+  
+  assert(this -> objets_nb < DicoObjets_SIZE); 
+  this -> objets_array[this -> objets_nb] = o;
+  this -> objets_noms_array[this -> objets_nb] = strcopy(nom);
+  this -> objets_nb++; 
+  
   printf("Ajout de l'objet physique réussi !!\n");
-}
+};
 
 
 
-CPhysicalObj * CMap::RetrouverObjetViaSonNom(const char * nom) {
-  return DicoObjets.Get(nom);
-}
+CPhysicalObj * CMap__RetrouverObjetViaSonNom(CMap * this, const char * nom) {
+  for (int i = 0; i < this -> objets_nb; i++) {
+    if (0 != strcmp(nom, this -> objets_noms_array[i])) continue; 
+    return this -> objets_array[i]; 
+  }; 
+  return NULL;
+};
 
 
 
@@ -392,46 +436,49 @@ CPhysicalObj * CMap::RetrouverObjetViaSonNom(const char * nom) {
 
    Map -> AjouterZoneTeleportation(pos, dim, DOS, "carte.carte", posdest, DOS);
 */
-void CMap::AjouterZoneTeleportation(TPoint3D position, TPoint3D dimension, TDirection depart_direction, const char * destination_carte, TPoint3D destination_position, TDirection destination_direction) {
-  CZoneTeleportation * o = new CZoneTeleportation(position, dimension, depart_direction, destination_carte, destination_position, destination_direction);
+void CMap__AjouterZoneTeleportation(CMap * this, TPoint3D position, TPoint3D dimension, TDirection depart_direction, const char * destination_carte, TPoint3D destination_position, TDirection destination_direction) {
+  CZoneTeleportation * zt = CZoneTeleportation_make(position, dimension, depart_direction, destination_carte, destination_position, destination_direction);
 
   printf("Ajout d'une zone de téléportation \n");
   printf(" position: (%f, %f, %f)\n", position.x, position.y, position.z);
   printf(" dimension: (%f, %f, %f)\n", dimension.x, dimension.y, dimension.z);
-  ZonesTeleportation.Empiler_sans_copie(o);
-}
+
+  assert(this -> ZonesTeleportation_nb < ZonesTeleportation_SIZE); 
+  this -> ZonesTeleportation_array[this -> ZonesTeleportation_nb] = zt;
+  this -> ZonesTeleportation_nb++; 
+}; 
 
 
 
-void CMap::AjouterParticules(TPoint3D p, const char * nom, const bool MoteurPhysiqueActif) {
+void CMap__AjouterParticules(CMap * this, TPoint3D p, const char * nom, const bool MoteurPhysiqueActif) {
 #define NB_PARTICULES 10
   printf("Ajout d'une flopée de particules au point (%f, %f, %f,) \n...", p.x, p.y, p.z);
 
 #ifdef NB_PARTICULES
   for (int i = 0; i<NB_PARTICULES; i++) {
 
-    CPhysicalObj * o = new CBonhomme(nom);
-    o->SetDimension(0.0f,0.0f,0.0f);
+    CBonhomme * b = CBonhomme_make(nom);
+    CPhysicalObj * o = &b -> parent1; 
+    o->SetDimension(o, 0.0f,0.0f,0.0f);
 
-    o->SetPosition(p);
-    o->SetObjetEphemere(32);
+    o->SetPosition_vTPoint3D(o, p);
+    o->SetObjetEphemere(o, 32);
     o->Hostile = false;
-    TPoint3D pp = o->GetPosition();
+    TPoint3D pp = o->GetPosition(o);
     printf("Coordonnée des particules : (%f, %f, %f,) \n", pp.x, pp.y, pp.z);
-    o->InitForce();
+    o->InitForce(o);
 
 #define GENPOS ((float) (rand()%2000-1000)) / 200.0f
-    o->AddForce(GENPOS,GENPOS,100.0f );
-    o->CalcNewPosition();
-    o->ValiderPosition(MoteurPhysiqueActif);
-    AjouterObjet(o);
+    o->AddForce_vXYZ(o, GENPOS, GENPOS, 100.0f);
+    o->CalcNewPosition(o);
+    o->ValiderPosition(o, MoteurPhysiqueActif);
+    this -> AjouterObjet(this, o);
 
   }
 #endif
 
   printf("Ajout des particules effectuées!\n");
-
-}
+};
 
 
 
@@ -442,47 +489,45 @@ TDirection DirectionAleatoire(void) {
 
 
 
-CZoneTeleportation * CMap::VaTonBouger(CPhysicalObj* aHero) {
-  TPoint3D p = aHero->GetPosition();
+const CZoneTeleportation * CMap__VaTonBouger(const CMap * this, const CPhysicalObj * aHero) { 
+  TPoint3D p = aHero -> GetPosition(aHero);
 
   PARCOURS_ZONESTELEPORTATIONS
     {
-      CZoneTeleportation* o = a.Element();
-
-      if ((o->position.x <= p.x) &&
-          (o->position.y <= p.y) &&
-          (o->position.z <= p.z) &&
-          (p.x <= o->position.x + o->dimension.x) &&
-          (p.y <= o->position.y + o->dimension.y) &&
-          (p.z <= o->position.z + o->dimension.z) )
-        return o;
+      if ((zt_parcours->position.x <= p.x) &&
+          (zt_parcours->position.y <= p.y) &&
+          (zt_parcours->position.z <= p.z) &&
+          (p.x <= zt_parcours->position.x + zt_parcours->dimension.x) &&
+          (p.y <= zt_parcours->position.y + zt_parcours->dimension.y) &&
+          (p.z <= zt_parcours->position.z + zt_parcours->dimension.z) )
+        return zt_parcours;
 
     }
+  PARCOURS_ZONESTELEPORTATIONS_FIN;
 
   return NULL;
-}
+}; 
 
 
 
 
-void CMap::TraiterOrdresDeplacement(CBonhomme * aHero, const bool MoteurPhysiqueActif) {
-  aHero -> TraiterOrdresDeplacement(this, MoteurPhysiqueActif);
+void CMap__TraiterOrdresDeplacement(CMap * this, CBonhomme * aHero, const bool MoteurPhysiqueActif) {
+  aHero -> TraiterOrdresDeplacement(aHero, this, MoteurPhysiqueActif);
 
   PARCOURS_OBJETS
     {
 #if 0
       CBonhomme * b = dynamic_cast<CBonhomme *>(a.Element());
-#else
+#elif 0
       CBonhomme * b = dynamic_cast<CBonhomme *>(o_parcours);
+#elif 1 
+      if (!(CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype)) continue; 
+      CBonhomme * b = (CBonhomme *) o_parcours; 
 #endif
-
-      if (b) {
-        b -> TraiterOrdresDeplacement(this, MoteurPhysiqueActif);
-      }
+      b -> TraiterOrdresDeplacement(b, this, MoteurPhysiqueActif);
     }
   PARCOURS_OBJETS_FIN;
-
-}
+}; 
 
 
 
@@ -492,37 +537,38 @@ void CMap::TraiterOrdresDeplacement(CBonhomme * aHero, const bool MoteurPhysique
   OU NULL si trop loin
 */
 // En fait cette fonction est le moteur physique…………
-CPhysicalObj * CMap::TesterPositionHero(CPhysicalObj * aHero, const bool MoteurPhysiqueActif) {
+CPhysicalObj * CMap__TesterPositionHero(CMap * this, CPhysicalObj * aHero, const bool MoteurPhysiqueActif) {
 
-  CBonhomme * Hero = dynamic_cast<CBonhomme *>(aHero);
+  CBonhomme * Hero = (CBonhomme *) aHero;
 
-  TesterPosition(Hero, MoteurPhysiqueActif);
-  Hero->ValiderPosition(MoteurPhysiqueActif);
-  Hero->InitForce();
+  this -> TesterPosition(this, aHero, MoteurPhysiqueActif);
+  aHero -> ValiderPosition(aHero, MoteurPhysiqueActif);
+  aHero -> InitForce(aHero);
 
 
   // on fait bouger les objets
   PARCOURS_OBJETS
     {
-      if (CBonhomme* b = dynamic_cast<CBonhomme *>(o_parcours)) {
+      if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) {  
+	CBonhomme * b = (CBonhomme *) o_parcours; 
         if (rand() % 20 == 1)
-          b->SetDirection(DirectionAleatoire());
+          b -> SetDirection(b, DirectionAleatoire());
 
-        b->Avancer(b->GetDirection(), this);
+        b -> Avancer(b, b -> GetDirection(b), this); 
       }
 
-      if (!(o_parcours->Fixe)) {
-        TesterPosition(o_parcours, MoteurPhysiqueActif);
-        if (!o_parcours->TesterPosition(this, Hero)) {
-          if (o_parcours->Hostile)
-            if (not(Hero->EstInvinsible())) {
+      if (!(o_parcours -> Fixe)) {
+        this -> TesterPosition(this, o_parcours, MoteurPhysiqueActif);
+        if (!o_parcours -> TesterPosition(o_parcours, &this -> parent, aHero)) {
+          if (o_parcours -> Hostile)
+            if (not(Hero -> EstInvisible(Hero))) {
               //le héros se fait toucher par un ennemi
-              Hero->PerdrePV(5);
-              Hero->DevenirInvinsible(200);
+              aHero -> PerdrePV(aHero, 5);
+              Hero -> DevenirInvisible(Hero, 200);
             }
         }
-        o_parcours->ValiderPosition(MoteurPhysiqueActif);
-        o_parcours->InitForce();
+        o_parcours -> ValiderPosition(o_parcours, MoteurPhysiqueActif);
+        o_parcours -> InitForce(o_parcours);
       }
     }
   //FIN_PARCOURS_OBJETS_VOISINAGES;
@@ -532,35 +578,38 @@ CPhysicalObj * CMap::TesterPositionHero(CPhysicalObj * aHero, const bool MoteurP
   // la phsyique de l'épée
 #if 1
   {
-    if (Hero->EnTrainDeFrapper()) {
-      CPhysicalObj zoneepee = (*aHero);
-      TPoint3D d = Hero->GetDimension(this);
-      zoneepee.SetDimension(d.x, d.y, d.z);
+    if (Hero -> EnTrainDeFrapper(Hero)) {
+      CPhysicalObj zoneepee = *(aHero);
+      TPoint3D d = aHero -> GetDimension(aHero, &this -> parent);
+      zoneepee.SetDimension(&zoneepee, d.x, d.y, d.z);
 
       TPoint3D dir;
-      switch (Hero->GetDirection()) {
-      case FACE: dir = Point3D(0.0f, -1.0f, 0.0f); break;
-      case DOS: dir = Point3D(0.0f, 1.0f, 0.0f); break;
-      case PROFIL_VERS_D: dir = Point3D(1.0f, 0.0f, 0.0f); break;
-      case PROFIL_VERS_G: dir = Point3D(-1.0f, 0.0f, 0.0f); break;
+      switch (Hero -> GetDirection(Hero)) {
+      case FACE: dir = TPoint3D_make_struct(0.0f, -1.0f, 0.0f); break;
+      case DOS: dir = TPoint3D_make_struct(0.0f, 1.0f, 0.0f); break;
+      case PROFIL_VERS_D: dir = TPoint3D_make_struct(1.0f, 0.0f, 0.0f); break;
+      case PROFIL_VERS_G: dir = TPoint3D_make_struct(-1.0f, 0.0f, 0.0f); break;
       default: assert(false);
       }
-
-      zoneepee.SetPosition(Hero->GetPosition() + dir);
+      
+      //zoneepee.SetPosition(&zoneepee, aHero -> GetPosition(aHero) + dir);
+      TPoint3D hero_pos = aHero -> GetPosition(aHero); 
+      zoneepee.SetPosition_vTPoint3D(&zoneepee, TPoint3D_add(hero_pos, dir));
 
       //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition())
       PARCOURS_OBJETS
         {
-          CBonhomme* b = dynamic_cast<CBonhomme *> (o_parcours);
+	  if (CPhysicalObj_subtype_CBonhomme != o_parcours -> subtype) continue; 
+	  CBonhomme * b = (CBonhomme *) o_parcours; 
 
-          if (b && (!b->IsVolumeNul()))
-            if ((!(b->TesterPosition(this, &zoneepee))) && (!(b->EstInvinsible()))) {
+          if (!o_parcours -> IsVolumeNul(o_parcours))
+            if ((!(o_parcours->TesterPosition(o_parcours, &this -> parent, &zoneepee))) && (!(b->EstInvisible(b)))) {
               //on a frappé a.Element()
               printf("Le héros a frappé un bonhomme\n");
-              b->PerdrePV(1);
-              AjouterParticules(b->GetPosition(), "sang.anime", MoteurPhysiqueActif);
-              b->AddForce(10.0f*dir);
-              b->DevenirInvinsible(50);
+              o_parcours -> PerdrePV(o_parcours, 1);
+              this -> AjouterParticules(this, o_parcours -> GetPosition(o_parcours), "sang.anime", MoteurPhysiqueActif);
+              o_parcours -> AddForce_vP3D(o_parcours, TPoint3D_scalar_mul(10.0f, dir));
+              b -> DevenirInvisible(b, 50);
             }
 
         }
@@ -573,11 +622,15 @@ CPhysicalObj * CMap::TesterPositionHero(CPhysicalObj * aHero, const bool MoteurP
   // on enlève les éléments qui n'ont plus de vie
   PARCOURS_OBJETS
     {
-      if (not(o_parcours -> Fixe) && o_parcours -> Is0PV()) {
-#ifndef VOISINAGE_IS_TAB
+      if (not(o_parcours -> Fixe) && o_parcours -> Is0PV(o_parcours)) {
+#if 0 
         a.DetruireElementCourant();
-#else
+#elif 0
         voisinage_detruire(this, iii, jjj);
+#else 
+	CPhysicalObj_delete(this -> Voisinages_array[iii][jjj][kkk]); 
+	this -> Voisinages_array[iii][jjj][kkk] = NULL; 
+	// Et dans le dico? 
 #endif
       }
     }
@@ -594,7 +647,7 @@ CPhysicalObj * CMap::TesterPositionHero(CPhysicalObj * aHero, const bool MoteurP
 
     PARCOURS_OBJETS
       {
-        float norme_courante = Norme1(o_parcours->GetPosition() - Hero->GetPosition());
+        float norme_courante = TPoint3D_Norme1(TPoint3D_sub(o_parcours -> GetPosition(o_parcours), aHero -> GetPosition(aHero)));
 
         if (norme_courante < norme_du_proche) {
           norme_du_proche = norme_courante;
@@ -624,19 +677,23 @@ CPhysicalObj * CMap::TesterPositionHero(CPhysicalObj * aHero, const bool MoteurP
     {
 
       //fprintf(stderr, "ACC: courant: %p - precedent: %p - liste: %p\n", a.pointeurcourant, a.pointeurprecedent, a.maliste);
-      if (o_parcours->Is0PV()) {
-        if (o_parcours->Hostile)
+      if (o_parcours -> Is0PV(o_parcours)) {
+        if (o_parcours -> Hostile)
           unennemiestdecede = true;
-#ifndef VOISINAGE_IS_TAB
+#if 0
         a.DetruireElementCourant();
-#else
+#elif 0
         voisinage_detruire(this, iii, jjj);
+#elif 1 
+	CPhysicalObj_delete(this -> Voisinages_array[iii][jjj][kkk]); 
+	this -> Voisinages_array[iii][jjj][kkk] = NULL; 
+	// Et dans le dico? 
 #endif
       }
       else {
-        if (o_parcours->Hostile) nb_ennemis++;
+        if (o_parcours -> Hostile) nb_ennemis++;
 
-        float norme_courante = Norme1(o_parcours->GetPosition() - Hero->GetPosition());
+        float norme_courante = TPoint3D_Norme1(TPoint3D_sub(o_parcours -> GetPosition(o_parcours), aHero -> GetPosition(aHero)));
 
         if (norme_courante < norme_du_proche) {
           norme_du_proche = norme_courante;
@@ -651,36 +708,39 @@ CPhysicalObj * CMap::TesterPositionHero(CPhysicalObj * aHero, const bool MoteurP
 
 
 
-  if (Hero->EnTrainDeFrapper()) {
+  if (Hero -> EnTrainDeFrapper(Hero)) {
     CPhysicalObj zoneepee = (*aHero);
-    TPoint3D d = Hero->GetDimension(this);
-    zoneepee.SetDimension(d.x, d.y, d.z);
+    TPoint3D d = aHero -> GetDimension(aHero, &this -> parent);
+    zoneepee.SetDimension(&zoneepee, d.x, d.y, d.z);
 
     TPoint3D dir;
-    switch (Hero->GetDirection()) {
-    case FACE: dir = Point3D(0.0f, -1.0f, 0.0f); break;
-    case DOS: dir = Point3D(0.0f, 1.0f, 0.0f); break;
-    case PROFIL_VERS_D: dir = Point3D(1.0f, 0.0f, 0.0f); break;
-    case PROFIL_VERS_G: dir = Point3D(-1.0f, 0.0f, 0.0f); break;
+    switch (Hero -> GetDirection(Hero)) {
+    case FACE: dir = TPoint3D_make_struct(0.0f, -1.0f, 0.0f); break;
+    case DOS: dir = TPoint3D_make_struct(0.0f, 1.0f, 0.0f); break;
+    case PROFIL_VERS_D: dir = TPoint3D_make_struct(1.0f, 0.0f, 0.0f); break;
+    case PROFIL_VERS_G: dir = TPoint3D_make_struct(-1.0f, 0.0f, 0.0f); break;
     default: assert(false);
     }
 
-    zoneepee.SetPosition(Hero->GetPosition() + dir);
-
+    TPoint3D hero_pos = aHero -> GetPosition(aHero); 
+    zoneepee.SetPosition_vTPoint3D(&zoneepee, TPoint3D_add(hero_pos, dir));
+    
     //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition())
     PARCOURS_OBJETS
       {
-        CBonhomme* b = dynamic_cast<CBonhomme *> (o_parcours);
+	if (CPhysicalObj_subtype_CBonhomme != o_parcours -> subtype) continue; 
+        if (o_parcours -> IsVolumeNul(o_parcours)) continue;
+	
+        CBonhomme* b = (CBonhomme *) o_parcours;
 
-        if (b && (!b->IsVolumeNul()))
-          if ((!(b->TesterPosition(this, &zoneepee))) && (!(b->EstInvinsible()))) {
-            //on a frappé a.Element()
-            printf("Le héros a frappé un bonhomme\n");
-            b->PerdrePV(1);
-            AjouterParticules(b->GetPosition(), "sang.anime", MoteurPhysiqueActif);
-            b->AddForce(10.0f*dir);
-            b->DevenirInvinsible(50);
-          }
+	if ((!(o_parcours -> TesterPosition(o_parcours, &this -> parent, &zoneepee))) && (!(b -> EstInvisible(b)))) {
+	  //on a frappé a.Element()
+	  printf("Le héros a frappé un bonhomme\n");
+	  o_parcours -> PerdrePV(o_parcours, 1);
+	  this -> AjouterParticules(this, o_parcours -> GetPosition(o_parcours), "sang.anime", MoteurPhysiqueActif);
+	  o_parcours -> AddForce_vP3D(o_parcours, TPoint3D_scalar_mul(10.0f,dir));
+	  b -> DevenirInvisible(b, 50);
+	}
 
       }
     //FIN_PARCOURS_OBJETS_VOISINAGES;
@@ -694,88 +754,91 @@ CPhysicalObj * CMap::TesterPositionHero(CPhysicalObj * aHero, const bool MoteurP
   PARCOURS_OBJETS
     {
       /*si l'objet courant est un bonhomme*/
-      if (CBonhomme* b = dynamic_cast<CBonhomme *>(o_parcours)) {
-        if (rand() % 20 == 1)
-          b->SetDirection(DirectionAleatoire());
-
-        b->Avancer(b->GetDirection(), this);
+      //if (CBonhomme* b = dynamic_cast<CBonhomme *>(o_parcours)) {
+      if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
+	CBonhomme* b = (CBonhomme *) o_parcours;
+	if (rand() % 20 == 1)
+	  b -> SetDirection(b, DirectionAleatoire());
+	
+	b -> Avancer(b, b -> GetDirection(b), this);
       }
-
+      
       if (!(o_parcours->Fixe)) {
-        TesterPosition(o_parcours, MoteurPhysiqueActif);
-        if (!o_parcours->TesterPosition(this, Hero)) {
-          if (o_parcours->Hostile)
-            if (!Hero->EstInvinsible()) {
-              //le héros se fait toucher par un ennemi
-              Hero->PerdrePV(5);
-              Hero->DevenirInvinsible(200);
-            }
+	this -> TesterPosition(this, o_parcours, MoteurPhysiqueActif);
+	if (!o_parcours -> TesterPosition(o_parcours, &this -> parent, aHero)) {
+	  if (o_parcours -> Hostile)
+	    if (!Hero -> EstInvisible(Hero)) {
+	      //le héros se fait toucher par un ennemi
+	      aHero -> PerdrePV(aHero, 5);
+	      Hero -> DevenirInvisible(Hero, 200);
+	    }
         }
-        o_parcours->ValiderPosition(MoteurPhysiqueActif);
-        o_parcours->InitForce();
+        o_parcours -> ValiderPosition(o_parcours, MoteurPhysiqueActif);
+        o_parcours -> InitForce(o_parcours);
       }
     }
   //FIN_PARCOURS_OBJETS_VOISINAGES;
   PARCOURS_OBJETS_FIN;
 
-
+  
   return elementproche;
-}
+}; 
 
 
 
 
-void CMap::TesterPosition(CPhysicalObj * o, const bool MoteurPhysiqueActif) {
+void CMap__TesterPosition(CMap * this, CPhysicalObj * o, const bool MoteurPhysiqueActif) {
   // on teste si la position temporaire de o est correct
-  TPoint3D pp = o->GetPosition();
+  TPoint3D pp = o -> GetPosition(o);
   float i = pp.x;
   float j = pp.y;
   float z = pp.z;
 
-  if (yatilEau(i, j, z)) {
-    if (!(o->DansEau)) {
+  if (this -> parent.yatilEau(&this -> parent, i, j, z)) {
+    if (!(o -> DansEau)) {
       printf(" L'objet %p va rentrer dans l'eau. Sa position est la suivante : %f, %f, %f. Nous allons générer une floppée de particules d'eau.\n", o, i, j, z);
 
-      if (not(o->IsVolumeNul()))
-        AjouterParticules(o->GetPosition(), "eclaboussures.anime", MoteurPhysiqueActif);
+      if (not(o -> IsVolumeNul(o)))
+        this -> AjouterParticules(this, o -> GetPosition(o), "eclaboussures.anime", MoteurPhysiqueActif);
 
-      o->DansEau = true;
+      o -> DansEau = true;
+    }; 
 
-    }
+    o -> AddForce_vXYZ(o, 0.0f, 0.0f, -1.0f);
 
-    o->AddForce(0.0f, 0.0f, -1.0f);
-
-    if (yatilEau(i, j, z+20.0f))
-      o->Immerge = true;
+    if (this -> parent.yatilEau(&this -> parent, i, j, z+20.0f))
+      o -> Immerge = true;
     else
-      o->Immerge = false;
+      o -> Immerge = false;
 
     //dans l'eau les frottements fluides sont plus importants
-    o->CoeffFrottementFluide = 3.0f;
-    o->CoeffFrottementFluideZ = 1.0f;
+    o -> CoeffFrottementFluide = 3.0f;
+    o -> CoeffFrottementFluideZ = 1.0f;
 
   }
 
   else {
-    o->DansEau = false;
-    o->AddForce(0.0f, 0.0f, -10.0f);
-    o->Immerge = false;
+    o -> DansEau = false;
+    o -> AddForce_vXYZ(o, 0.0f, 0.0f, -10.0f);
+    o -> Immerge = false;
     //dans l'air, les frottements fluides sont assez petits
-    o->CoeffFrottementFluide = 1.0f;
-    o->CoeffFrottementFluideZ = 0.0f;
+    o -> CoeffFrottementFluide = 1.0f;
+    o -> CoeffFrottementFluideZ = 0.0f;
   }
 
-  o->CalcNewPosition();
-  o->TesterSol(this);
+  o -> CalcNewPosition(o);
+  o -> TesterSol(o, &this -> parent);
 
   //PARCOURS_OBJETS_VOISINAGES_TOUTPROCHE(o->GetPosition())
-  PARCOURS_OBJETS
-    if (o_parcours!=o)
-      o->TesterPosition(this, o_parcours);
-  PARCOURS_OBJETS_FIN;
+  PARCOURS_OBJETS {
+    if (o_parcours == o) continue; 
+    o -> TesterPosition(o, &this -> parent, o_parcours);
+  } PARCOURS_OBJETS_FIN;
   //FIN_PARCOURS_OBJETS_VOISINAGES;
+  
+}; 
 
-}
+
 
 
 
@@ -807,3 +870,170 @@ void voisinage_detruire(CMap * map, int iii, int jjj) {
 
 
 #endif
+
+
+
+
+void CMap__Render(CMap * this, const int i1, const int j1, const int i2, const int j2, const bool EnVaisseau) {
+  // on affiche le sol (on appelle la fonction Render de la classe CSol dont hérite CMap)
+  this -> parent.Render(&this -> parent, i1, j1, i2, j2);
+
+  const TPoint3D pos = TPoint3D_make_struct((i1 + i2) / 2, (j1 + j2) / 2, 0.  ); 
+  
+  
+  if (not(EnVaisseau)) {
+    //PARCOURS_OBJETS
+    PARCOURS_OBJETS_VOISINAGES_PROCHE(pos)
+      {
+        int i = (int) o_parcours -> GetPosition(o_parcours).x;
+        int j = (int) o_parcours -> GetPosition(o_parcours).y;
+
+#if 0
+        const char * filename = o_parcours -> filename;
+        if (filename != NULL)
+          if (0 != strcmp(filename, "./heros.anime")) {
+            fprintf(stderr, "ObjPhys: Rendering: %s\n", filename);
+            fflush(NULL);
+          }
+        //fprintf(stderr, "iii = %d - jjj = %d - ", iii, jjj);
+#endif
+
+        //bool test = ((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
+        //if (test)
+        //if (CBonhomme * b = dynamic_cast<CBonhomme *>(o_parcours)) {
+        if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) {
+          //fprintf(stderr, "Bonhomme: Rendering: %s\n", b -> filename);
+	  CBonhomme * b = (CBonhomme *) o_parcours; 
+          b -> Render(b, &this -> parent); // b cannot be 'const' as b is animated as the same time it's rendered. 
+        }
+        //else if (CObjNonAnime * nonanime = dynamic_cast<CObjNonAnime *>(o_parcours)) {
+        else if (CPhysicalObj_subtype_CObjNonAnime == o_parcours -> subtype) {
+	  CObjNonAnime * nonanime = (CObjNonAnime *) o_parcours; 
+          nonanime -> Render(nonanime, &this -> parent); 
+        }
+        else {
+          o_parcours -> Render(o_parcours, &this -> parent);
+	}; 
+
+      }
+    //PARCOURS_OBJETS_FIN;
+    PARCOURS_OBJETS_VOISINAGES_FIN;
+
+  }
+
+  else { // _ en vaisseau _
+    PARCOURS_OBJETS
+      {
+#if 0
+        int i = (int) a.Element()->GetPosition().x;
+        int j = (int) a.Element()->GetPosition().y;
+#endif
+        int i = (int) o_parcours->GetPosition(o_parcours).x;
+        int j = (int) o_parcours->GetPosition(o_parcours).y;
+
+
+        bool b = ((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
+        if (b)
+          o_parcours -> Render(o_parcours, &this -> parent);
+      }
+    PARCOURS_OBJETS_FIN;
+  }; // _ en vaisseau _ 
+
+  
+
+  {
+    //fprintf(stderr, "ZoneTeleportationBlit\n");
+    //int i = 0;
+    PARCOURS_ZONESTELEPORTATIONS {
+      //fprintf(stderr, "ZoneTeleportationRender: i = %d\n", i++);
+      this -> parent.AfficherCube(&this -> parent, zt_parcours -> position.x, zt_parcours -> position.y, zt_parcours -> position.z, zt_parcours -> dimension.x, zt_parcours -> dimension.y, zt_parcours -> dimension.z); 
+    } PARCOURS_ZONESTELEPORTATIONS_FIN;
+  };
+  
+};
+
+
+
+
+
+int CMap__ReadDescriptionFile(CMap * this, const char * dir, const char * filename) {
+  carte_t * carte_data = NULL; 
+  CSol * this_parent = &this -> parent; 
+
+  { 
+    char carte_fullpath[strlen(dir) + strlen(filename) + 1];
+    strcat(strcpy(carte_fullpath, dir), filename);
+    carte_data = carte_make_from_file(carte_fullpath); 
+  }; 
+  
+  if (!SCRIPT_EstEnTrainDExecuterUnScript()) {
+    SCRIPT_JouerMusique(carte_data -> musique);
+  }; 
+
+  this_parent -> ZEau = carte_data -> niveau_eau; 
+
+  for (int i = 0; i < carte_data -> teleportation_nb; i++) { 
+    this -> AjouterZoneTeleportation(this, 
+        TPoint3D_make_struct(carte_data -> teleportation_x[i], carte_data -> teleportation_y[i], carte_data -> teleportation_z[i]), 
+        TPoint3D_make_struct(carte_data -> teleportation_longueur[i], carte_data -> teleportation_largeur[i], carte_data -> teleportation_hauteur[i]), 
+        carte_data -> teleportation_direction[i], 
+        carte_data -> teleportation_destination[i], 
+        TPoint3D_make_struct(carte_data -> teleportation_destination_x[i], carte_data -> teleportation_destination_y[i], carte_data -> teleportation_destination_z[i]), 
+        carte_data -> teleportation_destination_direction[i]); 
+  }; 
+
+  for (int i = 0; i < carte_data -> events_nb; i++) { 
+    AddTraitementEvenement((type_evt)carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]);
+  }; 
+  
+  this -> ChargerZ(this, carte_data -> fichier_de_zone_de_niveau);
+  
+  this_parent -> ChargerIndiceTextureBitmap(this_parent, carte_data -> fichier_de_zone_de_texture); 
+
+  if ((this_parent -> nb_texture + carte_data -> texture_nb) >= NB_MAX_TEXTURESOL) {
+    messerr("Il n'y pas assez de place pour mettre la texture. Il faut changer NB_MAX_TEXTURESOL.");
+    message("[nb_textures = %d][carte_data_textures = %d][NB_MAX_TEXTURES = %d]", this_parent -> nb_texture, carte_data -> texture_nb, NB_MAX_TEXTURESOL);
+  }
+  else {
+    for (int i = 0; i < carte_data -> texture_nb; i++) { 
+      ///carte_mess("Chargement en mémoire de la texture (image = \"%s\", couleur associée = %d).", $6, $10);
+      //carte->TextureSol = gestionTexture.prendre($6);
+      this_parent -> AjouterTextureSol(this_parent, carte_data -> texture_image[i], carte_data -> texture_indice[i]); 
+    };
+  }; 
+
+  for (int i = 0; i < carte_data -> objet_nb; i++) { 
+    if (carte_data -> objet_anime_huh[i]) {
+      CBonhomme * bonhomme = CBonhomme_make(carte_data -> objet_fichier[i]);
+      CPhysicalObj * o = (CPhysicalObj *) bonhomme; 
+      o -> SetPosition_vTPoint3D(o, TPoint3D_make_struct(carte_data -> objet_x[i], carte_data -> objet_y[i], carte_data -> objet_z[i])); 
+      this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o);
+      continue; 
+    }
+    else {
+      CObjNonAnime * nonanime = CObjNonAnime_make(carte_data -> objet_fichier[i]);
+      CPhysicalObj * o = (CPhysicalObj *) nonanime; 
+      o -> SetPosition_vTPoint3D(o, TPoint3D_make_struct(carte_data -> objet_x[i], carte_data -> objet_y[i], carte_data -> objet_z[i])); 
+      this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o);
+      continue; 
+    };
+  }; 
+  
+  carte_delete(carte_data); 
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+

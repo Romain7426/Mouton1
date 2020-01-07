@@ -192,7 +192,7 @@ extern void pmessend(void);
 
 
 typedef float corps;
-typedef float real;
+//typedef float real;
 
 
 
@@ -204,6 +204,7 @@ typedef float real;
 //  les lignes commencent à 1,
 //  et les colonnes à 0.
 struct pascal_position;
+typedef struct pascal_position pascal_position;
 typedef pascal_position ppos;
 struct pascal_position {
   unsigned int deb_ligne; // La ligne de début.
@@ -212,23 +213,30 @@ struct pascal_position {
   unsigned int fin_car; // Le numéro du caractère de fin depuis le début de la ligne de fin.
   unsigned int deb_car_tot; // Le numéro du caractère de début depuis le début du fichier.
   unsigned int fin_car_tot; // Le numéro du caractère de fin depuis le début du fichier.
-  
-  pascal_position(unsigned int deb_ligne, unsigned int fin_ligne, unsigned int deb_car, unsigned int fin_car, unsigned int deb_car_tot, unsigned int fin_car_tot) {
-    this->deb_ligne = deb_ligne;
-    this->fin_ligne = fin_ligne;
-    this->deb_car = deb_car;
-    this->fin_car = fin_car;
-    this->deb_car_tot = deb_car_tot;
-    this->fin_car_tot = fin_car_tot;
-  }
-  
-  char * toString(void) const;
+  char * (* toString)(const pascal_position * this); 
+};
+
+static pascal_position * pascal_position_make(unsigned int deb_ligne, unsigned int fin_ligne, unsigned int deb_car, unsigned int fin_car, unsigned int deb_car_tot, unsigned int fin_car_tot) {
+  pascal_position * this = NULL; 
+  this->deb_ligne = deb_ligne;
+  this->fin_ligne = fin_ligne;
+  this->deb_car = deb_car;
+  this->fin_car = fin_car;
+  this->deb_car_tot = deb_car_tot;
+  this->fin_car_tot = fin_car_tot;
+  return this; 
 };
 
 
 
 
 
+
+
+
+
+
+#if 0
 
 template <class alpha> class pliste {
   //friend pliste<alpha> *mp(alpha *a, pliste<alpha> *l);
@@ -484,7 +492,7 @@ template <class beta> beta *popf(class pfifo<beta> *(&lb)) {
 }
 
 
-    
+#endif     
 
 
 

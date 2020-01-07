@@ -110,7 +110,7 @@ static enum file_or_dir_t path_is_file_or_dir(const char * path) {
   case S_IFCHR:  /* character special */
   case S_IFBLK:  /* block special */
   case S_IFSOCK: /* socket */
-  case S_IFWHT:  /* whiteout */
+  //case S_IFWHT:  /* whiteout */
     return FILE_OR_DIR__IS_OTHER;
     break;
   default: assert(false); return FILE_OR_DIR__ERROR; break;
@@ -124,7 +124,7 @@ const char * path_type(const char * path) {
   const enum file_or_dir_t file_type = path_is_file_or_dir(path);
 
   switch (file_type) {
-  default: assert(false); return false; break;
+  default: assert(false); return NULL; break;
   case FILE_OR_DIR__IS_DIR: return "FILE_OR_DIR__IS_DIR"; break;
   case FILE_OR_DIR__IS_FILE: return "FILE_OR_DIR__IS_FILE"; break;
   case FILE_OR_DIR__IS_SYMLINK: return "FILE_OR_DIR__IS_SYMLINK"; break;

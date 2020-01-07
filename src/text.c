@@ -1,8 +1,8 @@
-#include "global.hpp"
+#include "global.h"
 //#include <math.h>
-#include "text.hpp"   
+#include "text.h"   
 
-#include "pascal/pascal.tools.hpp"
+//#include "pascal/pascal.tools.hpp"
     
 #define TAILLE_CHAR_PIXEL 24
 #define TAILLEX_CHAR 16  
@@ -11,19 +11,18 @@
 //extern char * ansi2oem(const char *str);
 
 
-unsigned char conversionpourrie(unsigned char c) {
-  if (c == 224) c = 133; //‡
-  if (c == 226) c = 131; //‚
-  if (c == 231) c = 135; //Á
-  if (c == 233) c = 130; //È
-  if (c == 232) c = 138; //Ë
-  if (c == 234) c = 136; //Í
-    
-  if (c == 238) c = 140; //Ó
-  if (c == 244) c = 131+16; //Ù
-    
-  return c;     
-}
+unsigned char conversionpourrie(const unsigned char c) {
+  unsigned char d; 
+  if (c == 224) d = 133; //√†
+  if (c == 226) d = 131; //√¢
+  if (c == 231) d = 135; //√ß
+  if (c == 233) d = 130; //√©
+  if (c == 232) d = 138; //√®
+  if (c == 234) d = 136; //√™    
+  if (c == 238) d = 140; //√Æ
+  if (c == 244) d = 131+16; //√¥
+  return d;
+}; 
 
 
 
@@ -33,7 +32,7 @@ CMessageTexte * MessageTexte;
 
 
 void glEnable2D(void) {
-  // passe en mode 2D Ècran/pixel
+  // passe en mode 2D √©cran/pixel
   GLint vPort[4];
   
   glGetIntegerv(GL_VIEWPORT, vPort);
@@ -47,58 +46,55 @@ void glEnable2D(void) {
   glPushMatrix();
   glLoadIdentity();
   glDisable(GL_LIGHTING);
-}
-
+};
 
 void glDisable2D(void) {
-  // revient au mode d'avant...(‡ priori 3D normal, comme d'hab)
+  // revient au mode d'avant...(√† priori 3D normal, comme d'hab)
   glEnable(GL_LIGHTING);
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
-}
+};
 
 
 
-CText::CText(void) {
-  printf("CrÈation du moteur d'affichage de texte (chargement de l'image font.png)\n");
-  tex = new CTexture("./font.png");
-  printf("Chargement de font.png rÈussi\n");
+CText * CText_make(void) {
+  MALLOC_BZERO(CText,this); 
 
-  rx = ry = rw = rh = 0;
-  cx = cy = 0;
+  assert(false); 
+  //ASSIGN_METHOD(CText,this,print1); 
+  //ASSIGN_METHOD(CText,this,print2); 
 
-}
-
-
-CText::~CText() {
-  delete tex;
-}
+  printf("Cr√©ation du moteur d'affichage de texte (chargement de l'image font.png)\n");
+  this -> tex = CTexture_make("./font.png");
+  printf("Chargement de font.png r√©ussi\n");
+  return this; 
+}; 
 
 
-
-void CText::print(int x, int y, int w, int h, const char * s) {
-  bool b;
-  print(0.0f, 10000, 10000,x, y, w, h, s, b);   
-}
+void CText_delete(CText * this) {
+  CTexture_delete(this -> tex);
+  free(this);
+};
 
 
 
-float CText::print(float l, int nblignes, int nbcaracmax, int x, int y, int w, int h, const char* c, bool &toutaffiche) {
+
+float CText__print2(CText * this, float l, const int nblignes, const int nbcaracmax, const int x, const int y, const int w, const int h, const char* c, bool * toutaffiche_ref) {
   int lignecourante  = 0;
 
 #if 0
-  message("CText::print: %s\n", c);
-  printf("CText::print: %s\n", c);
+  message("CText__print: %s\n", c);
+  printf("CText__print: %s\n", c);
   fflush(NULL);
   *((int*) NULL) = 1;
 #endif
-  printf("CText::print: %s\n", c);
+  printf("CText__print: %s\n", c);
   fflush(NULL);
   
-  toutaffiche = true;
+  *toutaffiche_ref = true;
 
   if (l < 0) l = 0;
   
@@ -109,13 +105,13 @@ float CText::print(float l, int nblignes, int nbcaracmax, int x, int y, int w, i
 
   glEnable2D(); {
     
-    cx = x;
-    cy = y + (int) (l*TAILLEY_CHAR);
-    /*cx, cy reprÈsentent la position courante. Au dÈbut on l'initialise via (x, y)
-      on dÈcale Ègalement avec l (pour commencer ‡ Ècrire ‡ la ligne l*/
+    this -> cx = x;
+    this -> cy = y + (int) (l*TAILLEY_CHAR);
+    /*this -> cx, this -> cy repr√©sentent la position courante. Au d√©but on l'initialise via (x, y)
+      on d√©cale √©galement avec l (pour commencer √† √©crire √† la ligne l*/
     
     glEnable(GL_TEXTURE_2D);
-    tex->GLTextureCourante();
+    this -> tex -> GLTextureCourante(this -> tex);
     glDisable(GL_LIGHTING);
     glBegin(GL_QUADS); {
     
@@ -124,18 +120,18 @@ float CText::print(float l, int nblignes, int nbcaracmax, int x, int y, int w, i
         int j = i;
         while((c[j] !=0 ) && (c[j] != ' ') && (c[j] != 10) && (c[j] != 13)) j++;
              
-        /*de i, ‡ j on a un mot avec le caractËre ' ' ou #0 ‡ la fin*/
+        /*de i, √† j on a un mot avec le caract√®re ' ' ou #0 √† la fin*/
             
-        if ((cx + (j-i)*TAILLEX_CHAR >= x + w))
-          /*si le mot dÈpasse du cadre, on va ‡ la ligne*/
+        if ((this -> cx + (j-i)*TAILLEX_CHAR >= x + w))
+          /*si le mot d√©passe du cadre, on va √† la ligne*/
           {
-            cx = x;
-            cy-=TAILLEY_CHAR;
+            this -> cx = x;
+            this -> cy-=TAILLEY_CHAR;
             lignecourante++;
           } 
              
-        /*lignecourante+1 = l : on est sur une ligne limite au dÈbut*/
-        /*lignecourante = l : c'est bon, celle l‡ il faut l'afficher en entier*/
+        /*lignecourante+1 = l : on est sur une ligne limite au d√©but*/
+        /*lignecourante = l : c'est bon, celle l√† il faut l'afficher en entier*/
         if ((l-1<= lignecourante) && (lignecourante <= l))
           glColor4f(1.0f, 1.0f, 1.0f, min(1.0f, max((lignecourante+1 - l), 0.0f)));
         else if ((l+nblignes<=lignecourante ) && (lignecourante<= l + nblignes+1))
@@ -143,48 +139,48 @@ float CText::print(float l, int nblignes, int nbcaracmax, int x, int y, int w, i
         else     
           glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
-        /*on Ècrit que si on est dÈj‡ arrivÈ sur la ligne ‡ Ècrire*/
+        /*on √©crit que si on est d√©j√† arriv√© sur la ligne √† √©crire*/
         if (l-1<=lignecourante) {
           for (; (i<j) && (i<=nbcaracmax); i++)
-            /*on parcourt le mot sans le caractËre final (' ' ou #0), et on l'Ècrit
-              en avanÁant ‡ chaque fois vers la droite*/
+            /*on parcourt le mot sans le caract√®re final (' ' ou #0), et on l'√©crit
+              en avan√ßant √† chaque fois vers la droite*/
             {
               unsigned char conversionc = conversionpourrie(c[i]);      
               float tx = (float) (conversionc % 16) / 16.0f;
               float ty = (float) (conversionc / 16) / 16.0f;
               glTexCoord2f(tx,ty+0.0625f);  
-              glVertex2i(cx,cy);
+              glVertex2i(this -> cx,this -> cy);
               glTexCoord2f(tx+0.0625f,ty+0.0625f);
-              glVertex2i(cx+TAILLE_CHAR_PIXEL,cy);
+              glVertex2i(this -> cx+TAILLE_CHAR_PIXEL,this -> cy);
               glTexCoord2f(tx+0.0625f,ty);  
-              glVertex2i(cx+TAILLE_CHAR_PIXEL,cy+TAILLE_CHAR_PIXEL);          
+              glVertex2i(this -> cx+TAILLE_CHAR_PIXEL,this -> cy+TAILLE_CHAR_PIXEL);          
               glTexCoord2f(tx,ty);
-              glVertex2i(cx,cy+TAILLE_CHAR_PIXEL);
-              cx+=TAILLEX_CHAR;
+              glVertex2i(this -> cx,this -> cy+TAILLE_CHAR_PIXEL);
+              this -> cx+=TAILLEX_CHAR;
             }
         }
         else {
-          cx+=(j-i)*TAILLEX_CHAR;
+          this -> cx+=(j-i)*TAILLEX_CHAR;
           i = j;
         }    
       
-        /*si le dernier caractËre Ètant ' ', on avance encore
+        /*si le dernier caract√®re √©tant ' ', on avance encore
           pour faire un espace*/
         if (c[i] == ' ') {
-          cx+=TAILLEX_CHAR;
+          this -> cx+=TAILLEX_CHAR;
           i++;
         }
       
         if ((c[i] == 10) || (c[i] == 13))
-          /*si le dernier caractËre Ètait #10, on va ‡ la ligne*/
+          /*si le dernier caract√®re √©tait #10, on va √† la ligne*/
           {
-            cx = x;
-            cy-=TAILLEY_CHAR;
+            this -> cx  = x;
+            this -> cy -= TAILLEY_CHAR;
             lignecourante++;
             i++;
           } 
       
-        /*sinon, c[i] = #0 et la boucle gÈnÈral s'arrÍte*/
+        /*sinon, c[i] = #0 et la boucle g√©n√©ral s'arr√™te*/
       }
     
     } glEnd();
@@ -192,49 +188,69 @@ float CText::print(float l, int nblignes, int nbcaracmax, int x, int y, int w, i
   } glDisable2D();
   
   if (l > lignecourante - nblignes+1) {
-    toutaffiche = false;
+    *toutaffiche_ref = false;
     l = lignecourante - nblignes+1;
   }
   else
-    toutaffiche = true;
+    *toutaffiche_ref = true;
  
   return l;
 
-} 
+}; 
+
+
+void CText__print1(CText * this, const int x, const int y, const int w, const int h, const char * s) {
+  bool b;
+  this -> print2(this, 0.0f, 10000, 10000,x, y, w, h, s, &b);   
+};
 
 
 
 
-void CMessageTexte::SetMsg(const char * inS) {
-  printf("Argot s = %p\n", s); 
+
+
+
+void CMessageTexte__SetMsg(CMessageTexte * this, const char * inS) {
+  printf("Argot s = %p\n", this -> s); 
   fflush(NULL);
   
   //if(s != NULL)
   //          delete[] s;
   //s = NULL
   
-  s = strcopy(inS);
+  this -> s = strcopy(inS);
   //s = oem2ansi(s);
-  lignedebut = 0;
-  nbcaracaffiche = 0;
-}
+  this -> lignedebut = 0;
+  this -> nbcaracaffiche = 0;
+}; 
 
 
-CMessageTexte::CMessageTexte(void) : s(NULL) {
-  printf("CMessageTexte::CMessageTexte()\n");                         
-  texfond = new CTexture("parchemin.png");  
-  texFlecheBas = new CTexture("flechebas.png");  
-  s = NULL;
-}
+CMessageTexte * CMessageTexte_make(void) {
+  MALLOC_BZERO(CMessageTexte,this); 
 
-CMessageTexte::~CMessageTexte(void) {
-  delete texfond;
-  delete[] s;   
-}
+  assert(false); 
+#if 0
+  ASSIGN_METHOD(CMessageTexte,this,SetMsg); 
+  ASSIGN_METHOD(CMessageTexte,this,Render); 
+  ASSIGN_METHOD(CMessageTexte,this,InputAndRender); 
+#endif 
+
+  printf("CMessageTexte__CMessageTexte()\n");                         
+  this -> texfond = CTexture_make("parchemin.png");  
+  this -> texFlecheBas = CTexture_make("flechebas.png");  
+  this -> s = NULL;
+};
+
+void CMessageTexte_delete(CMessageTexte * this) {
+  CTexture_delete(this -> texFlecheBas);
+  CTexture_delete(this -> texfond);
+  free(this -> s);   
+  free(this); 
+};
 
 
-void CMessageTexte::Render(void) {
-  nbcaracaffiche++;  
+void CMessageTexte__Render(CMessageTexte * this) {
+  this -> nbcaracaffiche++;  
 #define MSGTXT_X 100
 #define MSGTXT_Y 300
 #define MSGTXT_W 500
@@ -247,9 +263,9 @@ void CMessageTexte::Render(void) {
     glDisable(GL_LIGHTING);
     
     bool toutafficheenbas;
-    lignedebut = Text->print(lignedebut, 4, nbcaracaffiche,
+    this -> lignedebut = Text -> print2(Text, this -> lignedebut, 4, this -> nbcaracaffiche,
                              MSGTXT_X + MSGTXTDECAL_X, MSGTXT_Y + MSGTXT_H - MSGTXTDECAL_Y,
-                             MSGTXT_W - 2*MSGTXTDECAL_X, MSGTXT_H, s, toutafficheenbas);
+                             MSGTXT_W - 2*MSGTXTDECAL_X, MSGTXT_H, this -> s, &toutafficheenbas);
   
     /*if(!toutafficheenbas)
       {*/
@@ -263,7 +279,7 @@ void CMessageTexte::Render(void) {
     /*}*/
 
 
-    texfond->GLTextureCourante();
+    this -> texfond -> GLTextureCourante(this -> texfond);
     
     glBegin(GL_QUADS); {
       BLIT(MSGTXT_X,MSGTXT_Y,MSGTXT_W,MSGTXT_H,0,0,1,1); 
@@ -273,24 +289,24 @@ void CMessageTexte::Render(void) {
     glEnable(GL_LIGHTING);
   } glDisable2D();
   
-}
+}; 
 
 
 
-bool CMessageTexte::InputAndRender(void) {
+bool CMessageTexte__InputAndRender(CMessageTexte * this) {
   
-  /*gestion de l'entrÈe clavier*/
+  /*gestion de l'entr√©e clavier*/
 #define PAS_MESSAGE_TEXTE 0.2f
-  if (KEY_UP) lignedebut -= PAS_MESSAGE_TEXTE;
-  if (KEY_DOWN) lignedebut += PAS_MESSAGE_TEXTE;
+  if (KEY_UP) this -> lignedebut -= PAS_MESSAGE_TEXTE;
+  if (KEY_DOWN) this -> lignedebut += PAS_MESSAGE_TEXTE;
   
-  if (nbcaracaffiche > 10)
+  if (this -> nbcaracaffiche > 10)
     if (KEY_MENU_VALIDER) return true;
   
   /*affichage*/
-  Render();
+  this -> Render(this);
   
   return false;
     
-}    
+};     
 

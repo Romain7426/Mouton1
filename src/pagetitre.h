@@ -1,13 +1,8 @@
 #ifndef CPageTitre_H
 #define CPageTitre_H
 
-
-#include "global.h"
-#include "texture.h"
-#include "text.h"
-
 /******************************************************************************
-     page de titre
+     Page de titre
 ******************************************************************************/
 
 enum TPageTitreAction {ptFADEIN, ptTITRE, ptFADEOUT};
@@ -17,21 +12,19 @@ struct CPageTitre {
 #define NB_ETAPE_FADING 64
   //private:  
   TPageTitreAction Action;
-  CTexture* DessineMoiUnMouton;
-  CTexture* Titre;
+  CTexture * DessineMoiUnMouton;
+  CTexture * Titre;
   int t;
   int fade;
   float Ligne_Courante;
   
-  //public:
-#if 0
-  CPageTitre();
-  ~CPageTitre();
-#endif
-
   void (* Render)(const struct CPageTitre * this);
   bool (* Life)(struct CPageTitre * this);
 };
+extern CPageTitre * CPageTitre_make(void);
+extern void CPageTitre_delete(CPageTitre * this);
+extern void CPageTitre__Render(const CPageTitre * this);
+extern bool CPageTitre__Life(CPageTitre * this);
 
 
 #endif

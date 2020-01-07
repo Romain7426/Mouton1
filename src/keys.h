@@ -7,21 +7,17 @@ extern unsigned char * KeyBoard;
 
 
 struct CKey {
-  //private:
   char kk;
   char previous;
 
-#if 0  
-  //public:  
-  //  CKey::CKey(char kkk);
-  CKey(char kkk);
-  bool Enfoncee(void);
-  bool Appuye(void);
-#endif
+  bool (* Enfoncee)(struct CKey * this); 
+  bool (* Appuye)(struct CKey * this); 
 };
-//DEFINE_NEW_OPERATOR_FOR_STRUCT(CKey);
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(CKey);
-extern CKey * new_CKey(char kkk);
+extern CKey * CKey_make(char kkk);
+extern void CKey_delete(CKey * this); 
+extern bool CKey__Enfoncee(CKey * this);
+extern bool CKey__Appuye(CKey * this);
+
 
 
 
@@ -70,26 +66,26 @@ extern CKey KeyF12;
 
 
 
-#define KEY_JUMP  (KeySpace.Appuye() || KeyM.Appuye())
+#define KEY_JUMP  (KeySpace.Appuye(&KeySpace) || KeyM.Appuye(&KeyM))
 
 #define KEY_VAISSEAU_UP   (KeyBoard[SDLK_PAGEDOWN] || KeyBoard['i'])
 #define KEY_VAISSEAU_DOWN (KeyBoard[SDLK_PAGEUP]   || KeyBoard['p'])
 
-#define KEY_MENU_JEU (KeyI.Appuye())
-#define KEY_FRAPPER  (KeyK.Appuye())
+#define KEY_MENU_JEU (KeyI.Appuye(&KeyI))
+#define KEY_FRAPPER  (KeyK.Appuye(&KeyK))
            
-#define KEY_MENU_VALIDER (KeyReturn.Appuye() || KeySpace.Appuye() || KeyK.Appuye()) 
-#define KEY_MENU_ECHAP   (KeyP.Appuye()      || KeyEchap.Appuye()) 
+#define KEY_MENU_VALIDER (KeyReturn.Appuye(&KeyReturn) || KeySpace.Appuye(&KeySpace) || KeyK.Appuye(&KeyK)) 
+#define KEY_MENU_ECHAP   (KeyP.Appuye(&KeyP)      || KeyEchap.Appuye(&KeyEchap)) 
 
 #define KEY_PASSER_TITRE KEY_MENU_VALIDER
 
-#define KEY_MENU_SYSTEME (KeyEchap.Appuye())
+#define KEY_MENU_SYSTEME (KeyEchap.Appuye(&KeyEchap))
 
-#define KEY_ACTION1 (KeyI.Appuye())
-#define KEY_ACTION2 (KeyO.Appuye()) // || KeyL.Appuye())
-#define KEY_ACTION3 (KeyP.Appuye())
+#define KEY_ACTION1 (KeyI.Appuye(&KeyI))
+#define KEY_ACTION2 (KeyO.Appuye(&KeyO)) // || KeyL.Appuye())
+#define KEY_ACTION3 (KeyP.Appuye(&KeyP))
 
-#define KEY_ACTIVEDESACTIVEMOTEURPHYSIQUE (KeyF12.Appuye())
+#define KEY_ACTIVEDESACTIVEMOTEURPHYSIQUE (KeyF12.Appuye(&KeyF12))
 
 
 

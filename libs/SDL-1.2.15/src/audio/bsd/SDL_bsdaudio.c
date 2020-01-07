@@ -301,6 +301,7 @@ OBSD_Status(_THIS)
 static int
 OBSD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
+#if 0
     char audiodev[64];
     Uint16 format;
     audio_info_t info;
@@ -399,6 +400,7 @@ OBSD_OpenAudio(_THIS, SDL_AudioSpec *spec)
     OBSD_Status(this);
 #endif
 
+#endif 
     /* We're ready to rock and roll. :-) */
     return(0);
 }

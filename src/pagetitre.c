@@ -1,5 +1,5 @@
-#include "global.hpp"
-#include "pagetitre.hpp"
+#include "global.h"
+#include "pagetitre.h"
 
 const char * CHAINE_GENERIQUE = 
 #if 0
@@ -8,79 +8,88 @@ const char * CHAINE_GENERIQUE =
   "Scripts des objets\nRomain (mainmain)\n\n\n"
   "Scripts de  descriptions\nRomain (mainmain)\n\n\n"
   "Scripts des cartes\nRomain (mainmain)\n\n\n"
-  "Scripts des cartesplans\nFrançois (c'min)\n\n\n"
+  "Scripts des cartesplans\nFranÃ§ois (c'min)\n\n\n"
 #endif
   "Scripts \nRomain (mainmain)\n\n\n"
-  "Moteur 3D\nFrançois (c'min)\n\n\n"
-  "Musiques\nFrançois (c'min)\n\n\n"
+  "Moteur 3D\nFranÃ§ois (c'min)\n\n\n"
+  "Musiques\nFranÃ§ois (c'min)\n\n\n"
   "Objets 3D\nLudovic (Mac Do)\n\n\n"
   "Bonhommes\nPierre\nMathilde (Tilda)\n\n";
 
 
-CPageTitre::CPageTitre(void) : Action(ptFADEIN), t(0), fade(0), Ligne_Courante(0.0f) {
-  DessineMoiUnMouton = new CTexture("titre/dessine.moi.un.mouton.jpg");
-  Titre = new CTexture("titre/titre.png");                     
-}
+CPageTitre * CPageTitre_make(void) {
+  MALLOC_BZERO(CPageTitre,this);
+  
+  ASSIGN_METHOD(CPageTitre,this,Render); 
+  ASSIGN_METHOD(CPageTitre,this,Life); 
+  
+  this -> Action = ptFADEIN; 
+  this -> t = 0; 
+  this -> fade = 0;
+  this -> Ligne_Courante = 0.0f; 
+  this -> DessineMoiUnMouton = CTexture_make("titre/dessine.moi.un.mouton.jpg");
+  this -> Titre = CTexture_make("titre/titre.png");                     
+  return this; 
+};
 
 
-CPageTitre::~CPageTitre(void) {
-  delete DessineMoiUnMouton; 
-  delete Titre;             
-}
+void CPageTitre_delete(CPageTitre * this) {
+  CTexture_delete(this -> DessineMoiUnMouton); 
+  CTexture_delete(this -> Titre);             
+  free(this); 
+};
 
 
 
-bool CPageTitre::Life(void) {
-  if (Action == ptFADEIN)
-    fade++;
+bool CPageTitre__Life(CPageTitre * this) {
+  if (this -> Action == ptFADEIN)
+    this -> fade++;
          
-  if (Action == ptFADEOUT)
-    fade--;
+  if (this -> Action == ptFADEOUT)
+    this -> fade--;
          
-  if (fade > NB_ETAPE_FADING) {
-    Action = ptTITRE;   
-    fade = NB_ETAPE_FADING;
+  if (this -> fade > NB_ETAPE_FADING) {
+    this -> Action = ptTITRE;   
+    this -> fade = NB_ETAPE_FADING;
   }
 
-  if (Action == ptTITRE) {
-    Ligne_Courante += 0.01f;
+  if (this -> Action == ptTITRE) {
+    this -> Ligne_Courante += 0.01f;
   }
 
   if (KEY_PASSER_TITRE) 
-    Action = ptFADEOUT;
+    this -> Action = ptFADEOUT;
 
-  t++;
+  this -> t++;
 
-  return (fade < 0) && (Action == ptFADEOUT);
-}
+  return (this -> fade < 0) && (this -> Action == ptFADEOUT);
+}; 
 
 
-void CPageTitre::Render(void) const {
+void CPageTitre__Render(const CPageTitre * this) {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   
   glDisable(GL_DEPTH_TEST);
   
   glEnable2D(); {
-
     glEnable(GL_TEXTURE_2D);
     
-    float f = (float) fade/NB_ETAPE_FADING;
+    float f = (float) this -> fade/NB_ETAPE_FADING;
     glColor3f(f, f, f);
-    Titre->GLTextureCourante();
+    this -> Titre -> GLTextureCourante(this -> Titre);
     BEGIN_BLIT_END(200,320,500,150,0.0f, 0.0f, 1.0f, 1.0f);
     
-    DessineMoiUnMouton->GLTextureCourante();
-    float v = ((float) t)/512.0f;
+    this -> DessineMoiUnMouton -> GLTextureCourante(this -> DessineMoiUnMouton);
+    float v = ((float) this -> t)/512.0f;
     BEGIN_BLIT_END(0, 100, SCREEN_WIDTH, 200, 0.0f + v, 0.0f, 1.0f, 1.0f);//t/512.0f, 0.0f, 640.0f/512.0f + t/512.0f, 640.0f);
     
-    if (Action == ptTITRE) {
-      bool b; //sert à rien :)
-      Text->print(Ligne_Courante, 7, 100000, 100, 100, 5000, 300, CHAINE_GENERIQUE, b);
-    }
+    if (this -> Action == ptTITRE) {
+      bool b; //sert Ã  rien :)
+      Text -> print2(Text, this -> Ligne_Courante, 7, 100000, 100, 100, 5000, 300, CHAINE_GENERIQUE, &b);
+    };
     
   } glDisable2D();           
 
-  glEnable(GL_DEPTH_TEST);
-  
-}
+  glEnable(GL_DEPTH_TEST);  
+};
 

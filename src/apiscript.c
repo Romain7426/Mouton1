@@ -1,139 +1,131 @@
-#include "global.hpp"
-#include "apiscript.hpp"
-#include "kernel.hpp"
-#include "main.hpp"
-#include "physicalobj.hpp"
-#include "bonhomme.hpp"
-#include "map.hpp"
-#include "menu.hpp"
-#include "text.hpp"
-#include "menu.hpp"
-#include "moteurteleportation.hpp"
-#include "map.hpp"
-#include "son.hpp"
-#include "camera.hpp"
-#include "menuentreenom.hpp"
-#include "objnonanime.hpp"
-
-
+#include "global.h"
+#include "apiscript.h"
+#include "kernel.h"
+#include "main.h"
+#include "physicalobj.h"
+#include "bonhomme.h"
+#include "map.h"
+#include "menu.h"
+#include "text.h"
+#include "menu.h"
+#include "moteurteleportation.h"
+#include "map.h"
+#include "son.h"
+#include "camera.h"
+#include "menuentreenom.h"
+#include "objnonanime.h"
 
 /****************************
    API pour le script
    ******************************************************/
 
-
-
-
-
-
+api_contexte_t * api_contexte_make(void) {
+  api_contexte_t * this = (api_contexte_t *) malloc(sizeof(api_contexte_t)); 
+  bzero(this, sizeof(api_contexte_t)); 
+  return this; 
+}; 
 
 void SCRIPT_AjouterObjetAnime(const char* qui, const char * filename) {
-     printf("SCRIPT_AjouterObjetAnime(%s, %s)\n", qui, filename);
-     CBonhomme* o = new CBonhomme(filename);
-     (*(api_contexte.Map))->AjouterObjet(qui, o);
-}
+  printf("SCRIPT_AjouterObjetAnime(%s, %s)\n", qui, filename);
+  CBonhomme * o = CBonhomme_make(filename);
+  (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent1);
+};
 
 void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename) {
-     printf("SCRIPT_AjouterObjetNonAnime(%s, %s)\n", qui, filename);
-     CObjNonAnime* o = new CObjNonAnime(filename);
-     (*(api_contexte.Map))->AjouterObjet(qui, o);     
-}
-
+  printf("SCRIPT_AjouterObjetNonAnime(%s, %s)\n", qui, filename);
+  CObjNonAnime * o = CObjNonAnime_make(filename);
+  (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent);     
+};
 
 bool SCRIPT_EstEnTrainDExecuterUnScript(void) {
   return (*(api_contexte.ModeJeu)) == mjSCRIPT;     
-}
+};
 
-
-void SCRIPT_SetTemps(float t)
+void SCRIPT_SetTemps(float t) {
 /* 0.0f : il fait jour
    0.5f : il fait nuit*/
-{
-     (*(api_contexte.Temps)) = 2*PI*t;
-}
+  (*(api_contexte.Temps)) = 2*PI*t;
+};
 
 void SCRIPT_BloquerTemps(void) {
   (*(api_contexte.marche_compression)) = 0.0f;   
-}
-
+}; 
 
 void SCRIPT_DebloquerTemps(void) {
   (*(api_contexte.marche_compression)) = marche_compression_defaut;     
-}
+}; 
 
-
-
-void SCRIPT_Init(void)
-/*‡ appeler quand on commencer ‡ exÈcuter un script
+void SCRIPT_Init(void) {
+/*√† appeler quand on commencer √† ex√©cuter un script
 (lors du premier execute)
 
- une fois cette procÈdure appelÈe le jeu sait qu'il exÈcute un
- script, les entrÈes clavier sont redirigÈ automatiquement vers 
- un dÈfilement de texte, un choix de menu, ou rien...
- dÈfini dans le script*/
-{
+ une fois cette proc√©dure appel√©e le jeu sait qu'il ex√©cute un
+ script, les entr√©es clavier sont redirig√© automatiquement vers 
+ un d√©filement de texte, un choix de menu, ou rien...
+ d√©fini dans le script*/
   (*(api_contexte.ModeJeu)) = mjSCRIPT;
   (*(api_contexte.TypeInstructionCourante)) = ticInstructionScript;
-}
+};
 
-
-void SCRIPT_Quit(void)
-/*‡ appeler quand on quitte le script (lors du dernier execute)
- cette procÈdure rend la main au jeu
+void SCRIPT_Quit(void) { 
+/*√† appeler quand on quitte le script (lors du dernier execute)
+ cette proc√©dure rend la main au jeu
  
- appuyer sur "haut" fera de nouveau bouger le hÈros etc...*/
-{
+ appuyer sur "haut" fera de nouveau bouger le h√©ros etc...*/
   fprintf(stderr, "SCRIPT_Quit\n");
   (*(api_contexte.ModeJeu)) = mjJEU; 
-}
+}; 
 
 
 const char * SCRIPT_GetNomCarte(void) {
   if ((*(api_contexte.Map)) == NULL)
     return "";
   else
-    return (*(api_contexte.Map))->GetNomCarte();       
-}
+    return (*(api_contexte.Map)) -> GetNomCarte((*(api_contexte.Map))); 
+};
 
 
 
 /*informe le jeu que l'on va afficher un message*/
 void SCRIPT_AfficherMessage(const char * msg) {
   (*(api_contexte.TypeInstructionCourante)) = ticAfficherMessage;
-  MessageTexte->SetMsg(msg);
-  
+  MessageTexte -> SetMsg(MessageTexte, msg);
   (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false;
-
 #if 0  
   while (not((*(api_contexte.SCRIPT_SystemeRendMainAuScript))))
     SCRIPT_unepassedeboucle();
 #endif
-}
+};
 
 
 
 
 void SCRIPT_Camera_SetPosition(float x, float y, float z, TMethodePlacement mp) {
-  Camera.pos = ((mp == mpRELATIF) ? Camera.pos : Point3D(0.0f, 0.0f, 0.0f))  +  Point3D(x, y, z); 
-}
+  //Camera.pos = ((mp == mpRELATIF) ? Camera.pos : Point3D_make(0.0f, 0.0f, 0.0f))  +  Point3D_make(x, y, z); 
+
+  if (mp == mpRELATIF) { 
+    TPoint3D_add_self2(Camera.pos, x, y, z); 
+  }
+  else {
+    TPoint3D_assign(Camera.pos, x, y, z); 
+  };
+};
 
 
 
-// angles en degrÈ
+// angles en degr√©
 void SCRIPT_Camera_Rotate(float angle_x, float angle_y, float angle_z, TMethodePlacement mp) {
   Camera.angleXY = ((mp == mpRELATIF) ? Camera.angleXY : 0.0f) + PI * angle_x / 180.0f;
   Camera.angleHB = ((mp == mpRELATIF) ? Camera.angleHB : 0.0f) + PI * angle_y / 180.0f;
-}
+};
 
 
-void SCRIPT_Camera_Zoom(float zoom)
+void SCRIPT_Camera_Zoom(float zoom) { 
 /*zoom = 1.0f : normal
-  zoom = 2.0f : on agrandit par 2, la camÈra est deux fois plus prËs
+  zoom = 2.0f : on agrandit par 2, la cam√©ra est deux fois plus pr√®s
   du point quel regarde */
-{
-   Camera.SetDist(dist_defaut / zoom);   
-     
-}
+  Camera.SetDist(&Camera, dist_defaut / zoom);   
+}; 
 
 
 
@@ -144,52 +136,52 @@ void SCRIPT_Camera_Zoom(float zoom)
      MiniMenu->Add(0, "Fifi Brindacier", "fifi.png"); 
      :
      :
-     SCRIPT_AfficherMenu("Choisis ton hÈros :");                           
+     SCRIPT_AfficherMenu("Choisis ton h√©ros :");                           
 */
-/*‡ appelr lors d'un dÈbut de menu*/
+/*√† appelr lors d'un d√©but de menu*/
 void SCRIPT_BeginAfficherMenu(void) {
-  delete (*(api_contexte.MiniMenu));
-  (*(api_contexte.MiniMenu)) = new CMiniMenu(100,200,10000);  
+  CMiniMenu_delete((*(api_contexte.MiniMenu))); 
+  (*(api_contexte.MiniMenu)) = CMiniMenu_make(100, 200, 10000); 
   (*(api_contexte.TypeInstructionCourante)) = ticMiniMenu;  
-}
+}; 
 
-int SCRIPT_AfficherMenu(const char * msg)
-/*‡ appeler pour rÈellement afficher le menu*/
-/*une fois l'exÈcution du menu terminÈ, le jeu "rend la main" au script
-  ===> on rÈcupËre le choix effectuÈ par l'utilisation dans un menu via 
+int SCRIPT_AfficherMenu(const char * msg) { 
+/*√† appeler pour r√©ellement afficher le menu*/
+/*une fois l'ex√©cution du menu termin√©, le jeu "rend la main" au script
+  ===> on r√©cup√®re le choix effectu√© par l'utilisation dans un menu via 
   cette fonction*/
-
-{
   (*(api_contexte.TypeInstructionCourante)) = ticMiniMenu;
-  MessageTexte->SetMsg(msg);
+  MessageTexte -> SetMsg(MessageTexte, msg);
   (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false;
 #if 0
   while (not((*(api_contexte.SCRIPT_SystemeRendMainAuScript))))
     SCRIPT_unepassedeboucle();
 #endif
      
-  return (*(api_contexte.MiniMenu))->itheta;
-}
+  return (*(api_contexte.MiniMenu)) -> parent.itheta;
+}; 
 
 
 void SCRIPT_RecevoirUneArme(const char * nom_arme) {
   printf("SCRIPT_RecevoirUneArme(%s)\n", nom_arme);
-  char * filename_icone;
-  filename_icone = new char[strlen(nom_arme) + 4 + 1];
+  //char * filename_icone;
+  //filename_icone = (char *) malloc(sizeof(char) * (strlen(nom_arme) + 4 + 1));
+  char filename_icone[strlen(nom_arme) + 4 + 1];
   strcpy(filename_icone, nom_arme);
   strcat(filename_icone, ".png");
   
-  (*(api_contexte.Menu)) -> Add(ANNEAU_MENU_ARME, nom_arme, filename_icone);
+  //(*(api_contexte.Menu)) -> Add1((*(api_contexte.Menu)), ANNEAU_MENU_ARME, nom_arme, filename_icone);
+  (*(api_contexte.Menu)) -> parent.Add(&(*(api_contexte.Menu)) -> parent, ANNEAU_MENU_ARME, nom_arme, filename_icone);
   
-  delete filename_icone;
-}
+  //free(filename_icone);
+}; 
 
 
-void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, CZoneTeleportation ZoneTeleportation) {
+void SCRIPT_ChangerDeCarte_vZT(CMoteurTeleportation * MoteurTeleportation, CZoneTeleportation ZoneTeleportation) {
   fprintf(stderr, "SCRIPT_ChangerDeCarte(%s, ...)\n", ZoneTeleportation.destination_carte);
   (*(api_contexte.TypeInstructionCourante)) = ticChangerDeCarte;
-  MoteurTeleportation -> SetCouleurFondu(0);  
-  MoteurTeleportation -> DebuterTeleportation(ZoneTeleportation);
+  MoteurTeleportation -> SetCouleurFondu(MoteurTeleportation, 0);  
+  MoteurTeleportation -> DebuterTeleportation(MoteurTeleportation, ZoneTeleportation);
   
   (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false;
   
@@ -197,9 +189,9 @@ void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, CZoneTele
   while (not(*(api_contexte.SCRIPT_SystemeRendMainAuScript)))
     SCRIPT_unepassedeboucle();
 #endif
-}
+}; 
 
-void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, const char * nom_carte, float x, float y, float z, TDirection direction) {
+void SCRIPT_ChangerDeCarte_vXYZ(CMoteurTeleportation * MoteurTeleportation, const char * nom_carte, float x, float y, float z, TDirection direction) {
   CZoneTeleportation zt;
   
   zt.destination_carte = (char *) strcopy(nom_carte);  
@@ -208,92 +200,82 @@ void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, const cha
   zt.destination_position.z = z;   
   zt.destination_direction = direction;
   
-  SCRIPT_ChangerDeCarte(MoteurTeleportation, zt);
-}
+  SCRIPT_ChangerDeCarte_vZT(MoteurTeleportation, zt);
+}; 
 
-void SCRIPT_ChangerDeCarte(CMoteurTeleportation * MoteurTeleportation, const char * nom_carte, float x, float y, TDirection direction) {                        
-  SCRIPT_ChangerDeCarte(MoteurTeleportation, nom_carte, x, y, 0.0f, direction);
-}
+void SCRIPT_ChangerDeCarte_vXY(CMoteurTeleportation * MoteurTeleportation, const char * nom_carte, float x, float y, TDirection direction) {                        
+  SCRIPT_ChangerDeCarte_vXYZ(MoteurTeleportation, nom_carte, x, y, 0.0f, direction);
+}; 
 
 
 CPhysicalObj * SCRIPT_RetrouverObjetViaSonNom(const char * qui) {
-    if (0 == strcmp(qui, "heros"))
-      return (*(api_contexte.Hero));
-    else           
-      return (*(api_contexte.Map))->RetrouverObjetViaSonNom(qui);
-}
+  if (0 == strcmp(qui, "heros"))
+    return &(*(api_contexte.Hero)) -> parent1;
+  else           
+    return (*(api_contexte.Map)) -> RetrouverObjetViaSonNom((*(api_contexte.Map)), qui);
+}; 
 
 
-void SCRIPT_SetPosition(const char* qui, TPoint3D position)
-{
-    printf("SCRIPT_SetPosition(%s, une position)\n", qui);
-    SCRIPT_RetrouverObjetViaSonNom(qui)->SetPosition(position);
-     
-}
+void SCRIPT_SetPosition_vTPoint3D(const char * qui, TPoint3D position) { 
+  printf("SCRIPT_SetPosition(%s, une position)\n", qui); 
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  o -> SetPosition_vTPoint3D(o, position);
+}; 
 
-void SCRIPT_SetPosition(const char* qui, float x, float y, TMethodePlacement mp)
-{
-    printf("SCRIPT_SetPosition(%s, %f, %f, ...)\n", qui, x, y); 
-    SCRIPT_RetrouverObjetViaSonNom(qui)->SetPosition(x, y, mp, (*(api_contexte.Map)));
-     
-}
+void SCRIPT_SetPosition_vExpanded(const char * qui, float x, float y, TMethodePlacement mp) { 
+  printf("SCRIPT_SetPosition(%s, %f, %f, ...)\n", qui, x, y); 
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  o -> SetPosition_vExpanded(o, x, y, mp, (*(api_contexte.Map)));
+}; 
 
+void SCRIPT_SetDirection(const char * qui, TDirection d) { 
+  printf("SCRIPT_SetDirection(%s, ...)\n", qui); 
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  CBonhomme * b = (CBonhomme *) o; 
+  if(b == NULL)
+    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut s'orienter.\n", qui);
+  else
+    b -> SetDirection(b, d);
+}; 
 
-void SCRIPT_SetDirection(const char* qui, TDirection d)
-{
-    printf("SCRIPT_SetDirection(%s, ...)\n", qui); 
-    CBonhomme* b = dynamic_cast<CBonhomme *> ( SCRIPT_RetrouverObjetViaSonNom(qui) ); 
-    if(b == NULL)
-          printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut s'orienter.\n", qui);
-    else
-         b->SetDirection(d);
-}
+void SCRIPT_SetZ(const char * qui, float z, TMethodePlacement mp) { 
+  printf("SCRIPT_SetZ(%s, ...)\n", qui);
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  o -> SetZ(o, z, mp);
+}; 
+ 
+void SCRIPT_Frapper(const char* qui) { 
+  printf("SCRIPT_Frapper(%s)\n", qui);   
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  CBonhomme * b = (CBonhomme *) o; 
+  if(b == NULL)
+    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut frapper.\n", qui);
+  else
+    b -> Frapper(b);
+}; 
+ 
+void SCRIPT_Deplacer(const char * qui, float x, float y, TMethodePlacement mp) { 
+  printf("SCRIPT_Deplacer(%s, %f, %f, ...)\n", qui, x, y); 
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  CBonhomme * b = (CBonhomme *) o; 
+  
+  if(b == NULL)
+    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut se d√©placer.\n", qui);
+  else
+    b -> AjouterOrdresDeplacement_vXY(b, x, y, mp);
+}; 
 
-void SCRIPT_SetZ(const char* qui, float z, TMethodePlacement mp)
-{
-     printf("SCRIPT_SetZ(%s, ...)\n", qui);
-    SCRIPT_RetrouverObjetViaSonNom(qui)->SetZ(z, mp);
-     
-}
-
-
-void SCRIPT_Frapper(const char* qui)
-{
-    printf("SCRIPT_Frapper(%s)\n", qui);   
-    CBonhomme* b = dynamic_cast<CBonhomme *> ( SCRIPT_RetrouverObjetViaSonNom(qui) ); 
-    if(b == NULL)
-          printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut frapper.\n", qui);
-    else
-         b->Frapper();
-    
-       
-}
-
-
-
-void SCRIPT_Deplacer(const char* qui, float x, float y, TMethodePlacement mp)
-{
-    printf("SCRIPT_Deplacer(%s, %f, %f, ...)\n", qui, x, y); 
-    CBonhomme* b = dynamic_cast<CBonhomme *> ( SCRIPT_RetrouverObjetViaSonNom(qui) ); 
-    
-    if(b == NULL)
-          printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut se dÈplacer.\n", qui);
-    else
-          b->AjouterOrdresDeplacement(x, y, mp);
-     
-}
-
-
-void SCRIPT_SupprimerObjet(const char * qui) {
+void SCRIPT_SupprimerObjet(const char * qui) { 
   printf("SCRIPT_SupprimerObjet(%s)\n", qui); 
-  /* dÈtruire (*(api_contexte.Map))->RetrouverObjetViaSonNom(qui)*/ 
+  /* d√©truire (*(api_contexte.Map))->RetrouverObjetViaSonNom(qui)*/ 
   TPoint3D pos;
   pos.x = 5000.0f;
   pos.y = 5000.0f;
   pos.z = 5000.0f;
-  SCRIPT_RetrouverObjetViaSonNom(qui)->SetPosition(pos);
-  /*pour l'instant au lieu de le dÈtruire, on l'envoie au paradis :):)*/
-}
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  o -> SetPosition_vTPoint3D(o, pos);
+  /*pour l'instant au lieu de le d√©truire, on l'envoie au paradis :):)*/
+}; 
 
 
 // permet d'attendre nbpasses*5 centisecondes environ
@@ -301,26 +283,27 @@ void SCRIPT_Wait(int nbpasses) {
   api_contexte.nbpasses = nbpasses;
   (*(api_contexte.TypeInstructionCourante)) = ticWait;
   return;
-
-
+  
+  
   SDL_Delay(100*nbpasses);
-
+  
   return;
   for (int i = 0; i < nbpasses; i++)
     SCRIPT_unepassedeboucle();     
-}
+}; 
 
 
 // attend qu'un objet n'a plus de mouvement
 void SCRIPT_WaitFor(const char * qui) {
   printf("SCRIPT_WaitFor(%s)\n", qui);
 
-  CBonhomme * b = dynamic_cast<CBonhomme *> (SCRIPT_RetrouverObjetViaSonNom(qui)); 
+  CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  CBonhomme * b = (CBonhomme *) o; 
   
   if (b == NULL) {
     printf("ERREUR: L'objet %s n'est pas un bonhomme. On ne peut pas l'attendre.\n", qui);
     return;
-  }
+  }; 
 
   api_contexte.b = b;
   (*(api_contexte.TypeInstructionCourante)) = ticWaitFor;
@@ -330,12 +313,12 @@ void SCRIPT_WaitFor(const char * qui) {
       //SCRIPT_unepassedeboucle();
       break;
 #endif
-}
+}; 
 
 
 void SCRIPT_SetCouleurFondu(CMoteurTeleportation * MoteurTeleportation, int color) {
-  MoteurTeleportation -> SetCouleurFondu(color);
-}
+  MoteurTeleportation -> SetCouleurFondu(MoteurTeleportation, color);
+}; 
 
 
 void SCRIPT_fondu(CMoteurTeleportation * MoteurTeleportation) {
@@ -345,7 +328,7 @@ void SCRIPT_fondu(CMoteurTeleportation * MoteurTeleportation) {
     mais... on reste au ^m endroit...cela se traduit par destination_carte == NULL*/
   CZoneTeleportation zt;
   zt.destination_carte = NULL;
-  MoteurTeleportation -> DebuterTeleportation(zt);
+  MoteurTeleportation -> DebuterTeleportation(MoteurTeleportation, zt);
   
   (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false;
   
@@ -353,7 +336,7 @@ void SCRIPT_fondu(CMoteurTeleportation * MoteurTeleportation) {
   while (not(*(api_contexte.SCRIPT_SystemeRendMainAuScript)))
     SCRIPT_unepassedeboucle();
 #endif
-}
+}; 
 
 
 
@@ -361,29 +344,27 @@ void SCRIPT_JouerMusique(const char* fichier) {
   printf("SCRIPT_JouerMusique(%s)\n", fichier);
   bool musiqueachanger = false;
   
-  if((*(api_contexte.Musique)) == NULL) musiqueachanger = true;
-  else if((*(api_contexte.Musique))->NomMusique == NULL)
+  if ((*(api_contexte.Musique)) == NULL) musiqueachanger = true;
+  else if ((*(api_contexte.Musique))->NomMusique == NULL)
          musiqueachanger = true;
-  else
-    if(strcmp((*(api_contexte.Musique))->NomMusique, fichier))
-      //si diffÈrent il faut charger la musique
-      musiqueachanger = true;
+  else if (strcmp((*(api_contexte.Musique))->NomMusique, fichier))
+    //si diff√©rent il faut charger la musique
+    musiqueachanger = true;
   
   if (musiqueachanger) {
-    delete (*(api_contexte.Musique));
-    
-    (*(api_contexte.Musique)) = new CMusique(fichier);
-    (*(api_contexte.Musique))->Jouer();
-  }
+    CMusique_delete((*(api_contexte.Musique))); 
+    (*(api_contexte.Musique)) = CMusique_make(fichier);
+    (*(api_contexte.Musique)) -> Jouer((*(api_contexte.Musique)));
+  };
   
-}
+}; 
 
 
 
 void SCRIPT_Readln(CMenuEntreeNom * MenuEntreeNom) {
   printf("SCRIPT_Readln\n");
     
-  MenuEntreeNom -> Init();
+  MenuEntreeNom -> Init(MenuEntreeNom);
   (*(api_contexte.TypeInstructionCourante)) = ticReadln;
   (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false;
   
@@ -393,7 +374,7 @@ void SCRIPT_Readln(CMenuEntreeNom * MenuEntreeNom) {
 #endif
          
   //return strcopy(MenuEntreeNom->buffer);
-}
+}; 
 
 
 

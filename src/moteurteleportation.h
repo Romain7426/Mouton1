@@ -1,30 +1,15 @@
 #ifndef MOTEURTELEPORTATION_H
 #define MOTEURTELEPORTATION_H
 
-
-struct CZoneTeleportation;
-struct CMap;
-struct CBonhomme;
-
-
 /****************************************************
    MOTEUR DE TELEPORTATION
 ******************************************/
-struct CMoteurTeleportation;
-
-
 
 struct CMoteurTeleportation {
-  //private:
   CZoneTeleportation * zt;
   int anim;
   float r, v, b;
             
-  //public:
-#if 0
-  CMoteurTeleportation(void);
-#endif
-  
   void (* DebuterTeleportation)(struct CMoteurTeleportation * this, struct CZoneTeleportation in_zt);
   // on commence une téléportation
   
@@ -46,9 +31,14 @@ struct CMoteurTeleportation {
   */
 };
 
+extern CMoteurTeleportation * CMoteurTeleportation_make(void);
+extern void CMoteurTeleportation_delete(CMoteurTeleportation * this);
 
-
-
+extern void CMoteurTeleportation__DebuterTeleportation(CMoteurTeleportation * this, CZoneTeleportation in_zt);
+extern bool CMoteurTeleportation__IsTeleportationEnCours(const CMoteurTeleportation * this);
+extern void CMoteurTeleportation__SetCouleurFondu(CMoteurTeleportation * this, int in_couleur);
+extern void CMoteurTeleportation__Life(CMoteurTeleportation * this, CMap * * Map_ptr, bool * EnVaisseau_ptr, CBonhomme * * Hero_ptr, bool * SCRIPT_SystemeRendMainAuScript_ptr);
+extern void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Map_ptr, bool * EnVaisseau_ptr, CBonhomme * * Hero_ptr);
 
 
 #endif

@@ -1,18 +1,10 @@
 #ifndef PASCAL_MEM_HPP
 #define PASCAL_MEM_HPP
 
-#include <stdlib.h>
-#include "pascal/pascal.tools.hpp"
-//#include "pascal.hpp"
-
-
-class CPprog;
-
 union pascal_sval;
+typedef union pascal_sval pascal_sval;
 typedef union pascal_sval psval;
-struct pascal_mem_case;
-struct pascal_mem;
-typedef struct pascal_mem pmem;
+
 
 
 
@@ -42,29 +34,30 @@ typedef pascal_location ploc;
 
 
 
-union pascal_sval {
-  typedef bool psboolean;
-  typedef int psinteger;
-  typedef int pssubrange;
-  typedef corps psreal;
-  typedef char *psstring;
-  typedef ploc pspointer;
-  struct psprocedure {
-    //struct param {
-    //char *nom;
-      // Dans DVal en fait.
-      //petype type;
-    //};
-    //pliste<param> *lparams;
-    //void *prog; // c du type prog pascal
-    CPprog * prog;
-  };
-  // En fait, une fonction, en mémoire c'est comme une procédure.
-  // La seule différence est la variable spéciale qui servira de valeur de retour.
-  //struct psfunction : public psprocedure {
-  //  pfuncrett retour; // type de la valeur de retour
+typedef bool psboolean;
+typedef int psinteger;
+typedef int pssubrange;
+typedef corps psreal;
+typedef char *psstring;
+typedef ploc pspointer;
+struct psprocedure {
+  //struct param {
+  //char *nom;
+  // Dans DVal en fait.
+  //petype type;
   //};
+  //pliste<param> *lparams;
+  //void *prog; // c du type prog pascal
+  CPprog * prog;
+};
+typedef struct psprocedure psprocedure;
+// En fait, une fonction, en mémoire c'est comme une procédure.
+// La seule différence est la variable spéciale qui servira de valeur de retour.
+//struct psfunction : public psprocedure {
+//  pfuncrett retour; // type de la valeur de retour
+//};
 
+union pascal_sval {
   psboolean b;
   psinteger i;
   pssubrange s;
@@ -77,17 +70,15 @@ union pascal_sval {
 
 
 
-struct pascal_mem_case {
-  ploc adresse;
-  psval contenu;
-};
+enum { pascal_mem_size = 2048 }; 
 struct pascal_mem {
-  //friend extern int pnew(pmem mem, unsigned int size, pmem &res);
-  //friend int pmemlookup(pmem mem, ploc i, psval &val);
-
-  ploc next; // L'adresse du prochain bloc allouable.
-  pliste<pascal_mem_case> *mem;
+  ploc adresse[pascal_mem_size];
+  psval contenu[pascal_mem_size];
+  int nb; 
 };
+
+//friend extern int pnew(pmem mem, unsigned int size, pmem &res);
+//friend int pmemlookup(pmem mem, ploc i, psval &val);
 
 
 
@@ -121,7 +112,7 @@ struct pascal_mem {
 // Elle renvoie un code d'erreur.
 // 0 => OKI
 // négatif => MDR
-extern int pnew(pmem mem, unsigned int size, pmem &res, ploc &i);
+extern int pnew(pmem mem, unsigned int size, pmem * res_ref, ploc * i_ref);
 
 extern const pmem mem0;
 extern const ploc nil_; // Le pointeur pascal nil.
@@ -139,18 +130,18 @@ extern const ploc nil_; // Le pointeur pascal nil.
 
 // Cette fonction renvoie la valeur associée à l'adresse i.
 // Plus un code d'erreur.
-extern int pmemread(pmem mem, ploc i, psval &val);
+extern int pmemread(const pmem * mem, ploc i, psval * val_ref);
 
 
 // Cette fonction associe la valeur à l'adresse.
 // Renvoie un code d'erreur selon les conventions habituelles.
-extern int pmemwrite(pmem mem, ploc i, psval val);
+extern int pmemwrite(pmem * mem, ploc i, psval val);
 
 
 // Cette fonction libère toute la mémoire jusqu'à l'adresse i comprise.
 // Renvoie un code d'erreur.
 // Ne libère pas la mémoire si pas trouvée.
-extern int pmemfree(pmem &mem, ploc i);
+extern int pmemfree(pmem * mem, ploc i);
     
 
 
@@ -166,7 +157,7 @@ extern int pmemfree(pmem &mem, ploc i);
 // Une façon plus propre, est de procéder d'abord à la destruction de l'environnement,
 // et lorsqu'elle croise une procédure (+ fonction) ou une string, hop elle détruit.
 // Mais cela ne détruira pas les variables locales qui n'ont pas été détruites au bon moment. :(
-extern void pmemdel(pmem &mem);    
+extern void pmemdel(pmem * mem);    
 
 
 

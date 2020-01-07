@@ -44,6 +44,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <langinfo.h> 
 
 #ifdef FENV_H_EXISTS
 #  include <fenv.h> // floating-point environment 
@@ -86,7 +87,7 @@
 #include <SDL_image.h> /* pour ouvrir des images d'autres formats que BMP (notamment des images au format PNG) */
 #include <SDL_mixer.h>
 
-#include <OpenGL/gl.h>
+//#include <OpenGL/gl.h>
 
 
 #ifdef SYS_MACOSX
@@ -94,7 +95,9 @@
   #include <OpenGL/glu.h>
 #endif /* MACOSX */
 
-#ifdef SYS_OPENBSD
+//#ifdef SYS_OPENBSD
+//#ifdef BSD 
+#ifdef __OpenBSD__
   #include <GL/gl.h>
   #include <GL/glu.h>
 #endif /* MACOSX */
@@ -150,6 +153,16 @@ typedef real real_t;
 
 typedef char str_t;
 
+#define _STRINGIFY(s) #s
+#define STRINGIFY(s) _STRINGIFY(s)
+
+#define BYTELEN(s)   (sizeof(s)) 
+#define ARRAYLEN(s)  (sizeof(s)/sizeof(*s)) 
+#define ARRAY_SIZE    ARRAYLEN 
+//#define STRLEN(s)  (ARRAYLEN(s)-1) 
+// Beware of a string like "bob\0and\0mary", whose the preprocessor STRLEN will never behave like the compile-one (12 vs 3). 
+// Therefore this one is kind of more accurate. 
+
 #include "biglib.h"
 #include "biglib_suppl.h"
 #include "biglib.h"
@@ -183,6 +196,9 @@ typedef char str_t;
     bzero(this, sizeof(struct TYPENAME));				\
     return this;							\
   }
+
+#define MALLOC_BZERO(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); bzero(this, sizeof(*this)); 
+#define ASSIGN_METHOD(ctype_t,this,method_name) this -> method_name = glue3(ctype_t,__,method_name); 
 
 #define DEFINE_NEW_OPERATOR_FOR_STRUCT1(TYPENAME,FIELDNAME1,FUNNAME_FOR_ATTRIBUTS) \
   struct TYPENAME * glue(new_,TYPENAME)(void) {				\
@@ -263,30 +279,155 @@ typedef char str_t;
 #include "structures.h"
 #include "constantes.h"
 
+#include "asprintf.h"
+
+struct CSon;
+typedef struct CSon CSon; 
+ 
+struct CMusique;
+typedef struct CMusique CMusique; 
+
+struct CCamera; 
+typedef struct CCamera CCamera; 
+
+struct CAffichageCoeur;
+typedef struct CAffichageCoeur CAffichageCoeur; 
+
+struct CMap; 
+typedef struct CMap CMap; 
+
+struct CEvenement; 
+typedef struct CEvenement CEvenement; 
+
+struct CBonhomme; 
+typedef struct CBonhomme CBonhomme; 
+ 
+struct CTexture; 
+typedef struct CTexture CTexture; 
+
+struct CPascal;
+typedef struct CPascal CPascal; 
+
+struct pascal_mem;
+typedef struct pascal_mem pascal_mem;
+typedef struct pascal_mem pmem;
+
+struct pascal_env; 
+typedef struct pascal_env pascal_env; 
+typedef pascal_env penv;
+
+struct CPprog; 
+typedef struct CPprog CPprog; 
+
+struct pascal_eval_type;
+typedef struct pascal_eval_type pascal_eval_type;
+typedef struct pascal_eval_type pevaltype;
+
+struct pascal_evalt;
+typedef struct pascal_evalt pascal_evalt;
+typedef struct pascal_evalt pevalt;
+
+struct pascal_dval_type_user; 
+typedef struct pascal_dval_type_user pascal_dval_type_user;
+typedef pascal_dval_type_user pdvaltypeuser;
+
+struct pascal_dvalt;
+typedef struct pascal_dvalt pascal_dvalt; 
+typedef pascal_dvalt pdvalt;
+
+struct pascal_dval_type;
+typedef struct pascal_dval_type pascal_dval_type;
+typedef pascal_dval_type pdvaltype;
+
+
+struct CPexpr;
+typedef struct CPexpr CPexpr;
+
+struct pascal_stack_t; 
+typedef struct pascal_stack_t pascal_stack_t; 
+
+struct CScriptLauncher;
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CScriptLauncher);
+
+struct CObjActionnable;
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(CObjActionnable);
+
+struct MenuItem; 
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(MenuItem);
+
+struct CMenuAbstrait; 
+typedef struct CMenuAbstrait CMenuAbstrait; 
+
+struct CMenu; 
+typedef struct CMenu CMenu; 
+
+struct CMiniMenu; 
+typedef struct CMiniMenu CMiniMenu; 
+ 
+struct CActionsMenu; 
+typedef struct CActionsMenu CActionsMenu; 
+
+struct CMenuEntreeNom; 
+typedef struct CMenuEntreeNom CMenuEntreeNom; 
+ 
+struct CText; 
+typedef struct CText CText; 
+
+struct CMessageTexte; 
+typedef struct CMessageTexte CMessageTexte; 
+
+struct CKey; 
+typedef struct CKey CKey; 
+
+struct CAffichageMainPierre; 
+typedef struct CAffichageMainPierre CAffichageMainPierre; 
+
+struct CObjNonAnime;
+typedef struct CObjNonAnime CObjNonAnime; 
+ 
+struct api_contexte_t; 
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(api_contexte_t);
+
+struct CMoteurTeleportation; 
+typedef struct CMoteurTeleportation CMoteurTeleportation; 
+ 
+struct CPageTitre;
+typedef struct CPageTitre CPageTitre; 
+
+struct COrdresDeplacement; 
+typedef struct COrdresDeplacement COrdresDeplacement; 
+
+struct C3DS;
+typedef struct C3DS C3DS; 
+
+
 #include "vectors.h" // pour pouvoir utiliser des vecteurs 2D et 3D
 #include "keys.h"
 
 #include "3ds.h"
+#include "texture.h"
+#include "sol.h"
+#include "menu.h"
 #include "action.h"
-#include "affichagemainpierre.h"
-#include "apiscript.h"
-#include "arme.h"
-#include "asprintf.h"
+#include "physicalobj.h"
 #include "bonhomme.h"
+#include "evenement.h"
+#include "evenements.h"
+#include "map.h"
+#include "menuentreenom.h"
+
+#include "arme.h"
+
+
 #include "camera.h"
 #include "coeurs.h"
 #include "constantes.h"
 #include "dico.h"
-#include "evenement.h"
-#include "evenements.h"
 #include "global.h"
 #include "kernel.h"
 #include "keys.h"
 #include "liste.h"
 #include "main.h"
-#include "map.h"
-#include "menu.h"
-#include "menuentreenom.h"
 #include "messages.h"
 #include "moteurdeplacement.h"
 #include "moteurteleportation.h"
@@ -294,16 +435,15 @@ typedef char str_t;
 #include "objnonanime.h"
 #include "pagetitre.h"
 #include "pascal.h"
-#include "physicalobj.h"
 #include "ressource.h"
-#include "sol.h"
 #include "son.h"
 #include "structures.h"
 #include "text.h"
-#include "texture.h"
 #include "timer.h"
 #include "utilities.h"
-#include "vectors.h"
+
+#include "apiscript.h"
+#include "affichagemainpierre.h"
 
 
 

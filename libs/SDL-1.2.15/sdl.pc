@@ -1,6 +1,6 @@
 # sdl pkg-config source file
 
-prefix=/Users/romain/Projets/zelda-c-language/libs/SDL-1.2.15/destroot
+prefix=/home/romain/projects/zelda-c-language/libs/SDL-1.2.15/destroot/
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
@@ -10,6 +10,6 @@ Description: Simple DirectMedia Layer is a cross-platform multimedia library des
 Version: 1.2.15
 Requires:
 Conflicts:
-Libs: -L${libdir}  -lSDLmain -lSDL   -Wl,-framework,Cocoa
-Libs.private: ${libdir}/libSDLmain.a ${libdir}/libSDL.a  -Wl,-framework,OpenGL  -Wl,-framework,Cocoa -Wl,-framework,ApplicationServices -Wl,-framework,Carbon -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit -Wl,-framework,IOKit
-Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -D_THREAD_SAFE
+Libs: -L${libdir}  -lSDL  -pthread
+Libs.private: -lSDL  -pthread  -lm -lossaudio  -lusbhid -pthread
+Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -D_REENTRANT

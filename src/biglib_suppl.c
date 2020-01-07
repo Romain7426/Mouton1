@@ -42,7 +42,7 @@ int int_max_brute(void) {
     return int_max_save;
   
   int i;
-  for (i = 0; i >= 0; i++);
+  for (i = 0; i >= 0; i++) {};
   assert(i < 0);
   i--;
   assert(i >= 0);
@@ -74,7 +74,7 @@ int int_max(void) {
 #else
   {
     int i;
-    for (i = 1; i >= 0; i *= 2);
+    for (i = 1; i >= 0; i *= 2) {};
     assert(i < 0);
     i--;
     assert(i >= 0);

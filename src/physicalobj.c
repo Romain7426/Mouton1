@@ -5,10 +5,9 @@
 
 //extern CMap * Map;
 
-CPhysicalObj(CPhysicalObj * this);
-CPhysicalObj(CPhysicalObj * this, const char * filename);
-virtual ~CPhysicalObj(CPhysicalObj * this) {}
+//extern CPhysicalObj * CPhysicalObj_make(void);
 
+#if 0
 bool IsVolumeNul(CPhysicalObj * this) const;
 TPoint3D GetDimension(CPhysicalObj * this, const CSol * Map) const;
 float NormeVitesse(CPhysicalObj * this) const;
@@ -27,14 +26,14 @@ void ValiderPosition(CPhysicalObj * this, const bool MoteurPhysiqueActif);
 void TesterSol(CPhysicalObj * this, const CSol * Map);
 bool TesterPosition(CPhysicalObj * this, const CSol * Map, const CPhysicalObj * po);
 bool IsBloque(CPhysicalObj * this) const;
-virtual void Render(CPhysicalObj * this, const CSol * Map) const;
+void Render(CPhysicalObj * this, const CSol * Map) const;
 void PerdrePV(CPhysicalObj * this, int nbpv);
 bool Is0PV(CPhysicalObj * this) const;
 void SetPVMax(CPhysicalObj * this, int nbpv);
 void GagnerPV(CPhysicalObj * this, int nbpv);
 int GetPV(CPhysicalObj * this) const;
 void SetObjetEphemere(CPhysicalObj * this, int nbPV); 
-
+#endif 
 
 
 
@@ -50,37 +49,6 @@ void SetObjetEphemere(CPhysicalObj * this, int nbPV);
   virtual ~struct CPhysicalObj(struct CPhysicalObj * this) {}
 
 
-  virtual void Render(struct CPhysicalObj * this, const CSol * Map) const
-  {
-#if AFFICHER_CUBE_DEBUG == true
-          
-    TPoint3D d = GetDimension(struct CPhysicalObj * this, Map);      
-
-    /* les cubes pour lesquels on a rejeté la position, sont rouges */
-    if (struct CPhysicalObj * this, !nvalid_position) {
-      glColor3f(struct CPhysicalObj * this, 1.0f, 0.0f, 0.0f);
-    }
-         
-    if (struct CPhysicalObj * this, Immerge) {
-      glColor3f(struct CPhysicalObj * this, 0.0f, 0.0f, 1.0f); 
-    }
-         
-#if 0
-    if (struct CPhysicalObj * this, IsVolumeNul(struct CPhysicalObj * this, )) {
-      glColor3f(struct CPhysicalObj * this, 0.0f, 0.0f, 0.0f);   
-      d.x = 0.2f;
-      d.y = 0.2f;
-      d.z = 10.0f;
-    }
-#endif
-    
-#if 1
-    Map -> AfficherCube(struct CPhysicalObj * this, p.x - d.x, p.y - d.y, p.z, 2*d.x, 2*d.y, d.z);
-         
-    glColor3f(struct CPhysicalObj * this, 1.0f, 1.0f, 1.0f);
-#endif
-#endif /* AFFICHER_CUBE_DEBUG */       
-  };
    
 
 #endif
@@ -98,162 +66,205 @@ void SetObjetEphemere(CPhysicalObj * this, int nbPV);
 
 //bool MoteurPhysiqueActif = true;
 
-
-CPhysicalObj::CPhysicalObj(void) : filename(NULL) {
+#if 0
+CPhysicalObj__CPhysicalObj(const CPhysicalObj * this, void) : filename(NULL) {
   CPhysicalObj("--NULL--");
 }
+#endif
 
-CPhysicalObj::CPhysicalObj(const char * filename) :
-  nvalid_position(true),
-  valid_position_x(true),
-  valid_position_y(true), 
-  valid_position_z(true),
-  ancvolumemax(0.0f),
-  volumemax(0.0f),
-  pv(1),
-  pvmax(1),
-  is_objet_ephemere(false),
-  Immerge(false),
-  DansEau(false),
-  AuSol(false),
-  Hostile(false),
-  filename(strcopy(filename))
-{
-  printf("CPhysicalObj::CPhysicalObj()\n");                             
-
-  p.x = 0.0f;
-  p.y = 0.0f;
-  p.z = 0.0f;
-  p.arf = 1.0f;
-    
-  np.x = 0.0f;
-  np.y = 0.0f;
-  np.z = 0.0f;
-  np.arf = 1.0f;
-    
-  v.x = 0.0f;
-  v.y = 0.0f;
-  v.z = 0.0f;
-  v.arf = 1.0f;  
-    
-  dimension.x = 0.0f;
-  dimension.y = 0.0f;
-  dimension.z = 0.0f;
-  dimension.arf = 1.0f; 
-    
-  InitForce();   
-}
-
-
-
-TPoint3D CPhysicalObj::GetPosition() const {
-  return p;
-}
-
-
-void CPhysicalObj::SetPosition(TPoint3D pos) {
-  printf("SetPosition sur %p : %f, %f, %f\n", this, pos.x, pos.y, pos.z);      
-  p = np = pos;
-}
-
-
-void CPhysicalObj::SetPosition(float x, float y, TMethodePlacement mp, const CMap * Map) {
-  p = ((mp == mpRELATIF) ? p : Point3D(0.0f, 0.0f, 0.0f))
-    + Point3D(x, y, 0.0f);
-  /*on place corectement en (x, y)*/
+CPhysicalObj * CPhysicalObj_make_assign_methods(CPhysicalObj * this) { 
+  assert(false); 
   
-  p.z = Map->GETZ(x, y);    
+  ASSIGN_METHOD(CPhysicalObj,this,Render); 
+  
+  return this; 
+}; 
+
+CPhysicalObj * CPhysicalObj_make(const char * filename) { 
+  MALLOC_BZERO(CPhysicalObj,this);
+  CPhysicalObj_make_aux(this, CPhysicalObj_subtype_None, filename); 
+  return this; 
+}; 
+
+CPhysicalObj * CPhysicalObj_make_aux(CPhysicalObj * this, const int subtype, const char * filename) { 
+  printf("%s\n", __FUNCTION__);                             
+
+  CObjActionnable_make_aux(&this -> parent);
+
+  CPhysicalObj_make_assign_methods(this);
+  
+  this -> subtype = subtype; 
+
+  this -> nvalid_position = true; 
+  this -> valid_position_x = true; 
+  this -> valid_position_y = true;  
+  this -> valid_position_z = true; 
+  this -> ancvolumemax = 0.0f; 
+  this -> volumemax = 0.0f; 
+  this -> pv = 1; 
+  this -> pvmax = 1; 
+  this -> is_objet_ephemere = false; 
+  this -> Immerge = false; 
+  this -> DansEau = false; 
+  this -> AuSol = false; 
+  this -> Hostile = false; 
+  this -> filename = strcopy(filename);
+
+  this -> p.x = 0.0f;
+  this -> p.y = 0.0f;
+  this -> p.z = 0.0f;
+  this -> p.arf = 1.0f;
+    
+  this -> np.x = 0.0f;
+  this -> np.y = 0.0f;
+  this -> np.z = 0.0f;
+  this -> np.arf = 1.0f;
+    
+  this -> v.x = 0.0f;
+  this -> v.y = 0.0f;
+  this -> v.z = 0.0f;
+  this -> v.arf = 1.0f;  
+    
+  this -> dimension.x = 0.0f;
+  this -> dimension.y = 0.0f;
+  this -> dimension.z = 0.0f;
+  this -> dimension.arf = 1.0f; 
+    
+  this -> InitForce(this);   
+
+  return this; 
+};
+
+
+
+void CPhysicalObj_delete_aux(CPhysicalObj * this) {
+  CObjActionnable_delete_aux(&this -> parent);
+}; 
+
+void CPhysicalObj_delete(CPhysicalObj * this) {
+  CPhysicalObj_delete_aux(this); 
+  free(this); 
+};
+
+CPhysicalObj * CPhysicalObj_copy_aux(CPhysicalObj * this, const CPhysicalObj * src) {
+  *this = *src;
+  CObjActionnable_copy_aux(&this -> parent, &src -> parent);
+  return this; 
+}; 
+
+CPhysicalObj * CPhysicalObj_copy(const CPhysicalObj * src) {
+  MALLOC_BZERO(CPhysicalObj,this);
+  CPhysicalObj_copy_aux(this, src); 
+  return this; 
+}; 
+
+
+
+
+TPoint3D CPhysicalObj__GetPosition(const CPhysicalObj * this) {
+  return this -> p;
+};
+
+
+void CPhysicalObj__SetPosition_vP3D(CPhysicalObj * this, const TPoint3D pos) {
+  printf("SetPosition sur %p : %f, %f, %f\n", this, pos.x, pos.y, pos.z);      
+  this -> p = this -> np = pos;
+};
+
+
+void CPhysicalObj__SetPosition_vXYZ(CPhysicalObj * this, const float x, const float y, const TMethodePlacement mp, const CMap * Map) {
+  /*on place corectement en (x, y)*/
+  if (mp == mpRELATIF) {
+    TPoint3D_add_self2(this -> p, x, y, 0); 
+  }
+  else { 
+    TPoint3D_assign(this -> p, x, y, 0); 
+  }; 
+  
   /*puis on ajuste l'altitude de l'objet*/
-
-}
-
-
-void CPhysicalObj::SetZ(float nz, TMethodePlacement mp) {
-  np.z = p.z = ((mp == mpRELATIF) ? p.z : 0.0f) + nz;  
-}
-
-bool CPhysicalObj::IsBloque() const {
-  return !nvalid_position;   
-}    
+  this -> p.z = Map -> parent.GETZ(&Map -> parent, x, y); 
+};
 
 
+void CPhysicalObj__SetZ(CPhysicalObj * this, const float nz, const TMethodePlacement mp) {
+  this -> np.z = this -> p.z = nz + ((mp == mpRELATIF) ? this -> p.z : 0.0f);  
+};
 
-void CPhysicalObj::SetDimension(float dx, float dy, float dz) {
+bool CPhysicalObj__IsBloque(const CPhysicalObj * this) {
+  return !this -> nvalid_position;   
+};
+
+
+
+void CPhysicalObj__SetDimension(CPhysicalObj * this, const float dx, const float dy, const float dz) {
   printf("SetDimension sur %p : %f, %f, %f\n", this, dx, dy, dz);   
-  dimension.x = dx / 2.0f;
-  dimension.y = dy / 2.0f;
-  dimension.z = dz / 2.0f;   
-    
-}    
+  this -> dimension.x = dx / 2.0f;
+  this -> dimension.y = dy / 2.0f;
+  this -> dimension.z = dz / 2.0f;   
+};   
 
-bool CPhysicalObj::IsVolumeNul() const {
-  return (dimension.x * dimension.y * dimension.z) < 1.0f;
-}    
+bool CPhysicalObj__IsVolumeNul(const CPhysicalObj * this) {
+  return (this -> dimension.x * this -> dimension.y * this -> dimension.z) < 1.0f;
+};
 
-void CPhysicalObj::InitForce() {
-  f.x = 0.0f;
-  f.y = 0.0f;
-  f.z = 0.0f;
-  f.arf = 1.0f; 
-    
-}
+void CPhysicalObj__InitForce(CPhysicalObj * this) {
+  this -> f.x   = 0.0f; 
+  this -> f.y   = 0.0f; 
+  this -> f.z   = 0.0f; 
+  this -> f.arf = 1.0f;  
+};
 
 
-void CPhysicalObj::AddForce(TPoint3D ff) {
-  f = f + ff;
-}
+void CPhysicalObj__AddForce_vP3D(CPhysicalObj * this, const TPoint3D ff) {
+  TPoint3D_add_self(this -> f, ff);
+};
 
 
-TPoint3D CPhysicalObj::GetForce() const {
-  return f;   
-}    
+TPoint3D CPhysicalObj__GetForce(const CPhysicalObj * this) {
+  return this -> f;   
+};   
 
 
-TPoint3D CPhysicalObj::GetVitesse() const {
-  return v;   
-} 
+TPoint3D CPhysicalObj__GetVitesse(const CPhysicalObj * this) {
+  return this -> v; 
+};
 
-void CPhysicalObj::AddForce(float fx, float fy, float fz) {
-  f.x = f.x + fx;
-  f.y = f.y + fy;
-  f.z = f.z + fz;
-}
+void CPhysicalObj__AddForce_vXYZ(CPhysicalObj * this, const float fx, const float fy, const float fz) {
+  TPoint3D_add_self2(this -> f, fx, fy, fz);
+};
 
 
-void CPhysicalObj::CalcNewPosition() {
+void CPhysicalObj__CalcNewPosition(CPhysicalObj * this) {
   /* force de frottement fluide*/
-  f.x = f.x + -CoeffFrottementFluide * v.x;
-  f.y = f.y + -CoeffFrottementFluide * v.y;
-  f.z = f.z + -CoeffFrottementFluideZ * v.z;
-   
-   
-  v = v + D_T * f;
-  np = p + D_T * v;
+  this -> f.x -= this -> CoeffFrottementFluide  * this -> v.x;
+  this -> f.y -= this -> CoeffFrottementFluide  * this -> v.y;
+  this -> f.z -= this -> CoeffFrottementFluideZ * this -> v.z;
+  
+  //this -> v  +=  D_T * this -> f;
+  TPoint3D_add_self(this -> v, TPoint3D_scalar_mul(D_T, this -> f)); 
+  //this -> np +=  D_T * this -> v;
+  TPoint3D_add_self(this -> np, TPoint3D_scalar_mul(D_T, this -> v)); 
   
   /*par défaut, l'objet physique n'est pas blogué et se trouve
     dans une bonne position*/
    
-  nvalid_position = true;
-  nvalid_position_x = true;
-  nvalid_position_y = true;
-  nvalid_position_z = true;
-  
-  
-   
-   
-}
+  this -> nvalid_position   = true;
+  this -> nvalid_position_x = true;
+  this -> nvalid_position_y = true;
+  this -> nvalid_position_z = true;
+};
 
 
 
-void CPhysicalObj::ValiderPosition(const bool MoteurPhysiqueActif) {
+void CPhysicalObj__ValiderPosition(CPhysicalObj * this, const bool MoteurPhysiqueActif) {
   //char s[1000]; 
    
   /*un objet éphémère perd un point de vie à chaque tour*/
-  if (is_objet_ephemere)
-    PerdrePV(1);
+  if (this -> is_objet_ephemere)
+    this -> PerdrePV(this, 1);
    
-  if (IsVolumeNul())
-    nvalid_position = true;
+  if (this -> IsVolumeNul(this))
+    this -> nvalid_position = true;
        
   //glColor3f(1.0f, 0.0f, 0.0f );
   /*  if (volumemax < 0.99f*ancvolumemax)
@@ -270,15 +281,15 @@ void CPhysicalObj::ValiderPosition(const bool MoteurPhysiqueActif) {
       Text->print(0,0,1000,10,s);
       }
   */
-  ancvolumemax = volumemax;
-  volumemax = 0.0f;
+  this -> ancvolumemax = this -> volumemax;
+  this -> volumemax = 0.0f;
     
    
    
-  if (nvalid_position || (!MoteurPhysiqueActif)
+  if (this -> nvalid_position || (!MoteurPhysiqueActif)
       /*&& nvalid_position_y && nvalid_position_z*/)
     //si la position est valide, on accepte la nouvelle position (np)
-    p = np;
+    this -> p = this -> np;
   else
     { 
        
@@ -305,81 +316,82 @@ void CPhysicalObj::ValiderPosition(const bool MoteurPhysiqueActif) {
            valid_position_y = nvalid_position_y;
            valid_position_z = nvalid_position_z;*/
     }  
-}    
+};    
 
 
 
 
-float CPhysicalObj::NormeVitesse(void) const {
-  return fabs(v.x) + fabs(v.y);
-}
+float CPhysicalObj__NormeVitesse(const CPhysicalObj * this) {
+  return fabs(this -> v.x) + fabs(this -> v.y);
+};
 
 
-void CPhysicalObj::TesterSol(const CSol * Map)  {
-  float zmap = Map->GETZ(p.x, p.y);
+void CPhysicalObj__TesterSol(CPhysicalObj * this, const CSol * Sol)  {
+  const float zmap = Sol -> GETZ(Sol, this -> p.x, this -> p.y);
   
   // gestion de l'altitude
-  if (np.z < zmap) {
-    np.z = zmap;
-    v.z = 0.0f;
-    AuSol = true;
+  if (this -> np.z < zmap) {
+    this -> np.z = zmap;
+    this -> v.z = 0.0f;
+    this -> AuSol = true;
   }
-  else
-    AuSol = false;
+  else {
+    this -> AuSol = false;
+  };
   
-  if (Norme1(Map->Differentiel(np)) > 10.0f) {      
-    np.x = p.x;
-    np.y = p.y;
-  }
+  if (TPoint2D_Norme1(Sol -> Differentiel(Sol, this -> np)) > 10.0f) {      
+    this -> np.x = this -> p.x;
+    this -> np.y = this -> p.y;
+  };
 
   // l'objet ne sort pas de la carte
-  if (np.y < 0) np.y = 0;
-  if (np.x < 0) np.x = 0;
-  if (np.y > Map->GetTailleY()-1.0f) np.y = Map->GetTailleY()-1.0f;
-  if (np.x > Map->GetTailleX()-1.0f) np.x = Map->GetTailleX()-1.0f;
-
-}   
+  if (this -> np.y < 0) this -> np.y = 0;
+  if (this -> np.x < 0) this -> np.x = 0;
+  if (this -> np.y > Sol -> GetTailleY(Sol) - 1.0f) this -> np.y = Sol->GetTailleY(Sol)-1.0f;
+  if (this -> np.x > Sol -> GetTailleX(Sol) - 1.0f) this -> np.x = Sol->GetTailleX(Sol)-1.0f;
+};
  
  
-TPoint3D CPhysicalObj::GetDimension(const CSol * Map) const {
-  TPoint3D d = dimension;
+TPoint3D CPhysicalObj__GetDimension(const CPhysicalObj * this, const CSol * Sol) {
+  TPoint3D d = this -> dimension;
   /*si ce n'est pas compressible, dans le repère adapté,
     les objets paraissent plus grands...*/
-  if (!Compressible)
-    d.x = d.x / Map->FacteurCompression(p.y);
+  if (!this -> Compressible) {
+    d.x = d.x / Sol -> FacteurCompression(Sol, this -> p.y);
+  };
   return d;   
-}    
+};  
 
 
-bool CPhysicalObj::TesterPosition(const CSol * Map, const CPhysicalObj * po) {
+bool CPhysicalObj__TesterPosition(CPhysicalObj * this, const CSol * Sol, const CPhysicalObj * po) {
   if (!DEBUG_MOTEUR_PHYSIQUE) return false;   
   
-  TPoint3D d1 = GetDimension(Map);
-  TPoint3D d2 = po->GetDimension(Map);
+  TPoint3D d1 = this -> GetDimension(this, Sol);
+  TPoint3D d2 = po   -> GetDimension(po,   Sol);
       
   /*np.x - d1.x = nouvelle abscisse la plus à gauche de notre objet
     po->p.x - d2.x = abscisse la plus à gauche de po
   */
-  float mnx1 = max(np.x - d1.x, po->p.x - d2.x); 
-  float mny1 = max(np.y - d1.y, po->p.y - d2.y); 
-  float mnz1 = max(np.z, po->p.z); 
+  const float mnx1 = max(this -> np.x - d1.x, po -> p.x - d2.x); 
+  const float mny1 = max(this -> np.y - d1.y, po -> p.y - d2.y); 
+  const float mnz1 = max(this -> np.z,        po->p.z); 
   
-  float mnx2 = min(np.x + d1.x, po->p.x + d2.x); 
-  float mny2 = min(np.y + d1.y, po->p.y + d2.y); 
-  float mnz2 = min(np.z + d1.z, po->p.z + d2.z);  
+  const float mnx2 = min(this -> np.x + d1.x, po->p.x + d2.x); 
+  const float mny2 = min(this -> np.y + d1.y, po->p.y + d2.y); 
+  const float mnz2 = min(this -> np.z + d1.z, po->p.z + d2.z);  
   
   /*itou avec l'ancienne position*/
-  float mx1 = max(p.x - d1.x, po->p.x - d2.x); 
-  float my1 = max(p.y - d1.y, po->p.y - d2.y); 
-  float mz1 = max(p.z, po->p.z); 
+  const float mx1 = max(this -> p.x - d1.x, po->p.x - d2.x); 
+  const float my1 = max(this -> p.y - d1.y, po->p.y - d2.y); 
+  const float mz1 = max(this -> p.z, po->p.z); 
     
-  float mx2 = min(p.x + d1.x, po->p.x + d2.x); 
-  float my2 = min(p.y + d1.y, po->p.y + d2.y); 
-  float mz2 = min(p.z + d1.z, po->p.z + d2.z); 
+  const float mx2 = min(this -> p.x + d1.x, po->p.x + d2.x); 
+  const float my2 = min(this -> p.y + d1.y, po->p.y + d2.y); 
+  const float mz2 = min(this -> p.z + d1.z, po->p.z + d2.z); 
     
-  float dmnx = mnx2 - mnx1;
-  float dmny = mny2 - mny1;
-  float dmnz = mnz2 - mnz1;
+  const float dmnx = mnx2 - mnx1;
+  const float dmny = mny2 - mny1;
+  const float dmnz = mnz2 - mnz1;
   float nvolume;
   
     
@@ -388,65 +400,88 @@ bool CPhysicalObj::TesterPosition(const CSol * Map, const CPhysicalObj * po) {
   else 
     nvolume = max(dmnx, 0.0f) * max(dmny, 0.0f) * max(dmnz, 0.0f);
 
-  volumemax += nvolume;
+  this -> volumemax += nvolume; // Here, 'this' cannot be 'const'. 
     
-  if (nvolume > 0.0f)
-    {
-      /* si les parallèpipèdes ont une intersection,
-         la position np n'est pas valide*/
-      nvalid_position = false;
-      /*  po->AddForce(f);
-          AddForce(po->f.x, po->f.y, po->f.z);*/
-    }
+  if (nvolume > 0.0f) {
+    /* si les parallèpipèdes ont une intersection,
+       la position np n'est pas valide*/
+    this -> nvalid_position = false;
+    /*  po->AddForce(f);
+	AddForce(po->f.x, po->f.y, po->f.z);*/
+  };
   
   
   bool test_return;
   test_return = ((mnx1 <= mnx2) && (my1 <= my2) && (mz1 <= mz2));
 
   if (test_return)
-    nvalid_position_x = false;
+    this -> nvalid_position_x = false;
   
   if ((mx1 <= mx2) && (mny1 <= mny2) && (mz1 <= mz2))
-    nvalid_position_y = false;
+    this -> nvalid_position_y = false;
        
   if ((mx1 <= mx2) && (my1 <= my2) && (mnz1 <= mnz2))
-    nvalid_position_z = false;
+    this -> nvalid_position_z = false;
          
   return !test_return;
+};     
+
+
+
+void CPhysicalObj__PerdrePV(CPhysicalObj * this, const int nbpv) {
+  this -> pv -= nbpv;
 }    
 
+void CPhysicalObj__SetPVMax(CPhysicalObj * this, const int nbpv) {
+  this -> pv = this -> pvmax = nbpv;
+};
+
+void CPhysicalObj__GagnerPV(CPhysicalObj * this, const int nbpv) {
+  this -> pv += nbpv;
+  if (this -> pv > this -> pvmax) this -> pv = this -> pvmax;
+};
+
+int CPhysicalObj__GetPV(const CPhysicalObj * this) {
+  return this -> pv;   
+}; 
+
+bool CPhysicalObj__Is0PV(const CPhysicalObj * this) {
+  return (this -> pv <= 0);  
+};
+
+void CPhysicalObj__SetObjetEphemere(CPhysicalObj * this, const int nbPV) {
+  this -> is_objet_ephemere = true;
+  this -> SetPVMax(this, nbPV);
+}; 
 
 
-void CPhysicalObj::PerdrePV(int nbpv) {
-  pv-=nbpv;
-}    
-
-void CPhysicalObj::SetPVMax(int nbpv) {
-  pv = pvmax = nbpv;
-}
-
-
-void CPhysicalObj::GagnerPV(int nbpv) {
-  pv+=nbpv;
-  if (pv > pvmax) pv = pvmax;
-}
-
-int CPhysicalObj::GetPV() const
-{
-  return pv;   
-}  
-
-
-bool CPhysicalObj::Is0PV() const
-{
-  return (pv<=0);  
-}
-
-
-void CPhysicalObj::SetObjetEphemere(int nbPV) {
-  is_objet_ephemere = true;
-  SetPVMax(nbPV);
-     
-}
-
-
+void CPhysicalObj__Render(const CPhysicalObj * this, const CSol * Sol) {
+#if AFFICHER_CUBE_DEBUG == true
+          
+  TPoint3D d = this -> GetDimension(this, Sol); 
+  
+  /* les cubes pour lesquels on a rejeté la position, sont rouges */
+  if (! this -> nvalid_position) {
+    glColor3f(1.0f, 0.0f, 0.0f);
+  }
+  
+  if (this -> Immerge) {
+    glColor3f(0.0f, 0.0f, 1.0f); 
+  }
+  
+#if 0
+  if (this -> IsVolumeNul(this)) {
+    glColor3f(0.0f, 0.0f, 0.0f);   
+    d.x = 0.2f;
+    d.y = 0.2f;
+    d.z = 10.0f;
+  }
+#endif
+  
+#if 1
+  Sol -> AfficherCube(Sol, this -> p.x - d.x, this -> p.y - d.y, this -> p.z, 2*d.x, 2*d.y, d.z);
+  
+  glColor3f(1.0f, 1.0f, 1.0f);
+#endif
+#endif /* AFFICHER_CUBE_DEBUG */       
+};

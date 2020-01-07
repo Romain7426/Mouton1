@@ -1,44 +1,30 @@
 #ifndef TEXT_HPP
 #define TEXT_HPP
 
-#include "texture.h"
-
-
-struct CText;
-struct CMessageTexte;
-
-
-
-
 /*
- * Cette classe représente le moteur de rendu de texte à l'écran. (il utilise
+ * Cette classe reprÃ©sente le moteur de rendu de texte Ã  l'Ã©cran. (il utilise
  * OpenGL et charge en fait une texture : font.png.
  * Par exemple dans les menus
  * La classe MessageTexte utilise l'objet Text aussi.
  
  * exemple : Text -> print(100, 100, 10, 10, "gougou");
- * Attention : le repère est en bas à gauche (comme en maths d'habitude)
+ * Attention : le repÃ¨re est en bas Ã  gauche (comme en maths d'habitude)
  */
-
 struct CText {
-  //private:
   int rx, ry, rw, rh; 
   int cx, cy;
   
-  // la police est une texture... ohlàlà ! si les poulets me lisaient...
+  // la police est une texture... ohlÃ lÃ  ! si les poulets me lisaient...
   struct CTexture * tex;
 
-  //public:
-#if 0
-  struct CText();
-  ~struct CText();
-#endif
   void (* print1)(struct CText * this, int x, int y, int w, int h, const char* s);
   float (* print2)(struct CText * this, float l, int nblignes, int nbcaracmax, int x, int y, int w, int h, const char * s, bool * toutaffiche_ptr);
   // l ligne courante
-
 };
-
+extern CText * CText_make(void);
+extern void CText_delete(CText * this);
+//extern  void CText__print1(CText * this, int x, int y, int w, int h, const char * s);
+//extern float CText__print2(CText * this, float l, int nblignes, int nbcaracmax, int x, int y, int w, int h, const char * s, bool * toutaffiche_ptr);
 
 
 
@@ -47,16 +33,16 @@ struct CText {
 
 /* 
  * La classe "message texte" permet d'afficher un message texte comme par exemple
- * quand on parle à quelqu'un. Elle utilise l'objet Text (un peu moins performant
+ * quand on parle Ã  quelqu'un. Elle utilise l'objet Text (un peu moins performant
  * mais Text s'utilise pour les textes des menus etc...)
  *
- * Elle gère :
- *   - le défilement de texte (appui sur haut et bas)
+ * Elle gÃ¨re :
+ *   - le dÃ©filement de texte (appui sur haut et bas)
  *           (avec des p'tits fondus en haut et en bas)
- *   - l'appui sur entrée (InputAndRender renvoit true)
+ *   - l'appui sur entrÃ©e (InputAndRender renvoit true)
  *
  * Exemple d'utilisation
- *   pendant l'affectation (dans la routine d'exécution du script) :
+ *   pendant l'affectation (dans la routine d'exÃ©cution du script) :
  *         MessageTexte->SetMsg("Bonjour!");
  *         
  *   pendant la boucle du jeu
@@ -67,11 +53,11 @@ struct CText {
 struct CMessageTexte {
   //private:
   float lignedebut;
-  // pour faire le défilement
+  // pour faire le dÃ©filement
         
   int nbcaracaffiche;
-  // nombre de caractère affiché (pour faire l'effet, "je parle"
-  // ce nombre est aussi utilisé pour tester l'appui sur Entrée
+  // nombre de caractÃ¨re affichÃ© (pour faire l'effet, "je parle"
+  // ce nombre est aussi utilisÃ© pour tester l'appui sur EntrÃ©e
   // Si nbcaracaffiche est trop petit l'appui sur Entree ne fera rien :
   // il faut qd ^m en lire un minimum!!!
         
@@ -80,25 +66,21 @@ struct CMessageTexte {
         
   // pour stocker le parchemin
         
-  const char * s;
-  // pointeur vers la chaîne à afficher
+  char * s;
+  // pointeur vers la chaÃ®ne Ã  afficher
         
-  //public:
-#if 0
-  struct CMessageTexte();
-  ~struct CMessageTexte();
-#endif
   void (* SetMsg)(struct CMessageTexte * this, const char* inS);
-  // dis, maintenant, on va afficher cette chaîne
+  // dis, maintenant, on va afficher cette chaÃ®ne
         
   void (* Render)(struct CMessageTexte * this);
-  // s'occupe d'afficher le message... ne récupère aucun code clavier
+  // s'occupe d'afficher le message... ne rÃ©cupÃ¨re aucun code clavier
         
-    
   bool (* InputAndRender)(struct CMessageTexte * this);
-  // s'occupe d'afficher, de récupérer le clavier...
-    
+  // s'occupe d'afficher, de rÃ©cupÃ©rer le clavier...
 };   
+
+extern CMessageTexte * CMessageTexte_make(void);
+extern void CMessageTexte_delete(CMessageTexte * this);
 
 
 
@@ -108,9 +90,9 @@ struct CMessageTexte {
 
 /* 
  * routines pour basculer en mode 2D/32
- * mode 2D = dessiner des choses 2D à l'écran avec BLIT par exemple
+ * mode 2D = dessiner des choses 2D Ã  l'Ã©cran avec BLIT par exemple
  * (comme les coeurs, les minimenus...)
- * Attention : le repère est en BAS à gauche et est en pixel
+ * Attention : le repÃ¨re est en BAS Ã  gauche et est en pixel
  */
 extern void glEnable2D(void);
 extern void glDisable2D(void);
@@ -120,7 +102,7 @@ extern struct CMessageTexte * MessageTexte;
 
               
 /*
- * truc pour afficher une image 2D à l'écran
+ * truc pour afficher une image 2D Ã  l'Ã©cran
  * cx, cy : en pixel
  * ttx, tty : taille de l'image en pixel
  * tx, ty : coord dans la texture

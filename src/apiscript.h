@@ -1,20 +1,8 @@
 #ifndef APISCRIPT_H
 #define APISCRIPT_H
 
-struct CMenuAbstrait;
-struct CZoneTeleportation;
-struct CBonhomme;
-struct CPhysicalObj;
-struct CMap;
-struct CMusique;
-struct CMoteurTeleportation;
-struct CMenuEntreeNom;
-
-#include "physicalobj.h"
-
-
 enum TTypeInstructionCourante {
-  ticInstructionScript, /*instruction genre if, + etc... géré par le script*/
+  ticInstructionScript, /*instruction genre if, + etc... gÃ©rÃ© par le script*/
   ticAfficherMessage, /*instruction affichermessage (la boucle du jeu s'en occupe*/
   ticMiniMenu, /*itou*/
   ticChangerDeCarte,
@@ -25,9 +13,6 @@ enum TTypeInstructionCourante {
 };
 TYPEDEF_TYPENAME_WITHOUT_ENUM(TTypeInstructionCourante);
 
-
-
-
 struct api_contexte_t {
   enum TModeJeu * ModeJeu;
 
@@ -36,7 +21,8 @@ struct api_contexte_t {
   struct CMap * * Map;
   struct CMusique * * Musique;
   
-  struct CMenuAbstrait * * Menu;
+  //struct CMenuAbstrait * * Menu;
+  struct CMenu * * Menu;
   struct CBonhomme * * Hero;
 
   float * Temps;
@@ -44,12 +30,12 @@ struct api_contexte_t {
   
   enum TTypeInstructionCourante * TypeInstructionCourante;
 
-  struct CMenuAbstrait * * MiniMenu;
+  //struct CMenuAbstrait * * MiniMenu;
+  struct CMiniMenu * * MiniMenu;
   int nbpasses;
   struct CBonhomme * b;
 };
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(api_contexte_t);
-DEFINE_NEW_OPERATOR_FOR_STRUCT(api_contexte_t);
+extern api_contexte_t * api_contexte_make(void); 
 
 
 
@@ -69,21 +55,16 @@ extern int SCRIPT_AfficherMenu(const char * msg);
 extern void SCRIPT_JouerMusique(const char* fichier);
 extern void SCRIPT_RecevoirUneArme(const char* nom_arme);
 //extern void SCRIPT_ChangerDeCarte(CZoneTeleportation zt);
-extern void SCRIPT_ChangerDeCarte_vZT(struct CMoteurTeleportation * MoteurTeleportation, struct CZoneTeleportation ZoneTeleportation);
-extern void SCRIPT_ChangerDeCarte_vXY(struct CMoteurTeleportation * MoteurTeleportation, const char* nom_carte,
-				      float x, float y,
-				      TDirection direction);
-                                  
-extern void SCRIPT_ChangerDeCarte_vXYZ(struct CMoteurTeleportation * MoteurTeleportation, const char* nom_carte,
-				       float x, float y, float z,
-				       TDirection direction);
+extern void SCRIPT_ChangerDeCarte_vZT(CMoteurTeleportation * MoteurTeleportation, struct CZoneTeleportation ZoneTeleportation);
+extern void SCRIPT_ChangerDeCarte_vXY(CMoteurTeleportation * MoteurTeleportation, const char * nom_carte, float x, float y, TDirection direction);
+extern void SCRIPT_ChangerDeCarte_vXYZ(CMoteurTeleportation * MoteurTeleportation, const char * nom_carte, float x, float y, float z, TDirection direction);
 
 
 extern void SCRIPT_AjouterObjetAnime(const char* qui, const char* filename);
 extern void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename);
 
 extern void SCRIPT_SetPosition_vTPoint3d(const char* qui, TPoint3D position);
-extern void SCRIPT_SetPosition_vTMethodePlacement(const char* qui, float x, float y, enum TMethodePlacement mp);
+extern void SCRIPT_SetPosition_vExpanded(const char* qui, float x, float y, enum TMethodePlacement mp);
 extern void SCRIPT_SetZ(const char* qui, float z, TMethodePlacement mp);
 extern void SCRIPT_SetDirection(const char* qui, TDirection d);
 
@@ -101,7 +82,7 @@ extern void SCRIPT_fondu(struct CMoteurTeleportation * MoteurTeleportation);
 
 
 
-/*pour la caméra :*/
+/*pour la camÃ©ra :*/
 extern void SCRIPT_Camera_SetPosition(float x, float y, float z, TMethodePlacement mp);
 
 

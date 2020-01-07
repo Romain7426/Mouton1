@@ -163,7 +163,8 @@ SDL_X11_SYM(Bool,XShmQueryExtension,(Display* a),(a),return)
  * Not required...these only exist in code in headers on some 64-bit platforms,
  *  and are removed via macros elsewhere, so it's safe for them to be missing.
  */
-#ifdef LONG64
+//#ifdef LONG64
+#if 0
 SDL_X11_MODULE(IO_32BIT)
 SDL_X11_SYM(int,_XData32,(Display *dpy,register long *data,unsigned len),(dpy,data,len),return)
 SDL_X11_SYM(void,_XRead32,(Display *dpy,register long *data,long len),(dpy,data,len),)

@@ -3,27 +3,23 @@
 
 
 struct CTexture {
-  //private:
-  GLuint tex_ind;
-  //unsigned int tex_ind; 
-
+  GLuint tex_ind; // indice de la texture dans OpenGL 
+  int internal_ind; // indice interne 
+  
   bool erreur;
         
-  //public:
   /*taille en pixel de toute la texture*/
   float taillex, tailley;
         
-  /*pour définir cette texture comme étant la texture courante*/
-  void (* GLTextureCourante)(struct CTexture * this);
-        
-#if 0
-  /*pour charger la texture (fichier JPG, PNG etc...)*/
-  CTexture(const char * fichier_image);
-        
-  /*libère la texture*/
-  ~CTexture();
-#endif
-};    
+  /*pour dÃ©finir cette texture comme Ã©tant la texture courante*/
+  void (* GLTextureCourante)(const CTexture * this);
+}; 
+ 
+extern CTexture * CTexture_make(const char * fichier_image); 
+extern void CTexture_delete(CTexture * this); 
+extern CTexture * CTexture_copy(const CTexture * src); 
+extern void CTexture__GLTextureCourante(const CTexture * this); 
+
 
 
 #endif /* TEXTURE_H */
