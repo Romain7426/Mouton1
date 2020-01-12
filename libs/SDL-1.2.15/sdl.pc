@@ -11,5 +11,5 @@ Version: 1.2.15
 Requires:
 Conflicts:
 Libs: -L${libdir}  -lSDL  -pthread
-Libs.private: -lSDL  -pthread  -lm -lossaudio  -lusbhid -pthread
+Libs.private: -lSDL  -pthread  -lm  -lusbhid -pthread
 Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -D_REENTRANT

@@ -40,10 +40,7 @@ extern TDirection ConvertirDirectionAvecVue2(TDirection d, CCamera Camera) {
   return (TDirection) dd;
 };
 
-CCamera * CCamera_make(void) {
-  CCamera * this = (CCamera *) malloc(sizeof(*this)); 
-  bzero(this, sizeof(*this)); 
-  
+CCamera * CCamera_make_aux(CCamera * this) {
   this -> IsSolidaireAuHeros = CCamera__IsSolidaireAuHeros; 
   this -> InitCamera = CCamera__InitCamera; 
   this -> SolidariserAuHeros = CCamera__SolidariserAuHeros; 
@@ -57,6 +54,13 @@ CCamera * CCamera_make(void) {
   this -> anim = 0; 
 
   return this; 
+}; 
+
+CCamera * CCamera_make(void) {
+  CCamera * this = (CCamera *) malloc(sizeof(*this)); 
+  bzero(this, sizeof(*this)); 
+  
+  return CCamera_make_aux(this); 
 }; 
 
 

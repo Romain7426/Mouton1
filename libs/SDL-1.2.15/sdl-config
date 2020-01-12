@@ -49,7 +49,7 @@ while test $# -gt 0; do
       ;;
     --static-libs)
 #    --libs|--static-libs)
-      echo -L${exec_prefix}/lib  -lSDL  -pthread  -lm -lossaudio  -lusbhid -pthread
+      echo -L${exec_prefix}/lib  -lSDL  -pthread  -lm  -lusbhid -pthread
       ;;
     *)
       echo "${usage}" 1>&2

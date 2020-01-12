@@ -216,16 +216,16 @@ CPhysicalObj * SCRIPT_RetrouverObjetViaSonNom(const char * qui) {
 }; 
 
 
-void SCRIPT_SetPosition_vTPoint3D(const char * qui, TPoint3D position) { 
+void SCRIPT_SetPosition_vP3D(const char * qui, TPoint3D position) { 
   printf("SCRIPT_SetPosition(%s, une position)\n", qui); 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
-  o -> SetPosition_vTPoint3D(o, position);
+  o -> SetPosition_vP3D(o, position);
 }; 
 
 void SCRIPT_SetPosition_vExpanded(const char * qui, float x, float y, TMethodePlacement mp) { 
   printf("SCRIPT_SetPosition(%s, %f, %f, ...)\n", qui, x, y); 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
-  o -> SetPosition_vExpanded(o, x, y, mp, (*(api_contexte.Map)));
+  o -> SetPosition_vXY(o, x, y, mp, (*(api_contexte.Map)));
 }; 
 
 void SCRIPT_SetDirection(const char * qui, TDirection d) { 
@@ -273,7 +273,7 @@ void SCRIPT_SupprimerObjet(const char * qui) {
   pos.y = 5000.0f;
   pos.z = 5000.0f;
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
-  o -> SetPosition_vTPoint3D(o, pos);
+  o -> SetPosition_vP3D(o, pos);
   /*pour l'instant au lieu de le détruire, on l'envoie au paradis :):)*/
 }; 
 

@@ -91,11 +91,7 @@ size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream) {
 /////
 ///////////////////////////////// CLOAD3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-struct CLoad3DS * new_CLoad3DS(void) {
-  struct CLoad3DS * this = NULL;
-  this = (struct CLoad3DS *) malloc(sizeof(struct CLoad3DS));
-  bzero(this, sizeof(struct CLoad3DS));
-
+CLoad3DS * CLoad3DS_make_aux(CLoad3DS * this) {
   this -> Import3DS = Import3DS;
   this -> GetString = GetString;
   this -> ReadChunk = ReadChunk;
@@ -114,7 +110,20 @@ struct CLoad3DS * new_CLoad3DS(void) {
   this -> m_TempChunk = new_tChunk();                   // Initialize and allocate a temporary chunk
 
   return this;
-}
+}; 
+
+CLoad3DS * CLoad3DS_make(void) {
+  struct CLoad3DS * this = NULL;
+  this = (struct CLoad3DS *) malloc(sizeof(struct CLoad3DS));
+  bzero(this, sizeof(struct CLoad3DS));
+
+  return CLoad3DS_make_aux(this);
+}; 
+
+struct CLoad3DS * new_CLoad3DS(void) {
+  return CLoad3DS_make();
+}; 
+
 
 ///////////////////////////////// IMPORT 3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 /////

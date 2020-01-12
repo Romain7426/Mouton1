@@ -64,103 +64,6 @@ void SetObjetEphemere(CPhysicalObj * this, int nbPV);
 
 #define D_T 0.1f
 
-//bool MoteurPhysiqueActif = true;
-
-#if 0
-CPhysicalObj__CPhysicalObj(const CPhysicalObj * this, void) : filename(NULL) {
-  CPhysicalObj("--NULL--");
-}
-#endif
-
-CPhysicalObj * CPhysicalObj_make_assign_methods(CPhysicalObj * this) { 
-  assert(false); 
-  
-  ASSIGN_METHOD(CPhysicalObj,this,Render); 
-  
-  return this; 
-}; 
-
-CPhysicalObj * CPhysicalObj_make(const char * filename) { 
-  MALLOC_BZERO(CPhysicalObj,this);
-  CPhysicalObj_make_aux(this, CPhysicalObj_subtype_None, filename); 
-  return this; 
-}; 
-
-CPhysicalObj * CPhysicalObj_make_aux(CPhysicalObj * this, const int subtype, const char * filename) { 
-  printf("%s\n", __FUNCTION__);                             
-
-  CObjActionnable_make_aux(&this -> parent);
-
-  CPhysicalObj_make_assign_methods(this);
-  
-  this -> subtype = subtype; 
-
-  this -> nvalid_position = true; 
-  this -> valid_position_x = true; 
-  this -> valid_position_y = true;  
-  this -> valid_position_z = true; 
-  this -> ancvolumemax = 0.0f; 
-  this -> volumemax = 0.0f; 
-  this -> pv = 1; 
-  this -> pvmax = 1; 
-  this -> is_objet_ephemere = false; 
-  this -> Immerge = false; 
-  this -> DansEau = false; 
-  this -> AuSol = false; 
-  this -> Hostile = false; 
-  this -> filename = strcopy(filename);
-
-  this -> p.x = 0.0f;
-  this -> p.y = 0.0f;
-  this -> p.z = 0.0f;
-  this -> p.arf = 1.0f;
-    
-  this -> np.x = 0.0f;
-  this -> np.y = 0.0f;
-  this -> np.z = 0.0f;
-  this -> np.arf = 1.0f;
-    
-  this -> v.x = 0.0f;
-  this -> v.y = 0.0f;
-  this -> v.z = 0.0f;
-  this -> v.arf = 1.0f;  
-    
-  this -> dimension.x = 0.0f;
-  this -> dimension.y = 0.0f;
-  this -> dimension.z = 0.0f;
-  this -> dimension.arf = 1.0f; 
-    
-  this -> InitForce(this);   
-
-  return this; 
-};
-
-
-
-void CPhysicalObj_delete_aux(CPhysicalObj * this) {
-  CObjActionnable_delete_aux(&this -> parent);
-}; 
-
-void CPhysicalObj_delete(CPhysicalObj * this) {
-  CPhysicalObj_delete_aux(this); 
-  free(this); 
-};
-
-CPhysicalObj * CPhysicalObj_copy_aux(CPhysicalObj * this, const CPhysicalObj * src) {
-  *this = *src;
-  CObjActionnable_copy_aux(&this -> parent, &src -> parent);
-  return this; 
-}; 
-
-CPhysicalObj * CPhysicalObj_copy(const CPhysicalObj * src) {
-  MALLOC_BZERO(CPhysicalObj,this);
-  CPhysicalObj_copy_aux(this, src); 
-  return this; 
-}; 
-
-
-
-
 TPoint3D CPhysicalObj__GetPosition(const CPhysicalObj * this) {
   return this -> p;
 };
@@ -172,7 +75,7 @@ void CPhysicalObj__SetPosition_vP3D(CPhysicalObj * this, const TPoint3D pos) {
 };
 
 
-void CPhysicalObj__SetPosition_vXYZ(CPhysicalObj * this, const float x, const float y, const TMethodePlacement mp, const CMap * Map) {
+void CPhysicalObj__SetPosition_vXY(CPhysicalObj * this, const float x, const float y, const TMethodePlacement mp, const CMap * Map) {
   /*on place corectement en (x, y)*/
   if (mp == mpRELATIF) {
     TPoint3D_add_self2(this -> p, x, y, 0); 
@@ -485,3 +388,119 @@ void CPhysicalObj__Render(const CPhysicalObj * this, const CSol * Sol) {
 #endif
 #endif /* AFFICHER_CUBE_DEBUG */       
 };
+
+
+
+
+
+CPhysicalObj * CPhysicalObj_make_assign_methods(CPhysicalObj * this) { 
+  ASSIGN_METHOD(CPhysicalObj,this,Render); 
+  ASSIGN_METHOD(CPhysicalObj,this,IsVolumeNul); 
+  ASSIGN_METHOD(CPhysicalObj,this,GetDimension); 
+  ASSIGN_METHOD(CPhysicalObj,this,NormeVitesse); 
+  ASSIGN_METHOD(CPhysicalObj,this,GetPosition); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetPosition_vP3D); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetPosition_vXY); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetZ); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetDimension); 
+  ASSIGN_METHOD(CPhysicalObj,this,InitForce); 
+  ASSIGN_METHOD(CPhysicalObj,this,AddForce_vP3D); 
+  ASSIGN_METHOD(CPhysicalObj,this,AddForce_vXYZ); 
+  ASSIGN_METHOD(CPhysicalObj,this,GetVitesse); 
+  ASSIGN_METHOD(CPhysicalObj,this,GetForce); 
+  ASSIGN_METHOD(CPhysicalObj,this,CalcNewPosition); 
+  ASSIGN_METHOD(CPhysicalObj,this,ValiderPosition); 
+  ASSIGN_METHOD(CPhysicalObj,this,TesterSol); 
+  ASSIGN_METHOD(CPhysicalObj,this,TesterPosition); 
+  ASSIGN_METHOD(CPhysicalObj,this,IsBloque); 
+  ASSIGN_METHOD(CPhysicalObj,this,Render); 
+  ASSIGN_METHOD(CPhysicalObj,this,PerdrePV); 
+  ASSIGN_METHOD(CPhysicalObj,this,Is0PV); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetPVMax); 
+  ASSIGN_METHOD(CPhysicalObj,this,GagnerPV); 
+  ASSIGN_METHOD(CPhysicalObj,this,GetPV); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetObjetEphemere);
+  return this; 
+}; 
+
+CPhysicalObj * CPhysicalObj_make(const char * filename) { 
+  MALLOC_BZERO(CPhysicalObj,this);
+  CPhysicalObj_make_aux(this, CPhysicalObj_subtype_None, filename); 
+  return this; 
+}; 
+
+CPhysicalObj * CPhysicalObj_make_aux(CPhysicalObj * this, const int subtype, const char * filename) { 
+  printf("%s\n", __FUNCTION__);                             
+
+  CObjActionnable_make_aux(&this -> parent);
+
+  CPhysicalObj_make_assign_methods(this);
+  
+  this -> subtype = subtype; 
+
+  this -> nvalid_position = true; 
+  this -> valid_position_x = true; 
+  this -> valid_position_y = true;  
+  this -> valid_position_z = true; 
+  this -> ancvolumemax = 0.0f; 
+  this -> volumemax = 0.0f; 
+  this -> pv = 1; 
+  this -> pvmax = 1; 
+  this -> is_objet_ephemere = false; 
+  this -> Immerge = false; 
+  this -> DansEau = false; 
+  this -> AuSol = false; 
+  this -> Hostile = false; 
+  this -> filename = strcopy(filename);
+
+  this -> p.x = 0.0f;
+  this -> p.y = 0.0f;
+  this -> p.z = 0.0f;
+  this -> p.arf = 1.0f;
+    
+  this -> np.x = 0.0f;
+  this -> np.y = 0.0f;
+  this -> np.z = 0.0f;
+  this -> np.arf = 1.0f;
+    
+  this -> v.x = 0.0f;
+  this -> v.y = 0.0f;
+  this -> v.z = 0.0f;
+  this -> v.arf = 1.0f;  
+    
+  this -> dimension.x = 0.0f;
+  this -> dimension.y = 0.0f;
+  this -> dimension.z = 0.0f;
+  this -> dimension.arf = 1.0f; 
+    
+  this -> InitForce(this);   
+
+  return this; 
+};
+
+
+
+void CPhysicalObj_delete_aux(CPhysicalObj * this) {
+  CObjActionnable_delete_aux(&this -> parent);
+}; 
+
+void CPhysicalObj_delete(CPhysicalObj * this) {
+  CPhysicalObj_delete_aux(this); 
+  free(this); 
+};
+
+CPhysicalObj * CPhysicalObj_copy_aux(CPhysicalObj * this, const CPhysicalObj * src) {
+  *this = *src;
+  CObjActionnable_copy_aux(&this -> parent, &src -> parent);
+  return this; 
+}; 
+
+CPhysicalObj * CPhysicalObj_copy(const CPhysicalObj * src) {
+  MALLOC_BZERO(CPhysicalObj,this);
+  CPhysicalObj_copy_aux(this, src); 
+  return this; 
+}; 
+
+
+
+

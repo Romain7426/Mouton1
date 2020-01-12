@@ -8,8 +8,8 @@
 #define FILENOTICE (LOGDIR "messages.log")
 #define FILEERROR  (LOGDIR "erreurs.log")
 
-static FILE * zeldafnotice;
-static FILE * zeldaferror;
+FILE * zeldafnotice = NULL;
+FILE * zeldaferror = NULL;
 
 /*
 static void vmessage(const char * mess, va_list args);
@@ -19,6 +19,14 @@ static void vmesserr(const char * mess, va_list args);
 
 void init_message(void) {
   (void) fprintf(stdout, "Initialisation des fonctions de message.\n");
+
+#if 1 
+  {
+    char FILENOTICE_realpath[PATH_MAX]; 
+    realpath(FILENOTICE, FILENOTICE_realpath); 
+    fprintf(stderr, "LOG REALPATH: %s" "\n", FILENOTICE_realpath);
+  }; 
+#endif 
  
   (void) (zeldafnotice = fopen(FILENOTICE, "w"));
   if (zeldafnotice == NULL) {
@@ -93,7 +101,7 @@ void vmesserr(const char * mess, va_list args) {
   va_end(tmp);
 }
 
-void messerr(const char * mess, ...) {
+void messerr_OLD(const char * mess, ...) {
   va_list args;
   
   va_start(args, mess);

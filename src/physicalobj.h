@@ -71,8 +71,10 @@ struct CPhysicalObj {
   TPoint3D (* GetDimension)(const struct CPhysicalObj * this, const CSol * Map);
   float (* NormeVitesse)(const struct CPhysicalObj * this);
   TPoint3D (* GetPosition)(const struct CPhysicalObj * this);
-  void (* SetPosition_vTPoint3D)(struct CPhysicalObj * this, TPoint3D pos);
-  void (* SetPosition_vExpanded)(struct CPhysicalObj * this, float x, float y, TMethodePlacement mp, const CMap * CMap);
+  //void (* SetPosition_vTPoint3D)(struct CPhysicalObj * this, TPoint3D pos);
+  //void (* SetPosition_vExpanded)(struct CPhysicalObj * this, float x, float y, TMethodePlacement mp, const CMap * CMap);
+  void (* SetPosition_vP3D)(struct CPhysicalObj * this, TPoint3D pos);
+  void (* SetPosition_vXY)(struct CPhysicalObj * this, const float x, const float y, const TMethodePlacement mp, const CMap * CMap);
   void (* SetZ)(struct CPhysicalObj * this, float z, TMethodePlacement mp);
   void (* SetDimension)(struct CPhysicalObj * this, float dx, float dy, float dz);
     
@@ -84,7 +86,7 @@ struct CPhysicalObj {
   TPoint3D (* GetVitesse)(const struct CPhysicalObj * this);
   TPoint3D (* GetForce)(const struct CPhysicalObj * this);
   void (* CalcNewPosition)(struct CPhysicalObj * this); // RL: Prend en compte la vitesse actuelle, la force appliquée, et les frottements. 
-  void (* ValiderPosition)(const struct CPhysicalObj * this, const bool MoteurPhysiqueActif);
+  void (* ValiderPosition)(struct CPhysicalObj * this, const bool MoteurPhysiqueActif);
   void (* TesterSol)(struct CPhysicalObj * this, const CSol * Map);
   // friend void (* TesterPosition)(struct CPhysicalObj * this, struct CPhysicalObj * po);
 

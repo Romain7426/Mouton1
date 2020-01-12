@@ -1,7 +1,8 @@
 #include "global.h"
 #include "objnonanime.h"
 //#include "nonanime/nonanime.hpp"
-#include "nonanime.h"
+//#include "nonanime.h"
+#include "nonanime/nonanime.h"
 
 
 CObjNonAnime * CObjNonAnime_make_core(void) {
@@ -50,6 +51,7 @@ CObjNonAnime * CObjNonAnime_make(const char * filename) {
   this -> parent.Compressible = true;  
   this -> parent.Hostile = false;
   this -> parent.Fixe = true;
+
   
   int ret;
   ret = this -> ReadDescriptionFile(this, NONANIMESDIR, filename);

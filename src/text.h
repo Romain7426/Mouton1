@@ -1,5 +1,5 @@
-#ifndef TEXT_HPP
-#define TEXT_HPP
+#ifndef TEXT_H
+#define TEXT_H
 
 /*
  * Cette classe représente le moteur de rendu de texte à l'écran. (il utilise
@@ -15,16 +15,16 @@ struct CText {
   int cx, cy;
   
   // la police est une texture... ohlàlà ! si les poulets me lisaient...
-  struct CTexture * tex;
+  CTexture * tex;
 
-  void (* print1)(struct CText * this, int x, int y, int w, int h, const char* s);
+  void (* print1)(struct CText * this, int x, int y, int w, int h, const char * s);
   float (* print2)(struct CText * this, float l, int nblignes, int nbcaracmax, int x, int y, int w, int h, const char * s, bool * toutaffiche_ptr);
   // l ligne courante
 };
 extern CText * CText_make(void);
 extern void CText_delete(CText * this);
-//extern  void CText__print1(CText * this, int x, int y, int w, int h, const char * s);
-//extern float CText__print2(CText * this, float l, int nblignes, int nbcaracmax, int x, int y, int w, int h, const char * s, bool * toutaffiche_ptr);
+extern void  CText__print1(CText * this, int x, int y, int w, int h, const char * s);
+extern float CText__print2(CText * this, float l, int nblignes, int nbcaracmax, int x, int y, int w, int h, const char * s, bool * toutaffiche_ptr);
 
 
 
@@ -147,4 +147,4 @@ extern struct CMessageTexte * MessageTexte;
 
 
 
-#endif /* TEXT_HPP */
+#endif /* TEXT_H */

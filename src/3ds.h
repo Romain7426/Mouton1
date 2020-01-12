@@ -96,6 +96,10 @@ struct t3DModel {
 DEFINE_NEW_OPERATOR_FOR_STRUCT(t3DModel);
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(t3DModel);
 
+//extern struct t3DModel * new_t3DModel(void);
+//extern t3DModel * t3DModel_make(void);
+//extern t3DModel * t3DModel_make_aux(t3DModel * this);
+
 
 //////////// *** NEW *** ////////// *** NEW *** ///////////// *** NEW *** ////////////////////
 
@@ -284,6 +288,8 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(CLoad3DS);
 DECLARE_NEW_OPERATOR_FOR_STRUCT(CLoad3DS);
 
 extern struct CLoad3DS * new_CLoad3DS(void);
+extern CLoad3DS * CLoad3DS_make(void);
+extern CLoad3DS * CLoad3DS_make_aux(CLoad3DS * this);
 
 
 

@@ -1,5 +1,94 @@
 #include "global.h"
 #include "pascal.h"
+#include "pascal/pascal.h"
+
+
+
+CPascal * CPascal_make(const char * filename) { 
+  MALLOC_BZERO(CPascal,this);
+
+  assert(false); 
+  
+#if 0
+  ASSIGN_METHOD(CPascal,this,execProcedure); 
+  ASSIGN_METHOD(CPascal,this,execProcedure_step); 
+  ASSIGN_METHOD(CPascal,this,next_step); 
+  ASSIGN_METHOD(CPascal,this,stack_push_int); 
+  ASSIGN_METHOD(CPascal,this,stack_push_string); 
+#endif 
+
+
+  if (filename == NULL) {
+    messerr("Constructeur de CPascal: le nom de fichier est le pointeur NULL.");
+    this -> code_erreur = -1;
+    assert(false);
+    //throw ((void *) NULL);
+    free(this); 
+    return NULL;
+  }
+  if (filename[0] == '\0') {
+    messerr("Constructeur de CPascal: le nom de fichier est la chaîne vide.");
+    this -> code_erreur = -2;
+    assert(false);
+    //throw ((void *) NULL);
+    free(this); 
+    return NULL;
+  }  
+  printf("  nom de fichier correct!\n");
+  
+  this -> filename = strcopy(filename); 
+  this -> prog_exec = NULL; 
+
+  printf("Constructeur CPascal__CPascal(%s)\n", this -> filename); 
+  
+  
+
+
+#define clexing_ ".lexing.out"
+  static const char * const clexing = clexing_;
+  static const int pastaille = ARRAY_SIZE(PASCALDIR) - 1;
+  static const int lextaille = ARRAY_SIZE(clexing_) - 1; 
+  const int taille = pastaille + strlen(filename);
+  char reelname[taille+1];
+  char lexing[taille+1];
+  strcat(strcpy(reelname, PASCALDIR), filename);
+  strcat(strcpy(lexing, reelname), clexing);
+  printf("  nom de fichier réel: %s\n", reelname);
+
+  assert(false); 
+  
+  message("Constructeur de CPascal: C'est bon, l'initialisation du fichier de script pascalml '%s' s'est bien passée.", filename);
+  return this; 
+}; 
+
+
+void CPascal_delete(CPascal * this) {
+  // Il faut fermer les flux de message d'erreur,
+  // et détruire l'environnement,
+  // et détruire la mémoire.
+
+  assert(false); 
+  
+  //pascal_stack_free(this -> stack);
+  //penvdel(this->env);
+  //ptabdvaltypeuser_del(tabdvaltypeuser);
+  //pmemdel(this->mem);
+  //pmessend();
+  free(this -> filename); 
+  free(this); 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+#if 0 
 #include "pascal/pascal.tools.hpp"
 #include "pascal/pascal.prog.hpp"
 #include "pascal/pascal.mem.hpp"
@@ -92,8 +181,6 @@ CPascal * CPascal_make(const char * filename) {
   ret = pmessinit(filename);
   if (ret < 0) {
     messerr("Constructeur de CPascal: Impossible de créer les fichiers de sorties pour l'exécution du script (reelname = '%s').", reelname);
-    free(reelname);
-    free(lexing);
     this -> code_erreur = -3;
     assert(false);
     //throw ((void *) NULL);
@@ -108,8 +195,6 @@ CPascal * CPascal_make(const char * filename) {
   yypascalout = fopen(lexing, "w");
   if (yypascalout == NULL) {
     messerr("Constructeur de CPascal: Impossible d'ouvrir en écriture le fichier '%s' pour les sorties du lexer.", lexing);
-    free(reelname);
-    free(lexing);
     this -> code_erreur = -4;
     assert(false);
     //throw ((void *) NULL);
@@ -123,8 +208,6 @@ CPascal * CPascal_make(const char * filename) {
     messerr("Constructeur de CPascal: Impossible d'ouvrir en lecture le fichier '%s'.", reelname);
     fclose(yypascalout);
     assert(false);
-    free(reelname);
-    free(lexing);
     this -> code_erreur = -5;
     //throw ((void *) NULL);
     free(this -> filename); 
@@ -948,3 +1031,4 @@ void CPascal__stack_push_string(CPascal * this, const char * str) {
   pascal_stack_push(this -> stack, e);
 };
 
+#endif 

@@ -53,6 +53,7 @@ struct CCamera {
 };
 
 extern CCamera * CCamera_make(void);
+extern CCamera * CCamera_make_aux(CCamera * this);
 extern void CCamera_delete(CCamera * this);
 extern bool CCamera__IsSolidaireAuHeros(const struct CCamera * this);
 extern void CCamera__InitCamera(struct CCamera * this);

@@ -157,7 +157,19 @@ bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLu
   // On charge du bitmap en mémoire graâce la SDL. 
   texture = IMG_Load(fichier_image);
   if (texture == NULL) {
-    printf("  ERREUR : Impossible de charger le fichier image '%s'\n",fichier_image);
+    messerr("Impossible de charger le fichier image '%s'\n", fichier_image);
+#if 1 
+    {
+      char filename_realpath[PATH_MAX]; 
+      realpath(fichier_image, filename_realpath); 
+      messerr("REALPATH: %s" "\n", filename_realpath);
+    }; 
+#endif 
+#if 1 
+    {
+      messerr("SDL_image ERROR: %s" "\n", IMG_GetError()); 
+    };
+#endif 
     return false; 
   }; 
 #if 1

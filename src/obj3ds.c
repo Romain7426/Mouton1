@@ -48,9 +48,10 @@ C3DS * C3DS_make(const char * filename) {
   for (int i = 0; i < MAX_TEXTURES; i++) 
     this -> g_Texture[i] = NULL;
           
+  CLoad3DS_make_aux(&this -> g_Load3ds);
 
   // First we need to actually load the .3DS file.  
-  // We just pass in an address to our t3DModel structure and the file name string we want to load ("face.3ds").
+  // We just pass in an address to our t3DModel structure and the file name string we want to load ("face.3ds"). 
   printf("   Début de la lecture du fichier 3DS '%s' ... !!\n", filename);
   b3dModelLoaded = this -> g_Load3ds.Import3DS(&this -> g_Load3ds, &this -> g_3DModel, filename);         // Load our .3DS file into our model structure
   if (b3dModelLoaded) {

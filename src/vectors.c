@@ -13,7 +13,7 @@ float TPoint2D__Norme1(const TPoint2D p) {
   return fabs(p.x) +  fabs(p.y);    
 }; 
 
-void TPoint3D__Normer2(TPoint3D * p_ref) {
+void TPoint3D_Normer2(TPoint3D * p_ref) {
   const float norme2 = TPoint3D_Norme2(*p_ref); 
   TPoint3D_lambda_self(1.0f / norme2, *p_ref); 
 };

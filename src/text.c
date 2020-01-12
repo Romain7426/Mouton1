@@ -63,9 +63,9 @@ void glDisable2D(void) {
 CText * CText_make(void) {
   MALLOC_BZERO(CText,this); 
 
-  assert(false); 
-  //ASSIGN_METHOD(CText,this,print1); 
-  //ASSIGN_METHOD(CText,this,print2); 
+  //assert(false); 
+  ASSIGN_METHOD(CText,this,print1); 
+  ASSIGN_METHOD(CText,this,print2); 
 
   printf("Création du moteur d'affichage de texte (chargement de l'image font.png)\n");
   this -> tex = CTexture_make("./font.png");
@@ -210,7 +210,7 @@ void CText__print1(CText * this, const int x, const int y, const int w, const in
 
 
 
-void CMessageTexte__SetMsg(CMessageTexte * this, const char * inS) {
+static void CMessageTexte__SetMsg(CMessageTexte * this, const char * inS) {
   printf("Argot s = %p\n", this -> s); 
   fflush(NULL);
   
@@ -225,31 +225,8 @@ void CMessageTexte__SetMsg(CMessageTexte * this, const char * inS) {
 }; 
 
 
-CMessageTexte * CMessageTexte_make(void) {
-  MALLOC_BZERO(CMessageTexte,this); 
 
-  assert(false); 
-#if 0
-  ASSIGN_METHOD(CMessageTexte,this,SetMsg); 
-  ASSIGN_METHOD(CMessageTexte,this,Render); 
-  ASSIGN_METHOD(CMessageTexte,this,InputAndRender); 
-#endif 
-
-  printf("CMessageTexte__CMessageTexte()\n");                         
-  this -> texfond = CTexture_make("parchemin.png");  
-  this -> texFlecheBas = CTexture_make("flechebas.png");  
-  this -> s = NULL;
-};
-
-void CMessageTexte_delete(CMessageTexte * this) {
-  CTexture_delete(this -> texFlecheBas);
-  CTexture_delete(this -> texfond);
-  free(this -> s);   
-  free(this); 
-};
-
-
-void CMessageTexte__Render(CMessageTexte * this) {
+static void CMessageTexte__Render(CMessageTexte * this) {
   this -> nbcaracaffiche++;  
 #define MSGTXT_X 100
 #define MSGTXT_Y 300
@@ -293,7 +270,7 @@ void CMessageTexte__Render(CMessageTexte * this) {
 
 
 
-bool CMessageTexte__InputAndRender(CMessageTexte * this) {
+static bool CMessageTexte__InputAndRender(CMessageTexte * this) {
   
   /*gestion de l'entrée clavier*/
 #define PAS_MESSAGE_TEXTE 0.2f
@@ -309,4 +286,30 @@ bool CMessageTexte__InputAndRender(CMessageTexte * this) {
   return false;
     
 };     
+
+
+
+
+CMessageTexte * CMessageTexte_make(void) {
+  MALLOC_BZERO(CMessageTexte,this); 
+
+  ASSIGN_METHOD(CMessageTexte,this,SetMsg); 
+  ASSIGN_METHOD(CMessageTexte,this,Render); 
+  ASSIGN_METHOD(CMessageTexte,this,InputAndRender); 
+  
+  printf("CMessageTexte__CMessageTexte()" "\n");                         
+  this -> texfond = CTexture_make("parchemin.png");  
+  this -> texFlecheBas = CTexture_make("flechebas.png");  
+  this -> s = NULL;
+
+  return this; 
+};
+
+void CMessageTexte_delete(CMessageTexte * this) {
+  CTexture_delete(this -> texFlecheBas);
+  CTexture_delete(this -> texfond);
+  free(this -> s);   
+  free(this); 
+};
+
 

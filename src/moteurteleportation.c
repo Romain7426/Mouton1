@@ -105,7 +105,7 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
       *Map_ref = CMap_make(this -> zt -> destination_carte, *EnVaisseau_ref);
       CBonhomme * Hero = *Hero_ref; 
       CPhysicalObj * aHero = &Hero -> parent1; 
-      aHero -> SetPosition_vTPoint3D(aHero, this -> zt -> destination_position);
+      aHero -> SetPosition_vP3D(aHero, this -> zt -> destination_position);
       Hero -> SetDirection(Hero, this -> zt -> destination_direction);
       aHero -> AddForce_vXYZ(aHero, 0.0f, 0.0f, 200.0f);
       Hero -> ViderOrdresDeplacement(Hero);

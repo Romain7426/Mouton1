@@ -102,6 +102,7 @@ void DebutDePartie(void) {
 
 
   //initialisation de la caméra
+  CCamera_make_aux(&Camera);
   Camera.InitCamera(&Camera);
   Camera.SolidariserAuHeros(&Camera);
   
@@ -447,7 +448,7 @@ void RaiseLife(void) {
 
       if (z > ZMAXVAISSEAU) z = ZMAXVAISSEAU;
 
-      Hero -> parent1.SetPosition_vTPoint3D(&Hero -> parent1, TPoint3D_make_struct(Hero -> parent1.GetPosition(&Hero -> parent1).x, Hero -> parent1.GetPosition(&Hero -> parent1).y, z ) );
+      Hero -> parent1.SetPosition_vP3D(&Hero -> parent1, TPoint3D_make_struct(Hero -> parent1.GetPosition(&Hero -> parent1).x, Hero -> parent1.GetPosition(&Hero -> parent1).y, z ) );
       Camera.angleXY = AngleXY;
     }
      
@@ -570,9 +571,9 @@ void RaiseRender(void) {
        */
       p = Hero -> parent1.GetPosition(&Hero -> parent1);
       Map -> parent.PositionModulo(&Map -> parent, &p.x, &p.y);
-      Hero -> parent1.SetPosition_vTPoint3D(&Hero -> parent1, p);
+      Hero -> parent1.SetPosition_vP3D(&Hero -> parent1, p);
       p.z -= 50;
-      Vaisseau -> parent.SetPosition_vTPoint3D(&Vaisseau -> parent, p);
+      Vaisseau -> parent.SetPosition_vP3D(&Vaisseau -> parent, p);
       Vaisseau -> SetAngleZ(Vaisseau, AngleXY + 90.0f);
       //Vaisseau -> SetAngleZ(AngleXY);
       

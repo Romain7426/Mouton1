@@ -349,7 +349,7 @@ void CMap__AjouterObjet(CMap * this, CPhysicalObj * o) {
   TPoint3D pos = o -> GetPosition(o);
 
   pos.z = this -> parent.GETZ(&this -> parent, pos.x, pos.y);
-  o -> SetPosition_vTPoint3D(o, pos);
+  o -> SetPosition_vP3D(o, pos);
 
 
   printf("Taille de la carte en real: %d x %d\n", this -> parent.TailleX, this -> parent.TailleY);
@@ -461,7 +461,7 @@ void CMap__AjouterParticules(CMap * this, TPoint3D p, const char * nom, const bo
     CPhysicalObj * o = &b -> parent1; 
     o->SetDimension(o, 0.0f,0.0f,0.0f);
 
-    o->SetPosition_vTPoint3D(o, p);
+    o->SetPosition_vP3D(o, p);
     o->SetObjetEphemere(o, 32);
     o->Hostile = false;
     TPoint3D pp = o->GetPosition(o);
@@ -594,7 +594,7 @@ CPhysicalObj * CMap__TesterPositionHero(CMap * this, CPhysicalObj * aHero, const
       
       //zoneepee.SetPosition(&zoneepee, aHero -> GetPosition(aHero) + dir);
       TPoint3D hero_pos = aHero -> GetPosition(aHero); 
-      zoneepee.SetPosition_vTPoint3D(&zoneepee, TPoint3D_add(hero_pos, dir));
+      zoneepee.SetPosition_vP3D(&zoneepee, TPoint3D_add(hero_pos, dir));
 
       //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition())
       PARCOURS_OBJETS
@@ -723,7 +723,7 @@ CPhysicalObj * CMap__TesterPositionHero(CMap * this, CPhysicalObj * aHero, const
     }
 
     TPoint3D hero_pos = aHero -> GetPosition(aHero); 
-    zoneepee.SetPosition_vTPoint3D(&zoneepee, TPoint3D_add(hero_pos, dir));
+    zoneepee.SetPosition_vP3D(&zoneepee, TPoint3D_add(hero_pos, dir));
     
     //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition())
     PARCOURS_OBJETS
@@ -1006,14 +1006,14 @@ int CMap__ReadDescriptionFile(CMap * this, const char * dir, const char * filena
     if (carte_data -> objet_anime_huh[i]) {
       CBonhomme * bonhomme = CBonhomme_make(carte_data -> objet_fichier[i]);
       CPhysicalObj * o = (CPhysicalObj *) bonhomme; 
-      o -> SetPosition_vTPoint3D(o, TPoint3D_make_struct(carte_data -> objet_x[i], carte_data -> objet_y[i], carte_data -> objet_z[i])); 
+      o -> SetPosition_vP3D(o, TPoint3D_make_struct(carte_data -> objet_x[i], carte_data -> objet_y[i], carte_data -> objet_z[i])); 
       this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o);
       continue; 
     }
     else {
       CObjNonAnime * nonanime = CObjNonAnime_make(carte_data -> objet_fichier[i]);
       CPhysicalObj * o = (CPhysicalObj *) nonanime; 
-      o -> SetPosition_vTPoint3D(o, TPoint3D_make_struct(carte_data -> objet_x[i], carte_data -> objet_y[i], carte_data -> objet_z[i])); 
+      o -> SetPosition_vP3D(o, TPoint3D_make_struct(carte_data -> objet_x[i], carte_data -> objet_y[i], carte_data -> objet_z[i])); 
       this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o);
       continue; 
     };

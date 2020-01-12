@@ -23,20 +23,37 @@ CMusique * CMusique_make(const char * filename) {
   
 
   char * nom_sans_ext = fichier_nom_sans_extension(filename);
+  //messerr("nom_sans_ext: '%s'" "\n", nom_sans_ext); 
   
-  this -> music = try_to_load(SONSDIR, nom_sans_ext, ".ogg");
-  
-  if (this -> music == NULL)
+  do {
+    this -> music = try_to_load(SONSDIR, nom_sans_ext, ".ogg");
+    if (this -> music != NULL) { break; }; 
+    messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
+    
     this -> music = try_to_load(SONSDIR, nom_sans_ext, ".mp3");
-  
-  if (this -> music == NULL)
-    this -> music = try_to_load(SONSDIR, nom_sans_ext, ".wav");
-  
-  if (this -> music == NULL)
+    if (this -> music != NULL) { break; }; 
+    messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
+    
+    this -> music = try_to_load(SONSDIR, nom_sans_ext, ".wav"); 
+    if (this -> music != NULL) { break; }; 
+    messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
+    
     this -> music = try_to_load(SONSDIR, nom_sans_ext, ".mid");
+    if (this -> music != NULL) { break; }; 
+    messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
+    
+  } while (false); 
   
-  if (this -> music == NULL)
-    printf("ERREUR: Impossible de charger la musique %s!\n", filename);
+  if (this -> music == NULL) {
+    messerr("Impossible de charger la musique %s!\n", filename);
+#if 1 
+    {
+      char filename_realpath[PATH_MAX]; 
+      realpath(filename, filename_realpath); 
+      messerr("REALPATH: %s" "\n", filename_realpath);
+    }; 
+#endif 
+  };
   
   free(nom_sans_ext);
   
@@ -72,11 +89,15 @@ char * fichier_nom_sans_extension(const char * filename) {
 
 
 void CMusique__Jouer(CMusique * this) {
-  if (this -> NomMusique == NULL)
+  if (this -> NomMusique == NULL) {
     Mix_HaltMusic();
-  else
-    if (Mix_PlayMusic(this -> music, -1)==-1)
-      printf("ERREUR: Impossible de jouer le son\n");
+    return; 
+  }; 
+
+  if (-1 == Mix_PlayMusic(this -> music, -1)) {
+    messerr("Impossible de jouer le son: %s" "\n", this -> NomMusique); 
+    messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
+  };
 };
 
 
@@ -111,7 +132,15 @@ CSon * CSon_make(const char * filename) {
   
   this -> son = Mix_LoadWAV(filename);
   if (!this -> son) {
-    printf("ERREUR: Mix_LoadMUS a fait pouf!\n");
+    messerr("Mix_LoadMUS a fait pouf: %s" "\n", filename); 
+#if 1 
+    {
+      char filename_realpath[PATH_MAX]; 
+      realpath(filename, filename_realpath); 
+      messerr("REALPATH: %s" "\n", filename_realpath);
+    }; 
+#endif 
+    messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
     return this;
   };
 
@@ -124,7 +153,8 @@ void CSon__Jouer(CSon * this) {
   int alright_huh;
   alright_huh = Mix_PlayChannel(-1, this -> son, 0); 
   if (alright_huh == -1) {
-    printf("ERREUR: Impossible de jouer le son\n");
+    messerr("Impossible de jouer le son\n");
+    messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
   };
 };  
 
