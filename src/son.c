@@ -104,7 +104,10 @@ void CMusique__Jouer(CMusique * this) {
 void CMusique_delete(CMusique * this) {
   printf("Destruction de la musique...\n");  
   Mix_HaltMusic(); 
-  Mix_FreeMusic(this -> music);  
+#if 1 
+  // RL: 2020-01-12: Crashes if ogg 
+  if (this -> music != NULL) Mix_FreeMusic(this -> music);  
+#endif 
   free(this -> NomMusique); 
   free(this); 
   printf("   Destruction de la musique REUSSIE !!!\n");
@@ -185,15 +188,18 @@ int init_audio(void) {
   // print out some info on the audio device and stream
   
   Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
-  bits = audio_format&0xFF;
+  bits = audio_format & 0xFF;
   
-  printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate, bits, audio_channels > 1 ? "stereo" : "mono", audio_buffers);
+  printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer" "\n", audio_rate, bits, audio_channels > 1 ? "stereo" : "mono", audio_buffers); 
   
-  return 0; // ca rend quoi cette fonction ???  
+  return 0; // ça rend quoi cette fonction ???  
 }; 
 
 
 void close_audio(void) {
+#if 1 
+  //RL: 2020-01-12: It crashes...
   Mix_CloseAudio(); 
+#endif 
 }; 
 

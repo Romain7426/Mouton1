@@ -35,7 +35,7 @@ CObjNonAnime * CObjNonAnime_copy(const CObjNonAnime * o) {
 
 void CObjNonAnime_delete(CObjNonAnime * this) {
   C3DS_delete(this -> resobj3ds);        
-  CPhysicalObj_delete(&this -> parent); 
+  CPhysicalObj_delete_aux(&this -> parent); 
   free(this); 
 };
 

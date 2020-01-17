@@ -78,17 +78,30 @@ int main(int argc, char * argv[]) {
   main_win_print();
 
   init_message();
-  message("argc = %d ; argv = %p", argc, argv);
-
- 
+  message("argc = %d ; argv = %p" "\n", argc, argv);
+  
+  
   if (init_sdl_opengl()) {
+    
+
+    init_audio();
+
     Init();
+#if 0  
+    Free(); 
+    close_audio(); 
+    free_sdl();
+    exit(0); 
+#endif 
+
+
     
     while (isrunning) {
       SCRIPT_unepassedeboucle();
     }
 
     Free();
+    close_audio();
     free_sdl();
 
     retour = 0;
@@ -276,14 +289,13 @@ void setup_opengl(int width, int height) {
 bool init_sdl_opengl(void) {
   printf("Initialisation de la SDL...\n");
 
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) == -1) { 
-    printf("Erreur lors de l'initialisation de la SDL : %s.\n", SDL_GetError());
-    return 0; // Hallucinant C'Min !!!! Comment as-tu pu ecrire ca ?
+  if (-1 == SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) { 
+    messerr("Erreur lors de l'initialisation de la SDL: %s." "\n", SDL_GetError());
+    return false; 
   };
   
-  printf("SDL initialisé.\n");
+  printf("SDL initialisée.\n");
 
-  init_audio();
   /*
    * Now, we want to setup our requested
    * window attributes for our OpenGL window.
@@ -308,8 +320,8 @@ bool init_sdl_opengl(void) {
 
   // Set the video mode
   if (!DebugDoncOnNeSwitchePas)
-    if (SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BITSPERPIXEL, SDL_OPENGL | SCREEN_MODE | SDL_DOUBLEBUF | SDL_HWSURFACE /*| SDL_NOFRAME*/) == 0) {
-      fprintf(stderr, "Video mode set failed: %s\n", SDL_GetError());
+    if (0 == SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BITSPERPIXEL, SDL_OPENGL | SCREEN_MODE | SDL_DOUBLEBUF | SDL_HWSURFACE /*| SDL_NOFRAME*/)) {
+      messerr("Video mode set failed: %s" "\n", SDL_GetError());
       return 0;
     };
   
@@ -323,10 +335,11 @@ bool init_sdl_opengl(void) {
   
   
   if (Screen == NULL) {
-    fprintf(stderr, "La surface écran 'Screen' n'a pas pu être référencée.\n");
+    messerr("La surface écran 'Screen' n'a pas pu être référencée" "\n");
+    messerr("SDL: %s" "\n", SDL_GetError());
   };
 
-  return 1;
+  return true;
 };
 
 
@@ -334,11 +347,13 @@ bool init_sdl_opengl(void) {
 
 //libère la mémoire...
 void free_sdl(void) {
-  close_audio();
   
   printf("On quitte la SDL.\n");
 
+#if 1 
+  // RL: 2020-01-12: For some reasons, it crashes... 
   SDL_Quit();
+#endif 
   
   printf("On quitte....\n");
 };

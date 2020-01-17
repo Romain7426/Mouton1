@@ -11,7 +11,6 @@ MenuItem * MenuItem_make(void) {
 void MenuItem_delete_aux(MenuItem * this) {
   if (this -> nom != NULL) free(this -> nom); 
   if (this -> texture != NULL) CTexture_delete(this -> texture); 
-  free(this); 
 }; 
 
 void MenuItem_delete(MenuItem * this) {

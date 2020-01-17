@@ -19,37 +19,36 @@ static void vmesserr(const char * mess, va_list args);
 
 void init_message(void) {
   (void) fprintf(stdout, "Initialisation des fonctions de message.\n");
-
-#if 1 
-  {
-    char FILENOTICE_realpath[PATH_MAX]; 
-    realpath(FILENOTICE, FILENOTICE_realpath); 
-    fprintf(stderr, "LOG REALPATH: %s" "\n", FILENOTICE_realpath);
-  }; 
-#endif 
  
   (void) (zeldafnotice = fopen(FILENOTICE, "w"));
   if (zeldafnotice == NULL) {
-      (void) fprintf(stdout, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILENOTICE);
-      assert(false);
-    }
- 
+    (void) fprintf(stdout, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILENOTICE);
+#if 1 
+    {
+      char FILENOTICE_realpath[PATH_MAX]; 
+      realpath(FILENOTICE, FILENOTICE_realpath); 
+      fprintf(stderr, "LOG REALPATH: %s" "\n", FILENOTICE_realpath);
+    }; 
+#endif 
+    assert(false);
+  }; 
+  
   (void) fprintf(stdout, "Ouverture en écriture du fichier \"%s\" réussie.\n", FILENOTICE);
   (void) fprintf(zeldafnotice, "Ouverture en écriture du fichier \"%s\" réussie.\n", FILENOTICE);
 
   (void) (zeldaferror = fopen(FILEERROR, "w"));
   if (zeldaferror == NULL) {
-      (void) fprintf(stdout, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILEERROR);
-      (void) fprintf(zeldafnotice, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILEERROR);
-      (void) fclose(zeldafnotice);
-      assert(false);
-    }
+    (void) fprintf(stdout, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILEERROR);
+    (void) fprintf(zeldafnotice, "Ouverture impossible en écriture du fichier \"%s\".\nFin de  l'exécution.\n", FILEERROR);
+    (void) fclose(zeldafnotice);
+    assert(false);
+  };
     
   (void) fprintf(stdout, "Ouverture en écriture du fichier \"%s\" réussie.\n\n", FILEERROR);
   (void) fprintf(zeldafnotice, "Ouverture en écriture du fichier \"%s\" réussie.\n\n\n", FILEERROR);
   (void) fprintf(zeldaferror, "Ouverture en écriture du fichier \"%s\" réussie.\n\n\n", FILEERROR);
 
-}
+};
 
 
 void end_message(void) {
@@ -76,7 +75,7 @@ void vmessage(const char * mess, va_list args) {
   fflush(NULL);
 }
 
-void message(const char * mess, ...) {
+void message_OLD(const char * mess, ...) {
   va_list args;
   
   va_start(args, mess);

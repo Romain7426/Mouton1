@@ -129,91 +129,7 @@ void DebutDePartie(void) {
 #endif  
 
   
-}
-
-
-
-// Procédure d'initialisation 
-void Init(void) {
-  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
-
-  //Musique = new CMusique("a.mp3");
-  //Musique = new CMusique("zelda.mid");
-  init_actions();
-
-  Text = CText_make();
-  MessageTexte = CMessageTexte_make();
-  PageTitre = CPageTitre_make();
-  MenuEntreeNom = CMenuEntreeNom_make();
-
-  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
-
-  Musique = CMusique_make("intro.mid");
-  Musique -> Jouer(Musique);
-  son_bouton_espace = CSon_make("./frappe.wav");
-  son_bouton_saut = CSon_make("./frappe.wav");
-  //son_bouton_saut = new CSon("./plaisir.wav");
-
-  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
-
-  AffichageCoeur = CAffichageCoeur_make();
-  AffichageMainPierre = CAffichageMainPierre_make();  
-
-  //fprintf(stderr, "Init4: ModeJeu = %d\n", ModeJeu);
-
-  Vaisseau = CObjNonAnime_make("vaisseau.nonanime");
-
-  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
-
-  // *** OpenGL stuffs… ***
-  glEnable(GL_BLEND) ;
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;   
-  glEnable(GL_TEXTURE_2D);
-  //MessageTexte -> SetMsg("Bonjour!! Bienvenue dans le jeu le plus révolutionnaire du 24e millénaire. C'est vraiment que c'est cool et que c'est trop bien. Heureusement que ça marche nickel... j'avais peur un moment. Mais j'avoue que tout est bien qui finit bien.");
-  glEnable(GL_LIGHTING);
-  // on active le calcul de la lumière
-  glEnable(GL_LIGHT0); 
-  // on dit que la lumière n°0 est allumée
-  // Affichage de la lumière: flou ou pas
-  glShadeModel(GL_SMOOTH);
-  //glShadeModel(GL_FLAT);
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
-  // on dit que les appels glColor modifie en fait la couleur d'ambiance et de diffusion du matériau
-  glPolygonMode(GL_FRONT, GL_FILL);
-  glPolygonMode(GL_BACK, GL_FILL);
-  // Cause l'apparition des triangles.
-  // Donc, l'antialising on enlève.
-  //glEnable(GL_POLYGON_SMOOTH);
-  glDisable(GL_POLYGON_SMOOTH);
-  float mat_amb[] = {1.0, 1.0, 1.0, 1.0};
-  float mat_diff[] = {1.0, 1.0, 1.0, 1.0};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_amb);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diff);
-  float mat_em[] = {0.0, 0.0, 0.0, 1.0};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, mat_em);
-  // les deux lignes qui suivent sont là pour éviter les bugs de chevauchements
-  // pour les images avec des parties entièrement translucides (en fait,
-  // un pixel entièrement transparent ne touche pas le Z-buffer)
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_GREATER, 0.0f);
-  glFogi(GL_FOG_MODE, GL_LINEAR);
-  //glFogi(GL_FOG_MODE, GL_EXP);   // exponentiel
-  //glFogf(GL_FOG_DENSITY, 0.001); 
-  //glFogf(GL_FOG_DENSITY, 0.0f); // GL_FOG_DENSITY CA MARCHE PAS en mode linéaire  !!
-  glFogf(GL_FOG_START, 0);
-  glFogf(GL_FOG_END, 500); //500
-  glEnable(GL_FOG);
-#if 0
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-#endif
-  
-  printf("Fin de l'initialisation!! YOUPI!!\n");
-  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
 }; 
-
-
 
 
 
@@ -405,8 +321,8 @@ void RaiseLife(void) {
     if (PageTitre -> Life(PageTitre)) {
       ModeJeu = mjJEU;
       DebutDePartie();
-    }
-  }
+    };
+  };
 
 
 
@@ -611,44 +527,140 @@ void RaiseRender(void) {
 
 
 
+
+
+
+
+
+// Procédure d'initialisation 
+void Init(void) {
+  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
+
+  //Musique = new CMusique("a.mp3");
+  //Musique = new CMusique("zelda.mid");
+  init_actions();
+
+  Text = CText_make();
+  MessageTexte = CMessageTexte_make();
+  PageTitre = CPageTitre_make();
+  MenuEntreeNom = CMenuEntreeNom_make();
+
+  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
+
+  Musique = CMusique_make("intro.mid");
+  Musique -> Jouer(Musique);
+  //son_bouton_espace = CSon_make("./frappe.wav");
+  son_bouton_espace = CSon_make("epee.wav");
+  //son_bouton_saut = CSon_make("./frappe.wav");
+  son_bouton_saut = CSon_make("epee.wav");
+  //son_bouton_saut = new CSon("./plaisir.wav");
+
+  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
+
+  AffichageCoeur = CAffichageCoeur_make();
+  AffichageMainPierre = CAffichageMainPierre_make();  
+
+  //fprintf(stderr, "Init4: ModeJeu = %d\n", ModeJeu);
+
+  Vaisseau = CObjNonAnime_make("vaisseau.nonanime");
+
+#if 1
+  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
+
+  // *** OpenGL stuffs… ***
+  {
+    glEnable(GL_BLEND) ;
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;   
+    glEnable(GL_TEXTURE_2D);
+    //MessageTexte -> SetMsg("Bonjour!! Bienvenue dans le jeu le plus révolutionnaire du 24e millénaire. C'est vraiment que c'est cool et que c'est trop bien. Heureusement que ça marche nickel... j'avais peur un moment. Mais j'avoue que tout est bien qui finit bien.");
+    glEnable(GL_LIGHTING);
+    // on active le calcul de la lumière
+    glEnable(GL_LIGHT0); 
+    // on dit que la lumière n°0 est allumée
+    // Affichage de la lumière: flou ou pas
+    glShadeModel(GL_SMOOTH);
+    //glShadeModel(GL_FLAT);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
+    // on dit que les appels glColor modifie en fait la couleur d'ambiance et de diffusion du matériau
+    glPolygonMode(GL_FRONT, GL_FILL);
+    glPolygonMode(GL_BACK, GL_FILL);
+    // Cause l'apparition des triangles.
+    // Donc, l'antialising on enlève.
+    //glEnable(GL_POLYGON_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
+    float mat_amb[] = {1.0, 1.0, 1.0, 1.0};
+    float mat_diff[] = {1.0, 1.0, 1.0, 1.0};
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_amb);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diff);
+    float mat_em[] = {0.0, 0.0, 0.0, 1.0};
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, mat_em);
+    // les deux lignes qui suivent sont là pour éviter les bugs de chevauchements
+    // pour les images avec des parties entièrement translucides (en fait,
+    // un pixel entièrement transparent ne touche pas le Z-buffer)
+    glEnable(GL_ALPHA_TEST);
+    glAlphaFunc(GL_GREATER, 0.0f);
+    glFogi(GL_FOG_MODE, GL_LINEAR);
+    //glFogi(GL_FOG_MODE, GL_EXP);   // exponentiel
+    //glFogf(GL_FOG_DENSITY, 0.001); 
+    //glFogf(GL_FOG_DENSITY, 0.0f); // GL_FOG_DENSITY CA MARCHE PAS en mode linéaire  !!
+    glFogf(GL_FOG_START, 0);
+    glFogf(GL_FOG_END, 500); //500
+    glEnable(GL_FOG);
+#if 0
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+#endif
+  }; 
+#endif   
+  printf("Fin de l'initialisation!! YOUPI!!\n");
+  //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
+}; 
+
+
+
+
+
 void Free(void) {
   printf("On quitte le jeu et on va tranquillement désallouer TOUT!\n"); 
+  fflush(NULL); 
   
-  free_actions();
+  printf("-------- on détruit la carte courante ---------\n");
+  if (Map != NULL) CMap_delete(Map);
+  
+  printf("-------- on détruit le héros ----------------\n");
+  if (Hero != NULL) CBonhomme_delete(Hero);
+  
+  printf("-------- on détruit le vaisseau ----------------\n");
+  CObjNonAnime_delete(Vaisseau);
+
+  printf("-------- on détruit le moteur d'affichage de pierre ---------\n");
+  if (AffichageMainPierre != NULL) CAffichageMainPierre_delete(AffichageMainPierre);
+  
+  printf("-------- on détruit le moteur d'affichage de coeurs ---------\n");
+  CAffichageCoeur_delete(AffichageCoeur);
+
+  printf("-------- on détruit les sons... ---------\n");
+  if (son_bouton_saut != NULL) CSon_delete(son_bouton_saut);
+  if (son_bouton_espace != NULL) CSon_delete(son_bouton_espace);
+  
+  printf("-------- on détruit la musique ---------\n");
+  if (Musique != NULL) CMusique_delete(Musique);
   
   printf("-------- on détruit l'interface pour entrer les noms --------\n");
   CMenuEntreeNom_delete(MenuEntreeNom);
   
-  printf("-------- on détruit le héros ----------------\n");
-  CBonhomme_delete(Hero);
-  
-  printf("-------- on détruit le vaisseau ----------------\n");
-  CObjNonAnime_delete(Vaisseau);
-  
-  printf("-------- on détruit le moteur d'affichage de texte ---------\n");
-  CText_delete(Text);
-  
-  printf("-------- on détruit le moteur d'affichage de message de texte ---------\n");
-  CMessageTexte_delete(MessageTexte);
-  
-  printf("-------- on détruit la carte courante ---------\n");
-  CMap_delete(Map);
-  
-  printf("-------- on détruit le moteur d'affichage de coeurs ---------\n");
-  CAffichageCoeur_delete(AffichageCoeur);
-  
-  printf("-------- on détruit les sons... ---------\n");
-  CSon_delete(son_bouton_espace);
-  CSon_delete(son_bouton_saut);
-  
-  printf("-------- on détruit le moteur d'affichage de pierre ---------\n");
-  CAffichageMainPierre_delete(AffichageMainPierre);
-  
-  printf("-------- on détruit la musique ---------\n");
-  CMusique_delete(Musique);
-  
   printf("-------- on détruit le moteur d'affichage de page de titre ---------\n");
   CPageTitre_delete(PageTitre);
+
+  printf("-------- on détruit le moteur d'affichage de message de texte ---------\n");
+  CMessageTexte_delete(MessageTexte);
+
+  printf("-------- on détruit le moteur d'affichage de texte ---------\n");
+  CText_delete(Text);
+    
+  free_actions();
+  
 }; // Free()
 
 
