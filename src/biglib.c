@@ -171,7 +171,7 @@ bool strequal(const char * str1, const char * str2) {
 
 
 
-
+#if 0 
 char * strcopy(const char * str) {
   // le code suivant plante!!!!!
   // dans strcpy()! il suffit de lui filer le contenu de «mettre_a_jour.sh» 
@@ -192,15 +192,17 @@ char * strcopy(const char * str) {
 
   return retour;
 };
+#endif 
 
 
 
 
-
+#if 0 
 char * bool_string(bool b) {
   //return strcopy(bool_string_const(b));
   return strcopy(bool_string_tab[b]);
 }
+#endif 
 
 const char * bool_string_const(bool b) {
   //  return (b ? "VRAI" : "FAUX");
@@ -586,7 +588,7 @@ const char * bool_string_c_tab[2] = {"true", "false"};
 #endif
 
 
-
+#if 0 
 //char * str_of_char(char c) {
 char * char_string(const char c) {
   char * retour;
@@ -598,6 +600,7 @@ char * char_string(const char c) {
 
   return retour;
 }
+#endif 
 
 char * char_string_filtre(const char c) {
   char * retour;
@@ -667,17 +670,21 @@ char * uint8_string(uint8_t byte) {
   return retour;
 }
 
+#if 0 
 char * uint_string(uint_t byte) {
   char * retour;
   asprintf(&retour, "%u", byte);
   return retour;
 }
+#endif 
 
+#if 0 
 char * float_string(const float x) {
   char * retour;
   asprintf(&retour, "%f", x);
   return retour;
 }
+#endif 
 
 char * double_string(const double x) {
   char * retour;

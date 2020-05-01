@@ -64,18 +64,22 @@ struct CMessageTexte {
   struct CTexture * texfond;
   struct CTexture * texFlecheBas;
         
-  // pour stocker le parchemin
+  // pour stocker le parchemin 
         
   char * s;
-  // pointeur vers la chaîne à afficher
+  // pointeur vers la chaîne à afficher 
         
   void (* SetMsg)(struct CMessageTexte * this, const char* inS);
   // dis, maintenant, on va afficher cette chaîne
         
-  void (* Render)(struct CMessageTexte * this);
-  // s'occupe d'afficher le message... ne récupère aucun code clavier
+  // RL: TODO XXX FIXME: Should be const. 
+  void (* Render)(struct CMessageTexte * this); 
+  // s'occupe d'afficher le message... ne récupère aucun code clavier 
         
-  bool (* InputAndRender)(struct CMessageTexte * this);
+  bool (* Input)(struct CMessageTexte * this);
+  void (* Life)(struct CMessageTexte * this);
+
+  //bool (* InputAndRender)(struct CMessageTexte * this);
   // s'occupe d'afficher, de récupérer le clavier...
 };   
 

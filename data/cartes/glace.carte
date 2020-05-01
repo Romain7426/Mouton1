@@ -8,19 +8,19 @@ gameplay {
  arme := vrai ; // A-t-on le droit de porter une arme ?
  musique := "glace.mid"; // musique de fond
  niveau eau := 45.8; // niveau de l'eau
- vie eau :=  23; // point de vie gagné lorsqu'on saute dans l'eau
+ vie eau :=  23; // point de vie gagne lorsqu'on saute dans l'eau
 	         // Un nombre negatif indique qu'on en perds
 	         // un nombre positif qu'on en gagne.
  		 // Seul pb : on ne gere pas encore les nombre negatifs.
- /* De même, une carte n'a pas apparemment d'actions.
-    À la rigueur, le héros pourrait réalisé une action sur un élément
+ /* De mÃªme, une carte n'a pas apparemment d'actions.
+    Ã€ la rigueur, le hÃ©ros pourrait rÃ©alisÃ© une action sur un Ã©lÃ©ment
     de la carte, ce qui aurait une influence sur la carte, mais pas
-    une action sur la carte elle-même.
-    Par contre, une carte possède bien des évènements,
+    une action sur la carte elle-mÃªme.
+    Par contre, une carte possÃ¨de bien des Ã©vÃ¨nements,
     comme celui lorsqu'on s'approche d'une zone, alors on change de carte. 
     D'un certain point de vue, cela peut correspondre
-    à une notion d'action. Il faudra donc que l'on définisse bien
-    la différence entre 'action' et 'evenement'.
+    Ã  une notion d'action. Il faudra donc que l'on dÃ©finisse bien
+    la diffÃ©rence entre 'action' et 'evenement'.
  */
 teleportation IDENT {
   destination := "village.carte";

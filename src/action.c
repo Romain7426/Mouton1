@@ -43,13 +43,11 @@ CScriptLauncher * CScriptLauncher_make(const char * const filename, const char *
   
   printf("   cool on a capté la ressource pascal!!\n");
   this -> proc = CopyString(procedure_name);
-
-
-
-  this -> Execute = CScriptLauncher__Execute; 
-  this -> init_step = CScriptLauncher__init_step; 
-  this -> execute_step = CScriptLauncher__execute_step; 
-  this -> stack_push_int = CScriptLauncher__stack_push_int; 
+  
+  this -> Execute           = CScriptLauncher__Execute; 
+  this -> init_step         = CScriptLauncher__init_step; 
+  this -> execute_step      = CScriptLauncher__execute_step; 
+  this -> stack_push_int    = CScriptLauncher__stack_push_int; 
   this -> stack_push_string = CScriptLauncher__stack_push_string; 
 
   
@@ -77,16 +75,20 @@ void CScriptLauncher__Execute(CScriptLauncher * this) {
 }
 
 void CScriptLauncher__init_step(CScriptLauncher * this) {
+  message("%s" "\n", __func__); 
   SCRIPT_Init();
 
   this -> resPascal -> execProcedure_step(this -> resPascal, this -> proc);
 }
 
 bool CScriptLauncher__execute_step(CScriptLauncher * this) {
+  message("%s" "\n", __func__); 
   bool fini_huh;
   int ret;
 
   ret = this -> resPascal -> next_step(this -> resPascal, &fini_huh);
+
+  message("%s: " "ret = %d ; fini_huh = %d " "\n", __func__, ret, fini_huh); 
 
   return (fini_huh || ret != 0);
 }
@@ -105,7 +107,10 @@ void CScriptLauncher__stack_push_string(CScriptLauncher * this, const char * str
 
 CActionsMenu * CActionsMenu_make(void) {
   MALLOC_BZERO(CActionsMenu,this); 
-  this -> InputAndRender = CActionsMenu__InputAndRender; 
+  //this -> InputAndRender = CActionsMenu__InputAndRender; 
+  this -> Input  = CActionsMenu__Input; 
+  this -> Render = CActionsMenu__Render; 
+  this -> Life   = CActionsMenu__Life; 
   CMenuAbstrait_make_aux(&this -> parent); 
   return this; 
 }; 
@@ -122,15 +127,52 @@ CActionsMenu * CActionsMenu_copy(const CActionsMenu * src) {
   return this; 
 }; 
 
-bool CActionsMenu__InputAndRender(CActionsMenu * this) { 
+//bool CActionsMenu__InputAndRender(CActionsMenu * this) { 
+int CActionsMenu__Input(CActionsMenu * this) { 
   //MenuItem (* Items)[7][8] = &this -> parent.Items; 
-  MenuItem (* Items)[8] = this -> parent.Items; 
+  //MenuItem (* Items)[8] = this -> parent.Items; 
+  MenuItem (* Items)[NB_ITEM_MAX] = this -> parent.Items; 
+  //MenuItem * * Items = this -> parent.Items; 
+  //MenuItem * * Items = &this -> parent.Items[0]; 
+  //MenuItem * * Items = &this -> parent.Items[0][0]; 
+
+    
+    if (KEY_ACTION1) { 
+      CScriptLauncher * c = Items[0][0 /*action n° 1 - 1*/].qch; 
+      if (NULL != c) c -> Execute(c); 
+    }; 
+    
+    if(KEY_ACTION2) {
+      CScriptLauncher * c = (CScriptLauncher *) (Items[0][1 /*action n° 2 - 1*/].qch); 
+      if (NULL != c) c -> Execute(c); 
+    }; 
+    
+    if(KEY_ACTION3) { 
+      CScriptLauncher * c = (CScriptLauncher *) (Items[0][2 /*action n° 3 - 1*/].qch); 
+      if (NULL != c) c -> Execute(c); 
+    }; 
+  
+  
+  return false;
+}; 
+
+void CActionsMenu__Life(CActionsMenu * this) { 
+}; 
+
+void CActionsMenu__Render(const CActionsMenu * this) { 
+  //MenuItem (* Items)[7][8] = &this -> parent.Items; 
+  //MenuItem (* Items)[8] = this -> parent.Items; 
+  const MenuItem (* Items)[NB_ITEM_MAX] = this -> parent.Items; 
+  //MenuItem * * Items = this -> parent.Items; 
+  //MenuItem * * Items = &this -> parent.Items[0]; 
+  //MenuItem * * Items = &this -> parent.Items[0][0]; 
+
   glEnable2D(); { 
     int i = 0; //iphi = 0  
 #define NB_PIXEL_HAUTEUR_LIGNE 32.0f
 #define NB_PIXEL_DECAL_X 20
     // on parcourt les items du sous-menus
-    int num_item_max = this -> parent.ProchainIndice(&this -> parent, i);
+    const int num_item_max = this -> parent.ProchainIndice(&this -> parent, i);
     for (int j = 0; j < num_item_max; j++) {
 #define yy ACTIONS_MENU_Y - (int) (j*NB_PIXEL_HAUTEUR_LIGNE)
 #define xx ACTIONS_MENU_X+j*NB_PIXEL_DECAL_X
@@ -154,33 +196,18 @@ bool CActionsMenu__InputAndRender(CActionsMenu * this) {
       
     }; 
     
-    
-    if (KEY_ACTION1) { 
-      CScriptLauncher * c = Items[0][0 /*action n° 1 - 1*/].qch; 
-      if (NULL != c) c -> Execute(c); 
-    }; 
-    
-    if(KEY_ACTION2) {
-      CScriptLauncher * c = (CScriptLauncher *) (Items[0][1 /*action n° 2 - 1*/].qch); 
-      if (NULL != c) c -> Execute(c); 
-    }; 
-    
-    if(KEY_ACTION3) { 
-      CScriptLauncher * c = (CScriptLauncher *) (Items[0][2 /*action n° 3 - 1*/].qch); 
-      if (NULL != c) c -> Execute(c); 
-    }; 
-  
   } glDisable2D();
   
-  
-  return false;
 }; 
 
 
 
 CObjActionnable * CObjActionnable_make_aux(CObjActionnable * this) { 
-  this -> InputAndRenderActionMenu = CObjActionnable__InputAndRenderActionMenu; 
-  this -> AjouterAction = CObjActionnable__AjouterAction; 
+  //this -> InputAndRenderActionMenu = CObjActionnable__InputAndRenderActionMenu; 
+  this -> ActionMenu_Input  = CObjActionnable__ActionMenu_Input; 
+  this -> ActionMenu_Render = CObjActionnable__ActionMenu_Render; 
+  this -> ActionMenu_Life   = CObjActionnable__ActionMenu_Life; 
+  this -> AjouterAction     = CObjActionnable__AjouterAction; 
   this -> actions = NULL; 
   return this; 
 }; 
@@ -222,9 +249,20 @@ void CObjActionnable_delete(CObjActionnable * this) {
   free(this); 
 }; 
  
-void CObjActionnable__InputAndRenderActionMenu(CObjActionnable * this) {
+int CObjActionnable__ActionMenu_Input(CObjActionnable * this) {
   if (this -> actions != NULL)
-    this -> actions -> InputAndRender(this -> actions); 
+    return this -> actions -> Input(this -> actions); 
+  return 0; 
+};
+
+void CObjActionnable__ActionMenu_Life(CObjActionnable * this) {
+  if (this -> actions != NULL)
+    this -> actions -> Life(this -> actions); 
+};
+
+void CObjActionnable__ActionMenu_Render(const CObjActionnable * this) {
+  if (this -> actions != NULL)
+    this -> actions -> Render(this -> actions); 
 };
 
 void CObjActionnable__AjouterAction(CObjActionnable * this, const char * caption,

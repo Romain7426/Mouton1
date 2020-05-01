@@ -1,7 +1,8 @@
 #ifndef APISCRIPT_H
 #define APISCRIPT_H
 
-enum TTypeInstructionCourante {
+enum TTypeInstructionCourante { 
+  Script_Automaton_Idle, 
   ticInstructionScript, /*instruction genre if, + etc... géré par le script*/
   ticAfficherMessage, /*instruction affichermessage (la boucle du jeu s'en occupe*/
   ticMiniMenu, /*itou*/
@@ -10,7 +11,7 @@ enum TTypeInstructionCourante {
   ticWait,
   ticWaitFor,
   ticNOMBRE
-};
+}; 
 TYPEDEF_TYPENAME_WITHOUT_ENUM(TTypeInstructionCourante);
 
 struct api_contexte_t {
@@ -34,6 +35,9 @@ struct api_contexte_t {
   struct CMiniMenu * * MiniMenu;
   int nbpasses;
   struct CBonhomme * b;
+  
+  //riemann_t * our_manifold; 
+  riemann_t * * our_manifold_ref; 
 };
 extern api_contexte_t * api_contexte_make(void); 
 
@@ -48,7 +52,9 @@ extern bool SCRIPT_EstEnTrainDExecuterUnScript(void);
 
 extern const char * SCRIPT_GetNomCarte(void);
 extern void SCRIPT_AfficherMessage(const char * msg);
-extern void SCRIPT_BeginAfficherMenu(void);
+//extern void SCRIPT_BeginAfficherMenu(void);
+extern CMenuAbstrait * SCRIPT_BeginAfficherMenu(void); 
+
 //extern CMenuAbstrait* MiniMenu;
 extern int SCRIPT_AfficherMenu(const char * msg);
 //extern int SCRIPT_GetChoixMenu(void);
@@ -63,10 +69,10 @@ extern void SCRIPT_ChangerDeCarte_vXYZ(CMoteurTeleportation * MoteurTeleportatio
 extern void SCRIPT_AjouterObjetAnime(const char* qui, const char* filename);
 extern void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename);
 
-extern void SCRIPT_SetPosition_vTPoint3d(const char* qui, TPoint3D position);
-extern void SCRIPT_SetPosition_vExpanded(const char* qui, float x, float y, enum TMethodePlacement mp);
-extern void SCRIPT_SetZ(const char* qui, float z, TMethodePlacement mp);
-extern void SCRIPT_SetDirection(const char* qui, TDirection d);
+extern void SCRIPT_SetPosition_vP3D(const char * qui, TPoint3D position);
+extern void SCRIPT_SetPosition_vXY(const char * qui, float x, float y, enum TMethodePlacement mp);
+extern void SCRIPT_SetZ(const char * qui, float z, TMethodePlacement mp);
+extern void SCRIPT_SetDirection(const char * qui, TDirection d);
 
 extern void SCRIPT_Frapper(const char* qui);
 extern void SCRIPT_Deplacer(const char* qui, float x, float y, TMethodePlacement mp);

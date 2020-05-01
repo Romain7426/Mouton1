@@ -1,5 +1,5 @@
-#ifndef MESSAGES_HPP
-#define MESSAGES_HPP
+#ifndef MESSAGES_H
+#define MESSAGES_H
 
 
 #ifdef __GNUC__
@@ -18,21 +18,21 @@ extern FILE * zeldaferror;
 //extern void message(const char * mess, ...) MESSAGE_FORMAT_ATTRIBUT;
 //extern void messerr(const char * mess, ...) MESSAGE_FORMAT_ATTRIBUT;
 #define message(...)							\
-  if (!zeldafnotice) fprintf(zeldafnotice, __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
-  fprintf                   (stdout_FILE,  __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
+  if (zeldafnotice) fprintf(zeldafnotice, __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
+  fprintf                  (stdout_FILE , __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
   //putc('\n', yycarteout); 
 #define messerr(...)							\
-  if (!zeldafnotice) fprintf(zeldafnotice, "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
-  if (!zeldaferror)  fprintf(zeldaferror,  "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
-  fprintf                   (stdout_FILE,  "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
-  fprintf                   (stderr_FILE,  "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
+  if (zeldafnotice) fprintf(zeldafnotice, "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
+  if (zeldaferror)  fprintf(zeldaferror , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
+  fprintf                  (stdout_FILE , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
+  fprintf                  (stderr_FILE , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " __VA_ARGS__); \
   //putc('\n', yycarteout); 
 
 
 //extern void vmessage(const char * mess, va_list args);
 //extern void vmesserr(const char * mess, va_list args);
 
-extern void init_message(void);
-extern void end_message(void);
+extern void message__init(void);
+extern void message__dispose(void);
 
-#endif /* MESSAGES_HPP */
+#endif /* MESSAGES_H */

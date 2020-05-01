@@ -9,8 +9,8 @@
 // Sous Windows, ces fonctions sont définies dans windef.h
 // Je ne sais pas où sont défénies ces fonctions, mais il y en a besoin dans text.cpp
 //Sous windows, ça met des warnings
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#define max(a,b) ((a) < (b) ? (b) : (a))
+//#define min(a,b) ((a) < (b) ? (a) : (b))
+//#define max(a,b) ((a) < (b) ? (b) : (a))
 #endif 
 
 

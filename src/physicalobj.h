@@ -1,5 +1,5 @@
-#ifndef PHYSICALOBJ_HPP
-#define PHYSICALOBJ_HPP
+#ifndef PHYSICALOBJ_H 
+#define PHYSICALOBJ_H 
 
 enum TMethodePlacement { mpABSOLU, mpRELATIF }; 
 TYPEDEF_TYPENAME_WITHOUT_ENUM(TMethodePlacement);
@@ -8,67 +8,61 @@ TYPEDEF_TYPENAME_WITHOUT_ENUM(TMethodePlacement);
 enum { CPhysicalObj_subtype_None, CPhysicalObj_subtype_CBonhomme, CPhysicalObj_subtype_CObjNonAnime }; 
 
 /* 
-   Ceci est une structe abstraite pour définir des choses matérielles.
-   But : modéliser un point matériel (position, vitesse, forces...)
+   Ceci est une structe abstraite pour définir des choses matérielles. 
+   But: modéliser un point matériel (position, vitesse, forces...) 
 */
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPhysicalObj);
 DECLARE_NEW_OPERATOR_FOR_STRUCT(CPhysicalObj);
 //struct CPhysicalObj : public CObjActionnable {
-struct CPhysicalObj {
+struct CPhysicalObj { 
   CObjActionnable parent;
   
   int subtype; 
   
-  //protected:
+  bool nvalid_position; 
+  bool  valid_position_x,  valid_position_y,  valid_position_z; 
+  bool nvalid_position_x, nvalid_position_y, nvalid_position_z; 
+  float ancvolumemax; float volumemax;
   
-  bool nvalid_position;
-  bool valid_position_x, valid_position_y, valid_position_z;
-  bool nvalid_position_x, nvalid_position_y, nvalid_position_z;
-  TPoint3D f, v, p, np, dimension;
-  float ancvolumemax, volumemax;
-  
-  int pv, pvmax;
-  bool is_objet_ephemere;
+  int pv; 
+  int pvmax; 
+  bool is_objet_ephemere; 
     
   /* pour la plupart des objets (sauf les 3DS),
      la zone de choc est un parallpipède
      de taille dimension (contenant longueur, largeur, hauteur)
 
-     le centre de la face de base (en bas) est le point p*/
-       
-  /*force (accélération),
-    vitesse,
-    position,
-    nouvelle position (calculée),
-    dimension*/
-    
-  //public:
-  //virtual const char * const filename;
+     le centre de la face de base (en bas) est le point p*/       
+  TPoint3D f; // force (accélération) 
+  TPoint3D v; // vitesse,
+  TPoint3D p; // position,
+  TPoint3D np; // nouvelle position (calculée) 
+  TPoint3D dimension; // dimension 
+  
   char * filename;
 
 
-  //public:
-
-    
-  bool Immerge; /* vaut vrai si la chose est entièrement immergé dans l'eau */
-  bool DansEau; /* vaut vrai si la chose est dans l'eau (^m si c'est qu'un doigt de pied */
-  bool Compressible; /* vaut vrai ssi ça se compresse avec le tore
-			Typiquement, être vivant, bonhomme --> faux
-			pierre, maison ---> vrai */
+  int8_t Immerge_huh; //* vaut vrai si la chose est entièrement immergé dans l'eau */
+  int8_t DansEau_huh; //* vaut vrai si la chose est dans l'eau (^m si c'est qu'un doigt de pied */
+  int8_t Compressible_huh; /* vaut vrai ssi ça se compresse avec le tore
+			      Typiquement, être vivant, bonhomme --> faux
+			      pierre, maison ---> vrai */
                    
-  bool Fixe; /* calcule-t-on les forces appliqués à l'objet ?? */
+  int8_t Fixe_huh; //* calcule-t-on les forces appliqués à l'objet ?? */
     
-  bool AuSol;
-  bool Hostile;
+  int8_t AuSol_huh; 
+  int8_t Hostile_huh; 
 
-  float CoeffFrottementFluide, CoeffFrottementFluideZ; 
-
-
-
-
+  float CoeffFrottementFluide; 
+  float CoeffFrottementFluideZ; 
+  
+  
+  
+  
+  // *** METHODS *** 
   
   bool (* IsVolumeNul)(const struct CPhysicalObj * this);
-  TPoint3D (* GetDimension)(const struct CPhysicalObj * this, const CSol * Map);
+  TPoint3D (* GetDimension)(const struct CPhysicalObj * this, const riemann_t * our_manifold);
   float (* NormeVitesse)(const struct CPhysicalObj * this);
   TPoint3D (* GetPosition)(const struct CPhysicalObj * this);
   //void (* SetPosition_vTPoint3D)(struct CPhysicalObj * this, TPoint3D pos);
@@ -78,7 +72,7 @@ struct CPhysicalObj {
   void (* SetZ)(struct CPhysicalObj * this, float z, TMethodePlacement mp);
   void (* SetDimension)(struct CPhysicalObj * this, float dx, float dy, float dz);
     
-  /* pour gérer les forces dans le moteur physique )(struct CPhysicalObj * this, appelé à chaque boucle) */
+  //* pour gérer les forces dans le moteur physique )(struct CPhysicalObj * this, appelé à chaque boucle) */
   void (* InitForce)(struct CPhysicalObj * this);
   //void (* AddForce)(struct CPhysicalObj * this, TPoint3D f);
   void (* AddForce_vP3D)(struct CPhysicalObj * this, TPoint3D f);
@@ -90,10 +84,10 @@ struct CPhysicalObj {
   void (* TesterSol)(struct CPhysicalObj * this, const CSol * Map);
   // friend void (* TesterPosition)(struct CPhysicalObj * this, struct CPhysicalObj * po);
 
-  /* retourne vrai ssi il n'y a pas de colision */
-  bool (* TesterPosition)(struct CPhysicalObj * this, const CSol * Map, const struct CPhysicalObj * po);
+  //* retourne vrai ssi il n'y a pas de colision */
+  bool (* TesterPosition)(struct CPhysicalObj * this, const riemann_t * our_manifold, const struct CPhysicalObj * po);
   bool (* IsBloque)(const struct CPhysicalObj * this);
-  void (* Render)(const struct CPhysicalObj * this, const CSol * Map);
+  void (* Render)(const struct CPhysicalObj * this, const riemann_t * our_manifold);
 
   // gestion des points de vies
   void (* PerdrePV)(struct CPhysicalObj * this, int nbpv);
@@ -112,7 +106,7 @@ extern void CPhysicalObj_delete_aux(CPhysicalObj * this);
 extern CPhysicalObj * CPhysicalObj_copy(const CPhysicalObj * src); 
 extern CPhysicalObj * CPhysicalObj_copy_aux(CPhysicalObj * this, const CPhysicalObj * src); 
 
-extern void CPhysicalObj__Render(const CPhysicalObj * this, const CSol * Map); 
+extern void CPhysicalObj__Render(const CPhysicalObj * this, const riemann_t * our_manifold); 
 
 
 
@@ -120,5 +114,5 @@ extern void CPhysicalObj__Render(const CPhysicalObj * this, const CSol * Map);
 
 
 
-#endif /* PHYSICALOBJ_HPP */
+#endif /* PHYSICALOBJ_H */
 

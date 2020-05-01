@@ -11,10 +11,10 @@ struct CMoteurTeleportation {
   float r, v, b;
             
   void (* DebuterTeleportation)(struct CMoteurTeleportation * this, struct CZoneTeleportation in_zt);
-  // on commence une tÈlÈportation
+  // on commence une t√©l√©portation
   
   bool (* IsTeleportationEnCours)(const struct CMoteurTeleportation * this);
-  // prÈcise si le jeu est en train de rÈaliser une tÈlÈportation
+  // pr√©cise si le jeu est en train de r√©aliser une t√©l√©portation
   
   void (* SetCouleurFondu)(struct CMoteurTeleportation * this, int in_couleur);
   
@@ -23,16 +23,23 @@ struct CMoteurTeleportation {
 
   //void (* Render)(const struct CMoteurTeleportation * this, struct CMap * &Map, bool &EnVaisseau, struct CBonhomme * &Hero);
   void (* Render)(const struct CMoteurTeleportation * this, struct CMap * * Map_ptr, bool * EnVaisseau_ptr, struct CBonhomme * * Hero_ptr);
-  /*si le jeu ne fait pas de tÈlÈportation, ==> ne fait rien
-    sinon, avance dans la tÈlÈportation
-    (dessine le fondu... ‡ placer en fin de RaiseRender())
+  /*si le jeu ne fait pas de t√©l√©portation, ==> ne fait rien
+    sinon, avance dans la t√©l√©portation
+    (dessine le fondu... √† placer en fin de RaiseRender())
     charge la nouvelle carte
     puis fondu inverse
   */
+  
+  CMoteurTeleportation * (* make)(void);
+  CMoteurTeleportation * (* make_content)(CMoteurTeleportation * this);
+  void (* delete)(CMoteurTeleportation * this);
+  void (* delete_content)(CMoteurTeleportation * this);
 };
 
-extern CMoteurTeleportation * CMoteurTeleportation_make(void);
-extern void CMoteurTeleportation_delete(CMoteurTeleportation * this);
+extern CMoteurTeleportation * CMoteurTeleportation__make(void);
+extern CMoteurTeleportation * CMoteurTeleportation__make_content(CMoteurTeleportation * this);
+extern void CMoteurTeleportation__delete(CMoteurTeleportation * this);
+extern void CMoteurTeleportation__delete_content(CMoteurTeleportation * this);
 
 extern void CMoteurTeleportation__DebuterTeleportation(CMoteurTeleportation * this, CZoneTeleportation in_zt);
 extern bool CMoteurTeleportation__IsTeleportationEnCours(const CMoteurTeleportation * this);

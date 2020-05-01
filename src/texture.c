@@ -238,7 +238,7 @@ bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLu
   }; 
 
   SDL_FreeSurface(texture);
-  printf("Chargement de l'image dans OpenGL à travers la SDL effectué (code erreur OpenGL: %d)\n\n", (int) glGetError());
+  printf("Chargement de l'image dans OpenGL à travers la SDL effectué (code OpenGL: %d)\n\n", (int) glGetError());
   return true; 
 };
 

@@ -12,7 +12,7 @@ physique {
 
 gameplay {
  points de vie := 9999;
- invinsible := vrai;
+ invincible := vrai;
  
 }
 

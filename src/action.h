@@ -8,7 +8,10 @@
 struct CObjActionnable {
   CActionsMenu * actions; 
   
-  void (* InputAndRenderActionMenu)(struct CObjActionnable * this);  
+  //void (* InputAndRenderActionMenu)(struct CObjActionnable * this);  
+  int  (* ActionMenu_Input)(struct CObjActionnable * this);  
+  void (* ActionMenu_Life)(struct CObjActionnable * this);  
+  void (* ActionMenu_Render)(const struct CObjActionnable * this);  
   void (* AjouterAction)(struct CObjActionnable * this, const char * caption, const char * nom_texture, const char * fichier_pascal, const char * proc);
 };
 
@@ -18,7 +21,10 @@ extern void CObjActionnable_delete(CObjActionnable * this);
 extern void CObjActionnable_delete_aux(CObjActionnable * this); 
 extern CObjActionnable * CObjActionnable_copy(const CObjActionnable * src);
 extern CObjActionnable * CObjActionnable_copy_aux(CObjActionnable * this, const CObjActionnable * src);
-extern void CObjActionnable__InputAndRenderActionMenu(struct CObjActionnable * this); 
+//extern void CObjActionnable__InputAndRenderActionMenu(struct CObjActionnable * this); 
+extern int  CObjActionnable__ActionMenu_Input(struct CObjActionnable * this); 
+extern void CObjActionnable__ActionMenu_Life(struct CObjActionnable * this); 
+extern void CObjActionnable__ActionMenu_Render(const struct CObjActionnable * this); 
 extern void CObjActionnable__AjouterAction(struct CObjActionnable * this, const char * caption, const char * nom_texture, const char * fichier_pascal, const char * proc);
 
 
@@ -57,11 +63,17 @@ enum { ACTIONS_MENU_X = 100, ACTIONS_MENU_Y = 400 };
 // CActionsMenu c'est un menu qui gere legerement plus les actions
 struct CActionsMenu /* : public CMenuAbstrait */ {    
   CMenuAbstrait parent; 
-  bool (* InputAndRender)(CActionsMenu * this);
+  //bool (* InputAndRender)(CActionsMenu * this);
+  int  (* Input)(CActionsMenu * this);
+  void (* Life)(CActionsMenu * this);
+  void (* Render)(const CActionsMenu * this);
 };
-extern bool CActionsMenu__InputAndRender(CActionsMenu * this); 
+//extern bool           CActionsMenu__InputAndRender(CActionsMenu * this); 
+extern int            CActionsMenu__Input(CActionsMenu * this); 
+extern void           CActionsMenu__Life(CActionsMenu * this); 
+extern void           CActionsMenu__Render(const CActionsMenu * this); 
 extern CActionsMenu * CActionsMenu_make(void); 
-extern void CActionsMenu_delete(CActionsMenu * this); 
+extern void           CActionsMenu_delete(CActionsMenu * this); 
 extern CActionsMenu * CActionsMenu_copy(const CActionsMenu * src); 
 
 

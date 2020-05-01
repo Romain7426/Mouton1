@@ -17,7 +17,7 @@ static void vmesserr(const char * mess, va_list args);
 */
 
 
-void init_message(void) {
+void message__init(void) {
   (void) fprintf(stdout, "Initialisation des fonctions de message.\n");
  
   (void) (zeldafnotice = fopen(FILENOTICE, "w"));
@@ -51,7 +51,7 @@ void init_message(void) {
 };
 
 
-void end_message(void) {
+void message__dispose(void) {
   (void) fprintf(stdout, "Fermeture du fichier \"%s\".\n", FILEERROR);
   (void) fprintf(zeldafnotice, "Fermeture du fichier \"%s\".\n", FILEERROR);
   (void) fprintf(zeldaferror, "Fermeture du fichier \"%s\".\n", FILEERROR);

@@ -1,7 +1,7 @@
 #include "global.h"
 #include "apiscript.h"
-#include "kernel.h"
-#include "main.h"
+#include "002_kernel.h"
+//#include "main.h"
 #include "physicalobj.h"
 #include "bonhomme.h"
 #include "map.h"
@@ -25,11 +25,11 @@ api_contexte_t * api_contexte_make(void) {
   return this; 
 }; 
 
-void SCRIPT_AjouterObjetAnime(const char* qui, const char * filename) {
-  printf("SCRIPT_AjouterObjetAnime(%s, %s)\n", qui, filename);
-  CBonhomme * o = CBonhomme_make(filename);
-  (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent1);
-};
+void SCRIPT_AjouterObjetAnime(const char* qui, const char * filename) { 
+  printf("SCRIPT_AjouterObjetAnime(%s, %s)\n", qui, filename); 
+  CBonhomme * o = CBonhomme_make(filename); 
+  (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent1); 
+}; 
 
 void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename) {
   printf("SCRIPT_AjouterObjetNonAnime(%s, %s)\n", qui, filename);
@@ -38,21 +38,34 @@ void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename) {
 };
 
 bool SCRIPT_EstEnTrainDExecuterUnScript(void) {
-  return (*(api_contexte.ModeJeu)) == mjSCRIPT;     
+  //return (*(api_contexte.ModeJeu)) == mjSCRIPT;     
+  return false; 
 };
 
-void SCRIPT_SetTemps(float t) {
-/* 0.0f : il fait jour
+void SCRIPT_SetTemps(const float t) { 
+/* 0.0f : il fait jour 
    0.5f : il fait nuit*/
-  (*(api_contexte.Temps)) = 2*PI*t;
-};
-
-void SCRIPT_BloquerTemps(void) {
-  (*(api_contexte.marche_compression)) = 0.0f;   
+#if 1 
+  (*(api_contexte.our_manifold_ref)) -> temps__set(*(api_contexte.our_manifold_ref), t);   
+#else 
+  (*(api_contexte.Temps)) = 2*PI*t; 
+#endif 
 }; 
 
-void SCRIPT_DebloquerTemps(void) {
-  (*(api_contexte.marche_compression)) = marche_compression_defaut;     
+void SCRIPT_BloquerTemps(void) { 
+#if 1 
+  (*(api_contexte.our_manifold_ref)) -> temps__bloque(*(api_contexte.our_manifold_ref));   
+#else 
+  (*(api_contexte.marche_compression)) = 0.0f; 
+#endif 
+}; 
+
+void SCRIPT_DebloquerTemps(void) { 
+#if 1 
+  (*(api_contexte.our_manifold_ref)) -> temps__debloque(*(api_contexte.our_manifold_ref));   
+#else 
+  (*(api_contexte.marche_compression)) = marche_compression_defaut; 
+#endif 
 }; 
 
 void SCRIPT_Init(void) {
@@ -63,8 +76,10 @@ void SCRIPT_Init(void) {
  script, les entrées clavier sont redirigé automatiquement vers 
  un défilement de texte, un choix de menu, ou rien...
  défini dans le script*/
-  (*(api_contexte.ModeJeu)) = mjSCRIPT;
-  (*(api_contexte.TypeInstructionCourante)) = ticInstructionScript;
+#if 0 
+  (*(api_contexte.ModeJeu)) = mjSCRIPT; 
+  (*(api_contexte.TypeInstructionCourante)) = ticInstructionScript; 
+#endif 
 };
 
 void SCRIPT_Quit(void) { 
@@ -73,7 +88,9 @@ void SCRIPT_Quit(void) {
  
  appuyer sur "haut" fera de nouveau bouger le héros etc...*/
   fprintf(stderr, "SCRIPT_Quit\n");
+#if 0 
   (*(api_contexte.ModeJeu)) = mjJEU; 
+#endif 
 }; 
 
 
@@ -86,45 +103,47 @@ const char * SCRIPT_GetNomCarte(void) {
 
 
 
-/*informe le jeu que l'on va afficher un message*/
-void SCRIPT_AfficherMessage(const char * msg) {
+// informe le jeu que l'on va afficher un message 
+void SCRIPT_AfficherMessage(const char * msg) { 
+  //fprintf(stderr, "<%s:" STRINGIFY(__LINE__) ">: " "@msg = %p" "\n", __func__, msg); fflush(NULL); 
+  
   (*(api_contexte.TypeInstructionCourante)) = ticAfficherMessage;
   MessageTexte -> SetMsg(MessageTexte, msg);
-  (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false;
-#if 0  
+  (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false; 
+#if 0 
   while (not((*(api_contexte.SCRIPT_SystemeRendMainAuScript))))
     SCRIPT_unepassedeboucle();
-#endif
+#endif 
+  (*(api_contexte.TypeInstructionCourante)) = ticAfficherMessage;  
 };
 
 
 
 
-void SCRIPT_Camera_SetPosition(float x, float y, float z, TMethodePlacement mp) {
+void SCRIPT_Camera_SetPosition(const float x, const float y, const float z, const TMethodePlacement mp) {
   //Camera.pos = ((mp == mpRELATIF) ? Camera.pos : Point3D_make(0.0f, 0.0f, 0.0f))  +  Point3D_make(x, y, z); 
 
   if (mp == mpRELATIF) { 
-    TPoint3D_add_self2(Camera.pos, x, y, z); 
-  }
-  else {
-    TPoint3D_assign(Camera.pos, x, y, z); 
-  };
+    TPoint3D_add_self_expanded__macro(Camera -> pos, x, y, z); 
+  } 
+  else { 
+    TPoint3D_assign__macro(Camera -> pos, x, y, z); 
+  }; 
+}; 
+
+
+
+void SCRIPT_Camera_Rotate(const float degree_angle_x, const float degree_angle_y, const float degree_angle_z, const TMethodePlacement mp) {
+  Camera -> angleXY = ((mp == mpRELATIF) ? Camera -> angleXY : 0.0f) + PI * degree_angle_x / 180.0f;
+  Camera -> angleHB = ((mp == mpRELATIF) ? Camera -> angleHB : 0.0f) + PI * degree_angle_y / 180.0f;
 };
 
 
-
-// angles en degré
-void SCRIPT_Camera_Rotate(float angle_x, float angle_y, float angle_z, TMethodePlacement mp) {
-  Camera.angleXY = ((mp == mpRELATIF) ? Camera.angleXY : 0.0f) + PI * angle_x / 180.0f;
-  Camera.angleHB = ((mp == mpRELATIF) ? Camera.angleHB : 0.0f) + PI * angle_y / 180.0f;
-};
-
-
-void SCRIPT_Camera_Zoom(float zoom) { 
+void SCRIPT_Camera_Zoom(const float zoom) { 
 /*zoom = 1.0f : normal
   zoom = 2.0f : on agrandit par 2, la caméra est deux fois plus près
   du point quel regarde */
-  Camera.SetDist(&Camera, dist_defaut / zoom);   
+  Camera -> SetDist(Camera, dist_defaut / zoom);   
 }; 
 
 
@@ -138,18 +157,34 @@ void SCRIPT_Camera_Zoom(float zoom) {
      :
      SCRIPT_AfficherMenu("Choisis ton héros :");                           
 */
+// RL: Why the 'add' function is not part of the apiscript? 
+//     It might be the reason that the script is behaving weirdly. 
+//     And it's definitely better than global var. 
 /*à appelr lors d'un début de menu*/
-void SCRIPT_BeginAfficherMenu(void) {
-  CMiniMenu_delete((*(api_contexte.MiniMenu))); 
-  (*(api_contexte.MiniMenu)) = CMiniMenu_make(100, 200, 10000); 
+//void SCRIPT_BeginAfficherMenu(void) { 
+CMenuAbstrait * SCRIPT_BeginAfficherMenu(void) { 
+  if (NULL != (*(api_contexte.MiniMenu))) { 
+    CMiniMenu_delete((*(api_contexte.MiniMenu))); 
+    (*(api_contexte.MiniMenu)) = NULL; 
+  }; 
+  //(*(api_contexte.MiniMenu)) = CMiniMenu_make(100, 200, 10000); 
+  (*(api_contexte.MiniMenu)) = CMiniMenu_make(/*x*/100, /*y*/270, /*w*/10000); 
+  (*(api_contexte.MiniMenu)) -> parent.NomSousMenu[0] = strcopy("<DEFAULT>"); 
+  (*(api_contexte.MiniMenu)) -> parent.iphi = 0; 
   (*(api_contexte.TypeInstructionCourante)) = ticMiniMenu;  
+  return &(*(api_contexte.MiniMenu)) -> parent; 
 }; 
 
 int SCRIPT_AfficherMenu(const char * msg) { 
-/*à appeler pour réellement afficher le menu*/
-/*une fois l'exécution du menu terminé, le jeu "rend la main" au script
-  ===> on récupère le choix effectué par l'utilisation dans un menu via 
-  cette fonction*/
+#if 0 
+  //fprintf(stderr, "%s: " "msg = %s" "\n", __func__, msg); 
+  //dprintf(2, "%s: " "msg = %s" "\n", __func__, msg); 
+  messerr("%s: " "msg = %s" "\n", __func__, msg); 
+#endif 
+  // à appeler pour réellement afficher le menu 
+  // une fois l'exécution du menu terminé, le jeu "rend la main" au script
+  //   ===> on récupère le choix effectué par l'utilisation dans un menu via 
+  //        cette fonction 
   (*(api_contexte.TypeInstructionCourante)) = ticMiniMenu;
   MessageTexte -> SetMsg(MessageTexte, msg);
   (*(api_contexte.SCRIPT_SystemeRendMainAuScript)) = false;
@@ -158,7 +193,7 @@ int SCRIPT_AfficherMenu(const char * msg) {
     SCRIPT_unepassedeboucle();
 #endif
      
-  return (*(api_contexte.MiniMenu)) -> parent.itheta;
+  return (*(api_contexte.MiniMenu)) -> parent.itheta; // RL: Should be ignored. 
 }; 
 
 
@@ -222,9 +257,13 @@ void SCRIPT_SetPosition_vP3D(const char * qui, TPoint3D position) {
   o -> SetPosition_vP3D(o, position);
 }; 
 
-void SCRIPT_SetPosition_vExpanded(const char * qui, float x, float y, TMethodePlacement mp) { 
+void SCRIPT_SetPosition_vXY(const char * qui, float x, float y, TMethodePlacement mp) { 
   printf("SCRIPT_SetPosition(%s, %f, %f, ...)\n", qui, x, y); 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  if (NULL == o) { 
+  messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+  return; 
+  };
   o -> SetPosition_vXY(o, x, y, mp, (*(api_contexte.Map)));
 }; 
 
@@ -288,8 +327,10 @@ void SCRIPT_Wait(int nbpasses) {
   SDL_Delay(100*nbpasses);
   
   return;
+#if 0 
   for (int i = 0; i < nbpasses; i++)
     SCRIPT_unepassedeboucle();     
+#endif 
 }; 
 
 

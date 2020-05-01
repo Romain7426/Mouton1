@@ -1,6 +1,6 @@
 #include "global.h"
 #include "bonhomme.h"
-#include "main.h"
+#include "002_kernel.h"
 #include "map.h"
 #include "anime.h"
 #include "camera.h"
@@ -8,25 +8,25 @@
 
 
 
-#define FACT_PIXEL_OPENGL 0.38
+#define FACT_PIXEL_OPENGL 0.38f 
 
-void DirectionToVecteur(TDirection d, TPoint3D * vec) {
+void DirectionToVecteur(const TDirection d, TPoint3D * vec) {
   switch(d) {
-  case DOS:   TPoint3D_assign(*vec, 0.0f,  1.0f, 0.0f); break; 
-  case FACE:  TPoint3D_assign(*vec, 0.0f, -1.0f, 0.0f); break; 
-  case PROFIL_VERS_G:  TPoint3D_assign(*vec, -1.0f, 0.0f, 0.0f); break; 
-  case PROFIL_VERS_D:  TPoint3D_assign(*vec,  1.0f, 0.0f, 0.0f); break; 
-  default: assert(false);
+  case DOS          : TPoint3D_assign__macro(*vec,  0.0f,  1.0f,  0.0f); break; 
+  case FACE         : TPoint3D_assign__macro(*vec,  0.0f, -1.0f,  0.0f); break; 
+  case PROFIL_VERS_G: TPoint3D_assign__macro(*vec, -1.0f,  0.0f,  0.0f); break; 
+  case PROFIL_VERS_D: TPoint3D_assign__macro(*vec,  1.0f,  0.0f,  0.0f); break; 
+  default: assert(false); 
   }; 
 }; 
  
  
 CPantin * CPantin__GetPantinFils(CPantin * this, int i) {
-  if (this -> Membre[i].Pantin == NULL) {
-    printf("On va créer un pantin intermédiaire au membre n° %i \n", i);
-    this -> Membre[i].Pantin = CPantin_make();
+  if (this -> Membre[i].Pantin == NULL) { 
+    printf("On va créer un pantin intermédiaire au membre n° %i \n", i); 
+    this -> Membre[i].Pantin = CPantin_make(); 
   }; 
-  return this -> Membre[i].Pantin;   
+  return this -> Membre[i].Pantin; 
 }; 
 
 
@@ -54,6 +54,7 @@ CPantin * CPantin_make(void) {
 }; 
 
 void CPantin_delete_aux(CPantin * this) {
+  if (this == NULL) return; 
   printf("Destruction du pantin %p\n", this);                  
   for (int i = 0; i < this -> NbMembres; i++) {
     CTexture_delete(this -> Membre[i].Texture); 
@@ -163,13 +164,16 @@ int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * dir, const cha
   { 
     char anime_fullpath[strlen(dir) + strlen(filename) + 1];
     strcat(strcpy(anime_fullpath, dir), filename);
-    anime_data = anime_make_from_file(anime_fullpath); 
+#define LOG_SUFF ".log"
+    char anime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1];
+    strcat(strcat(strcpy(anime_log, LOGDIR), filename), LOG_SUFF);
+    anime_data = anime_make_from_file(anime_fullpath, anime_log); 
   }; 
   
   this -> parent1.SetDimension(&this -> parent1, anime_data -> choc_longueur, anime_data -> choc_hauteur, anime_data -> choc_hauteur);
   if (NULL == this -> parent1.filename) this -> parent1.filename = strcopy(filename);
   this -> parent1.pvmax = anime_data -> vie; 
-  this -> parent1.Hostile = anime_data -> hostile; 
+  this -> parent1.Hostile_huh = anime_data -> hostile; 
 
   if (NULL == this -> filename) this -> filename = strcopy(filename);
 
@@ -206,11 +210,15 @@ CBonhomme * CBonhomme_make(const char * filename) {
   bzero(this, sizeof(*this)); 
   CPhysicalObj * o = &this -> parent1; 
   CPhysicalObj_make_aux(o, CPhysicalObj_subtype_CBonhomme, filename); 
+ 
+  CPantin * p = &this -> parent2; 
+  CPantin_make_aux(p); 
 
   this -> TexCoord = CBonhomme__TexCoord;
   this -> AfficherPantin = CBonhomme__AfficherPantin;
   this -> SetDirection = CBonhomme__SetDirection;
   this -> GetDirection = CBonhomme__GetDirection;
+  this -> Life = CBonhomme__Life;
   this -> Render = CBonhomme__Render;
   this -> Frapper = CBonhomme__Frapper;
   this -> EnTrainDeFrapper = CBonhomme__EnTrainDeFrapper;
@@ -231,9 +239,9 @@ CBonhomme * CBonhomme_make(const char * filename) {
   this -> invisible_etape = 0; 
   this -> filename = strcopy(filename); 
     
-  o -> Compressible = false;
-  o -> Fixe = false;
-  o -> Hostile = true;
+  o -> Compressible_huh = false;
+  o -> Fixe_huh = false;
+  o -> Hostile_huh = true;
 
   this -> od_nb = 0; 
   this -> od_head = 0;  
@@ -271,14 +279,15 @@ CBonhomme * CBonhomme_make(const char * filename) {
 
 void CBonhomme_delete(CBonhomme * this) {
   printf("Destruction du bonhomme (CBonhomme__~CBonhomme() ) %p\n", this); 
-  if (this -> filename != NULL) free(this -> filename); 
+  if (this -> filename != NULL) { free(this -> filename); }; 
+  CPantin_delete_aux(&this -> parent2); 
   CPhysicalObj_delete_aux(&this -> parent1); 
   free(this); 
 };
 
 
-void CBonhomme__TexCoord(const CBonhomme * this, int i, float tx, float ty) {
-  TDirection direction_affichee = ConvertirDirectionAvecVue2(this -> Direction, Camera);
+void CBonhomme__TexCoord(const CBonhomme * this, const int i, const float tx, const float ty) { 
+  const TDirection direction_affichee = ConvertirDirectionAvecVue2(this -> Direction, Camera); 
 
   const CPantin * p = &this -> parent2; 
 
@@ -293,17 +302,17 @@ void CBonhomme__TexCoord(const CBonhomme * this, int i, float tx, float ty) {
 
 
 void CBonhomme__AfficherPantin(const CBonhomme * this, const CPantin * pantin) {
-  if (pantin == NULL) return;
+  if (pantin == NULL) return; 
   
-  //printf("Affichage du pantin n° %i \n", pantin);
+  //printf("Affichage du pantin n° %i \n", pantin); 
   
-  /*le gars regarde dans la direction x*/
+  //*le gars regarde dans la direction x*/ 
   for (int i = 0; i < pantin -> GetNbMembres(pantin); i++) { 
-    //printf("Affichage du membre n° %i\n", i);
-    float a = pantin -> Membre[i].angle;
+    //printf("Affichage du membre n° %i\n", i); 
+    const float a = pantin -> Membre[i].angle; 
     pantin -> Membre[i].Texture -> GLTextureCourante(pantin -> Membre[i].Texture );  
-    glPushMatrix(); {
-      TDirection direction_affichee = ConvertirDirectionAvecVue2(this -> Direction, Camera); 
+    glPushMatrix(); { 
+      const TDirection direction_affichee = ConvertirDirectionAvecVue2(this -> Direction, Camera); 
       
       if ((direction_affichee == PROFIL_VERS_G) || (direction_affichee == PROFIL_VERS_D))
 	glTranslatef(pantin -> Membre[i].px, pantin -> Membre[i].py*0.05f, pantin -> Membre[i].pz);
@@ -361,25 +370,14 @@ bool CBonhomme__EnTrainDeFrapper(const CBonhomme * this) {
   return this -> Etat == ebFrapper;
 }    
 
-void CBonhomme__Render(CBonhomme * this, const CSol * Map) {
-#if 0
-  //fprintf(stderr, "HERE\n");
-  if (0 != strcmp(filename, "./heros.anime")) {
-    fprintf(stderr, "Bonhomme: Rendering: %s\n", filename);
-    fflush(NULL);
-  }
-#endif
+void CBonhomme__Life(CBonhomme * this) { 
   CPhysicalObj * o = &this -> parent1; 
   CPantin * p = &this -> parent2; 
   
-  o -> Render(o, Map);
-
-  glEnable(GL_TEXTURE_2D);
-  glDisable(GL_CULL_FACE); {
-    // on anime le pantin en donnant les angles des membres
-    for (int i = 0; i < p -> GetNbMembres(p); i++) {
-      p -> SetAngleMembre(p, i, p -> Membre[i].angle_max * this -> iangle / MAX_IND_ANGLE); 
-    };
+  // on anime le pantin en donnant les angles des membres
+  for (int i = 0; i < p -> GetNbMembres(p); i++) {
+    p -> SetAngleMembre(p, i, p -> Membre[i].angle_max * this -> iangle / MAX_IND_ANGLE); 
+  };
 
     CPantin * p_arme = p -> GetPantinFils(p, MEMBRE_AVEC_ARME); 
     p_arme -> SetAngleMembre(p_arme, 0, -150); 
@@ -396,23 +394,14 @@ void CBonhomme__Render(CBonhomme * this, const CSol * Map) {
         this -> EtapeEtat = 0;
       };
     };
-    
+
+
     // clignotement quand on est invisible
     if (this -> invisible_etape > 0) this -> invisible_etape--;
     if (this -> invisible_etape % 2 == 1) return;
     
-    glPushMatrix(); {
-      Map -> MatricePour2D(Map, o -> p.x, o-> p.y, o -> p.z);
-      glRotatef(90.0f * this -> Direction, 0.0f, 0.0f, 1.0f);
-      //glRotatef(90.0f*Direction + 90.0f*((int) (2.0f * (Camera.angleXY - PI/4.0f) / PI)), 0.0f, 0.0f, 1.0f);
-      
-      this -> AfficherPantin(this, p);
-      
-    } glPopMatrix();
-    
-    
     this -> iangle += o -> NormeVitesse(o) * this -> sens_iangle*2.0f;
-    if (o -> Immerge)
+    if (o -> Immerge_huh)
       this -> iangle += 1.0f * this -> sens_iangle; //dans l'eau on bouge (on nage)
     else if (o -> NormeVitesse(o) < 0.1f)
       this -> iangle = 0;
@@ -423,16 +412,47 @@ void CBonhomme__Render(CBonhomme * this, const CSol * Map) {
     if (this -> iangle <= -MAX_IND_ANGLE)
       this -> sens_iangle = 1;      
   
-  } glEnable(GL_CULL_FACE);  
-};    
+}; 
+
+void CBonhomme__Render(const CBonhomme * this, const riemann_t * our_manifold) {
+#if 0
+  //fprintf(stderr, "HERE\n");
+  if (0 != strcmp(filename, "./heros.anime")) {
+    fprintf(stderr, "Bonhomme: Rendering: %s\n", filename);
+    fflush(NULL);
+  }
+#endif
+  const CPhysicalObj * o = &this -> parent1; 
+  const CPantin * p = &this -> parent2; 
+  
+  o -> Render(o, our_manifold); 
+  
+  glEnable(GL_TEXTURE_2D); 
+  glDisable(GL_CULL_FACE); { 
+    
+    glPushMatrix(); { 
+      //Map -> MatricePour2D(Map, o -> p.x, o-> p.y, o -> p.z); 
+      our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, o -> p.x, o-> p.y, o -> p.z); 
+      glRotatef(90.0f * this -> Direction, 0.0f, 0.0f, 1.0f); 
+      //glRotatef(90.0f*Direction + 90.0f*((int) (2.0f * (Camera.angleXY - PI/4.0f) / PI)), 0.0f, 0.0f, 1.0f);
+      
+      this -> AfficherPantin(this, p); 
+      
+    } glPopMatrix(); 
+    
+  } glEnable(GL_CULL_FACE); 
+  
+}; 
 
 
 
-void CBonhomme__SetDirection(CBonhomme * this, TDirection NouvelleDirection) {
-  if ((NouvelleDirection < 0) || (NouvelleDirection > 3))
-    printf("ERREUR : Direction spécifiée incorrecte\n");
-  else
-    this -> Direction = NouvelleDirection;
+void CBonhomme__SetDirection(CBonhomme * this, const TDirection NouvelleDirection) {
+  if ((NouvelleDirection < 0) || (NouvelleDirection > 3)) { 
+    printf("ERREUR : Direction spécifiée incorrecte\n"); 
+  } 
+  else { 
+    this -> Direction = NouvelleDirection; 
+  }; 
 }; 
 
 
@@ -442,7 +462,9 @@ TDirection CBonhomme__GetDirection(const CBonhomme * this) {
 
 
 //void CBonhomme__Avancer(TDirection Direction, float FacteurCompression)
-void CBonhomme__Avancer(CBonhomme * this, TDirection Direction, const CMap * Map) {
+//void CBonhomme__Avancer(CBonhomme * this, const TDirection Direction, const CMap * Map) {
+//void CBonhomme__Avancer(CBonhomme * this, const TDirection Direction, const float FacteurCompression) {
+void CBonhomme__Avancer(CBonhomme * this, const TDirection Direction, const riemann_t * our_manifold) {
   /*on n'avance pas si on frappe par exemple
     ATTENTION: cela n'empêche pas que le gars soit poussé s'il frappe car
     les poussages se font directement via AddForce
@@ -451,20 +473,24 @@ void CBonhomme__Avancer(CBonhomme * this, TDirection Direction, const CMap * Map
     return;
   
   CPhysicalObj * o = &this -> parent1; 
-  float FacteurCompression;
-  FacteurCompression = Map -> parent.FacteurCompression(&Map -> parent, o -> GetPosition(o).y);
+#if 1 
+  const float FacteurCompression = our_manifold -> FacteurCompression(our_manifold, /*map_j*/0, o -> GetPosition(o).y); 
+#else 
+  //float FacteurCompression; 
+  const float FacteurCompression = Map -> parent.FacteurCompression(&Map -> parent, o -> GetPosition(o).y); 
+#endif 
 
 #define force_marche 0.8f
   switch (Direction) {
-  case DOS:  o -> AddForce_vXYZ(o, 0.0f,  force_marche, 0.0f); break;
-  case FACE: o -> AddForce_vXYZ(o, 0.0f, -force_marche, 0.0f); break;
-  case PROFIL_VERS_G: o -> AddForce_vXYZ(o, - force_marche / FacteurCompression, 0.0f, 0.0f); break;
-  case PROFIL_VERS_D: o -> AddForce_vXYZ(o,   force_marche / FacteurCompression, 0.0f, 0.0f); break;
-  default: assert(false);
-  }
+  case DOS          : o -> AddForce_vXYZ(o,                                0.0f,  force_marche, 0.0f); break; 
+  case FACE         : o -> AddForce_vXYZ(o,                                0.0f, -force_marche, 0.0f); break; 
+  case PROFIL_VERS_G: o -> AddForce_vXYZ(o, - force_marche / FacteurCompression,          0.0f, 0.0f); break; 
+  case PROFIL_VERS_D: o -> AddForce_vXYZ(o,   force_marche / FacteurCompression,          0.0f, 0.0f); break; 
+  default: assert(false); 
+  }; 
     
-  this -> SetDirection(this, Direction);
-}
+  this -> SetDirection(this, Direction); 
+}; 
 
 
 
@@ -473,7 +499,7 @@ bool CBonhomme__EstInvisible(const CBonhomme * this) {
   return (this -> invisible_etape > 0);    
 };
 
-void CBonhomme__DevenirInvisible(CBonhomme * this, int nbetape) {
+void CBonhomme__DevenirInvisible(CBonhomme * this, const int nbetape) {
   this -> invisible_etape = nbetape;
 };    
 
@@ -565,7 +591,7 @@ void CBonhomme__AjouterOrdresDeplacement_vXY(CBonhomme * this, const float x, co
 
 
 
-void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, const bool MoteurPhysiqueActif) {
+void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, const riemann_t * our_manifold, const bool MoteurPhysiqueActif) {
   COrdreDeplacement * od = CBonhomme__OrdreDeplacement_head(this); 
     
   if (od) {
@@ -590,7 +616,7 @@ void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, con
       CBonhomme__OrdreDeplacement_pop(this); 
     }
     else {
-      this -> Avancer(this, od -> direction, Map); 
+      this -> Avancer(this, od -> direction, our_manifold); 
     };
     
     

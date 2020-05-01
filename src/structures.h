@@ -1,13 +1,15 @@
-#ifndef STRUCTURES_HPP
-#define STRUCTURES_HPP
+#ifndef STRUCTURES_H 
+#define STRUCTURES_H 
 
+#if 0 
 /* 
- * structure pour les données de la souris
+ * structure pour les donnÃ©es de la souris
  * x, y : position
- * dx, dy : dernier déplacement 
+ * dx, dy : dernier dÃ©placement 
  */
 struct TMouse {int x,y,dx,dy;};
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(TMouse);
+TYPEDEF_TYPENAME_WITHOUT_STRUCT(TMouse); 
+#endif 
 
 struct TColor {char r,v,b,a;};
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(TColor);
@@ -18,15 +20,16 @@ enum TDirection {FACE, PROFIL_VERS_D, DOS, PROFIL_VERS_G};
 TYPEDEF_TYPENAME_WITHOUT_ENUM(TDirection);
 
 enum TModeJeu { 
- mjTITRE,  // au début, on affiche le titre
- mjJEU,    // mode normal
- mjMENU,   // menu pour le choix des armes etc...
- mjSCRIPT, // on est en train d'exécuter un script
- mjTELEPORTATION,
- mjNOMBRE
+ mjTITRE,  // au dÃ©but, on affiche le titre 
+ mjCARTE,    // mode normal 
+ mjAEROTHEIERE, 
+ mjINVENTAIRE,   // menu pour le choix des armes etc... 
+ mjIDLE, // on est en train d'exÃ©cuter un script 
+ mjTELEPORTATION, 
+ mjNOMBRE 
 };
 TYPEDEF_TYPENAME_WITHOUT_ENUM(TModeJeu);
 
 
 
-#endif /* STRUCTURES_HPP */
+#endif /* STRUCTURES_H */ 

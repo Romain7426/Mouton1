@@ -114,15 +114,16 @@ struct CBonhomme /* : public CPhysicalObj, public CPantin */ {
   void (* SetDirection)(CBonhomme * this, const TDirection NouvelleDirection);
   TDirection (* GetDirection)(const CBonhomme * this);
   // affiche le bonhomme (en fait, anime le pantin puis affiche le pantin)
-  void (* Render)(CBonhomme * this, const CSol * Map);
+  void (* Life)(CBonhomme * this);
+  void (* Render)(const CBonhomme * this, const riemann_t * our_manifold);
   void (* Frapper)(CBonhomme * this);
   bool (* EnTrainDeFrapper)(const CBonhomme * this);
   bool (* EstInvisible)(const CBonhomme * this);
   void (* DevenirInvisible)(CBonhomme * this, const int nbetape);
-  void (* Avancer)(CBonhomme * this, const TDirection Direction, const CMap * Map);
+  void (* Avancer)(CBonhomme * this, const TDirection Direction, const riemann_t * our_manifold); 
   void (* AjouterOrdresDeplacement_vP)(CBonhomme * this, const TPoint3D pos);
   void (* AjouterOrdresDeplacement_vXY)(CBonhomme * this, const float x, const float y, const TMethodePlacement mp);
-  void (* TraiterOrdresDeplacement)(CBonhomme * this, const CMap * Map, const bool MoteurPhysiqueActif);
+  void (* TraiterOrdresDeplacement)(CBonhomme * this, const CMap * Map, const riemann_t * our_manifold, const bool MoteurPhysiqueActif);
   void (* ViderOrdresDeplacement)(CBonhomme * this);
   bool (* IsSoumisADesOrdres)(const CBonhomme * this);
 };
@@ -136,15 +137,16 @@ extern void CBonhomme__AfficherPantin(const CBonhomme * this, const CPantin * pa
 extern void CBonhomme__SetDirection(CBonhomme * this, const TDirection NouvelleDirection);
 extern TDirection CBonhomme__GetDirection(const CBonhomme * this);
   // affiche le bonhomme (en fait, anime le pantin puis affiche le pantin)
-extern void CBonhomme__Render(CBonhomme * this, const CSol * Map);
+extern void CBonhomme__Life(CBonhomme * this);
+extern void CBonhomme__Render(const CBonhomme * this, const riemann_t * our_manifold); 
 extern void CBonhomme__Frapper(CBonhomme * this);
 extern bool CBonhomme__EnTrainDeFrapper(const CBonhomme * this);
 extern bool CBonhomme__EstInvisible(const CBonhomme * this);
 extern void CBonhomme__DevenirInvisible(CBonhomme * this, const int nbetape);
-extern void CBonhomme__Avancer(CBonhomme * this, TDirection Direction, const CMap * Map);
+extern void CBonhomme__Avancer(CBonhomme * this, const TDirection Direction, const riemann_t * our_manifold); 
 extern void CBonhomme__AjouterOrdresDeplacement_vP(CBonhomme * this, const TPoint3D pos);
 extern void CBonhomme__AjouterOrdresDeplacement_vXY(CBonhomme * this, const float x, const float y, const TMethodePlacement mp);
-extern void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, const bool MoteurPhysiqueActif);
+extern void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, const riemann_t * our_manifold, const bool MoteurPhysiqueActif);
 extern void CBonhomme__ViderOrdresDeplacement(CBonhomme * this);
 extern bool CBonhomme__IsSoumisADesOrdres(const CBonhomme * this);
 

@@ -12,16 +12,17 @@ void DebutDePasse(void) {
 
 
 
-void FinDePasse(void) {
-  int diff = SDL_GetTicks() - t;
+void FinDePasse(void) { 
+  const int diff = SDL_GetTicks() - t; 
   
-#define nb_microsec_in_passe 20
-#if 1
-  if (diff < nb_microsec_in_passe)
-    SDL_Delay(nb_microsec_in_passe - diff);
-#endif
-
-};
+enum { nb_microsec_in_passe = 20 }; 
+#if 1 
+  if (diff < nb_microsec_in_passe) { 
+    SDL_Delay(nb_microsec_in_passe - diff); 
+  }; 
+#endif 
+  
+}; 
 
 
 

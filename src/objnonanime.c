@@ -24,17 +24,17 @@ CObjNonAnime * CObjNonAnime_copy(const CObjNonAnime * o) {
   this -> angleZ = 0.0f; 
   this -> filename = strcopy(o -> filename); 
   
-  this -> parent.Compressible = o -> parent.Compressible;
-  this -> parent.Hostile = o -> parent.Hostile;
-  this -> parent.Fixe = o -> parent.Fixe;
+  this -> parent.Compressible_huh = o -> parent.Compressible_huh;
+  this -> parent.Hostile_huh = o -> parent.Hostile_huh;
+  this -> parent.Fixe_huh = o -> parent.Fixe_huh;
   
-  this -> resobj3ds = C3DS_copy(o -> resobj3ds); 
+  this -> resobj3ds = o -> resobj3ds -> copy(o -> resobj3ds); 
   
   return this; 
 };
 
 void CObjNonAnime_delete(CObjNonAnime * this) {
-  C3DS_delete(this -> resobj3ds);        
+  this -> resobj3ds -> delete(this -> resobj3ds);        
   CPhysicalObj_delete_aux(&this -> parent); 
   free(this); 
 };
@@ -48,9 +48,9 @@ CObjNonAnime * CObjNonAnime_make(const char * filename) {
   this -> angleZ = 0.0f; 
   this -> filename = strcopy(filename); 
 
-  this -> parent.Compressible = true;  
-  this -> parent.Hostile = false;
-  this -> parent.Fixe = true;
+  this -> parent.Compressible_huh = true;  
+  this -> parent.Hostile_huh = false;
+  this -> parent.Fixe_huh = true;
 
   
   int ret;
@@ -68,30 +68,35 @@ CObjNonAnime * CObjNonAnime_make(const char * filename) {
 
 
 
-void CObjNonAnime__Render(const CObjNonAnime * this, const CSol * sol) {
-#if 0
-  if (0 != strcmp(filename, "./heros.anime")) {
-    fprintf(stderr, "ObjNonAnime: Rendering: %s\n", filename);
-    fflush(NULL);
-  }
+void CObjNonAnime__Render(const CObjNonAnime * this, const CSol * sol, const riemann_t * our_manifold) { 
+#if 0 
+  if (0 != strcmp(filename, "./heros.anime")) { 
+    fprintf(stderr, "ObjNonAnime: Rendering: %s\n", filename); 
+    fflush(NULL); 
+  }; 
 #endif
-
-  const CPhysicalObj * parent = &this -> parent; 
-  parent -> Render(parent, sol);   
   
-  glPushMatrix(); {
-
-    sol -> MatricePour2D(sol, parent -> p.x, parent -> p.y, parent -> p.z);
-
-    glRotatef(90.0f, 1.0, 0.0, 0.0);
-    glRotatef(this -> angleZ * 180.0f/PI, 0.0, 1.0, 0.0);
-
-    if (parent -> Compressible)
-      glScalef(1.0f, 1.0f, sol -> FacteurCompression(sol, parent -> p.y));
+  const CPhysicalObj * parent = &this -> parent; 
+  parent -> Render(parent, our_manifold); 
+  
+  glPushMatrix(); { 
     
-    this -> resobj3ds -> Render(this -> resobj3ds);
-
-  } glPopMatrix();
+    // RL: This is a change of origin and a change of the tangent vector basis: local coordinates. 
+    our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, parent -> p.x, parent -> p.y, parent -> p.z); 
+    
+    // RL: Now onwards, we are in map-local coordinates. 
+    
+    glRotatef(90.0f, 1.0, 0.0, 0.0); // RL: π/2 x-axis rotation. // RL: Awkwardly, 'glRotate' uses degrees. 
+    glRotatef(this -> angleZ * 180.0f/PI, 0.0, 1.0, 0.0); // RL: π y-axis rotation. // RL: Awkwardly, 'glRotate' uses degrees. 
+    
+    if (parent -> Compressible_huh) { 
+      const float FacteurCompression = our_manifold -> FacteurCompression(our_manifold, /*map_j*/0, parent -> p.y); 
+      glScalef(1.0f, 1.0f, FacteurCompression); 
+    }; 
+    
+    this -> resobj3ds -> Render(this -> resobj3ds); 
+    
+  } glPopMatrix(); 
 }; 
 
 
@@ -107,18 +112,21 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
 
   { 
     char nonanime_fullpath[strlen(dir) + strlen(filename) + 1];
-    strcat(strcpy(nonanime_fullpath, dir), filename);
-    nonanime_data = nonanime_make_from_file(nonanime_fullpath); 
+    strcat(strcpy(nonanime_fullpath, dir), filename); 
+#define LOG_SUFF ".log"
+    char nonanime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1];
+    strcat(strcat(strcpy(nonanime_log, LOGDIR), filename), LOG_SUFF);
+    nonanime_data = nonanime_make_from_file(nonanime_fullpath, nonanime_log); 
   }; 
   
   this -> parent.SetDimension(&this -> parent, nonanime_data -> choc_longueur, nonanime_data -> choc_hauteur, nonanime_data -> choc_hauteur);
   if (NULL == this -> parent.filename) this -> parent.filename = strcopy(filename);
-  this -> parent.Compressible = nonanime_data -> compressible; 
-  this -> parent.Fixe = nonanime_data -> fixe; 
+  this -> parent.Compressible_huh = nonanime_data -> compressible; 
+  this -> parent.Fixe_huh = nonanime_data -> fixe; 
   this -> parent.pvmax = nonanime_data -> vie; 
   
   if (0 < nonanime_data -> elements_nb) { 
-    this -> resobj3ds = C3DS_make(nonanime_data -> elements_image[0]);
+    this -> resobj3ds = C3DS__make(nonanime_data -> elements_image[0]);
   }; 
   if (NULL == this -> filename) this -> filename = strcopy(filename);
   

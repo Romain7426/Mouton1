@@ -7,7 +7,7 @@
 
 
 static CAffichageMainPierre * CAffichageMainPierre_set_attributs(CAffichageMainPierre * this) {
-  this -> main = CTexture_make("main.png");   
+  this -> main   = CTexture_make("main.png");   
   this -> pierre = CTexture_make("pierre.png");    
   this -> Render = CAffichageMainPierre__Render; 
   return this; 
@@ -19,7 +19,7 @@ CAffichageMainPierre * CAffichageMainPierre_make(void) {
 }; 
 
 
-void CAffichageMainPierre__Render(const CAffichageMainPierre * this, const float y, const CMap * Map) {
+void CAffichageMainPierre__Render(const CAffichageMainPierre * this, const float y, const float FacteurCompression) { //const CMap * Map) {
   #define MAIN_PIERRE_X 550
   #define MAIN_PIERRE_Y 340  
   #define PIERRE_X 30
@@ -29,8 +29,8 @@ void CAffichageMainPierre__Render(const CAffichageMainPierre * this, const float
   #define TAILLE_PIERRE_Y 32
   
   glEnable2D(); {
-
-    const float d = Map -> parent.FacteurCompression(&Map -> parent, y);  
+    //const float d = Map -> parent.FacteurCompression(&Map -> parent, y);  
+    const float d = FacteurCompression; 
     this -> pierre -> GLTextureCourante(this -> pierre);
     glBegin(GL_QUADS); {
       BLIT(MAIN_PIERRE_X+PIERRE_X-(d*TAILLE_PIERRE_X/4.0f),
@@ -44,8 +44,7 @@ void CAffichageMainPierre__Render(const CAffichageMainPierre * this, const float
       BLIT(MAIN_PIERRE_X,MAIN_PIERRE_Y,128,128,0,0,1,1); 
     } glEnd();
     
-  } glDisable2D();      
-    
+  } glDisable2D();          
 }; 
 
     

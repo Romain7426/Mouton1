@@ -1,11 +1,11 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-TDirection ConvertirDirectionAvecVue(TDirection d, struct CCamera Camera);
-TDirection ConvertirDirectionAvecVue2(TDirection d, struct CCamera Camera);
+extern TDirection ConvertirDirectionAvecVue(const TDirection d, const struct CCamera * Camera);
+extern TDirection ConvertirDirectionAvecVue2(const TDirection d, const struct CCamera * Camera);
+
 
 #define dist_defaut 150.0f
-
 
 
 struct CCamera {
@@ -23,14 +23,20 @@ struct CCamera {
   
   /*les angles de vues en radian... angleXY pour touner autour de uz... angleHB
     pour regarder de plus haut ou plus bas*/
-  float angleXY, angleHB;
-
-
+  // RL: These angles are in radians. 
+  float angleXY; // RL: In the plane (x-y), around z-axis. 
+  float angleHB; // RL: Distance in angle from z-axis - we're in a cone around the z-axis: Be D any axis in in the plane (x-y), it's a D-rotation. 
+  
+  
+  
+  
+  // *** METHODS *** 
+  
   bool (* IsSolidaireAuHeros)(const struct CCamera * this);
  
   void (* InitCamera)(struct CCamera * this);
   //initialise les paramètres pour une vue de jeu normal
-
+  
   //attache la caméra au héros
   void (* SolidariserAuHeros)(struct CCamera * this);
   
@@ -41,14 +47,13 @@ struct CCamera {
   
   /**** ne pas prévoir d'instructions pascal pour ça... 
 	CalcCamera est automatiquement appelé dans RaiseRender)(struct CCamera * this)*/
-  void (* CalcCamera)(struct CCamera * this, const struct CBonhomme * Hero, const struct CMap * Map);
-  
+  void (* CalcCamera)(struct CCamera * this, const struct CBonhomme * Hero, const riemann_t * our_manifold);
   
   void (* EffetPsychadelique)(struct CCamera * this);
-  /*c'est nul*/
+  //*c'est nul*/
   
   void (* SetDist)(struct CCamera * this, float d);
-  /*distance de laquelle on regarde. plus c petit, plus on est près du point qu'on regarde*/
+  //*distance de laquelle on regarde. plus c petit, plus on est près du point qu'on regarde*/
 
 };
 
@@ -59,7 +64,8 @@ extern bool CCamera__IsSolidaireAuHeros(const struct CCamera * this);
 extern void CCamera__InitCamera(struct CCamera * this);
 extern void CCamera__SolidariserAuHeros(struct CCamera * this);
 extern void CCamera__DeSolidariser(struct CCamera * this);
-extern void CCamera__CalcCamera(struct CCamera * this, const struct CBonhomme * Hero, const struct CMap * Map);
+//extern void CCamera__CalcCamera(struct CCamera * this, const struct CBonhomme * Hero, const struct CMap * Map);
+extern void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const riemann_t * our_manifold); 
 extern void CCamera__EffetPsychadelique(struct CCamera * this);
 extern void CCamera__SetDist(struct CCamera * this, float d);
 

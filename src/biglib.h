@@ -33,8 +33,16 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 #ifndef max
 #define max(a,b) ((a) < (b) ? (b) : (a))
+#endif
+
+#ifndef MAX
+#define MAX(a,b) ((a) < (b) ? (b) : (a))
 #endif
 
 #define COMPILE_BREAK {int tab[-1];}
@@ -140,7 +148,7 @@ extern bool striequal(const char * str1, const char * str2);
 
 
 
-extern char * bool_string(bool b);
+//extern char * bool_string(bool b);
 extern const char * bool_string_const(bool b);
 extern const char * bool_string_tab[2];
 
@@ -155,9 +163,9 @@ extern char * str_of_integer(integer n);
 extern char * str_of_real(real x);
 extern char * str_of_pointeur(const void * ptr);
 
-extern char * float_string(const float x);
+//extern char * float_string(const float x);
 extern char * double_string(const double x);
-extern char * char_string(const char c);
+//extern char * char_string(const char c);
 extern char * char_string_filtre(const char c);
 //extern char * str_of_char(char c);
 //#define str_of_char
@@ -167,10 +175,10 @@ extern char * char_string_filtre(const char c);
 #define str_of_int    str_of_integer
 
 #define real_string str_of_real
-#define int_string str_of_integer
+//#define int_string str_of_integer
 
 
-extern char * uint_string(uint_t n);
+//extern char * uint_string(uint_t n);
 extern char * uint8_string(uint8_t byte);
 #define str_of_uint8 uint8_string
 #define str_of_uint uint_string

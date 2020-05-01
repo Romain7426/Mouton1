@@ -14,7 +14,10 @@ CMenuEntreeNom * CMenuEntreeNom_make(void) {
   
   ASSIGN_METHOD(CMenuEntreeNom,this,RetArr); 
   ASSIGN_METHOD(CMenuEntreeNom,this,Init); 
-  ASSIGN_METHOD(CMenuEntreeNom,this,InputAndRender); 
+  //ASSIGN_METHOD(CMenuEntreeNom,this,InputAndRender); 
+  ASSIGN_METHOD(CMenuEntreeNom,this,Input); 
+  ASSIGN_METHOD(CMenuEntreeNom,this,Render); 
+  ASSIGN_METHOD(CMenuEntreeNom,this,Life); 
 
   this -> poscur = 0; 
   
@@ -89,10 +92,12 @@ void CMenuEntreeNom__RetArr(CMenuEntreeNom * this) {
 }; 
 
 
-bool CMenuEntreeNom__InputAndRender(CMenuEntreeNom * this) {
+//bool CMenuEntreeNom__InputAndRender(CMenuEntreeNom * this) {
+int CMenuEntreeNom__Input(CMenuEntreeNom * this) { 
   CMenu * parent = &this -> parent; 
   CMenuAbstrait * parent_parent = &this -> parent.parent; 
-  if (parent -> InputAndRender(parent)) {
+
+  if (parent -> Input(parent)) { 
     if (parent_parent -> Canceled)
       this -> RetArr(this);
     else {                       
@@ -110,14 +115,23 @@ bool CMenuEntreeNom__InputAndRender(CMenuEntreeNom * this) {
         
 	if (this -> poscur < MAX_LONGUEUR_BUFFER-1)
 	  this -> poscur++;  
-      }     
-    }                    
-  }
-  
-  Text -> print1(Text,0,0,10000,1000,"Mon nom est : ");
-  Text -> print1(Text,230,0,10000,1000,this -> buffer);
+      } 
+    } 
+  }; 
   
   return false;                       
+}; 
+
+void CMenuEntreeNom__Life(CMenuEntreeNom * this) {   
+  CMenu * parent = &this -> parent; 
+  parent -> Life(parent); 
+};
+
+void CMenuEntreeNom__Render(const CMenuEntreeNom * this) {   
+  const CMenu * parent = &this -> parent; 
+  parent -> Render(parent); 
+  Text -> print1(Text,0,0,10000,1000,"Mon nom est : ");
+  Text -> print1(Text,230,0,10000,1000,this -> buffer);
 };
 
 

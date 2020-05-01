@@ -2,44 +2,45 @@
 #include "obj3ds.h"
 #include "texture.h"
 
+// ***** DB ***** 
+enum        { obj3ds_dico__size = 256 }; 
+static char * obj3ds_dico__filename[obj3ds_dico__size] = {}; 
+static C3DS * obj3ds_dico__obj3ds  [obj3ds_dico__size] = {}; 
+static int    obj3ds_dico__usersnb [obj3ds_dico__size] = {}; 
+static int    obj3ds_dico__nb = 0; 
 
-C3DS * C3DS_copy__broken(const C3DS * src) {
-  MALLOC_BZERO(C3DS,this);
-  
-  *this = *src; 
+static int obj3ds_dico__push(const char * filename, C3DS * obj3ds_non_copie) {
+  assert(obj3ds_dico__nb < obj3ds_dico__size); 
+  const int index = obj3ds_dico__nb; 
+  obj3ds_dico__filename[index] = strcopy(filename); 
+  obj3ds_dico__obj3ds  [index] = obj3ds_non_copie; 
+  obj3ds_dico__usersnb [index] = 1; 
+  obj3ds_dico__nb++; 
+  return index; 
+}; 
 
-  for (int i = 0; i < MAX_TEXTURES; i++) { 
-    if (NULL == src -> g_Texture[i]) continue; 
-    this -> g_Texture[i] = CTexture_copy(src -> g_Texture[i]);
+static int obj3ds_dico__lookup(const char * filename) {
+  char * * p = obj3ds_dico__filename; 
+  for (int i = 0; i < obj3ds_dico__nb; i++) {
+    if (0 == strcmp(*p, filename)) return i; 
+    p++; 
   };
-
-  for (int i = 0; i < this -> g_3DModel.numOfObjects; i++) {
-    // Free the faces, normals, vertices, and texture coordinates.
-    free(this -> g_3DModel.pObject[i].pFaces);
-    free(this -> g_3DModel.pObject[i].pNormals);
-    free(this -> g_3DModel.pObject[i].pVerts);
-    free(this -> g_3DModel.pObject[i].pTexVerts);
-  }
-  
-  return this; 
+  return -1;
 }; 
 
-C3DS * C3DS_copy(const C3DS * src) {
-  return C3DS_make(src -> filename); 
+static C3DS * obj3ds_dico__get(const int i) {
+  obj3ds_dico__usersnb[i] ++; 
+  return obj3ds_dico__obj3ds[i];
 }; 
 
-C3DS * C3DS_make(const char * filename) {
-  MALLOC_BZERO(C3DS,this);
-  
-  ASSIGN_METHOD(C3DS,this,Render); 
-  ASSIGN_METHOD(C3DS,this,RenderGL); 
-  //ASSIGN_METHOD(C3DS,this,CalcPE); 
+static void obj3ds_dico__release(const int i) {
+  obj3ds_dico__usersnb[i] --; 
+}; 
 
-  this -> filename = strcopy(filename); 
-  
-  char reelfile[strlen(T3DSDIR) + strlen(filename) + 1];
-  strcat(strcpy(reelfile, T3DSDIR), filename);
-  filename = reelfile;
+
+// ***** OBJECT ***** 
+
+static int C3DS__load(C3DS * this, const char * filename) { 
   bool b3dModelLoaded;
   
   printf("Importation du fichier 3DS %s...\n", filename);  
@@ -61,7 +62,7 @@ C3DS * C3DS_make(const char * filename) {
   else {
     printf("Impossible de charger le fichier 3DS '%s' ; soit le fichier n'existe pas, soit il est corrompu.", filename);
     fflush(NULL);
-    return this;
+    return false;
   };
   // Depending on how many textures we found, load each one (Assuming .BMP)
   // If you want to load other files than bitmaps, you will need to adjust CreateTexture().
@@ -95,9 +96,9 @@ C3DS * C3DS_make(const char * filename) {
   glEndList();
     
   printf("   Objet 3DS '%s' entièrement terminé !!\n", filename);
-
-  return this; 
+  return true; 
 }; 
+
 
 
 
@@ -206,13 +207,18 @@ void C3DS__RenderGL(const C3DS * this) {
 
 
 
-void C3DS__Render(const C3DS * this) {
+static void C3DS__Render(const C3DS * this) {
   glCallList(this -> Liste);
 };
 
 
 
-void C3DS_delete(C3DS * this) {
+static void C3DS__delete(C3DS * this) {
+  obj3ds_dico__release(this -> dico_i); 
+}; 
+
+static void C3DS__delete_hard(C3DS * this) {
+  if (this == NULL) return; 
   for (int i = 0; i < MAX_TEXTURES; i++)
     if (this -> g_Texture[i] != NULL) {
       CTexture_delete(this -> g_Texture[i]);
@@ -226,6 +232,165 @@ void C3DS_delete(C3DS * this) {
     free(this -> g_3DModel.pObject[i].pNormals);
     free(this -> g_3DModel.pObject[i].pVerts);
     free(this -> g_3DModel.pObject[i].pTexVerts);
-  }
+  }; 
+  
+  BZERO_THIS(this); 
+  free(this); 
 };
 
+
+static C3DS * C3DS__copy(const C3DS * this) {
+  return obj3ds_dico__get(this -> dico_i); 
+}; 
+
+C3DS * C3DS__make(const char * filename) { 
+  const int lookedup_index = obj3ds_dico__lookup(filename); 
+  if (lookedup_index >= 0) { return obj3ds_dico__get(lookedup_index); }; 
+  
+  MALLOC_BZERO(C3DS,this);
+  
+  ASSIGN_METHOD(C3DS,this,make); 
+  ASSIGN_METHOD(C3DS,this,copy); 
+  ASSIGN_METHOD(C3DS,this,delete); 
+  ASSIGN_METHOD(C3DS,this,Render); 
+  ASSIGN_METHOD(C3DS,this,RenderGL); 
+  //ASSIGN_METHOD(C3DS,this,CalcPE); 
+
+  this -> filename = strcopy(filename); 
+  
+  char realfile[strlen(T3DSDIR) + strlen(filename) + 1];
+  strcat(strcpy(realfile, T3DSDIR), filename);
+  
+  C3DS__load(this, realfile); 
+  
+  this -> dico_i = obj3ds_dico__push(filename, this); 
+  
+  return this; 
+}; 
+
+
+
+
+
+
+#if 0 
+C3DS * C3DS_copy__broken(const C3DS * src) {
+  MALLOC_BZERO(C3DS,this);
+  
+  *this = *src; 
+
+  for (int i = 0; i < MAX_TEXTURES; i++) { 
+    if (NULL == src -> g_Texture[i]) continue; 
+    this -> g_Texture[i] = CTexture_copy(src -> g_Texture[i]);
+  };
+
+  for (int i = 0; i < this -> g_3DModel.numOfObjects; i++) {
+    // Free the faces, normals, vertices, and texture coordinates.
+    free(this -> g_3DModel.pObject[i].pFaces);
+    free(this -> g_3DModel.pObject[i].pNormals);
+    free(this -> g_3DModel.pObject[i].pVerts);
+    free(this -> g_3DModel.pObject[i].pTexVerts);
+  }
+  
+  return this; 
+}; 
+
+C3DS * C3DS_copy(const C3DS * src) {
+  return C3DS_make(src -> filename); 
+}; 
+
+C3DS * C3DS_make(const char * filename) {
+  MALLOC_BZERO(C3DS,this);
+  
+  ASSIGN_METHOD(C3DS,this,Render); 
+  ASSIGN_METHOD(C3DS,this,RenderGL); 
+  //ASSIGN_METHOD(C3DS,this,CalcPE); 
+
+  this -> filename = strcopy(filename); 
+  
+  char reelfile[strlen(T3DSDIR) + strlen(filename) + 1];
+  strcat(strcpy(reelfile, T3DSDIR), filename);
+  filename = reelfile;
+  bool b3dModelLoaded;
+  
+  printf("Importation du fichier 3DS %s...\n", filename);  
+    
+  this -> g_ViewMode = GL_TRIANGLES; 
+  for (int i = 0; i < MAX_TEXTURES; i++) 
+    this -> g_Texture[i] = NULL;
+          
+  CLoad3DS_make_aux(&this -> g_Load3ds);
+
+  // First we need to actually load the .3DS file.  
+  // We just pass in an address to our t3DModel structure and the file name string we want to load ("face.3ds"). 
+  printf("   Début de la lecture du fichier 3DS '%s' ... !!\n", filename);
+  b3dModelLoaded = this -> g_Load3ds.Import3DS(&this -> g_Load3ds, &this -> g_3DModel, filename);         // Load our .3DS file into our model structure
+  if (b3dModelLoaded) {
+    printf("   Lecture du fichier 3DS '%s' terminée !!\n", filename);
+    fflush(NULL);
+  }
+  else {
+    printf("Impossible de charger le fichier 3DS '%s' ; soit le fichier n'existe pas, soit il est corrompu.", filename);
+    fflush(NULL);
+    return this;
+  };
+  // Depending on how many textures we found, load each one (Assuming .BMP)
+  // If you want to load other files than bitmaps, you will need to adjust CreateTexture().
+  // Below, we go through all of the materials and check if they have a texture map to load.
+  // Otherwise, the material just holds the color information and we don't need to load a texture.
+
+  // Go through all the materials
+  for (int i = 0; i < this -> g_3DModel.numOfMaterials; i++) {
+    // Check to see if there is a file name to load in this material
+    if (strlen(this -> g_3DModel.pMaterials[i].strFile) > 0) {   
+      printf("   Ahh le fichier 3DS référence la texture %s !!\n", this -> g_3DModel.pMaterials[i].strFile); 
+      // Use the name of the texture file to load the bitmap, with a texture ID (i).
+      // We pass in our global texture array, the name of the texture, and an ID to reference it. 
+      //CreateTexture(g_Texture, g_3DModel.pMaterials[i].strFile, i);  
+      this -> g_Texture[i] = CTexture_make(this -> g_3DModel.pMaterials[i].strFile);         
+      //g_Texture[i] = LoadTex("./herbe.jpg");//g_3DModel.pMaterials[i].strFile);
+    };
+    
+    // Set the texture ID for this material
+    this -> g_3DModel.pMaterials[i].texureId = i;
+  };
+  printf("   Récupération des textures du 3DS %s terminé !!\n", filename); 
+  // Here, we turn on a lighting and enable lighting.  We don't need to
+  // set anything else for lighting because we will just take the defaults.
+  // We also want color, so we turn that on
+
+  this -> Liste = glGenLists(1);
+    
+  glNewList(this -> Liste, GL_COMPILE);
+  this -> RenderGL(this);
+  glEndList();
+    
+  printf("   Objet 3DS '%s' entièrement terminé !!\n", filename);
+
+  return this; 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif 

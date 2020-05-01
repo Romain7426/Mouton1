@@ -1,101 +1,104 @@
-#ifndef PASCAL_H
-#define PASCAL_H
+#ifndef CPASCAL_H
+#define CPASCAL_H
 
-
-#if 0
-struct CPprog;
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(CProg);
-
-struct CPascal;
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPascal);
-
-#include "global.h"
-#include "pascal/pascal.mem.hpp"
-#include "pascal/pascal.env.hpp"
-#include "pascal/pascal.prog.hpp"
-#endif 
-
-
-/* C'est ici qu'on fournit l'interface avec le jeu pour le moteur pascal.
-   Un objet pascal est un fichier.
-   Pour l'instant ça ne gère pas les includes dans les fichiers pascal.
-   Un fichier se trouve dans le répertoire pascal du projet.
-   L'extension est en .pml (Pascal + OCaml).
-*/
-
-/* Pour créer un objet pascal, il faut lui passer un nom de fichier 
-   (avec l'extension !).
-   Le fichier est alors parsé puis exécuté (ça remplit les tables +
-   initialisation).
-   On renvoie un code d'erreur en cas de problème.
-   Ensuite, pour accéder à une variable du fichier (fonctionnelle ou pas),
-   il suffit d'appeler la fonction correspondante.
-   Elle ira chercher la variable dans la table, retourne un code d'erreur si nécessaire.
-   Ensuite, elle réalise le traitement associée.
-   
-   En fait il y aura une fonction pour chaque type de variable.
-   C'est mieux et plus propre.
-   Mais de cette manière on ne pourra pas que les types primitifs
-   (booléen, entier, intervalle, réel, chaîne et pointeur).
-*/
-
+#include "pscript/pscript.h"
 
 struct CPascal {
-  //private:
-  // Le fichier que l'on lit.
-  char * filename;
+  char * filename; 
+  int dico_i; 
+  
+  pscript_t * pscript_env; 
+  
+  int funproc_i; 
+  int next_ipc0; 
+  
 
-  // Code de retour du constructeur.
-  int code_erreur;
+#if 1 
+  int    readln__arg_nb; 
+  char   readln__arg_type[pscript_ffiproc__arg__size]; 
+  int    readln__arg_sizeof[pscript_ffiproc__arg__size]; 
+  int    readln__arg_offset[pscript_ffiproc__arg__size]; 
+  int    readln__arg_mem_size; 
+  char * readln__arg_mem; 
+  int    readln__retval_allocated_size; 
+  char * readln__retval_value; 
+#else   
+  int          readln__arg_nb; 
+  const char * readln__arg_type; 
+  const int  * readln__arg_sizeof; 
+  const int  * readln__arg_offset; 
+  int          readln__arg_mem_size; 
+  const char * readln__arg_mem; 
+  int          readln__retval_allocated_size; 
+  char *       readln__retval_value; 
+#endif 
+  
+  CPascal * (* make_empty)(void); 
+  CPascal * (* make_with_file)(const char * filename); 
+  void (* delete)(CPascal * this);
+  int (* read_file_no_init)(CPascal * this, const char * filename); 
+  int (* link_writeln)(CPascal * this);
+  int (* link_menu)(CPascal * this);
+  int (* link_methods)(CPascal * this);
+  int (* link_ffiprocs)(CPascal * this);
+  int (* init_file)(CPascal * this);
 
-  // programme en cours d'exécution
-  CPprog * prog_exec;
-
-  // L'environnement du script courant.
-  penv * env;
-
-  // La mémoire du script courant.
-  pmem * mem;
-        
-  // la pile du script courant
-  pascal_stack_t * stack;
-        
-  // L'environnement des noms de type.
-  // MOI: ne pas oublier de le traiter correctement.
-  // Il suppose qu'un seul script ne peut s'exécuter à la fois.
-  pdvaltypeuser * tabdvaltypeuser;
-
-  penv * env_exec;
-
-
-
-
-  // La fonction d'exécution d'une procédure.
   int (* execProcedure)(CPascal * this, const char * ident);
   int (* execProcedure_step)(CPascal * this, const char * ident);
-
-  // L'exécution de code.
-  // On ne peut exécuter que des procédures et des fonctions sans paramètres.
-  // Pour le passage de parmètre, il faut utiliser les fonctions ci-dessus
-  // et prévoir une interface.
   int (* next_step)(CPascal * this, bool * fini_huh);
-
   void (* stack_push_int)(CPascal * this, int a);
   void (* stack_push_string)(CPascal * this, const char * str);
+#if 0   
+#endif 
 }; 
-  // Le constructeur.
-  // Le code d'erreur rend un nombre négatif en cas d'erreur.
-extern CPascal * CPascal_make(const char * filename);
-  // Le destructeur.
-  // Etant donné que j'ai beaucoup merdé sur la structure générale du machin,
-  // ca ne libérera pas beaucoup de mémoire.
-extern void CPascal_delete(CPascal * this);
-  // La fonction d'exécution d'une procédure.
+
+extern CPascal * CPascal__make_empty(void); 
+extern CPascal * CPascal__make_with_file(const char * filename); 
+#define CPascal__make CPascal__make_with_file 
+#define CPascal_make CPascal__make 
+extern void CPascal__delete(CPascal * this); 
+#define CPascal_delete CPascal__delete 
+extern int CPascal__read_file_no_init(CPascal * this, const char * filename); 
+extern int CPascal__link_writeln(CPascal * this);
+extern int CPascal__link_menu(CPascal * this);
+extern int CPascal__link_methods(CPascal * this);
+extern int CPascal__link_ffiprocs(CPascal * this);
+extern int CPascal__init_file(CPascal * this);
+
 extern int CPascal__execProcedure(CPascal * this, const char * ident);
 extern int CPascal__execProcedure_step(CPascal * this, const char * ident);
 extern int CPascal__next_step(CPascal * this, bool * fini_huh);
+
 extern void CPascal__stack_push_int(CPascal * this, int a);
 extern void CPascal__stack_push_string(CPascal * this, const char * str);
+#if 0 
+#endif 
+
+extern int CPascal__ffiproc_callback__Readln__async_reverse_callback__push_return_value(CPascal * this, const char * readln_cstr); 
+extern int CPascal__ffiproc_callback__Menu__async_reverse_callback__push_return_value(CPascal * this, const int choice); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -222,4 +225,4 @@ struct CPascal {
 
        
 
-#endif /* PASCAL_H */
+#endif /* CPASCAL_H */

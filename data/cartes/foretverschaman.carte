@@ -58,12 +58,12 @@ graphique {
  }
  texture route {
   image := "pierre.jpg";
-  indice := 7171437; //12632256;
+  indice := 8421504; //7171437; //12632256;
  }
  
  texture feuilles {
   image := "feuilles.jpg";
-  indice := 65310; //65280;
+  indice := 65280; //65310; //65280;
  }
 objet arbre0 {
 anime := faux;

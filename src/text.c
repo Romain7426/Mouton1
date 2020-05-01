@@ -34,7 +34,16 @@ unsigned char conversionpourrie_(const uint8_t c0, const uint8_t c1, int * used_
   unsigned char d = c0; 
   *used_ref = 1; 
   switch (c0) {
-  case 195: if (167 == c1) { d = 135; *used_ref = 2; }; break; 
+  case 195: 
+    if (160 == c1) { d = 133; *used_ref = 2; break; };  // à 
+    if (162 == c1) { d = 131; *used_ref = 2; break; };  // â 
+    if (167 == c1) { d = 135; *used_ref = 2; break; };  // ç 
+    if (168 == c1) { d = 138; *used_ref = 2; break; };  // è 
+    if (169 == c1) { d = 130; *used_ref = 2; break; };  // é 
+    if (170 == c1) { d = 136; *used_ref = 2; break; };  // ê 
+    if (174 == c1) { d = 140; *used_ref = 2; break; };  // î 
+    if (180 == c1) { d = 147; *used_ref = 2; break; };  // ô 
+    break;
   }; 
   return d;
 }; 
@@ -108,8 +117,8 @@ CText * CText_make(void) {
   ASSIGN_METHOD(CText,this,print2); 
 
   printf("Création du moteur d'affichage de texte (chargement de l'image font.png)\n");
-  this -> tex = CTexture_make("./font.png");
-  printf("Chargement de font.png réussi\n");
+  this -> tex = CTexture_make("./font.png"); 
+  printf("Chargement de font.png réussi\n"); 
   return this; 
 }; 
 
@@ -121,7 +130,7 @@ void CText_delete(CText * this) {
 
 
 
-
+// RL: What does it return? 
 float CText__print2(CText * this, float l, const int nblignes, const int nbcaracmax, const int x, const int y, const int w, const int h, const char * c_src, bool * toutaffiche_ref) {
   int lignecourante  = 0;
 
@@ -132,7 +141,7 @@ float CText__print2(CText * this, float l, const int nblignes, const int nbcarac
   *((int*) NULL) = 1;
 #endif
 #if 0 
-  printf("CText__print: %s\n", c);
+  fprintf(stderr, "CText__print: %s\n", c_src);
   fflush(NULL);
 #endif 
   
@@ -146,12 +155,13 @@ float CText__print2(CText * this, float l, const int nblignes, const int nbcarac
   const int c_src_len = strlen(c_src); 
   char c[c_src_len+1]; 
   int c_len = 0; 
-  int used_bytes; 
+  int used_bytes = 1; 
   for (int i = 0; i < c_src_len; ) {
     c[c_len] = conversionpourrie(c_src[i]); 
     i += used_bytes; 
     c_len++; 
   }; 
+  c[c_len] = '\0';
 #if 0 
   for (int i = 0; i < c_len; i++) {
     write(0, c + i, 1); 
@@ -215,7 +225,17 @@ float CText__print2(CText * this, float l, const int nblignes, const int nbcarac
 	    messerr("CText__print: ç: %c" "\n", L'ç'); // UTF-8: "character too large for enclosing literal type" 
 	    messerr("CText__print: sizeof(ç): %d" "\n", sizeof(L'ç')); // UTF-8: sizeof(L'ç'): 4 
 	    {
-	      static const unsigned char c_cedille[] = "ç"; 
+#if 0 
+  if (c == 224) d = 133; //à
+  if (c == 226) d = 131; //â
+  if (c == 231) d = 135; //ç
+  if (c == 233) d = 130; //é
+  if (c == 232) d = 138; //è
+  if (c == 234) d = 136; //ê    
+  if (c == 238) d = 140; //î
+  if (c == 244) d = 131+16; //ô
+#endif 
+	      static const unsigned char c_cedille[] = "ô"; //"î"; //"ê"; //"è"; //"â";//"à";//"é";//"ç"; 
 	      messerr("CText__print: c_cedille[]: %s" "\n", c_cedille); // UTF-8: sizeof(L'ç'): 4 
 	      messerr("CText__print: sizeof(c_cedille[]): %d" "\n", sizeof(c_cedille)); // UTF-8: sizeof(c_cedille): 3 
 	      messerr("CText__print: ARRAY_SIZE(c_cedille[]): %d" "\n", ARRAY_SIZE(c_cedille)); // UTF-8: ARRAY_SIZE(c_cedille): 3 
@@ -225,6 +245,7 @@ float CText__print2(CText * this, float l, const int nblignes, const int nbcarac
 	      messerr("CText__print: c_cedille[0]: %x" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 195 - C3 
 	      messerr("CText__print: c_cedille[1]: %x" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: 167 - A7 
 	      messerr("CText__print: c_cedille[2]: %x" "\n", c_cedille[2]); // UTF-8: c_cedille[2]: '\0'- 00 
+	      assert(false); 
 	    };
 	    {
 	      static const unsigned char c_cedille[] = "ą"; 
@@ -319,33 +340,45 @@ void CText__print1(CText * this, const int x, const int y, const int w, const in
 
 
 
-static void CMessageTexte__SetMsg(CMessageTexte * this, const char * inS) {
-  printf("Argot s = %p\n", this -> s); 
+static void CMessageTexte__SetMsg(CMessageTexte * this, const char * inS) { 
+#if 0 
+  fprintf(stderr, "%s : Argot s = %p ", __func__, this -> s); 
   fflush(NULL);
+  fprintf(stderr, " - '%s' " "\n", this -> s); 
+  if (0 == strcasecmp("Chapitre", this -> s)) { assert(false); }; 
+  if (0 == strcasecmp("Chapitre", inS)) { assert(false); }; 
+#endif 
   
   //if(s != NULL)
   //          delete[] s;
   //s = NULL
   
-  this -> s = strcopy(inS);
-  //s = oem2ansi(s);
-  this -> lignedebut = 0;
-  this -> nbcaracaffiche = 0;
+  if (this -> s != NULL) { 
+    free(this -> s); 
+  }; 
+  this -> s = strcopy(inS); 
+  //fprintf(stderr, "%s : this -> s = %s " "\n", __func__, this -> s); 
+  //s = oem2ansi(s); 
+  this -> lignedebut = 0; 
+  this -> nbcaracaffiche = 0; 
 }; 
 
 
 
-static void CMessageTexte__Render(CMessageTexte * this) {
+static void CMessageTexte__Life(CMessageTexte * this) { 
   this -> nbcaracaffiche++;  
-#define MSGTXT_X 100
-#define MSGTXT_Y 300
-#define MSGTXT_W 500
-#define MSGTXT_W2 220
-#define MSGTXT_H 150
-#define MSGTXTDECAL_Y 56
-#define MSGTXTDECAL_X 32
+}; 
+
+static void CMessageTexte__Render(CMessageTexte * this) {
+enum { MSGTXT_X = 60 }; //100 }; 
+enum { MSGTXT_Y = 320 }; //300 }; 
+enum { MSGTXT_W = 540 }; //500 }; 
+enum { MSGTXT_W2 = 220 }; 
+enum { MSGTXT_H = 150 }; 
+enum { MSGTXTDECAL_Y = 56 }; 
+enum { MSGTXTDECAL_X = 32 }; 
   
-  glEnable2D(); {
+  glEnable2D(); { 
     glDisable(GL_LIGHTING);
     
     bool toutafficheenbas;
@@ -379,9 +412,9 @@ static void CMessageTexte__Render(CMessageTexte * this) {
 
 
 
-static bool CMessageTexte__InputAndRender(CMessageTexte * this) {
+static bool CMessageTexte__Input(CMessageTexte * this) {
   
-  /*gestion de l'entrée clavier*/
+  // gestion de l'entrée clavier 
 #define PAS_MESSAGE_TEXTE 0.2f
   if (KEY_UP) this -> lignedebut -= PAS_MESSAGE_TEXTE;
   if (KEY_DOWN) this -> lignedebut += PAS_MESSAGE_TEXTE;
@@ -389,22 +422,25 @@ static bool CMessageTexte__InputAndRender(CMessageTexte * this) {
   if (this -> nbcaracaffiche > 10)
     if (KEY_MENU_VALIDER) return true;
   
-  /*affichage*/
+  return false;    
+}; 
+ 
+static bool CMessageTexte__InputAndRender(CMessageTexte * this) {
   this -> Render(this);
-  
-  return false;
-    
-};     
+  return this -> Input(this); 
+}; 
 
 
 
 
 CMessageTexte * CMessageTexte_make(void) {
   MALLOC_BZERO(CMessageTexte,this); 
-
+  
   ASSIGN_METHOD(CMessageTexte,this,SetMsg); 
   ASSIGN_METHOD(CMessageTexte,this,Render); 
-  ASSIGN_METHOD(CMessageTexte,this,InputAndRender); 
+  ASSIGN_METHOD(CMessageTexte,this,Input); 
+  ASSIGN_METHOD(CMessageTexte,this,Life); 
+  //ASSIGN_METHOD(CMessageTexte,this,InputAndRender); 
   
   printf("CMessageTexte__CMessageTexte()" "\n");                         
   this -> texfond = CTexture_make("parchemin.png");  

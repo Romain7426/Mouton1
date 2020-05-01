@@ -34,42 +34,47 @@ enum type_evt {
   EVT_NOMBRE
 };
 TYPEDEF_TYPENAME_WITHOUT_ENUM(type_evt);
-
 extern const unsigned int nb_evts;
 
-enum { CEvenement__liste_traitement__size = 127 }; 
-struct CEvenement {
-  CScriptLauncher * liste_traitement__array[CEvenement__liste_traitement__size];
-  int liste_traitement__nb;
-  int liste_traitement__head; 
-  int liste_traitement__tail; 
+struct MEvenement {
+  CEvenement * (* make)(void); 
+  CEvenement * (* make_content)(CEvenement * this); 
+  void (* delete)(CEvenement * this); 
+  void (* delete_content)(CEvenement * this); 
+}; 
+extern const struct MEvenement * EvenementModule; 
+
+struct CEvenement { // Problem with that is that the struct does not have the right size on declaration: "struct CEvenement e;" does not have space to hold the private data. It's not a problem when it's a pointer, it is when it's a struct. 
+  CEvenement * (* make)(void); 
+  CEvenement * (* make_content)(CEvenement * this); 
+  void (* delete)(CEvenement * this); 
+  void (* delete_content)(CEvenement * this); 
 
   void (* AjouterTraitement)(struct CEvenement * this, const char * file, const char * proc);
   void (* Vider)(struct CEvenement * this);
   void (* execute)(struct CEvenement * this);
-};
-extern CEvenement * CEvenement_make(void); 
-extern void CEvenement_delete(CEvenement * this); 
-extern void CEvenement__AjouterTraitement(struct CEvenement * this, const char * file, const char * proc);
-extern void CEvenement__Vider(struct CEvenement * this);
-extern void CEvenement__execute(struct CEvenement * this);
+}; 
 
 
 
 
+struct MEvenements {
+  void (* Init)(void); 
+  void (* End)(void); 
+  void (* Raise)(type_evt t); 
+  void (* Vider)(type_evt t); 
+  void (* AddTraitement)(type_evt t, const char * nom_fichier, const char * proc); 
+  void (* handle_evts)(void);
+}; 
+extern const struct MEvenements * EvenementsModule; 
 
 
-// Le type 'evenements' qui est pour le traitement des evt.
-typedef struct CEvenement evenements_t[EVT_NOMBRE];
 
-// Les evts globaux.
-extern evenements_t evts;
+// Le type 'evenements' qui est pour le traitement des evt. 
+//typedef struct CEvenement evenements_t[EVT_NOMBRE]; 
 
-// La liste des évènements globaux qui ont été lancés.
-//static bool tab
-struct tab_evt_bool {
-  bool tab[EVT_NOMBRE];
-};
+
+#if 0 
 #if 0
   tab_evt_bool(void) {
     //printf("tab_evt_bool::tab_evt_bool()\n");
@@ -78,8 +83,10 @@ struct tab_evt_bool {
   }
 #endif
 
+extern void EvenementsInit(void); 
+extern void EvenementsEnd(void); 
 
-// Déclenche un événement (en fait, ça le fait pas de suite, ça met juste un flag puis après c'est traité dans handle_evts
+// Déclenche un événement (en fait, ça le fait pas de suite, ça met juste un flag puis après c'est traité dans handle_evts) 
 extern void RaiseEvenement(type_evt t);
 
 // supprimer tous les traitements d'un événement
@@ -92,7 +99,7 @@ extern void AddTraitementEvenement(type_evt t, const char * nom_fichier, const c
 
 
 extern void handle_evts(void);
-
+#endif 
 
 
 #endif /* EVENEMENT_H */

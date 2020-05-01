@@ -15,6 +15,9 @@
 #  define srandom srand
 #endif
 
+
+#include "lib__01__pre_header.ci" 
+
 #include <stdlib.h>
 #include <stdint.h> // int8_t, etc., intmax_t , uintmax_t, 
 #include <inttypes.h> // uint8_t, ..., uintmax_t i = UINTMAX_MAX; // this type always exists 
@@ -84,7 +87,7 @@
 
 
 #include <SDL/SDL.h> //bibliothèque graphique 2D...
-#include <SDL_image.h> /* pour ouvrir des images d'autres formats que BMP (notamment des images au format PNG) */
+#include <SDL_image.h> // pour ouvrir des images d'autres formats que BMP (notamment des images au format PNG) 
 #include <SDL_mixer.h>
 
 //#include <OpenGL/gl.h>
@@ -110,13 +113,34 @@
 #endif //_WIN32
 
 
+#include "lib__02__header.ci" 
+#include "lib__03.ci"
+#include "lib__04__string_stack.ci"
+#include "lib__05__error_state.ci"
+#include "lib__06__exception.ci"
+
+#define MALLOC_THIS(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); 
+#define BZERO_THIS(this) bzero(this, sizeof(*this)); 
+#define MALLOC_BZERO(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); bzero(this, sizeof(*this)); 
+#define ASSIGN_METHOD(ctype_t,this,method_name) this -> method_name = glue3(ctype_t,__,method_name); 
+
+extern char * strcopy(const char * str); 
+
+#define BIGLIB_STRING(s) BIGLIB_STRINGX(s)
+#define BIGLIB_STRINGX(s) #s
+
   
 
 
 
 
 
+typedef unsigned char bool;
+typedef bool bool_t;
+typedef int32_t integer;
+typedef double real;
 
+#if 0 
 enum bool {true = (0 == 0), false = (0 != 0)};
 typedef enum bool bool;
 
@@ -135,8 +159,8 @@ typedef int int_t;
 typedef unsigned int uint_t;
 #endif
 
-typedef uint8_t byte;
-typedef uint16_t word;
+typedef uint8_t   byte;
+typedef uint16_t  word;
 typedef uint32_t dword;
 typedef uint64_t qword;
 
@@ -153,6 +177,7 @@ typedef real real_t;
 
 typedef char str_t;
 
+
 #define _STRINGIFY(s) #s
 #define STRINGIFY(s) _STRINGIFY(s)
 
@@ -162,6 +187,13 @@ typedef char str_t;
 //#define STRLEN(s)  (ARRAYLEN(s)-1) 
 // Beware of a string like "bob\0and\0mary", whose the preprocessor STRLEN will never behave like the compile-one (12 vs 3). 
 // Therefore this one is kind of more accurate. 
+
+enum  { stdout_d = 1 }; 
+enum  { stderr_d = 2 }; 
+enum  { stdin_d  = 0 }; 
+
+#endif 
+
 
 #include "biglib.h"
 #include "biglib_suppl.h"
@@ -197,6 +229,8 @@ typedef char str_t;
     return this;							\
   }
 
+#define MALLOC_THIS(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); 
+#define BZERO_THIS(this) bzero(this, sizeof(*this)); 
 #define MALLOC_BZERO(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); bzero(this, sizeof(*this)); 
 #define ASSIGN_METHOD(ctype_t,this,method_name) this -> method_name = glue3(ctype_t,__,method_name); 
 
@@ -218,8 +252,11 @@ typedef char str_t;
 #define AFFICHER_CUBE_DEBUG true
 #define DEBUG_MOTEUR_PHYSIQUE true
 
-#if 0
-#define SCREEN_WIDTH 800
+#if 1
+#define SCREEN_WIDTH  640
+#define SCREEN_HEIGHT 480
+#elif 0
+#define SCREEN_WIDTH  800
 #define SCREEN_HEIGHT 600
 #else
 #define SCREEN_WIDTH 1024
@@ -227,6 +264,7 @@ typedef char str_t;
 #endif
 
 #define SCREEN_DEPTH 24
+#define SCREEN_BITSPERPIXEL 16
 
 #define RGBA(r,v,b,a) (((a * 256 + v) * 256 + b) * 256 + r)
 
@@ -401,7 +439,12 @@ struct C3DS;
 typedef struct C3DS C3DS; 
 
 
+#include "001_main.h"
 #include "vectors.h" // pour pouvoir utiliser des vecteurs 2D et 3D
+#include "riemann.h"
+#include "camera.h"
+#include "002_kernel.h"
+
 #include "keys.h"
 
 #include "3ds.h"
@@ -418,16 +461,12 @@ typedef struct C3DS C3DS;
 
 #include "arme.h"
 
-
-#include "camera.h"
 #include "coeurs.h"
 #include "constantes.h"
 #include "dico.h"
 #include "global.h"
-#include "kernel.h"
 #include "keys.h"
 #include "liste.h"
-#include "main.h"
 #include "messages.h"
 #include "moteurdeplacement.h"
 #include "moteurteleportation.h"

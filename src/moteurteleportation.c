@@ -17,14 +17,18 @@
 #define NB_ANIM2_TELEPORTATION 32
 
 
-CMoteurTeleportation * CMoteurTeleportation_make(void) {
-  MALLOC_BZERO(CMoteurTeleportation,this);
+CMoteurTeleportation * CMoteurTeleportation__make_content(CMoteurTeleportation * this) { 
+  bzero(this, sizeof(*this)); 
   
   ASSIGN_METHOD(CMoteurTeleportation,this,DebuterTeleportation); 
   ASSIGN_METHOD(CMoteurTeleportation,this,IsTeleportationEnCours); 
   ASSIGN_METHOD(CMoteurTeleportation,this,SetCouleurFondu); 
   ASSIGN_METHOD(CMoteurTeleportation,this,Life); 
   ASSIGN_METHOD(CMoteurTeleportation,this,Render); 
+  ASSIGN_METHOD(CMoteurTeleportation,this,make); 
+  ASSIGN_METHOD(CMoteurTeleportation,this,make_content); 
+  ASSIGN_METHOD(CMoteurTeleportation,this,delete); 
+  ASSIGN_METHOD(CMoteurTeleportation,this,delete_content); 
   
   this -> anim = 0; 
   this -> r = 0.0f;
@@ -34,8 +38,22 @@ CMoteurTeleportation * CMoteurTeleportation_make(void) {
   return this; 
 };
 
-void CMoteurTeleportation_delete(CMoteurTeleportation * this) {
-  if (this -> zt != NULL) CZoneTeleportation_delete(this -> zt); 
+CMoteurTeleportation * CMoteurTeleportation__make(void) {
+  //MALLOC_BZERO(CMoteurTeleportation,this); 
+  CMoteurTeleportation * this = NULL; 
+  this = (CMoteurTeleportation *) malloc(sizeof(*this)); 
+  return CMoteurTeleportation__make_content(this); 
+};
+
+void CMoteurTeleportation__delete_content(CMoteurTeleportation * this) {
+  if (this -> zt != NULL) { 
+    CZoneTeleportation_delete(this -> zt); 
+    this -> zt = NULL; 
+  }; 
+}; 
+
+void CMoteurTeleportation__delete(CMoteurTeleportation * this) {
+  CMoteurTeleportation__delete_content(this); 
   free(this);
 }; 
 
@@ -74,8 +92,10 @@ void CMoteurTeleportation__Life(CMoteurTeleportation * this, CMap * * Map_ref, b
     (la boucle dans SCRIPT_ChangerDeCarte())
   */
   if (this -> anim == 1) {
-    if (this -> zt -> destination_carte != NULL)
-      RaiseEvenement(EVT_EntreeSurCarte);
+    if (this -> zt -> destination_carte != NULL) {
+      //RaiseEvenement(EVT_EntreeSurCarte);
+      EvenementsModule -> Raise(EVT_EntreeSurCarte);
+    }; 
     
     *SCRIPT_SystemeRendMainAuScript_ref = true;
   }; 
@@ -88,7 +108,7 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
   
   if (this -> anim >= NB_ANIM2_TELEPORTATION) {
     if ((this -> anim == NB_ANIM2_TELEPORTATION) && (this -> zt -> destination_carte != NULL)  && (this -> zt -> destination_carte[0] != '\0')) {
-      CMap_delete(*Map_ref);
+      CMap__delete(*Map_ref);
       *Map_ref = NULL;
 
       printf("Le moteur de téléportation charge la carte...\n");
@@ -102,7 +122,7 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
         //  Camera.InitCamera();
       }
         
-      *Map_ref = CMap_make(this -> zt -> destination_carte, *EnVaisseau_ref);
+      *Map_ref = CMap__make(this -> zt -> destination_carte, *EnVaisseau_ref);
       CBonhomme * Hero = *Hero_ref; 
       CPhysicalObj * aHero = &Hero -> parent1; 
       aHero -> SetPosition_vP3D(aHero, this -> zt -> destination_position);
@@ -111,7 +131,8 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
       Hero -> ViderOrdresDeplacement(Hero);
       
       // ne marche que si le changement de carte s'est effectué en dehors d'un script :)
-      RaiseEvenement(EVT_ChargementCarte);
+      //RaiseEvenement(EVT_ChargementCarte);
+      EvenementsModule -> Raise(EVT_ChargementCarte);
     }
 
 #if 1
