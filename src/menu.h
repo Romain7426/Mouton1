@@ -43,10 +43,10 @@ enum { NB_ITEM_MAX = 12 };
 // RL: Superfluous... 
 // structure pour stocker un élément du menu 
 struct MenuItem { 
-  char * nom; //par convention nom = NULL ==> pas d'item !! 
+  char     *     nom; //par convention nom = NULL ==> pas d'item !! 
   CTexture * texture; 
-  void * qch; //pour stocker des choses (comme un ScriptLauncher) dans ActionMenu 
-};    
+  void     *     qch; //pour stocker des choses (comme un ScriptLauncher) dans ActionMenu 
+}; 
 DEFINE_NEW_OPERATOR_FOR_STRUCT(MenuItem);
 extern MenuItem * MenuItem_make(void); 
 extern MenuItem * MenuItem_make_r(MenuItem * this); 
@@ -55,7 +55,9 @@ extern void       MenuItem_delete(MenuItem * this);
 extern MenuItem * MenuItem_copy_aux(MenuItem * this, const MenuItem * src); 
 
 
-  
+
+
+// RL: TODO XXX FIXME: For simple list menus, left key & right key do something... While they should not do so. (The menu disappears during the invisible animation.) 
 struct CMenuAbstrait {
   int Action; // détermine le mode du menu (= rien, en train de tourner vers la gauche, tourner vers le haut...)
   int anim_theta[NB_SOUS_MENU];
@@ -71,10 +73,16 @@ struct CMenuAbstrait {
   bool Canceled; 
   
   char * NomSousMenu[NB_SOUS_MENU]; // RL: Column title 
-
+  
+  
+  
+  
+  
+  
+  // *** METHODS *** 
+  
   int (* ProchainIndice)(const struct CMenuAbstrait * this, const int ssMenu);      
 
-    
       
   void (* Add)(struct CMenuAbstrait * this, int ssMenu, const char * nom, const char * nom_texture);
   /*ajoute un élément au menu... sur le sous-menu ssMenu

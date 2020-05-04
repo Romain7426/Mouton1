@@ -5,9 +5,12 @@
 #include "nonanime/nonanime.h"
 
 
-CObjNonAnime * CObjNonAnime_make_core(void) {
+CObjNonAnime * CObjNonAnime__make_core(void) {
   MALLOC_BZERO(CObjNonAnime,this);
   
+  ASSIGN_METHOD(CObjNonAnime,this,make); 
+  ASSIGN_METHOD(CObjNonAnime,this,copy); 
+  ASSIGN_METHOD(CObjNonAnime,this,delete); 
   ASSIGN_METHOD(CObjNonAnime,this,ReadDescriptionFile); 
   ASSIGN_METHOD(CObjNonAnime,this,SetAngleZ); 
   ASSIGN_METHOD(CObjNonAnime,this,Render); 
@@ -16,33 +19,33 @@ CObjNonAnime * CObjNonAnime_make_core(void) {
 }; 
 
 
-CObjNonAnime * CObjNonAnime_copy(const CObjNonAnime * o) {
-  CObjNonAnime * this = CObjNonAnime_make_core(); 
+CObjNonAnime * CObjNonAnime__copy(const CObjNonAnime * o) {
+  CObjNonAnime * this = CObjNonAnime__make_core(); 
 
-  CPhysicalObj_copy_aux(&this -> parent, &o -> parent); 
+  CPhysicalObj__copy_aux(&this -> parent, &o -> parent); 
 
-  this -> angleZ = 0.0f; 
+  this -> angleZ   = 0.0f; 
   this -> filename = strcopy(o -> filename); 
   
   this -> parent.Compressible_huh = o -> parent.Compressible_huh;
-  this -> parent.Hostile_huh = o -> parent.Hostile_huh;
-  this -> parent.Fixe_huh = o -> parent.Fixe_huh;
+  this -> parent.Hostile_huh      = o -> parent.Hostile_huh;
+  this -> parent.Fixe_huh         = o -> parent.Fixe_huh;
   
   this -> resobj3ds = o -> resobj3ds -> copy(o -> resobj3ds); 
   
   return this; 
 };
 
-void CObjNonAnime_delete(CObjNonAnime * this) {
+void CObjNonAnime__delete(CObjNonAnime * this) {
   this -> resobj3ds -> delete(this -> resobj3ds);        
-  CPhysicalObj_delete_aux(&this -> parent); 
+  CPhysicalObj__delete_aux(&this -> parent); 
   free(this); 
 };
 
-CObjNonAnime * CObjNonAnime_make(const char * filename) {
-  CObjNonAnime * this = CObjNonAnime_make_core(); 
+CObjNonAnime * CObjNonAnime__make(const char * filename) {
+  CObjNonAnime * this = CObjNonAnime__make_core(); 
 
-  CPhysicalObj_make_aux(&this -> parent, CPhysicalObj_subtype_CObjNonAnime, filename); 
+  CPhysicalObj__make_aux(&this -> parent, CPhysicalObj_subtype_CObjNonAnime, filename); 
 
   this -> resobj3ds = NULL; 
   this -> angleZ = 0.0f; 
@@ -68,7 +71,7 @@ CObjNonAnime * CObjNonAnime_make(const char * filename) {
 
 
 
-void CObjNonAnime__Render(const CObjNonAnime * this, const CSol * sol, const riemann_t * our_manifold) { 
+void CObjNonAnime__Render(const CObjNonAnime * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold) { 
 #if 0 
   if (0 != strcmp(filename, "./heros.anime")) { 
     fprintf(stderr, "ObjNonAnime: Rendering: %s\n", filename); 
@@ -77,12 +80,12 @@ void CObjNonAnime__Render(const CObjNonAnime * this, const CSol * sol, const rie
 #endif
   
   const CPhysicalObj * parent = &this -> parent; 
-  parent -> Render(parent, our_manifold); 
+  parent -> Render(parent, lattice_width, lattice_height, our_manifold); 
   
   glPushMatrix(); { 
     
     // RL: This is a change of origin and a change of the tangent vector basis: local coordinates. 
-    our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, parent -> p.x, parent -> p.y, parent -> p.z); 
+    our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, parent -> p.x / (float) lattice_width, parent -> p.y / (float) lattice_height, parent -> p.z); 
     
     // RL: Now onwards, we are in map-local coordinates. 
     
@@ -90,11 +93,12 @@ void CObjNonAnime__Render(const CObjNonAnime * this, const CSol * sol, const rie
     glRotatef(this -> angleZ * 180.0f/PI, 0.0, 1.0, 0.0); // RL: π y-axis rotation. // RL: Awkwardly, 'glRotate' uses degrees. 
     
     if (parent -> Compressible_huh) { 
-      const float FacteurCompression = our_manifold -> FacteurCompression(our_manifold, /*map_j*/0, parent -> p.y); 
+      const float FacteurCompression = our_manifold -> FacteurCompression(our_manifold, /*map_j*/0, parent -> p.y / (float) lattice_height); 
       glScalef(1.0f, 1.0f, FacteurCompression); 
     }; 
     
     this -> resobj3ds -> Render(this -> resobj3ds); 
+    //this -> resobj3ds -> RenderGL(this -> resobj3ds); 
     
   } glPopMatrix(); 
 }; 
@@ -119,7 +123,7 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
     nonanime_data = nonanime_make_from_file(nonanime_fullpath, nonanime_log); 
   }; 
   
-  this -> parent.SetDimension(&this -> parent, nonanime_data -> choc_longueur, nonanime_data -> choc_hauteur, nonanime_data -> choc_hauteur);
+  this -> parent.SetDimension(&this -> parent, nonanime_data -> choc_longueur, nonanime_data -> choc_largeur, nonanime_data -> choc_hauteur);
   if (NULL == this -> parent.filename) this -> parent.filename = strcopy(filename);
   this -> parent.Compressible_huh = nonanime_data -> compressible; 
   this -> parent.Fixe_huh = nonanime_data -> fixe; 

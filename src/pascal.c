@@ -576,7 +576,7 @@ int CPascal__execProcedure_step(CPascal * this, const char * ident_cstr) {
 
 
 int CPascal__next_step(CPascal * this, bool * fini_huh_ref) {
-  message("%s" "\n", __func__); 
+  //message("%s" "\n", __func__); 
   if (this -> next_ipc0 == PSCRIPT_VM__ERROR__HALT) { 
     *fini_huh_ref = true;
     const int retval_sizeof = pscript_funproc__get_retval_sizeof(this -> pscript_env -> funproc_env, this -> funproc_i); 

@@ -226,7 +226,7 @@ struct tChunk {
   unsigned int length;                    // The length of the chunk
   unsigned int bytesRead;                 // The amount of bytes read within that chunk
 };
-DEFINE_NEW_OPERATOR_FOR_STRUCT(tChunk);
+DEFINE_NEW_OPERATOR_FOR_STRUCT(tChunk); // RL: 'new_tChunk' // RL: It's a malloc + bzero - that's it. 
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(tChunk);
 
 // This struct handles all of the loading code

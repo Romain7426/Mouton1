@@ -22,7 +22,7 @@ struct CMoteurTeleportation {
   void (* Life)(struct CMoteurTeleportation * this, struct CMap * * Map_ptr, bool * EnVaisseau_ptr, struct CBonhomme * * Hero_ptr, bool * SCRIPT_SystemeRendMainAuScript_ptr);
 
   //void (* Render)(const struct CMoteurTeleportation * this, struct CMap * &Map, bool &EnVaisseau, struct CBonhomme * &Hero);
-  void (* Render)(const struct CMoteurTeleportation * this, struct CMap * * Map_ptr, bool * EnVaisseau_ptr, struct CBonhomme * * Hero_ptr);
+  void (* Render)(const struct CMoteurTeleportation * this, struct CMap * * Map_ptr, bool * EnVaisseau_ptr, struct CBonhomme * * Hero_ptr, const riemann_t * our_manifold);
   /*si le jeu ne fait pas de téléportation, ==> ne fait rien
     sinon, avance dans la téléportation
     (dessine le fondu... à placer en fin de RaiseRender())
@@ -45,7 +45,7 @@ extern void CMoteurTeleportation__DebuterTeleportation(CMoteurTeleportation * th
 extern bool CMoteurTeleportation__IsTeleportationEnCours(const CMoteurTeleportation * this);
 extern void CMoteurTeleportation__SetCouleurFondu(CMoteurTeleportation * this, int in_couleur);
 extern void CMoteurTeleportation__Life(CMoteurTeleportation * this, CMap * * Map_ptr, bool * EnVaisseau_ptr, CBonhomme * * Hero_ptr, bool * SCRIPT_SystemeRendMainAuScript_ptr);
-extern void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Map_ptr, bool * EnVaisseau_ptr, CBonhomme * * Hero_ptr);
+extern void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Map_ptr, bool * EnVaisseau_ptr, CBonhomme * * Hero_ptr, const riemann_t * our_manifold);
 
 
 #endif

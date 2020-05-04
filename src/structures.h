@@ -21,7 +21,8 @@ TYPEDEF_TYPENAME_WITHOUT_ENUM(TDirection);
 
 enum TModeJeu { 
  mjTITRE,  // au début, on affiche le titre 
- mjCARTE,    // mode normal 
+ mjCARTE,  // mode normal 
+ mjOEIL,   // 
  mjAEROTHEIERE, 
  mjINVENTAIRE,   // menu pour le choix des armes etc... 
  mjIDLE, // on est en train d'exécuter un script 

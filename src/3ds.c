@@ -19,7 +19,7 @@
 
 //struct CLoad3DS * new_CLoad3DS(void);
 static bool Import3DS(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
-static int GetString(struct CLoad3DS * this, char *);
+static int  GetString(struct CLoad3DS * this, char *);
 static void ReadChunk(struct CLoad3DS * this, tChunk *);
 static void ProcessNextChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
 static void ProcessNextObjectChunk(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *);
@@ -64,10 +64,17 @@ size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream) {
   return nmemb;
 }
 
-#ifdef BIG_ENDIAN
+#if 1 
+// RL: For some unknown reasons, the 'BIG_ENDIAN' is defined while my current computer is little-endian. 
+//     So I disable that for the moment. 
+#define fread_ fread  
+#else 
+#ifdef BIG_ENDIAN 
+#error BIG_ENDIAN 
 #define fread_ fread_big_endian
 #else
 #define fread_ fread
+#endif 
 #endif 
 
 
@@ -92,6 +99,8 @@ size_t fread_big_endian(void * ptr, size_t size, size_t nmemb, FILE * stream) {
 ///////////////////////////////// CLOAD3DS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
 CLoad3DS * CLoad3DS_make_aux(CLoad3DS * this) {
+  bzero(this, sizeof(*this)); 
+  
   this -> Import3DS = Import3DS;
   this -> GetString = GetString;
   this -> ReadChunk = ReadChunk;
@@ -133,12 +142,12 @@ struct CLoad3DS * new_CLoad3DS(void) {
 
 //bool CLoad3DS::Import3DS(t3DModel *pModel, const char * strFileName)
 bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
-  char strMessage[255] = {0};
+  char strMessage[255] = {0}; 
     
   //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
     
-  pModel->numOfMaterials = 0;
-  pModel->numOfObjects = 0;
+  pModel -> numOfMaterials = 0;
+  pModel -> numOfObjects = 0;
     
   //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
     
@@ -147,25 +156,31 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
 
   // Make sure we have a valid file pointer (we found the file)
   if (!this -> m_FilePointer) {
-    printf("Unable to find the file: %s!\n", strFileName);
-  }
-
+    printf("Unable to find the file: %s!\n", strFileName); 
+    CleanUp(this);
+    return false; 
+  }; 
+  
   // Once we have the file open, we need to read the very first data chunk
   // to see if it's a 3DS file.  That way we don't read an invalid file.
   // If it is a 3DS file, then the first chunk ID will be equal to PRIMARY (some hex num)
-
+  
   // Read the first chuck of the file to see if it's a 3DS file
   ReadChunk(this, this -> m_CurrentChunk);
 
   // Make sure this is a 3DS file
-  if (this -> m_CurrentChunk->ID != PRIMARY) {
-    sprintf(strMessage, "Unable to load PRIMARY chuck from file: %s!", strFileName);
-    printf("%s\n", strMessage);  
-  }
+  if (this -> m_CurrentChunk -> ID != PRIMARY) { 
+    snprintf(strMessage, sizeof(strMessage), "Unable to load PRIMARY chuck from file: %s!", strFileName); 
+    printf("%s\n", strMessage); 
+    CleanUp(this); 
+    return false; 
+  }; 
+  
+  
   printf("Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
 
   // Now we actually start reading in the data.  ProcessNextChunk() is recursive
-
+  
   // Begin loading objects, by calling this recursive function
   printf("   ProcessNextChunk...\n");
   ProcessNextChunk(this, pModel, this -> m_CurrentChunk);
@@ -186,12 +201,11 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
 /////
 ///////////////////////////////// CLEAN UP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void CleanUp(struct CLoad3DS * this) {
-
+void CleanUp(struct CLoad3DS * this) { 
   fclose(this -> m_FilePointer);                      // Close the current file pointer
   free(this -> m_CurrentChunk);                      // Free the current chunk
   free(this -> m_TempChunk);                         // Free our temporary chunk
-}
+}; 
 
 
 ///////////////////////////////// PROCESS NEXT CHUNK\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
@@ -542,22 +556,24 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
 /////
 ///////////////////////////////// READ CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void ReadChunk(CLoad3DS * this, tChunk *pChunk) {
+void ReadChunk(CLoad3DS * this, tChunk *pChunk) { 
   // This reads the chunk ID which is 2 bytes.
-  // The chunk ID is like OBJECT or MATERIAL.  It tells what data is
+  // The chunk ID is like OBJECT or MATERIAL.  It tells what data is 
   // able to be read in within the chunks section.  
-  //pChunk->bytesRead = fread(&pChunk->ID, 1, 2, this->m_FilePointer);
-  pChunk->bytesRead = 2 * fread_(&pChunk->ID, 2, 1, this->m_FilePointer);
-  printf("ChunkID: %X\n", (unsigned int) pChunk->ID);
-
-  // Then, we read the length of the chunk which is 4 bytes.
-  // This is how we know how much to read in, or read past.
+  //pChunk->bytesRead = fread(&pChunk->ID, 1, 2, this->m_FilePointer); 
+  //pChunk -> bytesRead = 2 * fread_(&pChunk -> ID, /*object size*/2, /*number of objects to be read*/1, this -> m_FilePointer); 
+  pChunk -> bytesRead = fread_(&pChunk -> ID, /*object size*/1, /*number of objects to be read*/2, this -> m_FilePointer); 
+  printf("ChunkID: %4X\n", (unsigned int) pChunk -> ID); 
+  
+  // Then, we read the length of the chunk which is 4 bytes. 
+  // This is how we know how much to read in, or read past. 
   //pChunk->bytesRead += fread(&pChunk->length, 1, 4, this->m_FilePointer);
-  pChunk->bytesRead += 4 * fread_(&pChunk->length, 4, 1, this->m_FilePointer);
-  printf("ChunkLength: %u\n", pChunk->length);
-  printf("Lecture En-Tete Chunk oki.\n");
-
-}
+  //pChunk->bytesRead += 4 * fread_(&pChunk->length, /*object size*/4, /*number of objects to be read*/1, this->m_FilePointer); 
+  pChunk -> bytesRead += fread_(&pChunk -> length, /*object size*/1, /*number of objects to be read*/4, this->m_FilePointer); 
+  //messerr("ChunkLength: %u\n", pChunk -> length); 
+  printf("ChunkLength: %u\n", pChunk -> length); 
+  printf("Lecture En-Tete Chunk oki.\n"); 
+}; 
 
 ///////////////////////////////// GET STRING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 /////

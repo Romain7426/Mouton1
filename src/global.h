@@ -227,7 +227,7 @@ enum  { stdin_d  = 0 };
     this = (struct TYPENAME *) malloc(sizeof(struct TYPENAME));		\
     bzero(this, sizeof(struct TYPENAME));				\
     return this;							\
-  }
+  }; 
 
 #define MALLOC_THIS(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); 
 #define BZERO_THIS(this) bzero(this, sizeof(*this)); 
@@ -242,7 +242,7 @@ enum  { stdin_d  = 0 };
     this -> FIELDNAME1 = FIELDNAME1;					\
     FUNNAME_FOR_ATTRIBUTS(this);					\
     return this;							\
-  }
+  }; 
 
 
 

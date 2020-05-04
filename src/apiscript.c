@@ -27,13 +27,13 @@ api_contexte_t * api_contexte_make(void) {
 
 void SCRIPT_AjouterObjetAnime(const char* qui, const char * filename) { 
   printf("SCRIPT_AjouterObjetAnime(%s, %s)\n", qui, filename); 
-  CBonhomme * o = CBonhomme_make(filename); 
+  CBonhomme * o = CBonhomme__make(filename); 
   (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent1); 
 }; 
 
 void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename) {
   printf("SCRIPT_AjouterObjetNonAnime(%s, %s)\n", qui, filename);
-  CObjNonAnime * o = CObjNonAnime_make(filename);
+  CObjNonAnime * o = CObjNonAnime__make(filename);
   (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent);     
 };
 
@@ -124,10 +124,10 @@ void SCRIPT_Camera_SetPosition(const float x, const float y, const float z, cons
   //Camera.pos = ((mp == mpRELATIF) ? Camera.pos : Point3D_make(0.0f, 0.0f, 0.0f))  +  Point3D_make(x, y, z); 
 
   if (mp == mpRELATIF) { 
-    TPoint3D_add_self_expanded__macro(Camera -> pos, x, y, z); 
+    TPoint3D_add_self_expanded__macro(Camera -> lattice_position, x, y, z); 
   } 
   else { 
-    TPoint3D_assign__macro(Camera -> pos, x, y, z); 
+    TPoint3D_assign__macro(Camera -> lattice_position, x, y, z); 
   }; 
 }; 
 
@@ -135,7 +135,8 @@ void SCRIPT_Camera_SetPosition(const float x, const float y, const float z, cons
 
 void SCRIPT_Camera_Rotate(const float degree_angle_x, const float degree_angle_y, const float degree_angle_z, const TMethodePlacement mp) {
   Camera -> angleXY = ((mp == mpRELATIF) ? Camera -> angleXY : 0.0f) + PI * degree_angle_x / 180.0f;
-  Camera -> angleHB = ((mp == mpRELATIF) ? Camera -> angleHB : 0.0f) + PI * degree_angle_y / 180.0f;
+  //Camera -> angleHB = ((mp == mpRELATIF) ? Camera -> angleHB : 0.0f) + PI * degree_angle_y / 180.0f;
+  Camera -> angleZ = ((mp == mpRELATIF) ? Camera -> angleZ : 0.0f) + PI * degree_angle_y / 180.0f;
 };
 
 
@@ -243,26 +244,30 @@ void SCRIPT_ChangerDeCarte_vXY(CMoteurTeleportation * MoteurTeleportation, const
 }; 
 
 
-CPhysicalObj * SCRIPT_RetrouverObjetViaSonNom(const char * qui) {
-  if (0 == strcmp(qui, "heros"))
+CPhysicalObj * SCRIPT_RetrouverObjetViaSonNom(const char * qui) { 
+  if (0 == strcmp(qui, "heros")) 
     return &(*(api_contexte.Hero)) -> parent1;
   else           
     return (*(api_contexte.Map)) -> RetrouverObjetViaSonNom((*(api_contexte.Map)), qui);
 }; 
 
 
-void SCRIPT_SetPosition_vP3D(const char * qui, TPoint3D position) { 
+void SCRIPT_SetPosition_vP3D(const char * qui, const TPoint3D position) { 
   printf("SCRIPT_SetPosition(%s, une position)\n", qui); 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
-  o -> SetPosition_vP3D(o, position);
+  if (NULL == o) { 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
+  }; 
+  o -> SetPosition_vP3D(o, position, (*(api_contexte.Map)));
 }; 
 
-void SCRIPT_SetPosition_vXY(const char * qui, float x, float y, TMethodePlacement mp) { 
+void SCRIPT_SetPosition_vXY(const char * qui, const float x, const float y, const TMethodePlacement mp) { 
   printf("SCRIPT_SetPosition(%s, %f, %f, ...)\n", qui, x, y); 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
   if (NULL == o) { 
-  messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
-  return; 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
   };
   o -> SetPosition_vXY(o, x, y, mp, (*(api_contexte.Map)));
 }; 
@@ -270,9 +275,14 @@ void SCRIPT_SetPosition_vXY(const char * qui, float x, float y, TMethodePlacemen
 void SCRIPT_SetDirection(const char * qui, TDirection d) { 
   printf("SCRIPT_SetDirection(%s, ...)\n", qui); 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  if (NULL == o) { 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
+  }; 
   CBonhomme * b = (CBonhomme *) o; 
-  if(b == NULL)
-    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut s'orienter.\n", qui);
+  if (CPhysicalObj_subtype_CBonhomme != o -> subtype) { 
+    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut s'orienter.\n", qui); 
+  } 
   else
     b -> SetDirection(b, d);
 }; 
@@ -280,15 +290,24 @@ void SCRIPT_SetDirection(const char * qui, TDirection d) {
 void SCRIPT_SetZ(const char * qui, float z, TMethodePlacement mp) { 
   printf("SCRIPT_SetZ(%s, ...)\n", qui);
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  if (NULL == o) { 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
+  }; 
   o -> SetZ(o, z, mp);
 }; 
  
 void SCRIPT_Frapper(const char* qui) { 
   printf("SCRIPT_Frapper(%s)\n", qui);   
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  if (NULL == o) { 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
+  }; 
   CBonhomme * b = (CBonhomme *) o; 
-  if(b == NULL)
-    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut frapper.\n", qui);
+  if (CPhysicalObj_subtype_CBonhomme != o -> subtype) { 
+    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut frapper.\n", qui); 
+  } 
   else
     b -> Frapper(b);
 }; 
@@ -296,10 +315,16 @@ void SCRIPT_Frapper(const char* qui) {
 void SCRIPT_Deplacer(const char * qui, float x, float y, TMethodePlacement mp) { 
   printf("SCRIPT_Deplacer(%s, %f, %f, ...)\n", qui, x, y); 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  if (NULL == o) { 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
+  }; 
+
   CBonhomme * b = (CBonhomme *) o; 
   
-  if(b == NULL)
-    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut se déplacer.\n", qui);
+  if (CPhysicalObj_subtype_CBonhomme != o -> subtype) { 
+    printf("ERREUR : L'objet %s n'est pas un bonhomme. Il ne peut se déplacer.\n", qui); 
+  } 
   else
     b -> AjouterOrdresDeplacement_vXY(b, x, y, mp);
 }; 
@@ -312,7 +337,11 @@ void SCRIPT_SupprimerObjet(const char * qui) {
   pos.y = 5000.0f;
   pos.z = 5000.0f;
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
-  o -> SetPosition_vP3D(o, pos);
+  if (NULL == o) { 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
+  }; 
+  o -> SetPosition_vP3D(o, pos, (*(api_contexte.Map)));
   /*pour l'instant au lieu de le détruire, on l'envoie au paradis :):)*/
 }; 
 
@@ -339,11 +368,15 @@ void SCRIPT_WaitFor(const char * qui) {
   printf("SCRIPT_WaitFor(%s)\n", qui);
 
   CPhysicalObj * o = SCRIPT_RetrouverObjetViaSonNom(qui); 
+  if (NULL == o) { 
+    messerr("%s: " "I could not find the object named '%s'." "\n", __func__, qui); 
+    return; 
+  }; 
   CBonhomme * b = (CBonhomme *) o; 
   
-  if (b == NULL) {
-    printf("ERREUR: L'objet %s n'est pas un bonhomme. On ne peut pas l'attendre.\n", qui);
-    return;
+  if (CPhysicalObj_subtype_CBonhomme != o -> subtype) { 
+    printf("ERREUR: L'objet %s n'est pas un bonhomme. On ne peut pas l'attendre.\n", qui); 
+    return; 
   }; 
 
   api_contexte.b = b;

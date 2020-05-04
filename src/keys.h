@@ -2,7 +2,7 @@
 #define KEYS_H
 
 
-// TODO XXX Bad
+// RL: TODO XXX FIXME: Bad
 extern unsigned char * KeyBoard;
 
 
@@ -57,8 +57,15 @@ extern CKey KeyF12;
 #define KEY_LEFT  (KeyBoard[SDLK_LEFT]  || KeyBoard['a'])
 #define KEY_RIGHT (KeyBoard[SDLK_RIGHT] || KeyBoard['d'])
 
-#define KEY_VUE_ANGLE_PLUS  (KeyBoard[SDLK_PAGEDOWN] || KeyBoard['c'])
-#define KEY_VUE_ANGLE_MOINS (KeyBoard[SDLK_PAGEUP]   || KeyBoard['z'])
+//#define KEY_VUE_ANGLE_PLUS  (KeyBoard[SDLK_PAGEDOWN] || KeyBoard['c'])
+//#define KEY_VUE_ANGLE_MOINS (KeyBoard[SDLK_PAGEUP]   || KeyBoard['z'])
+#define KEY_VUE_ANGLE_PLUS    (KeyBoard['c'])
+#define KEY_VUE_ANGLE_MOINS   (KeyBoard['z'])
+#define KEY_CAMERA_DIST_PLUS  (KeyBoard[SDLK_PAGEUP])
+#define KEY_CAMERA_DIST_MOINS (KeyBoard[SDLK_PAGEDOWN])
+
+#define KEY_CAMERA_ANGLE_Z_PLUS  (KeyBoard['o'])
+#define KEY_CAMERA_ANGLE_Z_MOINS (KeyBoard['l'])
            
 #endif
 
@@ -73,7 +80,7 @@ extern CKey KeyF12;
 
 #define KEY_MENU_JEU (KeyI.Appuye(&KeyI))
 #define KEY_FRAPPER  (KeyK.Appuye(&KeyK))
-           
+  
 #define KEY_MENU_VALIDER (KeyReturn.Appuye(&KeyReturn) || KeySpace.Appuye(&KeySpace) || KeyK.Appuye(&KeyK)) 
 #define KEY_MENU_ECHAP   (KeyP.Appuye(&KeyP)      || KeyEchap.Appuye(&KeyEchap)) 
 

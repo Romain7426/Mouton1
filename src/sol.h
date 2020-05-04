@@ -1,24 +1,6 @@
 #ifndef SOL_H 
 #define SOL_H 
 
-#if 0 
-#define nb_cases_afficheesX       25 
-#define nb_cases_afficheesYfond   20 
-#define nb_cases_afficheesYdevant 10 
-#else 
-enum { nb_cases_afficheesX       = 25 }; 
-enum { nb_cases_afficheesYfond   = 20 }; 
-enum { nb_cases_afficheesYdevant = 10 }; 
-#endif 
-
-struct TPointEcran { 
-  TPoint3D pt; 
-  TPoint3D normal; 
-}; 
-TYPEDEF_TYPENAME_WITHOUT_STRUCT(TPointEcran); 
-
-
-
 
 
 #ifndef STRUCT_CSOL 
@@ -46,22 +28,22 @@ extern const CSol_module_t CSol_module[1];
 //      * width : 'TailleX' vertices 
 //      * height: 'TailleY' vertices 
 // RL: 'TailleX' and 'TailleY' are determined when the z-levels are loaded. 
-enum { NB_MAX_TEXTURESOL =  10 }; 
+enum { NB_MAX_TEXTURESOL   =  10 }; 
+enum { NB_MAX_EXTRA_ARRAYS =   5 }; 
 struct CSol { 
-
-  // FS: taille en case de la carte, c'est ChargerZ qui s'occupe de remplir ça 
+  
   // RL: This is a number of vertices, not a number of cells. 
+  // RL: Currently, size is 32x32 vertices (= 1024 vertices) - thus 31x31 cells (= 961 cells). 
   uint8_t TailleX; 
   uint8_t TailleY; 
-
-  // RL: Water level. 
-  float ZEau; // = 45.8f; 
-
+  
+  float ZEau; 
+  
   // ___ Z Level ___ 
   // RL: Array of size TailleX * TailleY. 
-  //     It gives the z-level for the cell (i,j). 
-  //     Data loaded from the bitmap file. 
-  float * Z; // RL: Array of size TailleX * TailleY 
+  //     It gives the z-level for the vertex (i,j). 
+  // RL: Value is in map-local coordinates. 
+  float * Z; 
   
   // RL: This is the normal vector at vertex (i,j). 
   // RL: This is the normal vector in the map-local coordinates, not the manifold normal. 
@@ -86,14 +68,25 @@ struct CSol {
   float (* normal)[3]; // RL: Array of size TailleX * TailleY // RL: Apriori, their norm2 is not 1 (OpenGL will normalize them anyway). 
   
   // RL: These are local temporary variables, and not actual properties. 
+  // RL: It's an optimization: instead of computing the same cosinus again and again at each tick, 
+  //     all these trigo computations are computed once, before blitting/rendering. 
   float (* global_map__x); // RL: Array[TailleX] // RL: x-coordinate of each vertex in the global map. 
   float (* global_map__y); // RL: Array[TailleY] // RL: x-coordinate of each vertex in the global map. 
+#if 1 
+  uint8_t  manifold__extra_w_arrays__nb; 
+  float (* manifold__extra_w_arrays[NB_MAX_EXTRA_ARRAYS]); // RL: Array[TailleX] 
+  uint8_t  manifold__extra_h_arrays__nb; 
+  float (* manifold__extra_h_arrays[NB_MAX_EXTRA_ARRAYS]); // RL: Array[TailleY] 
+  uint8_t  manifold__extra_w_h_arrays__nb; 
+  float (* manifold__extra_w_h_arrays[NB_MAX_EXTRA_ARRAYS]); // RL: Array[TailleX * TailleY] 
+#else 
   float (* manifold__outer_angle); // RL: Array[TailleX] // RL: φ of each x-coordinate. 
   float (* manifold__outer_angle__cosf); // RL: Array[TailleX] // RL: φ of each x-coordinate. 
   float (* manifold__outer_angle__sinf); // RL: Array[TailleX] // RL: φ of each x-coordinate. 
   float (* manifold__inner_angle); // RL: Array[TailleY] // RL: θ of each y-coordinate. 
   float (* manifold__inner_angle__cosf); // RL: Array[TailleY] // RL: θ of each y-coordinate. 
   float (* manifold__inner_angle__sinf); // RL: Array[TailleY] // RL: θ of each y-coordinate. 
+#endif 
   float (* manifold__vertex)[3]; // RL: Array[TailleX * TailleY] // RL: Coordinates of each vertex in the manifold. 
   float (* manifold__normal)[3]; // RL: Array[TailleX * TailleY] // RL: Coordinates of each normal in the manifold. 
   float (* manifold__vertex__water)[3]; // RL: Array[TailleX * TailleY] // RL: Coordinates of each vertex in the manifold. 
@@ -147,7 +140,7 @@ struct CSol {
   int (* GetTailleX)(const CSol * this);
   int (* GetTailleY)(const CSol * this);
   
-  void  (* ChargerZ)(      CSol * this, const char * filename); 
+  int   (* ChargerZ)(      CSol * this, const int map_i, const int map_j, const riemann_t * our_manifold, const char * filename); 
   float (* GETZ    )(const CSol * this, const float map_x, const float map_y); 
   void  (* SETZ    )(      CSol * this,   int x,   int y, float z); // FS: en privée, un élément de l'extérieur n'a pas le droit de modifier le terrain; utiliser "ChargerZ" pour cela 
   
@@ -172,7 +165,7 @@ struct CSol {
   void (* Render__pre_computations)(      CSol * this, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_map_x, const float target_map_y); 
   void (* RenderEau               )(const CSol * this, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_map_x, const float target_map_y); 
   
-  bool (* yatilEau )(const CSol * this, const float i, const float j, const float z);
+  bool (* yatilEau )(const CSol * this, const float map_x, const float map_y, const float map_);
   
   //void (* PositionModulo)(const CSol * this, float& i, float& j); 
   //void (* PositionModulo)(const CSol * this, float * i_ptr, float * j_ptr); 

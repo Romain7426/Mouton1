@@ -103,7 +103,7 @@ void CMoteurTeleportation__Life(CMoteurTeleportation * this, CMap * * Map_ref, b
 };
 
 
-void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Map_ref, bool * EnVaisseau_ref, CBonhomme * * Hero_ref) {
+void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Map_ref, bool * EnVaisseau_ref, CBonhomme * * Hero_ref, const riemann_t * our_manifold) {
   if (this -> anim == 0) return;
   
   if (this -> anim >= NB_ANIM2_TELEPORTATION) {
@@ -120,19 +120,27 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
       else {
         *EnVaisseau_ref = false;
         //  Camera.InitCamera();
-      }
+      }; 
+
+
+
         
-      *Map_ref = CMap__make(this -> zt -> destination_carte, *EnVaisseau_ref);
+      // RL: Why that thing is in render??? Good Lord. 
+      *Map_ref = CMap__make(this -> zt -> destination_carte, /*map_i*/0, /*map_j*/0, our_manifold, *EnVaisseau_ref);
       CBonhomme * Hero = *Hero_ref; 
       CPhysicalObj * aHero = &Hero -> parent1; 
-      aHero -> SetPosition_vP3D(aHero, this -> zt -> destination_position);
-      Hero -> SetDirection(Hero, this -> zt -> destination_direction);
-      aHero -> AddForce_vXYZ(aHero, 0.0f, 0.0f, 200.0f);
-      Hero -> ViderOrdresDeplacement(Hero);
+      aHero -> SetPosition_vP3D(aHero, this -> zt -> destination_position, *Map_ref); 
+      Hero  -> SetDirection(Hero, this -> zt -> destination_direction); 
+      //aHero -> Acceleration_add_vXYZ(aHero, 0.0f, 0.0f, 200.0f); // RL: WHY??? 
+      Hero  -> ViderOrdresDeplacement(Hero); 
       
-      // ne marche que si le changement de carte s'est effectué en dehors d'un script :)
-      //RaiseEvenement(EVT_ChargementCarte);
-      EvenementsModule -> Raise(EVT_ChargementCarte);
+      // FS: ne marche que si le changement de carte s'est effectué en dehors d'un script :) 
+      //RaiseEvenement(EVT_ChargementCarte); 
+      EvenementsModule -> Raise(EVT_ChargementCarte); 
+      
+      
+      
+      
     }
 
 #if 1

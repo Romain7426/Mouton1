@@ -43,15 +43,15 @@ void TPoint3D_add_self_expanded(TPoint3D * p1_ref, const float x, const float y,
 }; 
 
 void TPoint3D_add(const TPoint3D  p1, const TPoint3D p2, TPoint3D * p3_ref) { 
-  p3_ref -> x = (p1).x + (p2).y; 
+  p3_ref -> x = (p1).x + (p2).x; 
   p3_ref -> y = (p1).y + (p2).y; 
   p3_ref -> z = (p1).z + (p2).z; 
 }; 
 
 void TPoint3D_sub(const TPoint3D  p1, const TPoint3D p2, TPoint3D * p3_ref) { 
-  p3_ref -> x = (p1).x + (p2).y; 
-  p3_ref -> y = (p1).y + (p2).y; 
-  p3_ref -> z = (p1).z + (p2).z; 
+  p3_ref -> x = (p1).x - (p2).x; 
+  p3_ref -> y = (p1).y - (p2).y; 
+  p3_ref -> z = (p1).z - (p2).z; 
 }; 
 
 void TPoint3D_scale(const float lambda, const TPoint3D p1, TPoint3D * p3_ref) { 

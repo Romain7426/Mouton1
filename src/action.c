@@ -72,34 +72,34 @@ void CScriptLauncher__Execute(CScriptLauncher * this) {
   printf("      fin de l'exécution\n");
   SCRIPT_Quit();
   printf("      Exécution du ScriptLauncher réussie!!!");   
-}
+};
 
 void CScriptLauncher__init_step(CScriptLauncher * this) {
   message("%s" "\n", __func__); 
   SCRIPT_Init();
 
   this -> resPascal -> execProcedure_step(this -> resPascal, this -> proc);
-}
+};
 
 bool CScriptLauncher__execute_step(CScriptLauncher * this) {
-  message("%s" "\n", __func__); 
+  //message("%s" "\n", __func__); 
   bool fini_huh;
   int ret;
 
   ret = this -> resPascal -> next_step(this -> resPascal, &fini_huh);
 
-  message("%s: " "ret = %d ; fini_huh = %d " "\n", __func__, ret, fini_huh); 
+  //message("%s: " "ret = %d ; fini_huh = %d " "\n", __func__, ret, fini_huh); 
 
   return (fini_huh || ret != 0);
-}
+};
 
 void CScriptLauncher__stack_push_int(CScriptLauncher * this, int a) {
   this -> resPascal -> stack_push_int(this -> resPascal, a);
-}
+};
 
 void CScriptLauncher__stack_push_string(CScriptLauncher * this, const char * str) {
   this -> resPascal -> stack_push_string(this -> resPascal, str);
-}
+};
 
 
 
