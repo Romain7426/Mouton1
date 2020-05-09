@@ -46,7 +46,7 @@ static void obj3ds_dico__release(const int i) {
 static int C3DS__load(C3DS * this, const char * filename) { 
   bool b3dModelLoaded;
   
-  printf("Importation du fichier 3DS '%s'" "\n", filename); 
+  //printf("Importation du fichier 3DS '%s'" "\n", filename); 
   
   this -> g_ViewMode = GL_TRIANGLES; 
   for (int i = 0; i < MAX_TEXTURES; i++) { 
@@ -62,7 +62,7 @@ static int C3DS__load(C3DS * this, const char * filename) {
     
     // First we need to actually load the .3DS file. 
     // We just pass in an address to our t3DModel structure and the file name string we want to load ("face.3ds"). 
-    printf("   Début de la lecture du fichier 3DS '%s' ... !!\n", filename); 
+    //printf("   Début de la lecture du fichier 3DS '%s' ... !!\n", filename); 
     //b3dModelLoaded = this -> g_Load3ds.Import3DS(&this -> g_Load3ds, &this -> g_3DModel, filename);         // Load our .3DS file into our model structure 
     b3dModelLoaded = g_Load3ds.Import3DS(&g_Load3ds, &this -> g_3DModel, filename); // Load our .3DS file into our model structure 
     //g_Load3ds.CleanUp(&g_Load3ds); 
@@ -73,7 +73,7 @@ static int C3DS__load(C3DS * this, const char * filename) {
     }; 
   }; 
   
-  printf("   Lecture du fichier 3DS '%s' terminée !!\n", filename); 
+  //printf("   Lecture du fichier 3DS '%s' terminée !!\n", filename); 
   fflush(NULL); 
   
   
@@ -84,11 +84,11 @@ static int C3DS__load(C3DS * this, const char * filename) {
   // Otherwise, the material just holds the color information and we don't need to load a texture.
   
   // Go through all the materials
-  printf("   Récupération des textures du 3DS %s terminé !!\n", filename); 
+  //printf("   Récupération des textures du 3DS %s terminé !!\n", filename); 
   for (int i = 0; i < this -> g_3DModel.numOfMaterials; i++) {
     // Check to see if there is a file name to load in this material
     if (strlen(this -> g_3DModel.pMaterials[i].strFile) > 0) {   
-      printf("   Ahh le fichier 3DS référence la texture '%s' !!\n", this -> g_3DModel.pMaterials[i].strFile); 
+      //printf("   Ahh le fichier 3DS référence la texture '%s' !!\n", this -> g_3DModel.pMaterials[i].strFile); 
       // Use the name of the texture file to load the bitmap, with a texture ID (i). 
       // We pass in our global texture array, the name of the texture, and an ID to reference it. 
       //CreateTexture(g_Texture, g_3DModel.pMaterials[i].strFile, i);  
@@ -99,7 +99,7 @@ static int C3DS__load(C3DS * this, const char * filename) {
     // Set the texture ID for this material 
     this -> g_3DModel.pMaterials[i].texureId = i; // RL: As far as I am concerned, that looks useless. // RL: Indeed, materialID is directly used instead. 
   }; 
-  printf("   Récupération des textures du 3DS %s terminé !!\n", filename); 
+  //printf("   Récupération des textures du 3DS %s terminé !!\n", filename); 
   // Here, we turn on a lighting and enable lighting.  We don't need to 
   // set anything else for lighting because we will just take the defaults. 
   // We also want color, so we turn that on 
@@ -107,8 +107,8 @@ static int C3DS__load(C3DS * this, const char * filename) {
   
   // RL: Displaying. 
   { 
-    printf("Obj3DS[%s] - this -> g_3DModel.numOfObjects   = %d" "\n", filename, this -> g_3DModel.numOfObjects); 
-    printf("Obj3DS[%s] - this -> g_3DModel.numOfMaterials = %d" "\n", filename, this -> g_3DModel.numOfMaterials); 
+    //printf("Obj3DS[%s] - this -> g_3DModel.numOfObjects   = %d" "\n", filename, this -> g_3DModel.numOfObjects); 
+    //printf("Obj3DS[%s] - this -> g_3DModel.numOfMaterials = %d" "\n", filename, this -> g_3DModel.numOfMaterials); 
 #if 0
     for (int i = 0; i < this -> g_3DModel.numOfObjects; i++) { 
       // Free the faces, normals, vertices, and texture coordinates. 
@@ -130,7 +130,7 @@ static int C3DS__load(C3DS * this, const char * filename) {
   glEndList();                          // RL: End recording. 
   
   
-  printf("   Objet 3DS '%s' entièrement terminé !!\n", filename); 
+  printf("<<< Objet 3DS chargé: '%s' " "\n", filename); 
   return true;  
 }; 
 
@@ -369,7 +369,7 @@ C3DS * C3DS_make(const char * filename) {
   filename = reelfile;
   bool b3dModelLoaded;
   
-  printf("Importation du fichier 3DS %s...\n", filename);  
+  //printf("Importation du fichier 3DS %s...\n", filename);  
     
   this -> g_ViewMode = GL_TRIANGLES; 
   for (int i = 0; i < MAX_TEXTURES; i++) 

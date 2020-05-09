@@ -43,6 +43,7 @@ struct MEvenement {
   void (* delete_content)(CEvenement * this); 
 }; 
 extern const struct MEvenement * EvenementModule; 
+//extern const struct MEvenement EvenementModule[1]; 
 
 struct CEvenement { // Problem with that is that the struct does not have the right size on declaration: "struct CEvenement e;" does not have space to hold the private data. It's not a problem when it's a pointer, it is when it's a struct. 
   CEvenement * (* make)(void); 

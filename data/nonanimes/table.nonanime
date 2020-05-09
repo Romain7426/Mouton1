@@ -1,15 +1,15 @@
-physique {
- zone de choc := {
-  longueur := 2.;
-  largeur := 2.;
-  hauteur := 100.;
- };
- MaSSe := 240.;
- compressible := faux;
- fixe := vrai;
- coefficient de rebondissement := 0.23;
-}
-
+physique { 
+ zone de choc := { 
+  longueur := 1.0; 
+  largeur := 1.0; 
+  hauteur := 0.75; 
+ }; 
+ MaSSe := 240.; 
+ compressible := faux; 
+ fixe := vrai; 
+ coefficient de rebondissement := 0.23; 
+} 
+ 
 gameplay {
  points de vie := 9999;
  invinsible := vrai;

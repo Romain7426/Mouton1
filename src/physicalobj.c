@@ -4,7 +4,8 @@
 #include "map.h"
 
 #define D_T 0.1f
-#define GRAVITY 100.0f 
+//#define GRAVITY 100.0f 
+#define GRAVITY 20.0f 
 
 
 void CPhysicalObj__PerdrePV(CPhysicalObj * this, const int nbpv) { 
@@ -43,7 +44,7 @@ void CPhysicalObj__Life(CPhysicalObj * this) {
   // FS: /*un objet éphémère perd un point de vie à chaque tour*/ 
   if (this -> is_objet_ephemere) { 
     this -> PerdrePV(this, 1); 
-  };   
+  }; 
 }; 
 
 
@@ -81,13 +82,20 @@ void CPhysicalObj__SetPosition_vXY(CPhysicalObj * this, const float lattice_x, c
   }; 
   
 #if 1 
-  this -> z0 = Map -> GETZ0_vXY(Map, this -> p.x, this -> p.y); 
+  this -> z0  = Map -> GETZ0_vXY(Map, this -> p.x, this -> p.y); 
   this -> p.z = this -> z0; 
 #else 
   const float map_x = lattice_x / Map -> lattice_width ; 
   const float map_y = lattice_y / Map -> lattice_height; 
   this -> p.z = Map -> Sol -> GETZ(Map -> Sol, map_x, map_y); 
 #endif 
+}; 
+
+void CPhysicalObj__SetPosition_vXYZ(CPhysicalObj * this, const float lattice_x, const float lattice_y, const float lattice_z, const CMap * Map) {
+  this -> p.x = lattice_x; 
+  this -> p.y = lattice_y; 
+  this -> p.z = lattice_z; 
+  this -> z0  = Map -> GETZ0_vXY(Map, this -> p.x, this -> p.y); 
 }; 
 
 void CPhysicalObj__SetZ(CPhysicalObj * this, const float nz, const TMethodePlacement mp) { 
@@ -124,7 +132,8 @@ TPoint3D CPhysicalObj__GetDimension(const CPhysicalObj * this) {
 
 bool CPhysicalObj__IsVolumeNul(const CPhysicalObj * this) { 
   //return (this -> dimension.x * this -> dimension.y * this -> dimension.z) < 1.0f; 
-  return this -> volume < 1.0f; 
+  //return this -> volume < 1.0f; 
+  return this -> volume < 0.01f; 
 }; 
 
 TPoint3D CPhysicalObj__GetVitesse(const CPhysicalObj * this) {
@@ -226,16 +235,23 @@ TPoint3D CPhysicalObj__GetForce(const CPhysicalObj * this) {
 
 
 void CPhysicalObj__NewtonEngine__Frottements_apply(CPhysicalObj * this) { 
-  if (this -> DansEau_huh) { 
-    this -> Acceleration_add_vXYZ(this, 0.0f, 0.0f, 0.9f * GRAVITY); // RL: Archimède: Gravitation is less strong in water. 
-    // FS: dans l'eau les frottements fluides sont plus importants 
-    this -> CoeffFrottementFluideXY = 3.0f; 
-    this -> CoeffFrottementFluideZ  = 1.0f; 
+  if (!this -> is_objet_ephemere) { 
+    if (this -> DansEau_huh) { 
+      this -> Acceleration_add_vXYZ(this, 0.0f, 0.0f, 0.9f * GRAVITY); // RL: Archimède: Gravitation is less strong in water. 
+      // FS: dans l'eau les frottements fluides sont plus importants 
+      this -> CoeffFrottementFluideXY = 3.0f; 
+      this -> CoeffFrottementFluideZ  = 1.0f; 
+    } 
+    else { 
+      // FS: dans l'air, les frottements fluides sont assez petits 
+      this -> CoeffFrottementFluideXY = 2.0f; 
+      this -> CoeffFrottementFluideZ  = 0.0f; 
+    }; 
   } 
   else { 
-    // FS: dans l'air, les frottements fluides sont assez petits 
-    this -> CoeffFrottementFluideXY = 2.0f; 
-    this -> CoeffFrottementFluideZ  = 0.0f; 
+    // RL: Pour un objet éphémère, les frottements sont différents. 
+    this -> CoeffFrottementFluideXY = 1.0f; 
+    this -> CoeffFrottementFluideZ  = 15.0f; 
   }; 
 
 #if 1 
@@ -258,11 +274,13 @@ void CPhysicalObj__NewtonEngine__Frottements_apply(CPhysicalObj * this) {
 }; 
 
 void CPhysicalObj__NewtonEngine__OneStepFoward__NoValidationYet(CPhysicalObj * this) { 
+#if 0
   // FS: /*par défaut, l'objet physique n'est pas bloqué et se trouve dans une position valide*/ 
   this -> nvalid_position   = true; 
   this -> nvalid_position_x = true; 
   this -> nvalid_position_y = true; 
   this -> nvalid_position_z = true; 
+#endif 
 
   this -> np    = this -> p; 
   
@@ -282,12 +300,14 @@ void CPhysicalObj__NewtonEngine__OneStepFoward__NoValidationYet(CPhysicalObj * t
 
 
 #if 1 
-void CPhysicalObj__ValiderPosition(CPhysicalObj * this, const float ZEau) { 
-  this -> AuSol_huh = (this -> np.z <= this -> z0_n); 
+void CPhysicalObj__ValiderPosition(CPhysicalObj * this, const float lattice_ZEau) { 
+  this -> AuSol_huh   = (this -> np.z <= this -> z0_n); 
   
-  this -> DansEau_huh = (this -> np.z <= ZEau);
-
-  this -> Immerge_huh = (this -> np.z + this -> d.z < ZEau); 
+  if (this -> np.z <= this -> z0_n) this -> np.z = this -> z0_n; 
+  
+  this -> DansEau_huh = (this -> np.z <= lattice_ZEau);
+  
+  this -> Immerge_huh = (this -> np.z + this -> d.z < lattice_ZEau); 
   
   this -> p  = this -> np; 
   this -> z0 = this -> z0_n; 
@@ -359,8 +379,7 @@ void CPhysicalObj__ValiderPosition(CPhysicalObj * this, const bool MoteurPhysiqu
 
 
 
-#if 1 
-void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * this, const CMap * Map, const CSol * Sol) { 
+void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * this, const CMap * Map) { 
   // RL: Borders 
   if (this -> np.x <= 0) this -> np.x = 0; 
   if (this -> np.y <= 0) this -> np.y = 0; 
@@ -368,11 +387,20 @@ void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * t
   if (this -> np.y >= Map -> lattice_height) this -> np.y = Map -> lattice_height; 
 
   // RL: Ground and Slope 
+#if 1 
+  const float lattice_z0__n = Map -> GETZ0_vXY(Map, this -> np.x, this -> np.y); 
+#else 
   const float map_x__n  = this -> np.x / Map -> lattice_width ; 
   const float map_y__n  = this -> np.y / Map -> lattice_height; 
-  const float map_z0__n = Sol -> GETZ(Sol, map_x__n, map_y__n); 
+  const float map_z0__n = Map -> GETZ0_vXY(Map, map_x__n, map_y__n); 
+#endif 
 
-  this -> z0_n = map_z0__n; 
+  //this -> z0_n = map_z0__n; 
+  this -> z0_n = lattice_z0__n; 
+
+#if 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " GROUND - this -> z0_n = %f - this -> np.z = %f -  this -> p.z = %f "  "\n", __func__, this -> z0_n, this -> np.z, this -> p.z); 
+#endif   
   
   if (this -> np.z > this -> z0_n) { 
     // RL: If the new position is above the ground, then no slope is to be looked at.  
@@ -383,8 +411,8 @@ void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * t
   //this -> AuSol_huh = this -> np.z <= this -> z0_n; 
 
   // RL: We can't go underground. 
-  if (this -> np.z < map_z0__n) { 
-    this -> np.z      = map_z0__n; 
+  if (this -> np.z < lattice_z0__n) { 
+    this -> np.z      = lattice_z0__n; 
     this -> v.z       = 0.0f; // RL: We hit the ground. 
     //this -> AuSol_huh = true; 
   }; 
@@ -395,9 +423,15 @@ void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * t
   }; 
   
   // RL: From now onward, both 'p' & 'np' are on the ground. 
-  
+
+#if 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " SLOPE  - this -> z0_n = %f - this -> np.z = %f -  this -> p.z = %f "  "\n", __func__, this -> z0_n, this -> np.z, this -> p.z); 
+#endif   
+
+
   // RL: If the slope is too high, then we can't move there. 
-  if (fabs(this -> np.z - this -> p.z) > 10.0f) { 
+  //if (fabs(this -> np.z - this -> p.z) > 10.0f) { 
+  if (fabs(this -> np.z - this -> p.z) > 0.25f) { 
     this -> np.x = this -> p.x; 
     this -> np.y = this -> p.y; 
     this -> np.z = this -> p.z; 
@@ -405,38 +439,13 @@ void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * t
   }; 
   
 }; 
-#else 
-void CPhysicalObj__TesterSol(CPhysicalObj * this, const CSol * Sol)  {
-  const float zmap = Sol -> GETZ(Sol, this -> p.x, this -> p.y);
-  
-  // FS: gestion de l'altitude 
-  if (this -> np.z < zmap) { 
-    this -> np.z = zmap; 
-    this -> v.z = 0.0f; 
-    this -> AuSol_huh = true; 
-  } 
-  else { 
-    this -> AuSol_huh = false; 
-  }; 
-  
-  if (TPoint2D_Norme1(Sol -> Differentiel(Sol, this -> np)) > 10.0f) {      
-    this -> np.x = this -> p.x; 
-    this -> np.y = this -> p.y; 
-  }; 
-  
-  // FS: l'objet ne sort pas de la carte 
-  if (this -> np.y < 0) this -> np.y = 0; 
-  if (this -> np.x < 0) this -> np.x = 0; 
-  if (this -> np.y > Sol -> GetTailleY(Sol) - 1.0f) this -> np.y = Sol -> GetTailleY(Sol) - 1.0f; 
-  if (this -> np.x > Sol -> GetTailleX(Sol) - 1.0f) this -> np.x = Sol -> GetTailleX(Sol) - 1.0f; 
-}; 
-#endif 
  
 
 
 
 
 static bool Segment__DoTheyIntersect_huh(const float __a1__, const float __a2__, const float __b1__, const float __b2__) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " __a1__ = %f, __a2__ = %f, __b1__ = %f, __b2__ = %f "  "\n", __func__, __a1__, __a2__, __b1__, __b2__ ); 
   float a1; float a2; float b1; float b2; 
   if (__a1__ < __b1__) { 
     a1 = __a1__; 
@@ -450,24 +459,30 @@ static bool Segment__DoTheyIntersect_huh(const float __a1__, const float __a2__,
     b1 = __a1__; 
     b2 = __a2__; 
   }; 
+#if 0
+  if (b1 < a2) { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " __a1__ = %f, __a2__ = %f, __b1__ = %f, __b2__ = %f "  "\n", __func__, __a1__, __a2__, __b1__, __b2__ ); 
+  }; 
+#endif 
   return (b1 < a2); 
 }; 
 
 #if 1 
 int CPhysicalObj__DoTheyIntersect_huh(const CPhysicalObj * this, const CPhysicalObj * po) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Hero_o = %p "  "\n", __func__,  Hero_o ); 
   const TPoint3D d1 = this -> GetDimension(this); 
   const TPoint3D d2 = po   -> GetDimension(po  ); 
   
 #if 1 
   int where = 0; 
-  if (Segment__DoTheyIntersect_huh(this -> np.x - d1.x, this -> np.x + d1.x, po -> p.x - d2.x, po -> p.x + d2.x)) where |= 1; 
-  if (Segment__DoTheyIntersect_huh(this -> np.y - d1.y, this -> np.y + d1.y, po -> p.y - d2.y, po -> p.x + d2.y)) where |= 2; 
-  if (Segment__DoTheyIntersect_huh(this -> np.z       , this -> np.z + d1.z, po -> p.z       , po -> p.z + d2.z)) where |= 4; 
+  if (Segment__DoTheyIntersect_huh(this -> np.x - d1.x, this -> np.x + d1.x, po -> np.x - d2.x, po -> np.x + d2.x)) where |= 1; 
+  if (Segment__DoTheyIntersect_huh(this -> np.y - d1.y, this -> np.y + d1.y, po -> np.y - d2.y, po -> np.y + d2.y)) where |= 2; 
+  if (Segment__DoTheyIntersect_huh(this -> np.z       , this -> np.z + d1.z, po -> np.z       , po -> np.z + d2.z)) where |= 4; 
   return where; 
 #else 
-  if (Segment__DoTheyIntersect_huh(this -> np.x - d1.x, this -> np.x + d1.x, po -> p.x - d2.x, po -> p.x + d2.x)) return true; 
-  if (Segment__DoTheyIntersect_huh(this -> np.y - d1.y, this -> np.y + d1.y, po -> p.y - d2.y, po -> p.x + d2.y)) return true; 
-  if (Segment__DoTheyIntersect_huh(this -> np.z       , this -> np.z + d1.z, po -> p.z       , po -> p.z + d2.z)) return true; 
+  if (Segment__DoTheyIntersect_huh(this -> np.x - d1.x, this -> np.x + d1.x, po -> np.x - d2.x, po -> np.x + d2.x)) return true; 
+  if (Segment__DoTheyIntersect_huh(this -> np.y - d1.y, this -> np.y + d1.y, po -> np.y - d2.y, po -> np.x + d2.y)) return true; 
+  if (Segment__DoTheyIntersect_huh(this -> np.z       , this -> np.z + d1.z, po -> np.z       , po -> np.z + d2.z)) return true; 
   return false; 
 #endif 
   
@@ -538,8 +553,12 @@ bool CPhysicalObj__TesterPosition(CPhysicalObj * this, const int lattice_width, 
 #endif 
 
 
-bool CPhysicalObj__IsBloque(const CPhysicalObj * this) {
-  return !this -> nvalid_position;   
+bool CPhysicalObj__IsBloque(const CPhysicalObj * this) { 
+#if 1 
+  return false; 
+#else 
+  return !this -> nvalid_position; 
+#endif 
 }; 
 
 
@@ -548,11 +567,19 @@ bool CPhysicalObj__IsBloque(const CPhysicalObj * this) {
 
 
 
-void CPhysicalObj__Render(const CPhysicalObj * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold) { 
+extern bool show_choc_cube_huh; 
+
+//void CPhysicalObj__Render(const CPhysicalObj * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold) { 
+void CPhysicalObj__Render(const CPhysicalObj * this, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold) { 
+  if (!(show_choc_cube_huh)) { return; }; 
 #if AFFICHER_CUBE_DEBUG == true 
   
   //const TPoint3D d = this -> GetDimension(this, lattice_width, lattice_height, our_manifold); 
   const TPoint3D d = this -> GetDimension(this); 
+
+#if 1 
+  glColor3f(1.0f, 1.0f, 1.0f); 
+#else 
   
   // FS: /* les cubes pour lesquels on a rejeté la position, sont rouges */ 
   if (!this -> nvalid_position) { 
@@ -571,8 +598,14 @@ void CPhysicalObj__Render(const CPhysicalObj * this, const int lattice_width, co
     d.z = 10.0f;
   }; 
 #endif
+#endif 
   
 #if 1 
+  our_manifold -> AfficherCube(our_manifold, 
+			       /*map_i*/0, /*map_j*/0, 
+			       /*map_x*/(this -> p.x - d.x) * lattice_to_map_scale_factor__x, /*map_y*/(this -> p.y - d.y) * lattice_to_map_scale_factor__y, /*map_z*/this -> p.z * lattice_to_map_scale_factor__z, 
+			       /*map_dx*/2.0f*d.x * lattice_to_map_scale_factor__x, /*map_dy*/2.0f*d.y * lattice_to_map_scale_factor__y, /*map_dz*/d.z * lattice_to_map_scale_factor__z); 
+#else 
   our_manifold -> AfficherCube(our_manifold, 
 			       /*map_i*/0, /*map_j*/0, 
 			       /*map_x*/(this -> p.x - d.x) / (float) lattice_width, /*map_y*/(this -> p.y - d.y) / (float) lattice_height, /*map_z*/this -> p.z, 
@@ -609,6 +642,7 @@ CPhysicalObj * CPhysicalObj__make_assign_methods(CPhysicalObj * this) {
   ASSIGN_METHOD(CPhysicalObj,this,GetPosition_z); 
   ASSIGN_METHOD(CPhysicalObj,this,SetPosition_vP3D); 
   ASSIGN_METHOD(CPhysicalObj,this,SetPosition_vXY); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetPosition_vXYZ); 
   ASSIGN_METHOD(CPhysicalObj,this,SetZ); 
   ASSIGN_METHOD(CPhysicalObj,this,SetDimension); 
   //ASSIGN_METHOD(CPhysicalObj,this,InitForce); 
@@ -642,6 +676,9 @@ CPhysicalObj * CPhysicalObj__make_assign_methods(CPhysicalObj * this) {
   ASSIGN_METHOD(CPhysicalObj,this,NewtonEngine__OneStepFoward__NoValidationYet); 
   ASSIGN_METHOD(CPhysicalObj,this,BordersAndGroundAndSlope__AdjustAndCorrectNP); 
   ASSIGN_METHOD(CPhysicalObj,this,DoTheyIntersect_huh); 
+
+  this -> Force_massique__add_vXYZ = this -> Force_add_by_mass_unit_vXYZ; 
+  this -> Force_massique__add_vP3D = this -> Force_add_by_mass_unit_vP3D; 
   
   return this; 
 }; 
@@ -653,20 +690,23 @@ CPhysicalObj * CPhysicalObj__make(const char * filename) {
 }; 
 
 CPhysicalObj * CPhysicalObj__make_aux(CPhysicalObj * this, const int subtype, const char * filename) { 
-  printf("%s\n", __FUNCTION__);                             
+  //printf("%s\n", __FUNCTION__);                             
   
-  CObjActionnable_make_aux(&this -> parent);
+  //CObjActionnable_make_aux(&this -> parent);
+  this -> actions = CObjActionnable_make();
   
   CPhysicalObj__make_assign_methods(this);
   
   this -> subtype = subtype; 
-  
+
+#if 0   
   this -> nvalid_position  = true; 
   this -> valid_position_x = true; 
   this -> valid_position_y = true;  
   this -> valid_position_z = true; 
   //this -> ancvolumemax = 0.0f; 
   //this -> volumemax = 0.0f; 
+#endif 
   this -> pv    = 1; 
   this -> pvmax = 1; 
   this -> is_objet_ephemere = false; 
@@ -710,7 +750,8 @@ CPhysicalObj * CPhysicalObj__make_aux(CPhysicalObj * this, const int subtype, co
 
 
 void CPhysicalObj__delete_aux(CPhysicalObj * this) {
-  CObjActionnable_delete_aux(&this -> parent);
+  //CObjActionnable_delete_aux(&this -> parent); 
+  CObjActionnable_delete(this -> actions); 
 }; 
 
 void CPhysicalObj__delete(CPhysicalObj * this) {
@@ -720,7 +761,8 @@ void CPhysicalObj__delete(CPhysicalObj * this) {
 
 CPhysicalObj * CPhysicalObj__copy_aux(CPhysicalObj * this, const CPhysicalObj * src) {
   *this = *src;
-  CObjActionnable_copy_aux(&this -> parent, &src -> parent);
+  //CObjActionnable_copy_aux(&this -> parent, &src -> parent);
+  CObjActionnable_copy_aux(this -> actions, src -> actions);
   return this; 
 }; 
 

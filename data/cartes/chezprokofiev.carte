@@ -4,6 +4,10 @@
 physique {
 }
 gameplay {
+ longueur := 12; 
+ largeur  := 16; 
+ recouvrement longueur := 1; 
+ recouvrement largeur  := 1; 
  arme := vrai ; 
  musique := "marrant.mid"; 
  niveau eau := -.10.0; 

@@ -64,7 +64,7 @@ PROF := no
 
 SYSTEME := $(shell uname)
 ENDIAN := $(shell ./tools/bin/endianness-detect)
-ARCH := $(shell arch)
+ARCH := $(shell arch) # RL: Synonym of 'machine' 
 MACHINE := $(shell machine)
 HARDWARE := $(shell uname -m)
 
@@ -85,7 +85,83 @@ HW_IDX := $(shell tools/bin/list-match $(HARDWARE) $(HW_LIST) $(HARDWARE))
 INTSIZE := $(word $(HW_IDX), $(INTSIZE_LIST) unknown_intsize)
 
 $(info OS: $(OS))
+$(info ARCH: $(MACHINE))
 $(info INTSIZE: $(INTSIZE))
+
+GCC_HUH   := $(shell gcc   --version > /dev/null 2>&1 ; echo $$?)
+CLANG_HUH := $(shell clang --version > /dev/null 2>&1 ; echo $$?)
+PCC_HUH   := $(shell pcc   --version > /dev/null 2>&1 ; echo $$?)
+YASM_HUH  := $(shell yasm  --version > /dev/null 2>&1 ; echo $$?)
+GAS_HUH   := $(shell gas   --version > /dev/null 2>&1 ; echo $$?)
+AS_HUH    := $(shell as    --version > /dev/null 2>&1 ; echo $$?)
+ifeq ($(GCC_HUH),0) 
+  GCC_HUH := yes
+else 
+  GCC_HUH := no
+endif
+ifeq ($(CLANG_HUH),0) 
+  CLANG_HUH := yes
+else 
+  CLANG_HUH := no
+endif
+ifeq ($(PCC_HUH),0) 
+  PCC_HUH := yes
+else 
+  PCC_HUH := no
+endif
+ifeq ($(YASM_HUH),0) 
+  YASM_HUH := yes
+else 
+  YASM_HUH := no
+endif
+ifeq ($(GAS_HUH),0) 
+  GAS_HUH := yes
+else 
+  GAS_HUH := no
+endif
+ifeq ($(AS_HUH),0) 
+  AS_HUH := yes
+else 
+  AS_HUH := no
+endif
+$(info Has CLANG? $(CLANG_HUH)) 
+$(info Has GCC?   $(GCC_HUH)) 
+$(info Has PCC?   $(PCC_HUH)) 
+$(info Has YASM?  $(YASM_HUH)) 
+$(info Has GAS?   $(GAS_HUH)) 
+$(info Has AS?    $(AS_HUH)) 
+
+CC := gcc # RL: GCC advantage is that it adds profiling data ('-pg' option). 
+CC := pcc # RL: PCC fails to compile the software. 
+CC := clang 
+CC := cc 
+ifeq ($(CLANG_HUH),yes) 
+  CC_IS_CLANG_HUH := $(shell echo "int main(int argc, char * argv[]) { return (int) __clang__; }; " | cc -x c -std=c99 -O0 -c - -o - > /dev/null 2>&1 ; echo $$?)
+  ifeq ($(CC_IS_CLANG_HUH),0) 
+    CC := clang
+  endif 
+else ifeq ($(GCC_HUH),yes) 
+  CC_IS_GCC_HUH   := $(shell echo "int main(int argc, char * argv[]) { return (int) __GNUC__ ; }; " | cc -x c -std=c99 -O0 -c - -o - > /dev/null 2>&1 ; echo $$?)
+  ifeq ($(CC_IS_GCC_HUH),0) 
+    CC := gcc
+  endif 
+else ifeq ($(PCC_HUH),yes) 
+  CC_IS_PCC_HUH   := $(shell echo "int main(int argc, char * argv[]) { return (int) __PCC__  ; }; " | cc -x c -std=c99 -O0 -c - -o - > /dev/null 2>&1 ; echo $$?)
+  ifeq ($(CC_IS_GCC_HUH),0) 
+    CC := pcc
+  endif 
+endif
+
+$(info CC is:  $(CC)) 
+
+
+
+
+ASM := yasm 
+
+SEPARATE_ASM := yes
+SEPARATE_ASM := $(YASM_HUH)
+SEPARATE_ASM := no
 
 CC_FLAGS := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -D SRCFILE_UTF8  
 
@@ -100,8 +176,20 @@ CC_FLAGS := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -D SRCFIL
 # -pedantic -pedantic-errors 
 #CINC := -I /usr/X11R6/include  -I ./libs/SDL-1.2.15/destroot/include -I ./libs/SDL_image/src/SDL_image/ -I ./libs/SDL_mixer/src/SDL_mixer/ -I ./libs/nonanime/destroot/include/ -I ./libs/anime/destroot/include/ -I ./libs/carte/destroot/include/  -I ./libs/pscript/destroot/include/ 
 CINC := -I /usr/X11R6/include  -I ./libs/SDL-1.2.15/destroot/include/ -I ./libs/SDL_image/src/SDL_image/ -I /usr/local/include/SDL/ -I ./libs/nonanime/destroot/include/ -I ./libs/anime/destroot/include/ -I ./libs/carte/destroot/include/  -I ./libs/pscript/destroot/include/ 
-CFLAGS_NO :=  -Wno-system-headers -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function -Wno-switch-default -Wno-format-nonliteral -Wno-unsequenced -Wno-cast-align 
-GCC_FLAGS_FOR_DEBUG := -O0 -Wall -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -Wnewline-eof -Wfatal-errors -Werror-implicit-function-declaration -fno-exceptions -fstack-check -Werror -W  -Wparentheses -fverbose-asm -fno-omit-frame-pointer -ffreestanding -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions  -gfull  -feliminate-unused-debug-types  -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type  -Wstrict-prototypes -Wpacked -Wcast-qual -Wcast-align -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas $(CFLAGS_NO) $(CINC) # -Wmissing-prototypes -Wmissing-declarations 
+CFLAGS_NO :=  -Wno-system-headers -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function -Wno-switch-default -Wno-format-nonliteral -Wno-cast-align 
+CFLAGS_CLANG := -gfull -Wnewline-eof  -Waddress-of-packed-member -fwrapv -gmodules -fstandalone-debug -ftrapv # -Wpointer-sign -### 
+CFLAGS_NO_CLANG := -Wno-unsequenced -Wno-pointer-sign
+CFLAGS_GCC := -ftrapv -fPIC -ggdb3 -pg #-Q 
+CFLAGS_NO_GCC := -Wno-nested-externs -Wno-unknown-pragmas  -Wno-uninitialized -Wno-undef -Wno-fatal-errors -Wno-error 
+CFLAGS_PCC := -pg -g  
+GCC_FLAGS_FOR_DEBUG := -O0 -Wall -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -Wfatal-errors -Werror-implicit-function-declaration -fno-exceptions -fstack-check -Werror -W  -Wparentheses -fverbose-asm -fno-omit-frame-pointer -ffreestanding -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions  -feliminate-unused-debug-types  -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type  -Wstrict-prototypes -Wpacked -Wcast-qual -Wcast-align -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas $(CFLAGS_NO) # -Wmissing-prototypes -Wmissing-declarations 
+ifeq ($(CC),clang) 
+GCC_FLAGS_FOR_DEBUG := $(GCC_FLAGS_FOR_DEBUG) $(CFLAGS_CLANG) $(CFLAGS_NO_CLANG) 
+endif
+ifeq ($(CC),gcc) 
+GCC_FLAGS_FOR_DEBUG := $(GCC_FLAGS_FOR_DEBUG) $(CFLAGS_GCC)   $(CFLAGS_NO_GCC) 
+endif
+GCC_FLAGS_FOR_DEBUG := $(GCC_FLAGS_FOR_DEBUG) $(CINC) 
 
 # unknown: -gstabs+3 -fno-early-inlining -fno-gcse-lm -fno-move-loop-invariants -fno-peephole  -fno-sched-interblock -fno-sched-spec -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-tree-loop-optimize -fno-tree-vect-loop-version -fno-tree-loop-im -fno-tree-loop-ivcanon 
 # Linker option: -aux-info build/action.aux 
@@ -167,6 +255,7 @@ SRC_C := $(filter-out $(SRC_Y),$(SRC_C))
 SRC_C := $(filter-out liste,$(SRC_C)) 
 SRC_H := $(filter-out liste,$(SRC_H)) 
 #OBJ := $(patsubst %,build/$(PROG)$(FLAVOR)--%.o, $(SRC_C) $(SRC_Y))
+OBJ_S := $(patsubst %,build/%.s, $(SRC_C) $(SRC_Y))
 OBJ := $(patsubst %,build/%.o, $(SRC_C) $(SRC_Y))
 #LIB := build/$(PROG)$(FLAVOR).a
 LIB := build/$(PROG).a
@@ -246,12 +335,12 @@ build.sh:
 	  echo "text2cstring src/$$i 2>&1" >> $@; \
 	done;
 	for i in $(SRC_C) $(SRC_Y); do \
-	  echo "cc $(CFLAGS) -c src/$$i.c -o build/$$i.o  2>&1" >> $@; \
+	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o  2>&1" >> $@; \
 	done;
-#	  echo "cc $(CFLAGS) -c src/$$i.c -o build/$$i.o -aux-info build/$$i.aux 2>&1" >> $@; 
+#	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o -aux-info build/$$i.aux 2>&1" >> $@; 
 	echo "ar -r -c $(LIB) $(OBJ) 2>&1" >> $@
 	echo "ranlib $(LIB) 2>&1" >> $@
-	echo "cc -o $(BIN) $(LIBS) $(LIB) 2>&1" >> $@
+	echo "$(CC) -o $(BIN) $(LIBS) $(LIB) 2>&1" >> $@
 	echo "" >> $@
 	echo "rm -f run" >> $@
 	echo "ln -s $(BIN) run" >> $@
@@ -337,8 +426,8 @@ Makefile:
 	echo "" >> $@
 	echo "" >> $@
 	echo "$(BIN): $(LIB)" >> $@
-#	echo "	cc -error-limit=1 -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
-	echo "	cc -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+#	echo "	$(CC) -error-limit=1 -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+	echo "	$(CC) -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "$(LIB): $(OBJ)" >> $@
@@ -368,16 +457,33 @@ Makefile:
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
+ifeq ($(SEPARATE_ASM),no) 
 	$(foreach file_c,$(sort $(patsubst src/%,%,$(wildcard src/*.c)) $(patsubst src/%.y,%.c,$(wildcard src/*.y)) $(patsubst src/%.ct,%.c,$(wildcard src/*.ct))), \
 	  $(foreach file_o,$(patsubst %.c,%.o,$(file_c)), \
 	    $(foreach file_aux,$(patsubst %.c,%.aux,$(file_c)), \
 	      echo "build/$(file_o): src/$(file_c) $(wildcard src/*.h)" >> $@; \
-	      echo "	cc $(CFLAGS) -c src/$(file_c) -o build/$(file_o)  2>&1" >> $@; \
+	      echo "	$(CC) $(CFLAGS) -c src/$(file_c) -o build/$(file_o)  2>&1" >> $@; \
 	      echo "" >> $@; \
 	    ) \
 	  ) \
 	)
-#	      echo "	cc $(CFLAGS) -c src/$(file_c) -o build/$(file_o) -aux-info build/$(file_aux) 2>&1" >> $@; 
+#	      echo "	$(CC) $(CFLAGS) -c src/$(file_c) -o build/$(file_o) -aux-info build/$(file_aux) 2>&1" >> $@; 
+else
+	$(foreach file_c,$(sort $(patsubst src/%,%,$(wildcard src/*.c)) $(patsubst src/%.y,%.c,$(wildcard src/*.y)) $(patsubst src/%.ct,%.c,$(wildcard src/*.ct))), \
+	  $(foreach file_s,$(patsubst %.c,%.s,$(file_c)), \
+	  $(foreach file_o,$(patsubst %.c,%.o	,$(file_c)), \
+	    $(foreach file_aux,$(patsubst %.c,%.aux,$(file_c)), \
+	      echo "build/$(file_o): build/$(file_s) " >> $@; \
+	      echo "	$(ASM) -f elf64 -w -p gas -g dwarf2 -mamd64  build/$(file_s) -o build/$(file_o)  2>&1" >> $@; \
+	      echo "" >> $@; \
+	      echo "build/$(file_s): src/$(file_c) $(wildcard src/*.h)" >> $@; \
+	      echo "	$(CC) $(CFLAGS) -S src/$(file_c) -o build/$(file_s)  2>&1" >> $@; \
+	      echo "" >> $@; \
+	    ) \
+	  ) \
+	  ) \
+	)
+endif
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@

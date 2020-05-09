@@ -17,12 +17,19 @@ unsigned char * KeyBoard = NULL;
 CKey__Enfoncee__META(SDLK_SPACE); 
 #endif 
 
-
+#if defined(__clang__) 
 #define CKey_StaticInit(kkk) ((struct CKey) { kkk, 0, CKey__Enfoncee, CKey__Appuye }) 
-CKey KeySpace = CKey_StaticInit(SDLK_SPACE); 
-CKey KeyEchap = CKey_StaticInit(SDLK_ESCAPE);
+#elif defined(__GNUC__) 
+#define CKey_StaticInit(kkk)                { kkk, 0, CKey__Enfoncee, CKey__Appuye } 
+#else 
+#define CKey_StaticInit(kkk) ((struct CKey) { kkk, 0, CKey__Enfoncee, CKey__Appuye }) 
+#endif 
+//CKey KeySpace  = { 0, 0, NULL, NULL }; //CKey_StaticInit(SDLK_SPACE); 
+//CKey KeySpace  = { SDLK_SPACE, 0, CKey__Enfoncee, CKey__Appuye }; //CKey_StaticInit(SDLK_SPACE); 
+CKey KeySpace  = CKey_StaticInit(SDLK_SPACE); 
+CKey KeyEchap  = CKey_StaticInit(SDLK_ESCAPE);
 CKey KeyReturn = CKey_StaticInit(SDLK_RETURN);
-CKey KeyF12 = CKey_StaticInit('g');
+CKey KeyF12    = CKey_StaticInit('g');
 
 CKey KeyI = CKey_StaticInit('i');
 CKey KeyL = CKey_StaticInit('l');

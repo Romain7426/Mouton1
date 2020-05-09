@@ -48,8 +48,8 @@ CObjNonAnime * CObjNonAnime__make(const char * filename) {
   CPhysicalObj__make_aux(&this -> parent, CPhysicalObj_subtype_CObjNonAnime, filename); 
 
   this -> resobj3ds = NULL; 
-  this -> angleZ = 0.0f; 
-  this -> filename = strcopy(filename); 
+  this -> angleZ    = 0.0f; 
+  this -> filename  = strcopy(filename); 
 
   this -> parent.Compressible_huh = true;  
   this -> parent.Hostile_huh = false;
@@ -59,19 +59,21 @@ CObjNonAnime * CObjNonAnime__make(const char * filename) {
   int ret;
   ret = this -> ReadDescriptionFile(this, NONANIMESDIR, filename);
 
-  if (0 == ret)
-    printf("Création de l'objet non animé réalisé avec succès!!\n");
-  else {
-    messerr("Erreur lors de la lecture du fichier de description l'objet non-anime.");
-    assert(false);
-  }
+  if (0 == ret) { 
+    //printf("Création de l'objet non-animé réalisée avec succès!!" "\n"); 
+  } 
+  else { 
+    messerr("Erreur lors de la lecture du fichier de description l'objet non-anime: '%s' " "\n", filename); 
+    assert(false); 
+  }; 
   
   return this; 
 };
 
 
 
-void CObjNonAnime__Render(const CObjNonAnime * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold) { 
+//void CObjNonAnime__Render(const CObjNonAnime * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold) { 
+void CObjNonAnime__Render(const CObjNonAnime * this, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold) { 
 #if 0 
   if (0 != strcmp(filename, "./heros.anime")) { 
     fprintf(stderr, "ObjNonAnime: Rendering: %s\n", filename); 
@@ -80,22 +82,39 @@ void CObjNonAnime__Render(const CObjNonAnime * this, const int lattice_width, co
 #endif
   
   const CPhysicalObj * parent = &this -> parent; 
-  parent -> Render(parent, lattice_width, lattice_height, our_manifold); 
+  //parent -> Render(parent, lattice_width, lattice_height, our_manifold); 
+  parent -> Render(parent, lattice_to_map_scale_factor__x, lattice_to_map_scale_factor__y, lattice_to_map_scale_factor__z, our_manifold); 
   
   glPushMatrix(); { 
     
+#if 1 
+    // RL: This is a change of origin and a change of the tangent vector basis: local coordinates. 
+    our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, parent -> p.x * lattice_to_map_scale_factor__x, parent -> p.y * lattice_to_map_scale_factor__y, parent -> p.z  * lattice_to_map_scale_factor__z); 
+    glScalef(lattice_to_map_scale_factor__x, lattice_to_map_scale_factor__y, lattice_to_map_scale_factor__z); 
+    glScalef(0.05f, 0.05f, 0.05f); // RL: Constant factor. Figured out of the blue. 
+#else 
     // RL: This is a change of origin and a change of the tangent vector basis: local coordinates. 
     our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, parent -> p.x / (float) lattice_width, parent -> p.y / (float) lattice_height, parent -> p.z); 
+    
+    //glScalef(1.0f / lattice_width, 1.0f / lattice_height, 1.0f); 
+    //glScalef(1.0f / lattice_width, 1.0f / lattice_height, 1.0f); 
+    //glScalef(0.05f, 0.05f, 1.0f); // RL: Constant factor. Figured out of the blue. 
+    const float lattice_depth = (lattice_width + lattice_height) / 2.0f; 
+    glScalef(1.0f / lattice_width, 1.0f / lattice_height, 1.0f / lattice_depth); 
+    glScalef(0.05f, 0.05f, 40.0f); // RL: Constant factor. Figured out of the blue. 
+#endif 
     
     // RL: Now onwards, we are in map-local coordinates. 
     
     glRotatef(90.0f, 1.0, 0.0, 0.0); // RL: π/2 x-axis rotation. // RL: Awkwardly, 'glRotate' uses degrees. 
     glRotatef(this -> angleZ * 180.0f/PI, 0.0, 1.0, 0.0); // RL: π y-axis rotation. // RL: Awkwardly, 'glRotate' uses degrees. 
-    
+
+#if 0     
     if (parent -> Compressible_huh) { 
       const float FacteurCompression = our_manifold -> FacteurCompression(our_manifold, /*map_j*/0, parent -> p.y / (float) lattice_height); 
       glScalef(1.0f, 1.0f, FacteurCompression); 
     }; 
+#endif 
     
     this -> resobj3ds -> Render(this -> resobj3ds); 
     //this -> resobj3ds -> RenderGL(this -> resobj3ds); 
@@ -111,31 +130,31 @@ void CObjNonAnime__SetAngleZ(CObjNonAnime * this, const float thetaZ) {
 
 
 
-int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, const char * filename) {
+int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, const char * filename) { 
   nonanime_t * nonanime_data = NULL; 
-
+  
   { 
-    char nonanime_fullpath[strlen(dir) + strlen(filename) + 1];
+    char nonanime_fullpath[strlen(dir) + strlen(filename) + 1]; 
     strcat(strcpy(nonanime_fullpath, dir), filename); 
-#define LOG_SUFF ".log"
-    char nonanime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1];
-    strcat(strcat(strcpy(nonanime_log, LOGDIR), filename), LOG_SUFF);
+#define LOG_SUFF ".log" 
+    char nonanime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1]; 
+    strcat(strcat(strcpy(nonanime_log, LOGDIR), filename), LOG_SUFF); 
     nonanime_data = nonanime_make_from_file(nonanime_fullpath, nonanime_log); 
   }; 
   
-  this -> parent.SetDimension(&this -> parent, nonanime_data -> choc_longueur, nonanime_data -> choc_largeur, nonanime_data -> choc_hauteur);
-  if (NULL == this -> parent.filename) this -> parent.filename = strcopy(filename);
+  this -> parent.SetDimension(&this -> parent, nonanime_data -> choc_longueur, nonanime_data -> choc_largeur, nonanime_data -> choc_hauteur); 
+  if (NULL == this -> parent.filename) this -> parent.filename = strcopy(filename); 
   this -> parent.Compressible_huh = nonanime_data -> compressible; 
-  this -> parent.Fixe_huh = nonanime_data -> fixe; 
-  this -> parent.pvmax = nonanime_data -> vie; 
+  this -> parent.Fixe_huh         = nonanime_data -> fixe; 
+  this -> parent.pvmax            = nonanime_data -> vie; 
   
   if (0 < nonanime_data -> elements_nb) { 
-    this -> resobj3ds = C3DS__make(nonanime_data -> elements_image[0]);
+    this -> resobj3ds = C3DS__make(nonanime_data -> elements_image[0]); 
   }; 
-  if (NULL == this -> filename) this -> filename = strcopy(filename);
+  if (NULL == this -> filename) this -> filename = strcopy(filename); 
   
   nonanime_delete(nonanime_data); 
-      
+  
   return 0; 
 }; 
 

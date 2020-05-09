@@ -4,9 +4,9 @@
 
 physique {
  zone de choc := {
-  longueur := 6.; // x
-  largeur := 12.; // y
-  hauteur := 100.; // z
+  longueur :=  8.; // x
+  largeur  :=  8.; // y
+  hauteur  :=  4.5; // z
  };
  MaSSe := 240.;
  compressible := vrai;
@@ -16,7 +16,7 @@ physique {
 
 gameplay {
  points de vie := 9999;
- invinsible := vrai;
+ invincible := vrai;
 
 }
 
@@ -34,7 +34,7 @@ graphique {
 
 
 
-Et tout ce qui se passe après, on s'en fout !!!!!!!
+Et tout ce qui se passe aprÃ¨s, on s'en fout !!!!!!!
 
 
 

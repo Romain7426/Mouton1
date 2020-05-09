@@ -2,9 +2,9 @@
 #include "moteurteleportation.h"
 #include "map.h"
 #include "bonhomme.h"
-#include "apiscript.h"
 #include "text.h" //pour enable2D
-#include "camera.h" //pour initcamera
+//#include "camera.h" //pour initcamera
+#include "script_api.h"
 
 
 
@@ -58,8 +58,8 @@ void CMoteurTeleportation__delete(CMoteurTeleportation * this) {
 }; 
 
 void CMoteurTeleportation__DebuterTeleportation(CMoteurTeleportation * this, CZoneTeleportation in_zt) {
-  this -> zt = CZoneTeleportation_copy(&in_zt);
-  this -> anim = 2*NB_ANIM2_TELEPORTATION;
+  this -> zt   = CZoneTeleportation_copy(&in_zt); 
+  this -> anim = 2 * NB_ANIM2_TELEPORTATION; 
 };
 
 void CMoteurTeleportation__SetCouleurFondu(CMoteurTeleportation * this, int in_couleur) {
@@ -107,12 +107,17 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
   if (this -> anim == 0) return;
   
   if (this -> anim >= NB_ANIM2_TELEPORTATION) {
-    if ((this -> anim == NB_ANIM2_TELEPORTATION) && (this -> zt -> destination_carte != NULL)  && (this -> zt -> destination_carte[0] != '\0')) {
-      CMap__delete(*Map_ref);
-      *Map_ref = NULL;
+    // RL: Why that thing is in render??? Good Lord. 
+    if ((this -> anim == NB_ANIM2_TELEPORTATION) && (this -> zt -> destination_carte != NULL)  && (this -> zt -> destination_carte[0] != '\0')) { 
+      CMap__delete(*Map_ref); 
+      *Map_ref = NULL; 
 
       printf("Le moteur de téléportation charge la carte...\n");
       
+
+
+
+      // RL: Why that thing is in render??? Good Lord. 
       if (0 == strcmp(this -> zt -> destination_carte, "tore.carte")) {
         printf("On est en vaisseau car on est sur tore.carte !!!\n");                         
         *EnVaisseau_ref = true;
@@ -129,9 +134,11 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
       *Map_ref = CMap__make(this -> zt -> destination_carte, /*map_i*/0, /*map_j*/0, our_manifold, *EnVaisseau_ref);
       CBonhomme * Hero = *Hero_ref; 
       CPhysicalObj * aHero = &Hero -> parent1; 
+      //aHero -> SetPosition_vXY(aHero, this -> zt -> destination_position.x, this -> zt -> destination_position.y, mpABSOLU, *Map_ref); 
       aHero -> SetPosition_vP3D(aHero, this -> zt -> destination_position, *Map_ref); 
+      if (aHero -> p.z < aHero -> z0) aHero -> p.z = aHero -> z0; 
       Hero  -> SetDirection(Hero, this -> zt -> destination_direction); 
-      //aHero -> Acceleration_add_vXYZ(aHero, 0.0f, 0.0f, 200.0f); // RL: WHY??? 
+      //aHero -> Acceleration_add_vXYZ(aHero, 0.0f, 0.0f, 200.0f); // RL: WHY??? // RL: The z-coordinate was not normalized... 
       Hero  -> ViderOrdresDeplacement(Hero); 
       
       // FS: ne marche que si le changement de carte s'est effectué en dehors d'un script :) 

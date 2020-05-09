@@ -3,32 +3,42 @@
 # C'est encore un commentaire.
 physique {
 }
+
+
 gameplay {
+ longueur := 24; 
+ largeur  := 24; 
+ recouvrement longueur := 1; 
+ recouvrement largeur  := 1; 
+
  arme := vrai ; 
  musique := "pyramide.mid"; 
  niveau eau := 0.0; 
  vie eau :=  0; 
+
 teleportation IDENT {
   destination := "niveau1_2.carte";
   position := {
-     x := 7;
+     x :=  4;
      y := 14;
-     z := 0;
+     z := -1;
   };
   dimension := {
      longueur := 3;  // x
-     largeur := 3;   // y
-     hauteur := 100;   // z
+     largeur  := 3;   // y
+     hauteur  := 6;   // z
   };
   direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
-     x := 7;
+     x :=  7;
      y := 14;
-     z := 0;
+     z :=  0;
   };
   destination direction parcours := bas;
 }
+
 }
+
 graphique {
  fichier de zone de niveau := "niveau1_3.niveau.png";
  fichier de zone de texture := "niveau1_3.textures.png";

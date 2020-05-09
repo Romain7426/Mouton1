@@ -61,8 +61,8 @@ extern CKey KeyF12;
 //#define KEY_VUE_ANGLE_MOINS (KeyBoard[SDLK_PAGEUP]   || KeyBoard['z'])
 #define KEY_VUE_ANGLE_PLUS    (KeyBoard['c'])
 #define KEY_VUE_ANGLE_MOINS   (KeyBoard['z'])
-#define KEY_CAMERA_DIST_PLUS  (KeyBoard[SDLK_PAGEUP])
-#define KEY_CAMERA_DIST_MOINS (KeyBoard[SDLK_PAGEDOWN])
+#define KEY_CAMERA_DIST_PLUS  (KeyBoard[SDLK_PAGEDOWN])
+#define KEY_CAMERA_DIST_MOINS (KeyBoard[SDLK_PAGEUP])
 
 #define KEY_CAMERA_ANGLE_Z_PLUS  (KeyBoard['o'])
 #define KEY_CAMERA_ANGLE_Z_MOINS (KeyBoard['l'])

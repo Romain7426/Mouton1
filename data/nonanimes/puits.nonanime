@@ -1,18 +1,18 @@
 physique {
  zone de choc := {
-  longueur := 2.;
-  largeur := 2.;
-  hauteur := 100.;
+  longueur := 1.0; 
+  largeur := 1.0; 
+  hauteur := 0.7; //15.0;
  };
  MaSSe := 240.;
- compressible := faux;
- fixe := vrai;
- coefficient de rebondissement := 0.23;
+ compressible := faux; 
+ fixe := vrai; 
+ coefficient de rebondissement := 0.23; 
 }
 
 gameplay {
- points de vie := 9999;
- invinsible := vrai;
+ points de vie := 9999; 
+ invincible := vrai; 
  
 
  action parler {

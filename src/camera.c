@@ -10,6 +10,8 @@ enum { NB_ETAPES_ANIM_CAMERA = 16 };
 
 
 
+// RL: Used in apiscript.c 
+#define lattice__dist_defaut 4.0f //90.0f //87.5f //75.0f //50.0f //100.0f //150.0f
 
 
 
@@ -103,9 +105,10 @@ CCamera * CCamera__make_aux(CCamera * this) {
   this -> EffetPsychadelique = CCamera__EffetPsychadelique; 
   this -> SetDist            = CCamera__SetDist; 
   this -> Blit               = CCamera__Blit; 
+  this -> Zoom               = CCamera__Zoom; 
   
   this -> a_dist             = 0.0f; 
-  this -> dist               = 0.0f; 
+  this -> lattice__dist      = 0.0f; 
   this -> anim               = 0; 
   this -> solidaire_au_heros = true; 
   
@@ -134,24 +137,38 @@ bool CCamera__IsSolidaireAuHeros(const CCamera * this) {
 
 
 void CCamera__SetDist(CCamera * this, const float in_new_dist) {
-  this -> a_dist = this -> dist; 
-  this -> dist = in_new_dist;  
+  this -> a_dist = this -> lattice__dist; 
+  this -> lattice__dist = in_new_dist;  
   this -> anim = NB_ETAPES_ANIM_CAMERA;   
 };
 
+void CCamera__Zoom(CCamera * this, const TZoomMethod zoom_method, const float zoom_factor) { 
+  switch (zoom_method) { 
+    case TZoomMethod_Relatif: CCamera__SetDist(this, this -> lattice__dist / zoom_factor); break; 
+    case TZoomMethod_Absolu : CCamera__SetDist(this, lattice__dist_defaut  / zoom_factor); break; 
+  }; 
+}; 
+
+
+
 void CCamera__InitCamera(CCamera * this) { 
-  this -> SetDist(this, dist_defaut); 
+  //this -> SetDist(this, dist_defaut); 
+  this -> lattice__dist = lattice__dist_defaut; 
   //this -> angleXY =   PI / 2.0f; 
   //this -> angleHB = - PI / 4.0f; 
   //this -> angleXY = - PI / 2.0f; 
   //this -> angleXY = 0; 
   this -> angleXY = - PI / 2.0f; 
   //this -> angleZ  =   PI / 4.0f; 
-  this -> angleZ  =   3.0f * PI / 8.0f; 
+  //this -> angleZ  =   3.0f * PI / 8.0f; 
+  //this -> angleZ  =   5.0f * PI / 16.0f; 
+  this -> angleZ  =   11.0f * PI / 32.0f; 
+  //this -> angleZ  =   10.0f * PI / 32.0f; 
 }; 
 
 //void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const CMap * Map) { 
-void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const int lattice_width, const int lattice_height, const riemann_t * our_manifold) { 
+//void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const int lattice_width, const int lattice_height, const riemann_t * our_manifold) { 
+void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold) { 
 #if 0 
   if (this -> angleXY > 0) { 
     this -> angleXY -= 2.0f * PI; 
@@ -160,22 +177,38 @@ void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const int latti
   
   // FS: /*si c'est fixé au héros*/ 
   if (this -> solidaire_au_heros) {
-    this -> lattice_position = Hero -> parent1.GetPosition(&Hero -> parent1); 
+    this -> lattice__target_position = Hero -> parent1.GetPosition(&Hero -> parent1); 
   }; 
   
   // Map->LookAt(Camera.pos.x, Camera.pos.y, Camera.pos.z); 
-  const float b = bary(this -> a_dist, this -> dist, this -> anim, NB_ETAPES_ANIM_CAMERA); 
+  const float lattice_b = bary(this -> a_dist, this -> lattice__dist, this -> anim, NB_ETAPES_ANIM_CAMERA); 
   //Map -> parent.LookAt_angle(&Map -> parent, this -> pos.x, this -> pos.y, this -> pos.z, b, this -> angleXY, this -> angleHB); 
   //our_manifold -> camera__LookAt_angle(our_manifold, /*map_i*/0, /*map_j*/0, this -> pos.x, this -> pos.y, this -> pos.z, b, this -> angleXY, this -> angleHB); 
   //our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> pos.x, this -> pos.y, this -> pos.z, b, this -> angleXY, this -> angleHB, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
-  this -> map_position.x = this -> lattice_position.x / (float) lattice_width; 
-  this -> map_position.y = this -> lattice_position.y / (float) lattice_height; 
-  this -> map_position.z = this -> lattice_position.z; 
+#if 1 
+  this -> map__target_position.x = this -> lattice__target_position.x * lattice_to_map_scale_factor__x; 
+  this -> map__target_position.y = this -> lattice__target_position.y * lattice_to_map_scale_factor__y; 
+  this -> map__target_position.z = this -> lattice__target_position.z * lattice_to_map_scale_factor__z; 
+#else 
+  this -> map__target_position.x = this -> lattice__target_position.x / (float) lattice_width; 
+  this -> map__target_position.y = this -> lattice__target_position.y / (float) lattice_height; 
+  this -> map__target_position.z = this -> lattice__target_position.z; 
+#endif 
+  
+  //const float dist_factor = (fabsf(cosf(this -> angleXY)) * lattice_to_map_scale_factor__x + fabsf(sinf(this -> angleXY)) * lattice_to_map_scale_factor__y) * fabsf(sinf(this -> angleZ)) + fabsf(cosf(this -> angleZ)) * lattice_to_map_scale_factor__z; 
+  //const float dist_factor = (powf(cosf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__x + powf(sinf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__y); 
+  const float dist_factor = (powf(cosf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__x + powf(sinf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__y) * powf(sinf(this -> angleZ), 2.0f) + powf(cosf(this -> angleZ), 2.0f) * lattice_to_map_scale_factor__z; 
+  this -> map__dist = dist_factor * this -> lattice__dist; 
+  const float map_b = dist_factor * lattice_b; 
+  
   
   //our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map_position.x, this -> map_position.y, this -> map_position.z, b, this -> angleXY, this -> angleHB, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
   //our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map_position.x, this -> map_position.y, this -> map_position.z, /*dist*/b, /*angleXY*/0, /*angleZ*/0, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
   //our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map_position.x, this -> map_position.y, this -> map_position.z, /*dist*/b, /*angleXY*/0, /*angleZ*/this -> angleZ, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
-  our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map_position.x, this -> map_position.y, this -> map_position.z, /*dist*/b, /*angleXY*/this -> angleXY, /*angleZ*/this -> angleZ, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
+  //our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map__target_position.x, this -> map__target_position.y, this -> map__target_position.z, /*dist*/b, /*angleXY*/this -> angleXY, /*angleZ*/this -> angleZ, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
+  our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map__target_position.x, this -> map__target_position.y, this -> map__target_position.z, /*map_dist*/map_b, /*angleXY*/this -> angleXY, /*angleZ*/this -> angleZ, &this -> manifold__dist, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
+  
+  this -> manifold__dist *= this -> lattice__dist / lattice_b; 
   
   if (this -> anim > 0) this -> anim --; 
 }; 
@@ -189,8 +222,8 @@ void CCamera__EffetPsychadelique(CCamera * this) {
 #define NB_PAS 50 
   for (int i = 0; i <= NB_PAS; i++) {
     const float f   = ((float) (NB_PAS - i)) / ((float) NB_PAS); 
-    this -> dist    = 150.0f - f * 100.0f; 
-    this -> angleXY = PI / 2.0f + f * 2.0f * PI; 
+    this -> lattice__dist = 150.0f - f * 100.0f; 
+    this -> angleXY       = PI / 2.0f + f * 2.0f * PI; 
     //SCRIPT_unepassedeboucle();        
   }; 
 }; 

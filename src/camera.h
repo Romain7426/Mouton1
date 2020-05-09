@@ -4,33 +4,40 @@
 extern TDirection ConvertirDirectionAvecVue(const TDirection d, const struct CCamera * Camera);
 extern TDirection ConvertirDirectionAvecVue2(const TDirection d, const struct CCamera * Camera);
 
+enum TZoomMethod { TZoomMethod_Absolu, TZoomMethod_Relatif }; 
+typedef enum TZoomMethod TZoomMethod; 
 
-// RL: Used in apiscript.c 
-#define dist_defaut 100.0f //150.0f
 
 struct CCamera {
   //private://pas touche !! 
   bool  solidaire_au_heros; 
-  float             a_dist;  
-  float               dist; 
   int                 anim; 
+  float             a_dist;  
   
-  //public:
-  /********* les paramètres cools **************/
-
-  // FS: /*le point que regarde la caméra (prévoir une instruction pour affecter ce paramètre en abs et en relatif*/
-  TPoint3D lattice_position; 
-  TPoint3D     map_position; 
+  // RL: The camera has four liberty degrees (all in lattice units): 
+  //     'target'  is the point that the camera is looking at. 
+  //     'dist'    is the distance from which the camera looks at the target point (the camera is on the 'dist'-sphere). 
+  //     'angleZ'  is the angle with the z-axis: 0 means that the camera is on the z-axis; π/2 means that the camera is in the xy-plane. 
+  //     'angleXY' is the angle in the xy-plane: 0 means that the camera is aligned with the x-axis; π/2 means that the camera is aligned with the y-axis. 
+  //               NB: 'angleXY' is still needed even when 'angleZ' is zero: it gives the 'upward_direction' (when 'angleZ' is zero, there's still on liberty degree left: it can spin around the z-axis) 
+  // RL: 'camera_position'  is computed (by 'CalcCamera'). 
+  // RL: 'upward_direction' is computed (by 'CalcCamera'). 
+  // 
+  // RL: 'upward_direction' answers the question of where is 'up' or 'down' 
+  //                (if the camera is on the z-axis, then it can still spin around; 
+  //                 if the camera is on the x-axis, then it can still spin around; 
+  //                 if the camera is on any   axis, then it can still spin around). 
+  TPoint3D lattice__target_position; // RL: Liberty degree. 
+  float               lattice__dist; // RL: Liberty degree. 
+  float                      angleZ; // RL: Liberty degree. // RL: Radians, not degrees. // RL: Angle with the z-axis (0 → z-axis ; π/2 → xy-plane) 
+  float                     angleXY; // RL: Liberty degree. // RL: Radians, not degrees. // RL: Angle in the xy-plane (0 → x-axis ; π/2 → y-axis) 
+  TPoint3D     map__target_position;    // RL: Computed (by 'CalcCamera'). 
+  float   manifold__camera_position[3]; // RL: Computed (by 'CalcCamera').  
+  float   manifold__target_position[3]; // RL: Computed (by 'CalcCamera'). 
+  float  manifold__upward_direction[3]; // RL: Computed (by 'CalcCamera'). 
+  float                   map__dist; // RL: Computed (by 'CalcCamera'). 
+  float              manifold__dist; // RL: Computed (by 'CalcCamera'). 
   
-  float manifold__camera_position[3]; 
-  float manifold__target_position[3]; 
-  float manifold__upward_direction[3]; 
-  
-  /*les angles de vues en radian... angleXY pour touner autour de uz... angleHB
-    pour regarder de plus haut ou plus bas*/
-  // RL: These angles are in radians. 
-  float angleXY; // RL: In the plane (x-y), around z-axis. 
-  float angleZ; //float angleHB; // RL: Distance in angle from z-axis - we're in a cone around the z-axis: Be D any axis in in the plane (x-y), it's a D-rotation. 
   
   
   
@@ -42,24 +49,23 @@ struct CCamera {
   void (* InitCamera)(struct CCamera * this);
   //initialise les paramètres pour une vue de jeu normal
   
-  //attache la caméra au héros
+  // FS: attache la caméra au héros
   void (* SolidariserAuHeros)(struct CCamera * this);
   
-  /*désattache la caméra au héros.
-    le point courant est alors la dernier position du héros lorsqu'il 
-    était encore lié à la caméra*/
+  // FS: /*désattache la caméra au héros. le point courant est alors la dernier position du héros lorsqu'il était encore lié à la caméra*/
   void (* DeSolidariser)(struct CCamera * this);
   
-  /**** ne pas prévoir d'instructions pascal pour ça... 
-	CalcCamera est automatiquement appelé dans RaiseRender)(struct CCamera * this)*/
-  void (* CalcCamera)(struct CCamera * this, const struct CBonhomme * Hero, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+  //void (* CalcCamera)(struct CCamera * this, const struct CBonhomme * Hero, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+  void (* CalcCamera)(struct CCamera * this, const struct CBonhomme * Hero, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold); 
   void (* Blit)(const CCamera * this, const riemann_t * our_manifold); 
   
   void (* EffetPsychadelique)(struct CCamera * this);
-  //*c'est nul*/
+  // FS: /*c'est nul*/
   
-  void (* SetDist)(struct CCamera * this, float d);
-  //*distance de laquelle on regarde. plus c petit, plus on est près du point qu'on regarde*/
+  void (* SetDist)(struct CCamera * this, const float lattice_dist); 
+  // FS: /*distance de laquelle on regarde. plus c petit, plus on est près du point qu'on regarde*/
+
+  void (* Zoom)(CCamera * this, const TZoomMethod zoom_method, const float zoom_factor); 
 
 };
 
@@ -71,10 +77,12 @@ extern void CCamera__InitCamera(struct CCamera * this);
 extern void CCamera__SolidariserAuHeros(struct CCamera * this);
 extern void CCamera__DeSolidariser(struct CCamera * this);
 //extern void CCamera__CalcCamera(struct CCamera * this, const struct CBonhomme * Hero, const struct CMap * Map);
-extern void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+//extern void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+extern void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold); 
 extern void CCamera__Blit(const CCamera * this, const riemann_t * our_manifold); 
 extern void CCamera__EffetPsychadelique(struct CCamera * this);
 extern void CCamera__SetDist(struct CCamera * this, float d); 
+extern void CCamera__Zoom(CCamera * this, const TZoomMethod zoom_method, const float zoom_factor); 
 
 
 #endif /* CAMERA_H */

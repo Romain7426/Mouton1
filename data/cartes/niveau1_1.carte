@@ -4,31 +4,38 @@
 physique {
 }
 gameplay {
+ longueur := 32; 
+ largeur  := 32; 
+ recouvrement longueur := 1; 
+ recouvrement largeur  := 1; 
+
  arme := vrai ; 
  musique := "pyramide.mid"; 
  niveau eau := 0.0; 
  vie eau :=  0; 
+
 //sortie
 teleportation IDENT {
   destination := "pyramide.carte";
   position := {
      x := 13;
-     y := 0;
-     z := 0;
+     y := -1;
+     z := -1;
   };
   dimension := {
      longueur := 4;  // x
-     largeur := 1;   // y
-     hauteur := 100;   // z
+     largeur  := 2;   // y
+     hauteur  := 6;   // z
   };
   direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
-     x := 13;
-     y := 13;
-     z := 0;
+     x := 14;
+     y := 15.9;
+     z :=  0;
   };
   destination direction parcours := bas;
 } 
+
 teleportation IDENT {
   destination := "niveau1_2.carte";
   position := {

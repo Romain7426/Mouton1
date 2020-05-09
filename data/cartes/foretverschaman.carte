@@ -1,48 +1,52 @@
 /* Ceci est un commentaire. */
 // Ceci est encore un commentaire.
 # C'est encore un commentaire.
-physique {
-}
-gameplay {
+physique { 
+} 
+gameplay { 
+ longueur := 64; //64
+ largeur  := 32; //32
+ recouvrement longueur := 2; // 2
+ recouvrement largeur  := 1; //1; 
  arme := vrai ; 
  musique := "foret.mid"; 
- niveau eau := -.10.0; 
+ niveau eau := - 0.5; 
  vie eau :=  0; 
 teleportation IDENT {
   destination := "foret.carte";
   position := {
-     x := 62;
+     x := 63;
      y := 10;
-     z := 0;
+     z := -1;
   };
   dimension := {
-     longueur := 3;  // x
-     largeur := 10;   // y
-     hauteur := 100;   // z
+     longueur :=  2;  // x
+     largeur  := 10;   // y
+     hauteur  :=  6;   // z
   };
   direction parcours := droite; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
-     x := 1;
+     x :=  1;
      y := 34;
-     z := 0;
+     z :=  0;
   };
   destination direction parcours := droite;
 } 
 teleportation IDENT {
   destination := "chaman.carte";
   position := {
-     x := 0;
-     y := 20;
-     z := 0;
+     x := -1;
+     y := 23;
+     z := -1;
   };
   dimension := {
      longueur := 2;  // x
-     largeur := 15;   // y
-     hauteur := 100;   // z
+     largeur  := 7;   // y
+     hauteur  := 6;   // z
   };
   direction parcours := gauche; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
-     x := 63;
+     x := 62.9;
      y := 6;
      z := 0;
   };

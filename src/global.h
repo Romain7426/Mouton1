@@ -61,9 +61,15 @@
 #  include <langinfo.h> // pas fournie sous WIN
 #endif 
 
+#if 0 
+// RL: 'tg' stands for 'type-generic', meaning, instead of writing 'cosf', 
+//     one writes 'cos' and the compiler will pattern match the type 
+//     of the argument with the function. 
+//      => Not needed. 
 #ifdef TGMATH_H_EXISTS
 #  include <tgmath.h> // includes the headers <math.h> and <complex.h>
 #endif
+#endif 
 
 
 #ifdef CTIME_R_IS_NEEDED_AND_IS_NOT_PROVIDED
@@ -455,34 +461,35 @@ typedef struct C3DS C3DS;
 #include "physicalobj.h"
 #include "bonhomme.h"
 #include "evenement.h"
-#include "evenements.h"
+//#include "evenements.h"
 #include "map.h"
 #include "menuentreenom.h"
 
-#include "arme.h"
+//#include "arme.h"
 
 #include "coeurs.h"
 #include "constantes.h"
-#include "dico.h"
+//#include "dico.h"
 #include "global.h"
 #include "keys.h"
-#include "liste.h"
+//#include "liste.h"
 #include "messages.h"
-#include "moteurdeplacement.h"
+//#include "moteurdeplacement.h"
 #include "moteurteleportation.h"
 #include "obj3ds.h"
 #include "objnonanime.h"
 #include "pagetitre.h"
-#include "pascal.h"
-#include "ressource.h"
+//#include "ressource.h"
 #include "son.h"
 #include "structures.h"
 #include "text.h"
 #include "timer.h"
 #include "utilities.h"
 
-#include "apiscript.h"
 #include "affichagemainpierre.h"
+
+#include "script_api.h"
+#include "script_pscript.h"
 
 
 

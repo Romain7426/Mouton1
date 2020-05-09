@@ -4,41 +4,45 @@
 physique {
 }
 gameplay {
+ longueur := 64; 
+ largeur  := 64; 
+ recouvrement longueur := 2; 
+ recouvrement largeur  := 2; 
  arme := vrai ; 
  musique := "foret.mid"; 
- niveau eau := -.10.0; 
+ niveau eau := - 0.5; 
  vie eau :=  0; 
 teleportation IDENT {
   destination := "village.carte";
   position := {
-     x := 40;
-     y := 62;
-     z := 0;
-  };
-  dimension := {
-     longueur := 20;  // x
-     largeur := 2;   // y
-     hauteur := 100;   // z
-  };
+     x := 50; 
+     y := 63; 
+     z := -1; 
+  }; 
+  dimension := { 
+     longueur :=   6; // x 
+     largeur  :=   2; // y 
+     hauteur  :=   6; // z 
+  }; 
   direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
      x := 16;
-     y := 2;
-     z := 0;
+     y :=  3;
+     z :=  0;
   };
   destination direction parcours := haut;
 } 
 teleportation IDENT {
   destination := "foretverschaman.carte";
   position := {
-     x := 0;
-     y := 30;
-     z := 0;
+     x :=   -1; 
+     y :=   28; 
+     z :=   -1; 
   };
   dimension := {
-     longueur := 2;  // x
-     largeur := 8;   // y
-     hauteur := 100;   // z
+     longueur :=   2; // x 
+     largeur  :=  10; // y 
+     hauteur  :=   6; // z 
   };
   direction parcours := gauche; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
@@ -17373,8 +17377,8 @@ objet arbre1 {
 anime := vrai;
 fichier := "pecu.anime";
 position := {
-x := 5.;
-y := 4.;
+x := 10.;
+y := 2.;
 z := 0.;
 angle x := 0.;
 angle y := 0.;
@@ -17387,7 +17391,7 @@ objet arbre1 {
 anime := vrai;
 fichier := "pecu.anime";
 position := {
-x := 10.;
+x := 2.;
 y := 2.;
 z := 0.;
 angle x := 0.;

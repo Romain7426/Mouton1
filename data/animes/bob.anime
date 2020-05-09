@@ -6,7 +6,7 @@ physique {
  zone de choc := {
   longueur := 0.5;
   largeur := 0.5;
-  hauteur := 50.;
+  hauteur := 0.75; //20.0;
  };
  MaSSe := 240.;
 }

@@ -93,7 +93,9 @@ struct CBonhomme {
   float           iangle;
   int        sens_iangle;
   TDirection   Direction; // le gars est-il de profil, de dos??
-        
+
+  float force_marche; 
+  
   enum TEtatBonhomme Etat;
   int EtapeEtat;
        
@@ -110,20 +112,21 @@ struct CBonhomme {
   
   CBonhomme * (* make)(const char * filename); 
   void (* delete)(CBonhomme * this); 
-  void (* TexCoord)(const CBonhomme * this, const int i, const float tx, const float ty); 
-  void (* AfficherPantin)(const CBonhomme * this, const CPantin * pantin, const int lattice_width, const int lattice_height); 
+  void (* TexCoord)(const CBonhomme * this, const int i, const float tx, const float ty, const CCamera * Camera); 
+  void (* AfficherPantin)(const CBonhomme * this, const CPantin * pantin, const int lattice_width, const int lattice_height, const CCamera * Camera); 
   // définit la direction dans lequel le bonhomme va (haut, bas, gauche, droite)
   void (* SetDirection)(CBonhomme * this, const TDirection NouvelleDirection); 
   TDirection (* GetDirection)(const CBonhomme * this);
   // affiche le bonhomme (en fait, anime le pantin puis affiche le pantin)
   void (* Life)(CBonhomme * this);
-  void (* Render)(const CBonhomme * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold);
+  //void (* Render)(const CBonhomme * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold, const CCamera * Camera); 
+  void (* Render)(const CBonhomme * this, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold, const CCamera * Camera); 
   void (* Frapper)(CBonhomme * this);
   bool (* EnTrainDeFrapper)(const CBonhomme * this);
   bool (* EstInvisible)(const CBonhomme * this);
   void (* DevenirInvisible)(CBonhomme * this, const int nbetape);
   //void (* Avancer)(CBonhomme * this, const TDirection Direction, const riemann_t * our_manifold); 
-  void (* Avancer)(CBonhomme * this, const TDirection Direction); 
+  void (* Avancer)(CBonhomme * this, const TDirection Direction, const bool slow_walk_huh); 
   void (* AjouterOrdresDeplacement_vP)(CBonhomme * this, const TPoint3D pos);
   void (* AjouterOrdresDeplacement_vXY)(CBonhomme * this, const float x, const float y, const TMethodePlacement mp);
   void (* TraiterOrdresDeplacement)(CBonhomme * this, const CMap * Map, const bool MoteurPhysiqueActif);
@@ -134,18 +137,19 @@ struct CBonhomme {
 // FS: /*création du bonhomme ... mais faut ajouter des membres au bonhomme-pantin...*/
 extern CBonhomme * CBonhomme__make(const char * filename); 
 extern void CBonhomme__delete(CBonhomme * this);
-extern void CBonhomme__TexCoord(const CBonhomme * this, const int i, const float tx, const float ty);
-extern void CBonhomme__AfficherPantin(const CBonhomme * this, const CPantin * pantin, const int lattice_width, const int lattice_height);
+extern void CBonhomme__TexCoord(const CBonhomme * this, const int i, const float tx, const float ty, const CCamera * Camera);
+extern void CBonhomme__AfficherPantin(const CBonhomme * this, const CPantin * pantin, const int lattice_width, const int lattice_height, const CCamera * Camera);
 extern void CBonhomme__SetDirection(CBonhomme * this, const TDirection NouvelleDirection);
 extern TDirection CBonhomme__GetDirection(const CBonhomme * this);
 extern void CBonhomme__Life(CBonhomme * this);
-extern void CBonhomme__Render(const CBonhomme * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+//extern void CBonhomme__Render(const CBonhomme * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold, const CCamera * Camera); 
+extern void CBonhomme__Render(const CBonhomme * this, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold, const CCamera * Camera); 
 extern void CBonhomme__Frapper(CBonhomme * this);
 extern bool CBonhomme__EnTrainDeFrapper(const CBonhomme * this);
 extern bool CBonhomme__EstInvisible(const CBonhomme * this);
 extern void CBonhomme__DevenirInvisible(CBonhomme * this, const int nbetape);
 //extern void CBonhomme__Avancer(CBonhomme * this, const TDirection Direction, const riemann_t * our_manifold); 
-extern void CBonhomme__Avancer(CBonhomme * this, const TDirection Direction); 
+extern void CBonhomme__Avancer(CBonhomme * this, const TDirection Direction, const bool slow_walk_huh); 
 extern void CBonhomme__AjouterOrdresDeplacement_vP(CBonhomme * this, const TPoint3D pos);
 extern void CBonhomme__AjouterOrdresDeplacement_vXY(CBonhomme * this, const float x, const float y, const TMethodePlacement mp);
 extern void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, const bool MoteurPhysiqueActif);

@@ -1,8 +1,8 @@
 physique {
  zone de choc := {
   longueur := 2.;
-  largeur := 2.;
-  hauteur := 100.;
+  largeur := 1.;
+  hauteur := 0.5;
  };
  MaSSe := 240.;
  compressible := faux;

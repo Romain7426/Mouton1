@@ -46,9 +46,9 @@ void CAffichageCoeur__InformerNbPV(CAffichageCoeur * this, int inpv) {
       //on perd des gros coeurs (plus que 1) : le num pv / 7
       pv = (inpv / 7) * 7;
       TypeAnimation = caPERDREGROSCOEUR;
-    };
-
-    if ((inpv / 7) == (pv / 7 - 1)) {
+    } 
+    
+    else if ((inpv / 7) == (pv / 7 - 1)) {
       //on perd un gros coeur : le num pv / 7
       nbpetitscoeursperdus = pv % 7;
       pv = (inpv / 7) * 7 + 6;

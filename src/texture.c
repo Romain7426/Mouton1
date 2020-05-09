@@ -69,7 +69,7 @@ CTexture * CTexture_copy(const CTexture * src) {
 
 
 CTexture * CTexture_make_and_push(const char * fichier_image) {
-  printf("Chargement de la texture '%s'...\n", fichier_image);
+  //printf("Chargement de la texture '%s'...\n", fichier_image);
 
   MALLOC_BZERO(CTexture,this);
   
@@ -86,7 +86,7 @@ CTexture * CTexture_make_and_push(const char * fichier_image) {
 };
 
 CTexture * CTexture_make(const char * fichier_image) {
-  printf("Chargement de la texture '%s'...\n", fichier_image);
+  //printf("Chargement de la texture '%s'...\n", fichier_image);
 
   const int internal_ind = texture_dico_lookup(fichier_image); 
   if (internal_ind >= 0) { return texture_dico_get(internal_ind); }; 
@@ -146,7 +146,7 @@ void CTexture__GLTextureCourante(const CTexture * this) {
 
 
 bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLuint * glindice_ref, float * taillex_ref, float * tailley_ref) {
-  printf("Chargement de l'image '%s' dans OpenGL\n", fichier_image);
+  //printf("Chargement de l'image '%s' dans OpenGL\n", fichier_image);
   
   char reelfile[strlen(TEXTURESDIR) + strlen(fichier_image) + 1];
   strcat(strcpy(reelfile, TEXTURESDIR), fichier_image);
@@ -172,7 +172,7 @@ bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLu
 #endif 
     return false; 
   }; 
-#if 1
+#if 0 
   printf("  Chargement réussi.\n");
   printf("  Taille de l'image : %i, %i\n", texture->w, texture->h);
   printf("  Nombre d'octets par pixels : %i\n", texture ->format->BytesPerPixel);
@@ -183,7 +183,7 @@ bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLu
 
   // On ne sait dans quel format est l'image. Nous, on ne connaît que RGB ou RGBA. 
   // Donc on demande à la SDL de la mettre en RGB ou en RGBA. 
-  printf("  On la convertie en un format potable (RGB ou RGBA).\n");
+  //printf("  On la convertie en un format potable (RGB ou RGBA).\n");
   {
     SDL_Surface * convertie;
     if (texture -> format -> BytesPerPixel == 4) {
@@ -201,7 +201,7 @@ bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLu
   {
     // Génération d'un numéro de texture OpenGL.  
     glGenTextures(1, glindice_ref);
-    printf("  Numéro OpenGL de texture généré : %u\n", (unsigned int) *glindice_ref);
+    //printf("  Numéro OpenGL de texture généré : %u\n", (unsigned int) *glindice_ref);
     
     // Sélection de cette texture. 
     glBindTexture(GL_TEXTURE_2D, *glindice_ref); 
@@ -238,7 +238,7 @@ bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLu
   }; 
 
   SDL_FreeSurface(texture);
-  printf("Chargement de l'image dans OpenGL à travers la SDL effectué (code OpenGL: %d)\n\n", (int) glGetError());
+  //printf("Chargement de l'image dans OpenGL à travers la SDL effectué (code OpenGL: %d)\n\n", (int) glGetError());
   return true; 
 };
 

@@ -6,7 +6,7 @@ physique {
  zone de choc := {
   longueur := 1.;
   largeur := 1.;
-  hauteur := 50.;
+  hauteur := 1.;
  };
  MaSSe := 240.;
 }
@@ -57,7 +57,7 @@ graphique {
 
 
 
-Et tout ce qui se passe après, on s'en fout !!!!!!!
+Et tout ce qui se passe aprÃ¨s, on s'en fout !!!!!!!
 
 
 

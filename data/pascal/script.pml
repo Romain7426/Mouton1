@@ -35,7 +35,7 @@ var chaman_la: boolean;
 begin
    nom_chaman := "Chaman";
    nom_boss := "Chouchou";
-   Perso := "Vladimir";
+   Perso := "Occiseur-de-dragons"; //"Vladimir"; 
    pere_est_vivant := true;
    a_la_potion := false;
    a_vu_son_pere_mort := false;

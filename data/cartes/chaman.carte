@@ -4,27 +4,31 @@
 physique {
 }
 gameplay {
+ longueur := 64; 
+ largeur  := 64; 
+ recouvrement longueur := 2; 
+ recouvrement largeur  := 2; 
  arme := vrai ; 
  musique := "foret.mid"; 
- niveau eau := -.10.0; 
+ niveau eau := - 0.5; 
  vie eau :=  0; 
 
 teleportation IDENT {
   destination := "foretverschaman.carte";
   position := {
-     x := 62;
-     y := 0;
-     z := 0;
+     x := 63;
+     y :=  4;
+     z := -1;
   };
   dimension := {
-     longueur := 3;  // x
-     largeur := 15;   // y
-     hauteur := 100;   // z
+     longueur :=  2;  // x
+     largeur  :=  8;  // y
+     hauteur  :=  6;  // z
   };
   direction parcours := droite; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
-     x := 0;
-     y := 27;
+     x := 1.1;
+     y := 26;
      z := 0;
   };
   destination direction parcours := droite;
@@ -33,20 +37,20 @@ teleportation IDENT {
 teleportation IDENT {
   destination := "pyramide.carte";
   position := {
-     x := 12;
-     y := 62;
-     z := 0;
+     x := 13;
+     y := 63;
+     z := -1;
   };
   dimension := {
-     longueur := 10;  // x
-     largeur := 3;   // y
-     hauteur := 100;   // z
+     longueur := 7; // x
+     largeur  := 2; // y
+     hauteur  := 6; // z
   };
   direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
      x := 25;
-     y := 1;
-     z := 0;
+     y :=  2;
+     z :=  0;
   };
   destination direction parcours := haut;
 } 

@@ -15,7 +15,8 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(CPhysicalObj);
 DECLARE_NEW_OPERATOR_FOR_STRUCT(CPhysicalObj);
 //struct CPhysicalObj : public CObjActionnable {
 struct CPhysicalObj { 
-  CObjActionnable parent;
+  //CObjActionnable parent;
+  CObjActionnable * actions;
   
   int8_t subtype; 
 
@@ -83,6 +84,7 @@ struct CPhysicalObj {
   float    z0;    // RL: Ground level. Used to determine 'AuSol'. 
   float    z0_n;  // RL: Ground level at 'np'. 
   
+#if 0 
   // RL: No idea what these are for. 
   bool nvalid_position; 
   bool  valid_position_x,  valid_position_y,  valid_position_z; 
@@ -91,6 +93,7 @@ struct CPhysicalObj {
   // RL: No idea what these are for. 
   //float ancvolumemax; 
   //float volumemax; 
+#endif 
   
   
   
@@ -123,6 +126,7 @@ struct CPhysicalObj {
   float    (* GetPosition_z   )(const struct CPhysicalObj * this); 
   void     (* SetPosition_vP3D)(      struct CPhysicalObj * this, const TPoint3D lattice_pos, const CMap * Map); 
   void     (* SetPosition_vXY )(      struct CPhysicalObj * this, const float lattice_x, const float lattice_y, const TMethodePlacement mp, const CMap * CMap); 
+  void     (* SetPosition_vXYZ)(      struct CPhysicalObj * this, const float lattice_x, const float lattice_y, const float lattice_z, const CMap * CMap); 
   void     (* SetZ            )(      struct CPhysicalObj * this, const float lattice_z, const TMethodePlacement mp); 
   
   TPoint3D (* GetVitesse      )(const struct CPhysicalObj * this); 
@@ -137,6 +141,8 @@ struct CPhysicalObj {
   
   void (* Force_add_by_mass_unit_vP3D)(struct CPhysicalObj * this, const TPoint3D foverm); 
   void (* Force_add_by_mass_unit_vXYZ)(struct CPhysicalObj * this, const float foverm_x, const float foverm_y, const float foverm_z); 
+  void (* Force_massique__add_vXYZ   )(struct CPhysicalObj * this, const float foverm_x, const float foverm_y, const float foverm_z); 
+  void (* Force_massique__add_vP3D   )(struct CPhysicalObj * this, const TPoint3D foverm); 
   
   void (* Force_add_over_whole_mass_vP3D)(struct CPhysicalObj * this, const TPoint3D f); 
   void (* Force_add_over_whole_mass_vXYZ)(struct CPhysicalObj * this, const float f_x, const float f_y, const float f_z); 
@@ -162,19 +168,20 @@ struct CPhysicalObj {
   void (* NewtonEngine__OneStepFoward__NoValidationYet)(CPhysicalObj * this); 
   
   // RL: Correct 'np' for borders & ground & slope. 
-  void (* BordersAndGroundAndSlope__AdjustAndCorrectNP)(CPhysicalObj * this, const CMap * Map, const CSol * Sol); 
+  void (* BordersAndGroundAndSlope__AdjustAndCorrectNP)(CPhysicalObj * this, const CMap * Map); 
 
   // RL: Does the new position of the object intersect with the new position of any other object? 
   int (* DoTheyIntersect_huh)(const CPhysicalObj * this, const CPhysicalObj * po); 
   
   // RL: 'p' <- 'np' 
   //void (* ValiderPosition)(struct CPhysicalObj * this, const bool MoteurPhysiqueActif); 
-  void (* ValiderPosition)(struct CPhysicalObj * this, const float ZEau); 
+  void (* ValiderPosition)(struct CPhysicalObj * this, const float lattice_ZEau); 
 
   // RL: ??? 
   bool (* IsBloque)(const struct CPhysicalObj * this); 
 
-  void (* Render)(const struct CPhysicalObj * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+  //void (* Render)(const struct CPhysicalObj * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+  void (* Render)(const struct CPhysicalObj * this, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold); 
   void (* Life)(struct CPhysicalObj * this); 
   
   
@@ -194,13 +201,14 @@ extern void           CPhysicalObj__delete_aux(      CPhysicalObj * this);
 extern CPhysicalObj * CPhysicalObj__copy      (const CPhysicalObj * src); 
 extern CPhysicalObj * CPhysicalObj__copy_aux  (      CPhysicalObj * this, const CPhysicalObj * src); 
 
-extern void CPhysicalObj__Render(const CPhysicalObj * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+//extern void CPhysicalObj__Render(const CPhysicalObj * this, const int lattice_width, const int lattice_height, const riemann_t * our_manifold); 
+extern void CPhysicalObj__Render(const CPhysicalObj * this, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold); 
 extern void CPhysicalObj__Life(CPhysicalObj * this); 
 extern int  CPhysicalObj__DoTheyIntersect_huh(const CPhysicalObj * this, const CPhysicalObj * po); 
-extern void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * this, const CMap * Map, const CSol * Sol); 
+extern void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * this, const CMap * Map); 
 extern void CPhysicalObj__NewtonEngine__OneStepFoward__NoValidationYet(CPhysicalObj * this); 
 extern void CPhysicalObj__NewtonEngine__Frottements_apply(CPhysicalObj * this); 
-extern void CPhysicalObj__ValiderPosition(CPhysicalObj * this, const float ZEau); 
+extern void CPhysicalObj__ValiderPosition(CPhysicalObj * this, const float lattice_ZEau); 
 
 
 

@@ -1,7 +1,7 @@
 #include "global.h"
 #include "evenement.h"
 #include "map.h"
-#include "apiscript.h"
+#include "script_api.h"
 
 static const struct CEvenement methodes; 
 
@@ -98,7 +98,8 @@ static void CEvenement__AjouterTraitement(CEvenement * this_m, const char * file
 };
 
 
-static void CEvenement__execute(CEvenement * this_m) {
+static void CEvenement__execute(CEvenement * this_m) { 
+#if 0 
   PEvenement * this = (PEvenement *) this_m; 
   if (SCRIPT_EstEnTrainDExecuterUnScript()) { return; }; 
   
@@ -119,6 +120,7 @@ static void CEvenement__execute(CEvenement * this_m) {
     acc.AllerSuivant();
   }
 #endif
+#endif 
 };
 
 
@@ -150,9 +152,11 @@ static struct PEvenement evts[EVT_NOMBRE];
 
 
 // Met le traitement sur la liste des globaux.
-static void RaiseEvenement(type_evt t) {
+static void RaiseEvenement(type_evt t) { 
+#if 0 
   if (!SCRIPT_EstEnTrainDExecuterUnScript())
     tab_evt.tab[t] = true;
+#endif 
 };
 
 static void ViderEvenement(type_evt t) {
@@ -165,6 +169,7 @@ static void AddTraitementEvenement(type_evt t, const char * nom_fichier, const c
 
 // La fonction de traitement des evenements globaux.
 static void handle_evts(void) {
+#if 0 
   if (SCRIPT_EstEnTrainDExecuterUnScript())
     return;
   
@@ -176,6 +181,7 @@ static void handle_evts(void) {
       evts[i].methodes.execute((CEvenement *) &evts[i]);
     }
   }
+#endif 
 };
 
 static void EvenementsInit(void) { 

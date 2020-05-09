@@ -42,7 +42,7 @@ CMenuAbstrait * CMenuAbstrait_make_aux(CMenuAbstrait * this) {
   ASSIGN_METHOD(CMenuAbstrait,this,Render); 
   ASSIGN_METHOD(CMenuAbstrait,this,Life); 
 
-  printf("Création du menu 'abstrait'...\n");
+  //printf("Création du menu 'abstrait'...\n");
   this -> iphi = 0;
   this -> Action = 0;
   this -> anim_phi = 0;
@@ -163,10 +163,10 @@ void CMenuAbstrait__Life(CMenuAbstrait * this) {
   
 #define PHI_TEST                                                        \
   this -> iphi = this -> anim_phi / nb_pas_phi;				\
-  printf("Ecart entre phi et iphi : %i\n",this -> anim_phi % nb_pas_phi); \
+  /*printf("Ecart entre phi et iphi : %i\n",this -> anim_phi % nb_pas_phi);*/ \
   if (((this -> anim_phi % nb_pas_phi) == 0) && (this -> ProchainIndice(this, this -> iphi)>0))	\
     {this -> Action = 0;						\
-      printf("C'est bon on est sur iphi = %i\n", this -> iphi); ;}
+      /*printf("C'est bon on est sur iphi = %i\n", this -> iphi);*/ ;}
   
 #define DEC_THETA 1
 #define INC_THETA 2
@@ -332,7 +332,7 @@ void CMenu__Render(const CMenu * this) {
   glColor4f(1.0f,1.0f,0.5f,0.2f);
   glDisable(GL_TEXTURE_2D);
     
-  printf("para\n"); 
+  //printf("para\n"); 
   /*les parallèles*/
   for (int j = 0; j<=MENU_nb_theta; j++) {
     glBegin(GL_LINE_STRIP); {
@@ -344,7 +344,7 @@ void CMenu__Render(const CMenu * this) {
   }; 
   
   
-  printf("minian\n"); 
+  //printf("minian\n"); 
   /*les mini-anneaux*/
   for (int i = 0; i<=MENU_nb_phi; i++) {
     const float ci = cosf((float)2*PI*(i)/MENU_nb_phi);
@@ -360,7 +360,7 @@ void CMenu__Render(const CMenu * this) {
   glEnable (GL_TEXTURE_2D); 
   glColor4f(1.0f,1.0f,1.0f,1.0f);  
     
-  printf("items\n"); 
+  //printf("items\n"); 
   //*on affiche les items ...*/   
   for (int i = 0; i < NB_SOUS_MENU; i++) {
     const int num_item_max = parent -> ProchainIndice(parent, i); /*nb d'items sur l'anneau n° i*/ // RL: items_nb 

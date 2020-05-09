@@ -7,7 +7,8 @@
 #include "carte.h"
 
 TDirection DirectionAleatoire(void) {
-  return (TDirection) (rand() % 4);
+  //return (TDirection) (rand() % 4);
+  return (TDirection) (arc4random_uniform(4));
 }; 
 
 
@@ -60,7 +61,24 @@ enum { taille_case = 5 }; // RL: That's for neighborhood management.
 #endif
 
 
+#define PARCOURS_OBJETS__TRIANGLE__DEBUT(__iii0__,__jjj0__,__kkk0__)		\
+  {									\
+  int iii = (__iii0__);							\
+  int jjj = (__jjj0__);							\
+  int kkk = (__kkk0__);							\
+  for (; iii < VOISINAGE_X_SIZE; iii++, jjj = 0)			\
+    for (; jjj < VOISINAGE_Y_SIZE; jjj++, kkk = 0)			\
+      for (; kkk < VOISINAGE_SIZE; kkk++)				\
+        {								\
+  CPhysicalObj * o_parcours = this -> Voisinages_array[iii][jjj][kkk];	\
+  if (o_parcours == NULL)						\
+    continue;
+
+
+
 #define PARCOURS_OBJETS_FIN }
+
+#define PARCOURS_OBJETS__TRIANGLE__FIN }; }; 
 
 
 
@@ -219,11 +237,12 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
   //ASSIGN_METHOD(CMap,this,tab_evt_carte); 
   ASSIGN_METHOD(CMap,this,GETZ0_vP3D); 
   ASSIGN_METHOD(CMap,this,GETZ0_vXY); 
+  ASSIGN_METHOD(CMap,this,GET_ZEau); 
 
   // CSol(EnVaisseau)
   //CSol_make_aux(this -> Sol, EnVaisseau); 
   //CSol_module -> make_content(this -> Sol, EnVaisseau); 
-  this -> Sol = CSol_module -> make(EnVaisseau); 
+  this -> Sol = CSol_module -> make(); 
   
   
   if (filename == NULL) return this;
@@ -240,7 +259,7 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
   ViderEvenement(EVT_PlusEnnemi);
 #endif
 
-  printf("Constructeur CMap(%s)\n", filename);
+  //printf("Constructeur CMap(%s)\n", filename);
 
 #if 0 
   // RL: It should be already done through the BZERO. But, later on, we have some weird dangling pointers to already freed objects. 
@@ -261,7 +280,7 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
     char * reelfile; 
     //reelfile = STRCAT2_(CARTESDIR, filename); 
     reelfile = strconcat2(CARTESDIR, filename); 
-    printf("nom de fichier réel: %s\n", reelfile); 
+    //printf("nom de fichier réel: %s\n", reelfile); 
     
     //int ret = CMap__parse(this, CARTESDIR, filename); 
     const int ret = CMap__ReadDescriptionFile(this, map_i, map_j, our_manifold, CARTESDIR, filename); 
@@ -270,19 +289,19 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
       assert(false); 
     } 
     else { 
-      message("analyse ok du fichier \"%s\"." "\n", reelfile); 
+      message("<<< analyse ok du fichier \"%s\"." "\n", reelfile); 
     }; 
     free(reelfile); 
   }; 
   
-  printf("Fin de la construction CMap__CMap()\n"); 
+  //printf("Fin de la construction CMap__CMap()\n"); 
   
   return this; 
 }; 
 
 
 void CMap__delete(CMap * this) { 
-  printf("Destruction de la carte %p\n", this); 
+  //printf("Destruction de la carte %p\n", this); 
   if (NULL == this) return; 
   
   for (int i = 0; i < this -> ZonesTeleportation_nb; i++) { 
@@ -342,10 +361,10 @@ const char * CMap__GetNomCarte(const CMap * this) {
 
 
 float CMap__GETZ0_vXY(const CMap * this, const float lattice_x, const float lattice_y) { 
-  const float map_x = lattice_x / this -> lattice_width;
-  const float map_y = lattice_y / this -> lattice_height; 
-  const float map_z = this -> Sol -> GETZ(this -> Sol, map_x, map_y); 
-  const float lattice_z = map_z; 
+  const float map_x = lattice_x * this -> lattice_to_map_scale_factor__x; // / this -> lattice_width;
+  const float map_y = lattice_y * this -> lattice_to_map_scale_factor__y; // / this -> lattice_height; 
+  const float map_z = this -> Sol -> GET_MAP_Z(this -> Sol, map_x, map_y); 
+  const float lattice_z = map_z / this -> lattice_to_map_scale_factor__z; 
   return lattice_z; 
 }; 
 
@@ -353,26 +372,41 @@ float CMap__GETZ0_vP3D(const CMap * this, const TPoint3D lattice_pos) {
   return CMap__GETZ0_vXY(this, lattice_pos.x, lattice_pos.y); 
 }; 
 
+float CMap__GET_ZEau(const CMap * this) { 
+  return this -> Sol -> map_ZEau / this -> lattice_to_map_scale_factor__z; 
+}; 
 
-#if 1 
-void CMap__AjouterObjet(CMap * this, CPhysicalObj * o) { 
-  printf("Ajout de l'objet physique (pointeur: %p; filename: %s) à la carte\n", o, o == NULL ? "<NULL object>" : o -> filename);
+
+
+static void CMap__NormalizePosition(CMap * this, CPhysicalObj * o) { 
   if (NULL == o) { return; }; 
   
   // RL: Normalizing its position. 
-  TPoint3D lattice_pos = o -> GetPosition(o);
-  lattice_pos.x = MAX(0, MIN(this -> lattice_width , lattice_pos.x)); 
-  lattice_pos.y = MAX(0, MIN(this -> lattice_height, lattice_pos.y)); 
-  lattice_pos.z = this -> GETZ0_vP3D(this, lattice_pos); 
-  o -> SetPosition_vP3D(o, lattice_pos, this); 
+  { 
+    o -> p.x = MAX(0, MIN(this -> lattice_width , o -> p.x)); 
+    o -> p.y = MAX(0, MIN(this -> lattice_height, o -> p.y)); 
+    o -> z0  = this -> GETZ0_vP3D(this, o -> p); 
+    o -> p.z = MAX(o -> z0, o -> p.z); 
+
+    o -> np   = o -> p; 
+    o -> z0_n = o -> z0; 
+  }; 
+
+}; 
+
+
+void CMap__AjouterObjet(CMap * this, CPhysicalObj * o) { 
+  //printf("Ajout de l'objet physique (pointeur: %p; filename: %s) à la carte\n", o, o == NULL ? "<NULL object>" : o -> filename);
+  if (NULL == o) { return; }; 
+
+  const TPoint3D lattice_pos = o -> GetPosition(o);
   
-  
-  printf("Taille de la carte en sommets (treilli): %d x %d" "\n", this -> lattice_width, this -> lattice_height); 
-  printf("Position de l'objet: %f x %f" "\n", lattice_pos.x, lattice_pos.y); 
+  //printf("Taille de la carte en sommets (treilli): %d x %d" "\n", this -> lattice_width, this -> lattice_height); 
+  //printf("Position de l'objet: %f x %f" "\n", lattice_pos.x, lattice_pos.y); 
   
   if (!(o -> Fixe_huh)) {
-    printf("RL: On ajoute un objet qui se déplace." "\n"); 
-    printf("    On l'ajoute donc dans le voisinage trivial." "\n"); 
+    //printf("RL: On ajoute un objet qui se déplace." "\n"); 
+    //printf("    On l'ajoute donc dans le voisinage trivial." "\n"); 
     int added_huh = false; 
     for (int iv = 0; iv < VOISINAGE_SIZE; iv++) { 
       if (NULL != this -> Voisinages_array[0][0][iv]) continue; 
@@ -380,13 +414,20 @@ void CMap__AjouterObjet(CMap * this, CPhysicalObj * o) {
       added_huh = true; 
       break; 
     };
+#if 1 
+    if (!added_huh) { 
+      messerr("Je n'ai pas trouvé d'emplacement libre dans le voisinage %d x %d pour l'object '%s'." "\n", 0, 0, o -> filename); 
+      // RL: TODO XXX FIXME: Memory leak as 'o' won't be owned by anyone. 
+    }; 
+#else 
     assert(added_huh); 
+#endif 
   } 
   else { 
-    printf("RL: On ajoute un objet qui ne bouge pas." "\n"); 
-    const int ix = MIN(VOISINAGE_X_SIZE,((int) (lattice_pos.x / taille_case))); 
-    const int iy = MIN(VOISINAGE_Y_SIZE,((int) (lattice_pos.y / taille_case))); 
-    printf("    On l'ajoute donc dans le voisinage: %d x %d " "\n", ix, iy); 
+    //printf("RL: On ajoute un objet qui ne bouge pas." "\n"); 
+    const int ix = MIN(VOISINAGE_X_SIZE - 1,((int) (lattice_pos.x / taille_case))); 
+    const int iy = MIN(VOISINAGE_Y_SIZE - 1,((int) (lattice_pos.y / taille_case))); 
+    //printf("    On l'ajoute donc dans le voisinage: %d x %d " "\n", ix, iy); 
     int added_huh = false; 
     for (int iv = 0; iv < VOISINAGE_SIZE; iv++) { 
       if (NULL != this -> Voisinages_array[ix][iy][iv]) continue; 
@@ -394,85 +435,23 @@ void CMap__AjouterObjet(CMap * this, CPhysicalObj * o) {
       added_huh = true; 
       break; 
     }; 
-    assert(added_huh); 
-  }; 
-  
-  printf("Ajout de l'objet physique réussi!!\n"); 
-}; 
+#if 1 
+    if (!added_huh) { 
+      messerr("Je n'ai pas trouvé d'emplacement libre dans le voisinage %d x %d pour l'object '%s'." "\n", ix, iy, o -> filename); 
+      // RL: TODO XXX FIXME: Memory leak as 'o' won't be owned by anyone. 
+    }; 
 #else 
-void CMap__AjouterObjet(CMap * this, CPhysicalObj * o) { 
-  printf("Ajout de l'objet physique (pointeur: %p; filename: %s) à la carte\n", o, o == NULL ? "<NULL object>" : o -> filename);
-  if (NULL == o) { return; }; 
-  
-  const TPoint3D lattice_pos = o -> GetPosition(o);
-  
-  // RL: Normalizing its position. 
-  lattice_pos.x = MAX(0,MIN(this -> lattice_width ,lattice_pos.x)); 
-  lattice_pos.y = MAX(0,MIN(this -> lattice_height,lattice_pos.y)); 
-  lattice_pos.z = this -> GETZ0_vP3D(this -> Sol, lattice_pos); 
-  o -> SetPosition_vP3D(o, lattice_pos); 
-  
-  
-  printf("Taille de la carte en sommets (treilli): %d x %d" "\n", this -> lattice_width, this -> lattice_height); 
-  printf("Position de l'objet: %f x %f" "\n", lattice_pos.x, lattice_pos.y); 
-  
-  if (o -> Fixe_huh) {
-    printf("RL: On ajoute dans un objet fixe.\n"); 
-    //int iii = ((int) (pos.y / taille_case)) * ((int) (TailleX / taille_case)) + ((int) pos.x / taille_case);
-    //int iii = ((int) (pos.x / taille_case))  +  ((int) (pos.y / taille_case)) * ((int) (this -> Sol -> TailleX / taille_case));
-    const int ix = MIN(VOISINAGE_X_SIZE,((int) (pos.x / taille_case))); 
-    const int iy = MIN(VOISINAGE_Y_SIZE,((int) (pos.y / taille_case))); 
-#if 0 
-    int iii = ix + iy * ((int) (this -> Sol -> TailleX / taille_case)); 
-    
-    if ((iii < 0) || (iii >= maxindvoisinages))
-      iii = -1; // un +1 est fait ensuite, donc tout va bien :-)
-
-    printf("On ajoute dans le voisinage n° %i (coord. x = %f, y %f)\n", iii, pos.x, pos.y);
-#if 1
-    Voisinages[iii+1].Objets.Empiler_sans_copie(o);
-#elif 0
-    voisinage_ajouter(this, iii+1, o); 
+    assert(added_huh); 
 #endif 
-#elif 1 
-    int added_huh = false; 
-    for (int iv = 0; iv < VOISINAGE_SIZE; iv++) { 
-      if (NULL != this -> Voisinages_array[ix][iy][iv]) continue; 
-      this -> Voisinages_array[ix][iy][iv] = o; 
-      added_huh = true; 
-      break; 
-    };
-    assert(added_huh); 
-#endif
-  }
-  else {
-    printf("RL: On ajoute dans un objet pas fixe.\n"); 
-    printf("On ajoute dans le voisinage trivial.\n"); 
-#if 0 
-    Voisinages[0].Objets.Empiler_sans_copie(o);
-#elif 0
-    voisinage_ajouter(this, 0, o);
-#elif 1 
-    int added_huh = false; 
-    for (int iv = 0; iv < VOISINAGE_SIZE; iv++) {
-      if (NULL != this -> Voisinages_array[0][0][iv]) continue; 
-      this -> Voisinages_array[0][0][iv] = o; 
-      added_huh = true; 
-      break; 
-    };
-    assert(added_huh); 
-#endif
   }; 
   
-  
-  printf("Ajout de l'objet physique réussi!!\n"); 
+  //printf("Ajout de l'objet physique réussi!!\n"); 
 }; 
-#endif 
  
  
 
 void CMap__AjouterObjet_nom(CMap * this, const char * nom, CPhysicalObj * o) {
-  printf("Ajout de l'objet physique (pointeur %p) à la carte, de nom %s \n", o, nom); 
+  //printf("Ajout de l'objet physique (pointeur %p) à la carte, de nom %s \n", o, nom); 
   this -> AjouterObjet(this, o); 
   
   assert(this -> objets_nb < DicoObjets_SIZE); 
@@ -480,11 +459,11 @@ void CMap__AjouterObjet_nom(CMap * this, const char * nom, CPhysicalObj * o) {
   this -> objets_noms_array[this -> objets_nb] = strcopy(nom); 
   this -> objets_nb++; 
   
-  printf("Ajout de l'objet physique réussi!!" "\n"); 
+  //printf("Ajout de l'objet physique réussi!!" "\n"); 
 }; 
  
 void CMap__Dico_EnleverObjet(CMap * this, CPhysicalObj * o) { 
-  printf("Enlèvement de l'objet physique (pointeur %p) à la carte " "\n", o); 
+  //printf("Enlèvement de l'objet physique (pointeur %p) à la carte " "\n", o); 
   for (int i = 0; i < this -> objets_nb; i++) { 
     if (o != this -> objets_array[i]) continue; 
     free(this -> objets_noms_array[i]); 
@@ -519,9 +498,11 @@ CPhysicalObj * CMap__RetrouverObjetViaSonNom(CMap * this, const char * nom) {
 void CMap__AjouterZoneTeleportation(CMap * this, TPoint3D position, TPoint3D dimension, TDirection depart_direction, const char * destination_carte, TPoint3D destination_position, TDirection destination_direction) {
   CZoneTeleportation * zt = CZoneTeleportation_make(position, dimension, depart_direction, destination_carte, destination_position, destination_direction);
 
+#if 0
   printf("Ajout d'une zone de téléportation \n");
   printf(" position: (%f, %f, %f)\n", position.x, position.y, position.z);
   printf(" dimension: (%f, %f, %f)\n", dimension.x, dimension.y, dimension.z);
+#endif 
 
   assert(this -> ZonesTeleportation_nb < ZonesTeleportation_SIZE); 
   this -> ZonesTeleportation_array[this -> ZonesTeleportation_nb] = zt;
@@ -529,17 +510,17 @@ void CMap__AjouterZoneTeleportation(CMap * this, TPoint3D position, TPoint3D dim
 }; 
 
 const CZoneTeleportation * CMap__VaTonBouger(const CMap * this, const CPhysicalObj * aHero) { 
-  TPoint3D p = aHero -> GetPosition(aHero);
+  const TPoint3D p = aHero -> GetPosition(aHero);
 
   PARCOURS_ZONESTELEPORTATIONS
     {
-      if ((zt_parcours->position.x <= p.x) &&
-          (zt_parcours->position.y <= p.y) &&
-          (zt_parcours->position.z <= p.z) &&
-          (p.x <= zt_parcours->position.x + zt_parcours->dimension.x) &&
-          (p.y <= zt_parcours->position.y + zt_parcours->dimension.y) &&
-          (p.z <= zt_parcours->position.z + zt_parcours->dimension.z) )
-        return zt_parcours;
+      if ((zt_parcours -> position.x <= p.x) &&
+          (zt_parcours -> position.y <= p.y) &&
+          (zt_parcours -> position.z <= p.z) &&
+          (p.x <= zt_parcours -> position.x + zt_parcours -> dimension.x) &&
+          (p.y <= zt_parcours -> position.y + zt_parcours -> dimension.y) &&
+          (p.z <= zt_parcours -> position.z + zt_parcours -> dimension.z) )
+        return zt_parcours; 
 
     }
   PARCOURS_ZONESTELEPORTATIONS_FIN;
@@ -578,22 +559,30 @@ void CMap__TraiterOrdresDeplacement(CMap * this, CBonhomme * aHero, const bool M
 
 
 
-
+//#define NB_PARTICULES 10 
+enum { NB_PARTICULES = 10 }; //10 }; 
+CBonhomme * particule = NULL; 
 void CMap__AjouterParticules(CMap * this, const TPoint3D p, const char * nom, const bool MoteurPhysiqueActif) {
-#define NB_PARTICULES 10
   //printf("Ajout d'une flopée de particules au point (%f, %f, %f,) \n...", p.x, p.y, p.z);
 
-#ifdef NB_PARTICULES
   for (int i = 0; i < NB_PARTICULES; i++) { 
     CBonhomme    * b = CBonhomme__make(nom); 
+    //particule = b; 
     CPhysicalObj * o = &b -> parent1; 
     o -> SetDimension(o, 0.0f,0.0f,0.0f); 
-    o -> SetPosition_vP3D(o, p, this); 
-    o -> SetObjetEphemere(o, 32); 
+    //o -> SetPosition_vP3D(o, p, this); 
+    o -> SetPosition_vXYZ(o, p.x, p.y, p.z + 2.0f, this); 
+    o -> SetObjetEphemere(o, 127); 
     o -> Hostile_huh = false; 
     const TPoint3D pp = o -> GetPosition(o); 
-    //printf("Coordonnée des particules : (%f, %f, %f,) \n", pp.x, pp.y, pp.z); 
-#if 0 
+    //printf("Coordonnées de la particule : (%f, %f, %f,) \n", pp.x, pp.y, pp.z); 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Coordonnées de la particule %p : (%f, %f, %f) "  "\n", __func__, o, pp.x, pp.y, pp.z); 
+#if 1
+#define GENFORCE ((float) (arc4random_uniform(2000)-1000)) / 100.0f 
+    //o -> Force_massique__add_vXYZ(o, GENFORCE, GENFORCE, 10.0f); 
+    //o -> Force_massique__add_vXYZ(o, 0.0f, 0.0f, 60.0f); 
+    o -> Force_massique__add_vXYZ(o, GENFORCE, GENFORCE, 60.0f); 
+#else  
     o -> InitForce(o); 
 #define GENPOS ((float) (rand()%2000-1000)) / 200.0f 
     o -> AddForce_vXYZ(o, GENPOS, GENPOS, 100.0f); 
@@ -601,8 +590,9 @@ void CMap__AjouterParticules(CMap * this, const TPoint3D p, const char * nom, co
     //o -> ValiderPosition(o, MoteurPhysiqueActif); 
 #endif 
     this -> AjouterObjet(this, o); 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Coordonnées de la particule %p : (%f, %f, %f) "  "\n", __func__, o, o -> p.x, o -> p.y, o -> p.z); 
+    o -> np = o -> p; 
   }; 
-#endif
   
   //printf("Ajout des particules effectué!\n");
 };
@@ -610,7 +600,22 @@ void CMap__AjouterParticules(CMap * this, const TPoint3D p, const char * nom, co
 
 
 void CMap__Life(CMap * this, const bool EnVaisseau) { 
+  this -> Sol -> Life(this -> Sol); 
   // RL: TODO XXX FIXME 
+
+  // RL: Éclaboussures eau 
+#if 0 
+  if (this -> Sol -> yatilEau(this -> Sol, map_x, map_y, map_z)) { 
+    if (!(o -> DansEau_huh)) { 
+      //printf(" L'objet %p va rentrer dans l'eau. Sa position est la suivante : %f, %f, %f. Nous allons générer une floppée de particules d'eau.\n", o, i, j, z);
+      
+      if (not(o -> IsVolumeNul(o))) { 
+        this -> AjouterParticules(this, o -> GetPosition(o), "eclaboussures.anime", MoteurPhysiqueActif); 
+      }; 
+    }; 
+  }; 
+#endif 
+
 }; 
 
 
@@ -639,18 +644,101 @@ void CMap__Life_GamePlay(CMap * this, const bool EnVaisseau) {
   //PARCOURS_OBJETS_VOISINAGES_FIN;
 };
 
-void CMap__Life_NewtonEngine_Objects(CMap * this, const bool EnVaisseau) {
+
+void CMap__Life_Simulate_Objects(CMap * this, const bool EnVaisseau) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "    EnVaisseau     = %s "  "\n", __func__,  EnVaisseau ? "TRUE" : "FALSE" ); 
+  
   if (EnVaisseau) return; 
 
   PARCOURS_OBJETS
     {
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+      //if (o_parcours -> subtype != 2) { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours -> subtype = %d "  "\n", __func__, o_parcours -> subtype); }; 
       if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
+	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
 	CBonhomme * b = (CBonhomme *) o_parcours; 
         //if (rand() % 40 == 1) { 
-        if (arc4random_uniform(40) == 0) { 
-          b -> SetDirection(b, DirectionAleatoire()); 
+	if (arc4random_uniform(100) == 0) { 
+	  b -> SetDirection(b, DirectionAleatoire()); 
 	}; 
-        b -> Avancer(b, b -> GetDirection(b)); 
+        if (arc4random_uniform(40) < 35) { 
+	  // RL: Do not move 
+	} 
+	else { 
+	  b -> Avancer(b, b -> GetDirection(b), /*slow_walk_huh*/false); 
+	}; 
+      }; 
+            
+    }
+  //FIN_PARCOURS_OBJETS_VOISINAGES;
+  PARCOURS_OBJETS_FIN; 
+}; 
+
+void CMap__Life_NewtonEngine_Objects(CMap * this, const bool EnVaisseau) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "    EnVaisseau     = %s "  "\n", __func__,  EnVaisseau ? "TRUE" : "FALSE" ); 
+  
+  if (EnVaisseau) return; 
+
+  PARCOURS_OBJETS
+    {
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+      //if (o_parcours -> subtype != 2) { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours -> subtype = %d "  "\n", __func__, o_parcours -> subtype); }; 
+      if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
+	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+	CBonhomme * b = (CBonhomme *) o_parcours; 
+	CPhysicalObj__NewtonEngine__Frottements_apply(o_parcours); 
+	CPhysicalObj__NewtonEngine__OneStepFoward__NoValidationYet(o_parcours); 
+	CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(o_parcours, this); 
+      }; 
+      
+    }
+  //FIN_PARCOURS_OBJETS_VOISINAGES;
+  PARCOURS_OBJETS_FIN; 
+}; 
+
+void CMap__Life_Objects_ValiderPosition(CMap * this, const bool EnVaisseau) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "    EnVaisseau     = %s "  "\n", __func__,  EnVaisseau ? "TRUE" : "FALSE" ); 
+  
+  if (EnVaisseau) return; 
+
+  PARCOURS_OBJETS
+    {
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+      //if (o_parcours -> subtype != 2) { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours -> subtype = %d "  "\n", __func__, o_parcours -> subtype); }; 
+      if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
+	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+	CBonhomme * b = (CBonhomme *) o_parcours; 
+	CPhysicalObj__ValiderPosition(o_parcours, CMap__GET_ZEau(this)); 
+      }; 
+      
+    }
+  //FIN_PARCOURS_OBJETS_VOISINAGES;
+  PARCOURS_OBJETS_FIN; 
+}; 
+
+
+void CMap__Life_NewtonEngine_ObjectsXXX(CMap * this, const bool EnVaisseau) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "    EnVaisseau     = %s "  "\n", __func__,  EnVaisseau ? "TRUE" : "FALSE" ); 
+  
+  if (EnVaisseau) return; 
+
+  PARCOURS_OBJETS
+    {
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+      //if (o_parcours -> subtype != 2) { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours -> subtype = %d "  "\n", __func__, o_parcours -> subtype); }; 
+      if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
+	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+	CBonhomme * b = (CBonhomme *) o_parcours; 
+        //if (rand() % 40 == 1) { 
+        if (arc4random_uniform(40) < 10) { 
+	  // RL: Do not move 
+	} 
+	else { 
+	  if (arc4random_uniform(40) == 0) { 
+	    b -> SetDirection(b, DirectionAleatoire()); 
+	  }; 
+	  b -> Avancer(b, b -> GetDirection(b), /*slow_walk_huh*/false); 
+	}; 
       }; 
       
 #if 0 
@@ -676,6 +764,102 @@ void CMap__Life_NewtonEngine_Objects(CMap * this, const bool EnVaisseau) {
 }; 
 
 
+#if 1 
+void CMap__Life_Choc_Sword(CMap * this, const CPhysicalObj * Hero_o) { 
+  //if (EnVaisseau) return; 
+  
+  const CBonhomme * Hero_b = (const CBonhomme *) Hero_o; 
+
+  if (!(Hero_b -> EnTrainDeFrapper(Hero_b))) return; 
+  
+#if 1 
+  { 
+    CPhysicalObj zone_epee = *(Hero_o); 
+#if 1 
+    switch (Hero_b -> GetDirection(Hero_b)) { 
+    case FACE         : zone_epee.np.y -= ldexpf(zone_epee.d.y, 1); break; 
+    case DOS          : zone_epee.np.y += ldexpf(zone_epee.d.y, 1); break; 
+    case PROFIL_VERS_D: zone_epee.np.x += ldexpf(zone_epee.d.x, 1); break; 
+    case PROFIL_VERS_G: zone_epee.np.x -= ldexpf(zone_epee.d.x, 1); break; 
+    default: assert(false); 
+    }; 
+#else 
+    TPoint3D d = Hero_o -> GetDimension(Hero_o); 
+    zone_epee.SetDimension(&zone_epee, d.x, d.y, d.z); 
+    
+    TPoint3D dir; 
+    switch (Hero_b -> GetDirection(Hero_b)) { 
+    case FACE         : dir = TPoint3D_make_struct( 0.0f, -2*d.y, 0.0f); break; 
+    case DOS          : dir = TPoint3D_make_struct( 0.0f,  1.0f, 0.0f); break; 
+    case PROFIL_VERS_D: dir = TPoint3D_make_struct( 1.0f,  0.0f, 0.0f); break; 
+    case PROFIL_VERS_G: dir = TPoint3D_make_struct(-1.0f,  0.0f, 0.0f); break; 
+    default: assert(false); 
+    }; 
+      
+    //zoneepee.SetPosition(&zoneepee, Hero_o -> GetPosition(Hero_o) + dir); 
+    const TPoint3D hero_pos = Hero_o -> GetPosition(Hero_o); 
+    zone_epee.SetPosition_vP3D(&zone_epee, TPoint3D_add__macro(hero_pos, dir), this); 
+#endif 
+      
+      //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition()) 
+      PARCOURS_OBJETS 
+        { 
+#if 0 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours = %p "  "\n", __func__,  o_parcours); 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours -> subtype = %d (anime_subtype = %d) "  "\n", __func__, o_parcours -> subtype, CPhysicalObj_subtype_CBonhomme); 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " o_parcours[%d][%d][%d] = %s "  "\n", __func__,  iii, jjj, kkk, o_parcours -> filename); 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Volume(o_parcours[%d][%d][%d]) = %f "  "\n", __func__, iii, jjj, kkk, o_parcours -> volume); 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " VolumeNul?(o_parcours[%d][%d][%d]) = %s "  "\n", __func__, iii, jjj, kkk, o_parcours -> IsVolumeNul(o_parcours) ? "TRUE" : "FALSE" ); 
+#endif 
+
+  	  if (CPhysicalObj_subtype_CBonhomme != o_parcours -> subtype) { continue; }; 
+          if (o_parcours -> IsVolumeNul(o_parcours)) { continue; }; 
+	  CBonhomme * b = (CBonhomme *) o_parcours; 
+	  if (b -> EstInvisible(b)) { continue; }; 
+	  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " EstInvisible?(o_parcours[%d][%d][%d]) = %s "  "\n", __func__, iii, jjj, kkk, b -> EstInvisible(b) ? "TRUE" : "FALSE" ); 
+#if 1 
+	  const int where = CPhysicalObj__DoTheyIntersect_huh(&zone_epee, o_parcours); 
+#if 0 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " WHERE = %d "  "\n", __func__, where ); 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " where = %d - %d - %d "  "\n", __func__,  where & 1, where & 2, where & 4 ); 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " hero_o.x,y = %f,%f [%f,%f] - épée_o.x,y = %f,%f [%f,%f] - o_parcours.x,y = %f,%f [%f,%f]  "  "\n", __func__, Hero_o -> np.x, Hero_o -> np.y, Hero_o -> d.x, Hero_o -> d.y, zone_epee.np.x, zone_epee.np.y, zone_epee.d.x, zone_epee.d.y, o_parcours -> np.x, o_parcours -> np.y, o_parcours -> d.x, o_parcours -> d.y); 
+#endif 
+	  if (7 != where) { continue; }; 
+	  // RL: We got an intersection! 
+	  o_parcours -> PerdrePV(o_parcours, 1); 
+	  this -> AjouterParticules(this, o_parcours -> GetPosition(o_parcours), "sang.anime", /*MoteurPhysiqueActif*/true); 
+#if 1 
+	  switch (Hero_b -> GetDirection(Hero_b)) { 
+	  case FACE         : o_parcours -> Force_massique__add_vXYZ(o_parcours,   0.0f, -10.0f, 0.0f); break; 
+	  case DOS          : o_parcours -> Force_massique__add_vXYZ(o_parcours,   0.0f,  10.0f, 0.0f); break; 
+	  case PROFIL_VERS_D: o_parcours -> Force_massique__add_vXYZ(o_parcours,  10.0f,   0.0f, 0.0f); break; 
+	  case PROFIL_VERS_G: o_parcours -> Force_massique__add_vXYZ(o_parcours, -10.0f,   0.0f, 0.0f); break; 
+	  default: assert(false); 
+	  }; 
+#else 
+	  o_parcours -> Force_massique__add_vP3D(o_parcours, TPoint3D_scale__macro(10.0f, dir)); 
+#endif 
+	  b -> DevenirInvisible(b, 50); 
+#else 
+	  if ((!(o_parcours->TesterPosition(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold, &zoneepee))) && (!(b->EstInvisible(b)))) {
+	    //on a frappé a.Element()
+	    printf("Le héros a frappé un bonhomme\n");
+	    o_parcours -> PerdrePV(o_parcours, 1);
+	    this -> AjouterParticules(this, o_parcours -> GetPosition(o_parcours), "sang.anime", MoteurPhysiqueActif);
+	    o_parcours -> AddForce_vP3D(o_parcours, TPoint3D_scale__macro(10.0f, dir));
+	    b -> DevenirInvisible(b, 50);
+	  }; 
+#endif 
+	  
+	  return; 
+        }
+      //FIN_PARCOURS_OBJETS_VOISINAGES;
+      PARCOURS_OBJETS_FIN;
+    };
+    
+#endif
+}; 
+#else 
 void CMap__Life_NewtonEngine_Sword(CMap * this, const CPhysicalObj * Hero_o, const bool EnVaisseau) {
   if (EnVaisseau) return; 
 
@@ -688,8 +872,8 @@ void CMap__Life_NewtonEngine_Sword(CMap * this, const CPhysicalObj * Hero_o, con
       CPhysicalObj zone_epee = *(Hero_o); 
       TPoint3D d = Hero_o -> GetDimension(Hero_o); 
       zone_epee.SetDimension(&zone_epee, d.x, d.y, d.z); 
-
-      TPoint3D dir;
+      
+      TPoint3D dir; 
       switch (Hero_b -> GetDirection(Hero_b)) { 
       case FACE         : dir = TPoint3D_make_struct( 0.0f, -1.0f, 0.0f); break; 
       case DOS          : dir = TPoint3D_make_struct( 0.0f,  1.0f, 0.0f); break; 
@@ -732,7 +916,7 @@ void CMap__Life_NewtonEngine_Sword(CMap * this, const CPhysicalObj * Hero_o, con
   };
 #endif
 }; 
-
+#endif 
 
 
 void CMap__Life_RemoveDeads(CMap * this, const bool EnVaisseau) { 
@@ -757,6 +941,13 @@ void CMap__Life_RemoveDeads(CMap * this, const bool EnVaisseau) {
       }; 
     }
   PARCOURS_OBJETS_FIN;
+
+#if 0 
+  if (unennemiestdecede && (nb_ennemis == 0)) {
+    //RaiseEvenement(EVT_PlusEnnemi); 
+    EvenementsModule -> Raise(EVT_PlusEnnemi); 
+  }; 
+#endif 
 }; 
 
 
@@ -764,7 +955,6 @@ void CMap__Life_RemoveDeads(CMap * this, const bool EnVaisseau) {
 
 
 
-#if 1 
 // RL: Returns the closest item with which the hero can interact. 
 CPhysicalObj * CMap__GetNearestInteractingObject(CMap * this, const CPhysicalObj * Hero_o) { 
   const CBonhomme * Hero_b = (const CBonhomme *) Hero_o; 
@@ -778,7 +968,7 @@ CPhysicalObj * CMap__GetNearestInteractingObject(CMap * this, const CPhysicalObj
   // on trouve l'élément le plus proche
   CPhysicalObj * elementproche = NULL;
   {
-#define norme_minimum_pour_etre_proche 50.0f 
+#define norme_minimum_pour_etre_proche 3.0f 
     float norme1_du_proche = norme_minimum_pour_etre_proche; 
     
     PARCOURS_OBJETS 
@@ -798,271 +988,165 @@ CPhysicalObj * CMap__GetNearestInteractingObject(CMap * this, const CPhysicalObj
   return elementproche; 
 }; 
 
+
+
+
+bool CMap__ChocEngine_HeroGotHostileEncounterHuh_one(CMap * this, const CPhysicalObj * hero_o) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Hero_o = %p "  "\n", __func__,  Hero_o ); 
+
+  PARCOURS_OBJETS { 
+    if ( o_parcours -> is_objet_ephemere) { continue; }; 
+    if (!o_parcours -> Hostile_huh) { continue; }; 
+    if ( o_parcours -> IsVolumeNul(o_parcours)) { continue; }; 
+    if ( o_parcours -> subtype != CPhysicalObj_subtype_CBonhomme) { continue; }; 
+    // RL: If the objects do not intersect on one coordinate, then they do not intersect. 
+    const int where = CPhysicalObj__DoTheyIntersect_huh(hero_o, o_parcours); 
+    if (where == 7) return true; 
+  } PARCOURS_OBJETS_FIN; 
+  
+  return false; 
+}; 
+
+
+
+void CMap__ChocEngine_OneObject(CMap * this, const CPhysicalObj * hero_o, CPhysicalObj * this_o, const int iii0, const int jjj0, const int kkk0) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Hero_o = %p "  "\n", __func__,  Hero_o ); 
+
+  if (this_o != hero_o) { 
+    const int where = CPhysicalObj__DoTheyIntersect_huh(this_o, hero_o); 
+    if (7 == where) { 
+      this_o -> np = this_o -> p; 
+      return ; 
+    }; 
+  }; 
+  
+  // RL: That's dumb, as it does not take into account the immovable objects... 
+  //PARCOURS_OBJETS__TRIANGLE__DEBUT(iii0,jjj0,kkk0) { 
+  PARCOURS_OBJETS__TRIANGLE__DEBUT(0,0,0) { 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this_o = %s - o_parcours[%d][%d][%d] = %s "  "\n", __func__,  this_o -> filename, iii, jjj, kkk, o_parcours -> filename); 
+#if 1 
+    if (this_o == o_parcours) { continue; }; 
+#else 
+    assert(this_o != o_parcours); 
+#endif 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Volume(o_parcours[%d][%d][%d]) = %f "  "\n", __func__, iii, jjj, kkk, o_parcours -> volume); 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " VolumeNul?(o_parcours[%d][%d][%d]) = %s "  "\n", __func__, iii, jjj, kkk, o_parcours -> IsVolumeNul(o_parcours) ? "TRUE" : "FALSE" ); 
+    if (o_parcours -> IsVolumeNul(o_parcours)) { continue; }; 
+    // RL: If the objects do not intersect on one coordinate, then they do not intersect. 
+    const int where = CPhysicalObj__DoTheyIntersect_huh(this_o, o_parcours); 
+#if 0 
+    if (0 == strcmp(o_parcours -> filename, "maison03.nonanime")) { 
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " VolumeNul?(o_parcours[%d][%d][%d]) = %s "  "\n", __func__, iii, jjj, kkk, o_parcours -> IsVolumeNul(o_parcours) ? "TRUE" : "FALSE" ); 
+      fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this_o.x,y = %f,%f,%f [%f,%f,%f] - o_parcours.x,y = %f,%f,%f [%f,%f,%f]  "  "\n", __func__,  this_o -> np.x, this_o -> np.y, this_o -> np.z, this_o -> d.x, this_o -> d.y, this_o -> d.z, o_parcours -> np.x, o_parcours -> np.y, o_parcours -> np.z, o_parcours -> d.x, o_parcours -> d.y, o_parcours -> d.z); 
+      fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " where = %d - %d - %d "  "\n", __func__,  where & 1, where & 2, where & 4 ); 
+    }; 
+#endif 
+#if 1 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " where = %d - %d - %d "  "\n", __func__,  where & 1, where & 2, where & 4 ); 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this_o.x,y = %f,%f [%f,%f] - o_parcours.x,y = %f,%f [%f,%f]  "  "\n", __func__,  this_o -> np.x, this_o -> np.y, this_o -> d.x, this_o -> d.y, o_parcours -> np.x, o_parcours -> np.y, o_parcours -> d.x, o_parcours -> d.y); 
+    if (7 != where) { continue; }; 
+
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this_o = %s - o_parcours[%d][%d][%d] = %s "  "\n", __func__,  this_o -> filename, iii, jjj, kkk, o_parcours -> filename); 
+    
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this_o.x,y = %f,%f [%f,%f] - o_parcours.x,y = %f,%f [%f,%f]  "  "\n", __func__,  this_o -> np.x, this_o -> np.y, this_o -> d.x, this_o -> d.y, o_parcours -> np.x, o_parcours -> np.y, o_parcours -> d.x, o_parcours -> d.y); 
+    
+#if 0 
+    int * a; a = NULL; 
+    *a = 1; 
+    //(*((int *) ((int)floorf(0.5f)))) = 1; 
+#endif 
+    
+    this_o     -> np = this_o     -> p; 
+    //o_parcours -> np = o_parcours -> p; 
+    return; 
+
+#else 
+    if (0 == where) { continue; }; 
+
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " where = %d - %d - %d "  "\n", __func__,  where & 1, where & 2, where & 4 ); 
+      
+    if (0 != (where & 1)) { 
+      this_o     -> np.x = this_o     -> p.x; 
+      o_parcours -> np.x = o_parcours -> p.x; 
+    }; 
+    
+    if (0 != (where & 2)) { 
+      this_o     -> np.y = this_o     -> p.y; 
+      o_parcours -> np.y = o_parcours -> p.y; 
+    }; 
+    
+    if (0 != (where & 4)) { 
+      this_o     -> np.z = this_o     -> p.z; 
+      o_parcours -> np.z = o_parcours -> p.z; 
+    };
+#endif  
+    
+  } PARCOURS_OBJETS__TRIANGLE__FIN; 
+  
+}; 
+
+
+// RL: It's a quadratic function... Any idea? 
+// RL:  - Yep: they could be pre-sorted by size: very big objects are tested at every loop, while small ones aren't. 
+// RL:  - On the ground, we could that they are some forbidden locations. 
+// RL:  - Organize the map by neighborhood. However that does change anything at the size issue. Because a big object could in a far neighborhood, so not tested, while should be so. 
+//        Or an object could show up in multiple neighborhoods: all the ones in which he is. That's better. 
+// RL: TODO XXX FIXME: Scenery objects should be considered like the ground - especially on the z-coordinate, so that the hero could walk 
+//     on roofs (for instance); because, as of now, he cannot the gravity invalidates its position at every passes. 
+void CMap__ChocEngine_MapObjects(CMap * this, const CPhysicalObj * hero_o) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Hero_o = %p "  "\n", __func__,  Hero_o ); 
+  
+  PARCOURS_OBJETS 
+    { 
+      // RL: Only 'anime' objects were moved. 
+      if (CPhysicalObj_subtype_CBonhomme != o_parcours -> subtype) { continue; }; 
+      CMap__ChocEngine_OneObject(this, hero_o, o_parcours, iii, jjj, kkk+1); 
+    } 
+  PARCOURS_OBJETS_FIN; 
+  
+}; 
+
+
+void CMap__ChocEngine(CMap * this, CPhysicalObj * Hero_o) { 
+  CMap__ChocEngine_OneObject(this, Hero_o, Hero_o, /*iii0*/0, /*jjj0*/0, /*kkk0*/0); 
+  CMap__ChocEngine_MapObjects(this, Hero_o); 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 1 
+
 #else 
 /*on informe la carte de la position du héro
 
   en retour, elle nous offre un pointeur vers l'élément le plus proche
   OU NULL si trop loin
 */
-// En fait cette fonction est le moteur physique………… 
-// RL: Returns the closest item with which the hero can interact. 
-CPhysicalObj * CMap__TesterPositionHero(CMap * this, CPhysicalObj * Hero_o, const riemann_t * our_manifold, const bool MoteurPhysiqueActif) { 
-  
+CPhysicalObj * CMap__TesterPositionHero(CMap * this, CPhysicalObj * Hero_o, const riemann_t * our_manifold, const bool MoteurPhysiqueActif) {   
   CBonhomme * Hero_b = (CBonhomme *) Hero_o;
-
   this   -> TesterPosition(this, Hero_o, our_manifold, MoteurPhysiqueActif);
   Hero_o -> ValiderPosition(Hero_o, MoteurPhysiqueActif);
   Hero_o -> InitForce(Hero_o);
-
-
-  // on fait bouger les objets 
-  // RL: Je suis sceptique que cela devrait être dans cette procédure. 
-  PARCOURS_OBJETS
-    {
-      if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) {  
-	CBonhomme * b = (CBonhomme *) o_parcours; 
-        if (rand() % 20 == 1) 
-          b -> SetDirection(b, DirectionAleatoire()); 
-
-        b -> Avancer(b, b -> GetDirection(b), our_manifold); 
-      }; 
-      
-      if (not(o_parcours -> Fixe_huh)) { 
-        this -> TesterPosition(this, o_parcours, our_manifold, MoteurPhysiqueActif); 
-        if (!o_parcours -> TesterPosition(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold, Hero_o)) { 
-          if (o_parcours -> Hostile_huh) { 
-            if (not(Hero -> EstInvisible(Hero))) { 
-              //le héros se fait toucher par un ennemi 
-              Hero_o -> PerdrePV(Hero_o, 5); 
-              Hero -> DevenirInvisible(Hero, 200); 
-            }; 
-	  }; 
-        }; 
-        o_parcours -> ValiderPosition(o_parcours, MoteurPhysiqueActif); 
-        o_parcours -> InitForce(o_parcours); 
-      }; 
-      
-    }
-  //FIN_PARCOURS_OBJETS_VOISINAGES;
-  PARCOURS_OBJETS_FIN;
-  
-  
-  // la phsyique de l'épée
-#if 1
-  {
-    if (Hero -> EnTrainDeFrapper(Hero)) { 
-      CPhysicalObj zoneepee = *(Hero_o); 
-      TPoint3D d = Hero_o -> GetDimension(Hero_o, this -> lattice_width, this -> lattice_height, our_manifold); 
-      zoneepee.SetDimension(&zoneepee, d.x, d.y, d.z); 
-
-      TPoint3D dir;
-      switch (Hero -> GetDirection(Hero)) {
-      case FACE: dir = TPoint3D_make_struct(0.0f, -1.0f, 0.0f); break;
-      case DOS: dir = TPoint3D_make_struct(0.0f, 1.0f, 0.0f); break;
-      case PROFIL_VERS_D: dir = TPoint3D_make_struct(1.0f, 0.0f, 0.0f); break;
-      case PROFIL_VERS_G: dir = TPoint3D_make_struct(-1.0f, 0.0f, 0.0f); break;
-      default: assert(false);
-      } 
-      
-      //zoneepee.SetPosition(&zoneepee, Hero_o -> GetPosition(Hero_o) + dir); 
-      const TPoint3D hero_pos = Hero_o -> GetPosition(Hero_o); 
-      zoneepee.SetPosition_vP3D(&zoneepee, TPoint3D_add__macro(hero_pos, dir)); 
-      
-      //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition())
-      PARCOURS_OBJETS
-        {
-	  if (CPhysicalObj_subtype_CBonhomme != o_parcours -> subtype) continue; 
-	  
-	  CBonhomme * b = (CBonhomme *) o_parcours; 
-
-          if (!o_parcours -> IsVolumeNul(o_parcours)) { 
-	    if ((!(o_parcours->TesterPosition(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold, &zoneepee))) && (!(b->EstInvisible(b)))) {
-              //on a frappé a.Element()
-              printf("Le héros a frappé un bonhomme\n");
-              o_parcours -> PerdrePV(o_parcours, 1);
-              this -> AjouterParticules(this, o_parcours -> GetPosition(o_parcours), "sang.anime", MoteurPhysiqueActif);
-              o_parcours -> AddForce_vP3D(o_parcours, TPoint3D_scale__macro(10.0f, dir));
-              b -> DevenirInvisible(b, 50);
-            }; 
-	  }; 
-
-        }
-      //FIN_PARCOURS_OBJETS_VOISINAGES;
-      PARCOURS_OBJETS_FIN;
-    };
-    
-  };
-#endif
-
-  // on enlève les éléments qui n'ont plus de vie
-  PARCOURS_OBJETS
-    {
-      if (not(o_parcours -> Fixe_huh) && o_parcours -> Is0PV(o_parcours)) {
-#if 0 
-        a.DetruireElementCourant();
-#elif 0
-        voisinage_detruire(this, iii, jjj);
-#else 
-	CPhysicalObj__delete(this -> Voisinages_array[iii][jjj][kkk]); 
-	this -> Voisinages_array[iii][jjj][kkk] = NULL; 
-	// RL: Et dans le dico? 
-#endif
-      };
-    }
-  PARCOURS_OBJETS_FIN;
-
-  
-  
-  
-  // on trouve l'élément le plus proche
-  CPhysicalObj * elementproche = NULL;
-  {
-#define norme_minimum_pour_etre_proche 50.0f
-    float norme1_du_proche = norme_minimum_pour_etre_proche;
-
-    PARCOURS_OBJETS
-      {
-	TPoint3D diff_vec; 
-	TPoint3D_sub(o_parcours -> GetPosition(o_parcours), Hero_o -> GetPosition(Hero_o), &diff_vec); 
-        const float norme1_courante = TPoint3D_Norme1(diff_vec);
-	
-        if (norme1_courante < norme1_du_proche) {
-          norme1_du_proche = norme1_courante;
-          elementproche = o_parcours;
-        };
-      }
-    PARCOURS_OBJETS_FIN;
-  };
-
-
-  return elementproche;
   return NULL;
-
-
-
-  // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-  //CPhysicalObj * elementproche = NULL; /*ce qu'on rend à la fin de cette fonction*/
-
-
-  // on nettoie la liste des objets... on vire ceux qui ont 0 PV
-  bool unennemiestdecede = false;
-  int nb_ennemis = 0;
-  float norme1_du_proche = norme_minimum_pour_etre_proche;
-  PARCOURS_OBJETS
-    {
-
-      //fprintf(stderr, "ACC: courant: %p - precedent: %p - liste: %p\n", a.pointeurcourant, a.pointeurprecedent, a.maliste);
-      if (o_parcours -> Is0PV(o_parcours)) {
-        if (o_parcours -> Hostile_huh)
-          unennemiestdecede = true;
-#if 0
-        a.DetruireElementCourant();
-#elif 0
-        voisinage_detruire(this, iii, jjj);
-#elif 1 
-	CPhysicalObj__delete(this -> Voisinages_array[iii][jjj][kkk]); 
-	this -> Voisinages_array[iii][jjj][kkk] = NULL; 
-	// Et dans le dico? 
-#endif
-      }
-      else {
-        if (o_parcours -> Hostile_huh) nb_ennemis++;
-
-	TPoint3D diff_vec; 
-	TPoint3D_sub(o_parcours -> GetPosition(o_parcours), Hero_o -> GetPosition(Hero_o), &diff_vec); 
-        const float norme1_courante = TPoint3D_Norme1(diff_vec);
-	
-        if (norme1_courante < norme1_du_proche) {
-          norme1_du_proche = norme1_courante;
-          elementproche = o_parcours;
-        }; 
-      }; 
-    }
-  PARCOURS_OBJETS_FIN;
-
-  if (unennemiestdecede && (nb_ennemis == 0)) {
-    //RaiseEvenement(EVT_PlusEnnemi); 
-    EvenementsModule -> Raise(EVT_PlusEnnemi); 
-  }; 
-
-
-
-  if (Hero -> EnTrainDeFrapper(Hero)) {
-    CPhysicalObj zoneepee = (*Hero_o);
-    TPoint3D d = Hero_o -> GetDimension(Hero_o, this -> lattice_width, this -> lattice_height, our_manifold);
-    zoneepee.SetDimension(&zoneepee, d.x, d.y, d.z);
-
-    TPoint3D dir;
-    switch (Hero -> GetDirection(Hero)) {
-    case FACE: dir = TPoint3D_make_struct(0.0f, -1.0f, 0.0f); break;
-    case DOS: dir = TPoint3D_make_struct(0.0f, 1.0f, 0.0f); break;
-    case PROFIL_VERS_D: dir = TPoint3D_make_struct(1.0f, 0.0f, 0.0f); break;
-    case PROFIL_VERS_G: dir = TPoint3D_make_struct(-1.0f, 0.0f, 0.0f); break;
-    default: assert(false);
-    }
-
-    TPoint3D hero_pos = Hero_o -> GetPosition(Hero_o); 
-    zoneepee.SetPosition_vP3D(&zoneepee, TPoint3D_add__macro(hero_pos, dir));
-    
-    //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition())
-    PARCOURS_OBJETS
-      {
-	if (CPhysicalObj_subtype_CBonhomme != o_parcours -> subtype) continue; 
-        if (o_parcours -> IsVolumeNul(o_parcours)) continue;
-	
-        CBonhomme* b = (CBonhomme *) o_parcours;
-
-	if ((!(o_parcours -> TesterPosition(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold, &zoneepee))) && (!(b -> EstInvisible(b)))) {
-	  //on a frappé a.Element()
-	  printf("Le héros a frappé un bonhomme\n");
-	  o_parcours -> PerdrePV(o_parcours, 1);
-	  this -> AjouterParticules(this, o_parcours -> GetPosition(o_parcours), "sang.anime", MoteurPhysiqueActif);
-	  o_parcours -> AddForce_vP3D(o_parcours, TPoint3D_scale__macro(10.0f,dir)); 
-	  b -> DevenirInvisible(b, 50);
-	}
-
-      }
-    //FIN_PARCOURS_OBJETS_VOISINAGES;
-    PARCOURS_OBJETS_FIN;
-
-  }
-
-
-  // on ne fait bouger que les ennemis près du héros: le reste du monde n'évolue pas!!!!
-  //PARCOURS_OBJETS_VOISINAGES_PROCHE(Hero->GetPosition())
-  PARCOURS_OBJETS
-    {
-      /*si l'objet courant est un bonhomme*/
-      //if (CBonhomme* b = dynamic_cast<CBonhomme *>(o_parcours)) {
-      if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
-	CBonhomme* b = (CBonhomme *) o_parcours;
-	if (rand() % 20 == 1)
-	  b -> SetDirection(b, DirectionAleatoire());
-	
-	b -> Avancer(b, b -> GetDirection(b), our_manifold);
-      }
-      
-      if (!(o_parcours->Fixe_huh)) {
-	this -> TesterPosition(this, o_parcours, our_manifold, MoteurPhysiqueActif);
-	if (!o_parcours -> TesterPosition(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold, Hero_o)) {
-	  if (o_parcours -> Hostile_huh)
-	    if (!Hero -> EstInvisible(Hero)) {
-	      //le héros se fait toucher par un ennemi
-	      Hero_o -> PerdrePV(Hero_o, 5);
-	      Hero -> DevenirInvisible(Hero, 200);
-	    }
-        }
-        o_parcours -> ValiderPosition(o_parcours, MoteurPhysiqueActif);
-        o_parcours -> InitForce(o_parcours);
-      }
-    }
-  //FIN_PARCOURS_OBJETS_VOISINAGES;
-  PARCOURS_OBJETS_FIN;
-
-  
-  return elementproche;
 }; 
 #endif 
 
@@ -1072,47 +1156,7 @@ CPhysicalObj * CMap__TesterPositionHero(CMap * this, CPhysicalObj * Hero_o, cons
 
 
 #if 0 
-void CMap__NewtonEngine_InteractAdjustCorrect(CMap * this, CPhysicalObj * o, const bool MoteurPhysiqueActif) { 
-  // FS: on teste si la position temporaire de o est correct
-  const TPoint3D pp = o -> GetPosition(o);
-  const float lattice_x = pp.x; 
-  const float lattice_y = pp.y; 
-  const float lattice_z = pp.z; 
-  const float map_x = lattice_x / this -> lattice_width;
-  const float map_y = lattice_y / this -> lattice_height; 
-  const float map_z = lattice_z; 
-
-  if (this -> Sol -> yatilEau(this -> Sol, map_x, map_y, map_z)) { 
-    if (!(o -> DansEau_huh)) { 
-      //printf(" L'objet %p va rentrer dans l'eau. Sa position est la suivante : %f, %f, %f. Nous allons générer une floppée de particules d'eau.\n", o, i, j, z);
-
-      if (not(o -> IsVolumeNul(o))) { 
-        this -> AjouterParticules(this, o -> GetPosition(o), "eclaboussures.anime", MoteurPhysiqueActif); 
-      }; 
-      
-      o -> DansEau_huh = true;
-    }; 
-    
-    //o -> AddForce_vXYZ(o, 0.0f, 0.0f, -1.0f); // RL: The object is drowning. 
-    o -> Acceleration_add_vXYZ(o, 0.0f, 0.0f, 9.0f); // RL: Archimede: Gravitation is less strong in water. 
-    
-    // RL: Are we fully under water? 
-    //o -> Immerge_huh = this -> Sol -> yatilEau(this -> Sol, map_x, map_y, map_z + 20.0f); 
-    o -> Immerge_huh = this -> Sol -> yatilEau(this -> Sol, map_x, map_y, map_z + o -> d.z); 
-
-    // FS: dans l'eau les frottements fluides sont plus importants
-    o -> CoeffFrottementFluideXY = 3.0f; 
-    o -> CoeffFrottementFluideZ  = 1.0f; 
-  } 
-  else { 
-    o -> DansEau_huh = false; 
-    //o -> AddForce_vXYZ(o, 0.0f, 0.0f, -10.0f); // RL: Gravitation 
-    o -> Immerge_huh = false; 
-    // FS: dans l'air, les frottements fluides sont assez petits 
-    //o -> CoeffFrottementFluide  = 1.0f; 
-    //o -> CoeffFrottementFluideZ = 0.0f; 
-  }; 
-}; 
+#elif 0 
 #elif 0  
 void CMap__TesterPosition(CMap * this, CPhysicalObj * o, const riemann_t * our_manifold, const bool MoteurPhysiqueActif) {
   // FS: on teste si la position temporaire de o est correct
@@ -1123,46 +1167,6 @@ void CMap__TesterPosition(CMap * this, CPhysicalObj * o, const riemann_t * our_m
   const float map_x = lattice_x / this -> lattice_width;
   const float map_y = lattice_y / this -> lattice_height; 
   const float map_z = lattice_z; 
-
-  if (this -> Sol -> yatilEau(this -> Sol, map_x, map_y, map_z)) { 
-    if (!(o -> DansEau_huh)) { 
-      //printf(" L'objet %p va rentrer dans l'eau. Sa position est la suivante : %f, %f, %f. Nous allons générer une floppée de particules d'eau.\n", o, i, j, z);
-
-      if (not(o -> IsVolumeNul(o))) { 
-        this -> AjouterParticules(this, o -> GetPosition(o), "eclaboussures.anime", MoteurPhysiqueActif); 
-      }; 
-      
-      o -> DansEau_huh = true;
-    }; 
-    
-    o -> AddForce_vXYZ(o, 0.0f, 0.0f, -1.0f); // RL: The object is drowning. 
-    
-    // RL: Are we fully under water? 
-    o -> Immerge_huh = this -> Sol -> yatilEau(this -> Sol, map_x, map_y, map_z + 20.0f); 
-
-    // FS: dans l'eau les frottements fluides sont plus importants
-    o -> CoeffFrottementFluide  = 3.0f;
-    o -> CoeffFrottementFluideZ = 1.0f;
-  } 
-  else { 
-    o -> DansEau_huh = false; 
-    o -> AddForce_vXYZ(o, 0.0f, 0.0f, -10.0f); // RL: Gravitation 
-    o -> Immerge_huh = false; 
-    // FS: dans l'air, les frottements fluides sont assez petits 
-    o -> CoeffFrottementFluide  = 1.0f; 
-    o -> CoeffFrottementFluideZ = 0.0f; 
-  }; 
-  
-  o -> CalcNewPosition(o); 
-  o -> TesterSol(o, this -> Sol); 
-  
-  //PARCOURS_OBJETS_VOISINAGES_TOUTPROCHE(o->GetPosition()) 
-  PARCOURS_OBJETS { 
-    if (o_parcours == o) continue; 
-    o -> TesterPosition(o, this -> lattice_width, this -> lattice_height, our_manifold, o_parcours); 
-  } PARCOURS_OBJETS_FIN; 
-  //FIN_PARCOURS_OBJETS_VOISINAGES; 
-  
 }; 
 #endif  
 
@@ -1183,11 +1187,15 @@ void CMap__TesterPosition(CMap * this, CPhysicalObj * o, const riemann_t * our_m
 
 
 
+extern bool show_choc_cube_huh; 
 
-#if 1
-void CMap__Render(const CMap * this, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_lattice_x, const float target_lattice_y, const bool EnVaisseau) { 
-  this -> Sol -> Render(this -> Sol, our_manifold, nb_cells_displayed_x, nb_cells_displayed_y, target_map_i, target_map_j, target_lattice_x / (float) this -> lattice_width, target_lattice_y / (float) this -> lattice_height); 
+void CMap__Render(const CMap * this, const CCamera * Camera, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_lattice_x, const float target_lattice_y, const bool EnVaisseau) { 
+  //this -> Sol -> Render(this -> Sol, our_manifold, nb_cells_displayed_x, nb_cells_displayed_y, target_map_i, target_map_j, target_lattice_x / (float) this -> lattice_width, target_lattice_y / (float) this -> lattice_height); 
+  //this -> Sol -> Render(this -> Sol, our_manifold, target_map_i, target_map_j, target_lattice_x / ((float) this -> lattice_width), target_lattice_y / ((float) this -> lattice_height), ((float) nb_cells_displayed_x) / ((float) this -> lattice_width), ((float) nb_cells_displayed_y) / ((float) this -> lattice_height)); 
+  this -> Sol -> Render(this -> Sol, our_manifold, target_map_i, target_map_j, target_lattice_x * this -> lattice_to_map_scale_factor__x, target_lattice_y * this -> lattice_to_map_scale_factor__y, ((float) nb_cells_displayed_x) * this -> lattice_to_map_scale_factor__x, ((float) nb_cells_displayed_y) * this -> lattice_to_map_scale_factor__y); 
   
+ 
+
   const TPoint3D pos = TPoint3D_make_struct(target_lattice_x, target_lattice_y, 0.0f); 
   
   
@@ -1196,17 +1204,20 @@ void CMap__Render(const CMap * this, const riemann_t * our_manifold, const int n
     PARCOURS_OBJETS_VOISINAGES_PROCHE(pos) 
       {
         if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
-          //fprintf(stderr, "Bonhomme: Rendering: %s\n", b -> filename); 
+          //fprintf(stderr, "Bonhomme: Rendering: %s\n", o_parcours -> filename); 
 	  const CBonhomme * b = (const CBonhomme *) o_parcours; 
-          b -> Render(b, this -> lattice_width, this -> lattice_height, our_manifold); 
+          //b -> Render(b, this -> lattice_width, this -> lattice_height, our_manifold, Camera); 
+	  b -> Render(b, this -> lattice_to_map_scale_factor__x, this -> lattice_to_map_scale_factor__y, this -> lattice_to_map_scale_factor__z, our_manifold, Camera); 
         } 
         else if (CPhysicalObj_subtype_CObjNonAnime == o_parcours -> subtype) { 
 	  const CObjNonAnime * nonanime = (const CObjNonAnime *) o_parcours; 
 	  //fprintf(stderr, "ObjPhys: Rendering: %s\n", o_parcours -> filename); 
-          nonanime -> Render(nonanime, this -> lattice_width, this -> lattice_height, our_manifold); 
+          //nonanime -> Render(nonanime, this -> lattice_width, this -> lattice_height, our_manifold); 
+          nonanime -> Render(nonanime, this -> lattice_to_map_scale_factor__x, this -> lattice_to_map_scale_factor__y, this -> lattice_to_map_scale_factor__z, our_manifold); 
         } 
         else { 
-          o_parcours -> Render(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold); 
+          //o_parcours -> Render(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold); 
+	  o_parcours -> Render(o_parcours, this -> lattice_to_map_scale_factor__x, this -> lattice_to_map_scale_factor__y, this -> lattice_to_map_scale_factor__z, our_manifold); 
 	}; 
 	
       }
@@ -1216,10 +1227,6 @@ void CMap__Render(const CMap * this, const riemann_t * our_manifold, const int n
   else { // _ en vaisseau _
     PARCOURS_OBJETS
       {
-#if 0
-        int i = (int) a.Element()->GetPosition().x;
-        int j = (int) a.Element()->GetPosition().y;
-#endif
         const int i = (int) o_parcours -> GetPosition(o_parcours).x; 
         const int j = (int) o_parcours -> GetPosition(o_parcours).y; 
 	
@@ -1227,7 +1234,8 @@ void CMap__Render(const CMap * this, const riemann_t * our_manifold, const int n
         //const bool b = ((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
         const bool b = true; //((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
         if (b) { 
-          o_parcours -> Render(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold); 
+          //o_parcours -> Render(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold); 
+	  o_parcours -> Render(o_parcours, this -> lattice_to_map_scale_factor__x, this -> lattice_to_map_scale_factor__y, this -> lattice_to_map_scale_factor__z, our_manifold); 
 	}; 
       }
     PARCOURS_OBJETS_FIN; 
@@ -1240,167 +1248,152 @@ void CMap__Render(const CMap * this, const riemann_t * our_manifold, const int n
     //int i = 0; 
     PARCOURS_ZONESTELEPORTATIONS { 
       //fprintf(stderr, "ZoneTeleportationRender: i = %d\n", i++); 
-      our_manifold -> AfficherCube(our_manifold, /*map_i*/0, /*map_j*/0, zt_parcours -> position.x / this -> lattice_width, zt_parcours -> position.y / this -> lattice_height, zt_parcours -> position.z, zt_parcours -> dimension.x / this -> lattice_width, zt_parcours -> dimension.y / this -> lattice_height, zt_parcours -> dimension.z); 
+      if (show_choc_cube_huh) { 
+	our_manifold -> AfficherCube(our_manifold, /*map_i*/0, /*map_j*/0, zt_parcours -> position.x * this -> lattice_to_map_scale_factor__x, zt_parcours -> position.y * this -> lattice_to_map_scale_factor__y, zt_parcours -> position.z * this -> lattice_to_map_scale_factor__z, zt_parcours -> dimension.x * this -> lattice_to_map_scale_factor__x, zt_parcours -> dimension.y * this -> lattice_to_map_scale_factor__y, zt_parcours -> dimension.z * this -> lattice_to_map_scale_factor__z); 
+      }; 
     } PARCOURS_ZONESTELEPORTATIONS_FIN; 
   }; 
   
 }; 
-#else 
-//void CMap__Render(const CMap * this, const riemann_t * our_manifold, const int i1, const int j1, const int i2, const int j2, const bool EnVaisseau) { 
-void CMap__Render(const CMap * this, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_lattice_x, const float target_lattice_y, const bool EnVaisseau) { 
-  //this -> Sol -> Render(this -> Sol, i1, j1, i2, j2); 
-  this -> Sol -> Render(this -> Sol, our_manifold, nb_cells_displayed_x, nb_cells_displayed_y, target_map_i, target_map_j, target_lattice_x / (float) this -> lattice_width, target_lattice_y / (float) this -> lattice_height); 
-  
-  //const TPoint3D pos = TPoint3D_make_struct((i1 + i2) / 2, (j1 + j2) / 2, 0.0f); 
-  const TPoint3D pos = TPoint3D_make_struct(target_lattice_x, target_lattice_y, 0.0f); 
-  
-  
-  if (not(EnVaisseau)) {
-    //PARCOURS_OBJETS
-    PARCOURS_OBJETS_VOISINAGES_PROCHE(pos) 
-      {
-#if 0 
-        const int i = (int) o_parcours -> GetPosition(o_parcours).x; 
-        const int j = (int) o_parcours -> GetPosition(o_parcours).y; 
-#endif 	
-#if 0
-        const char * filename = o_parcours -> filename; 
-        if (filename != NULL) { 
-          if (0 != strcmp(filename, "./heros.anime")) {
-            fprintf(stderr, "ObjPhys: Rendering: %s\n", filename);
-            fflush(NULL);
-          }; 
-	}; 
-        //fprintf(stderr, "iii = %d - jjj = %d - ", iii, jjj);
-#endif
-	
-        //bool test = ((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
-        //if (test)
-        //if (CBonhomme * b = dynamic_cast<CBonhomme *>(o_parcours)) { 
-        if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
-          //fprintf(stderr, "Bonhomme: Rendering: %s\n", b -> filename); 
-	  const CBonhomme * b = (const CBonhomme *) o_parcours; 
-          b -> Render(b, this -> lattice_width, this -> lattice_height, our_manifold); 
-        } 
-        //else if (CObjNonAnime * nonanime = dynamic_cast<CObjNonAnime *>(o_parcours)) { 
-        else if (CPhysicalObj_subtype_CObjNonAnime == o_parcours -> subtype) { 
-	  const CObjNonAnime * nonanime = (const CObjNonAnime *) o_parcours; 
-	  //fprintf(stderr, "ObjPhys: Rendering: %s\n", o_parcours -> filename); 
-          nonanime -> Render(nonanime, this -> lattice_width, this -> lattice_height, our_manifold); 
-        } 
-        else { 
-          o_parcours -> Render(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold); 
-	}; 
-	
-      }
-    //PARCOURS_OBJETS_FIN;
-    PARCOURS_OBJETS_VOISINAGES_FIN;
-
-  }
-  else { // _ en vaisseau _
-    PARCOURS_OBJETS
-      {
-#if 0
-        int i = (int) a.Element()->GetPosition().x;
-        int j = (int) a.Element()->GetPosition().y;
-#endif
-        const int i = (int) o_parcours -> GetPosition(o_parcours).x; 
-        const int j = (int) o_parcours -> GetPosition(o_parcours).y; 
-	
-	
-        //const bool b = ((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
-        const bool b = true; //((i1 <= i) && (i <= i2) && (j1 <= j) && (j <= j2));
-        if (b) { 
-          o_parcours -> Render(o_parcours, this -> lattice_width, this -> lattice_height, our_manifold); 
-	}; 
-      }
-    PARCOURS_OBJETS_FIN; 
-  }; // _ en vaisseau _ 
-  
-  
-  
-  { 
-    //fprintf(stderr, "ZoneTeleportationBlit\n"); 
-    //int i = 0; 
-    PARCOURS_ZONESTELEPORTATIONS { 
-      //fprintf(stderr, "ZoneTeleportationRender: i = %d\n", i++); 
-      our_manifold -> AfficherCube(our_manifold, /*map_i*/0, /*map_j*/0, zt_parcours -> position.x, zt_parcours -> position.y, zt_parcours -> position.z, zt_parcours -> dimension.x, zt_parcours -> dimension.y, zt_parcours -> dimension.z); 
-    } PARCOURS_ZONESTELEPORTATIONS_FIN; 
-  }; 
-  
-}; 
-#endif 
 
 
 
 
-int CMap__ReadDescriptionFile(CMap * this, const int map_i, const int map_j, const riemann_t * our_manifold, const char * dir, const char * filename) {
+int CMap__ReadDescriptionFile(CMap * this, const int global_map_i, const int global_map_j, const riemann_t * our_manifold, const char * dir, const char * filename) { 
   carte_t * carte_data  = NULL; 
   CSol    * this_parent = this -> Sol; 
   
   { 
-    char carte_fullpath[strlen(dir) + strlen(filename) + 1];
+    char carte_fullpath[strlen(dir) + strlen(filename) + 1]; 
     strcat(strcpy(carte_fullpath, dir), filename); 
-#define LOG_SUFF ".log"
-    char carte_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1];
-    strcat(strcat(strcpy(carte_log, LOGDIR), filename), LOG_SUFF);
-    carte_data = carte_make_from_file(carte_fullpath, carte_log); 
-    if (carte_data == NULL) { 
-      messerr("ERREUR: Le fichier de description de carte n'a pas pu être lu et/ou analysé: '%s'" "\n", carte_fullpath); 
-      messerr("        Veuillez vous reporter au compte-rendu rendant compte de cette tentative échouée: '%s'" "\n", carte_log); 
-      return -1; 
+#define LOG_SUFF ".log" 
+    char carte_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1]; 
+    strcat(strcat(strcpy(carte_log, LOGDIR), filename), LOG_SUFF); 
+    for(;;) { 
+      carte_data = carte_make_from_file(carte_fullpath, carte_log); 
+      if (NULL != carte_data) { break; }; 
+      //if (carte_data == NULL) { 
+      { 
+	messerr("ERREUR: Le fichier de description de carte n'a pas pu être lu et/ou analysé: '%s'" "\n", carte_fullpath); 
+	messerr("        Veuillez vous reporter au compte-rendu rendant compte de cette tentative échouée: '%s'" "\n", carte_log); 
+	messerr("        Voulez-vous réessayer?" "\n"); 
+	{
+	  char c; 
+	  const int nb_read = read(stdin_d, &c, 1); 
+	  if (0 == nb_read) { continue; }; 
+	  if (c == 'n') { return -1; }; 
+	  continue; 
+	}; 
+#if 0 
+	{ 
+	  SCRIPT_BeginAfficherMenu(); 
+	  MiniMenu -> Add(MiniMenu, 0, "Je veux réessayer.", NULL); 
+	  MiniMenu -> Add(MiniMenu, 0, "Je veux arrêter.", NULL); 
+	  SCRIPT_AfficherMenu("Problème lors de la lecture du ficher de description de carte."); 
+	  // RL: Can't do that, as we need to loop in the game engine, while it's blocked here... 
+	  //     We should definitely improve that. 
+	}; 
+#endif 
+	return -1; 
+      }; 
     }; 
   }; 
-  
+
+#if 1 
+  // RL: TODO XXX FIXME 
+  SCRIPT_JouerMusique(carte_data -> musique); 
+#else   
   if (!SCRIPT_EstEnTrainDExecuterUnScript()) {
     SCRIPT_JouerMusique(carte_data -> musique); 
   }; 
+#endif 
   
-  
-  // *** GROUND *** 
-  this_parent -> ZEau = carte_data -> niveau_eau; 
-  //this -> ChargerZ(this, map_i, map_j, our_manifold, carte_data -> fichier_de_zone_de_niveau); 
-  this_parent -> ChargerZ(this_parent, map_i, map_j, our_manifold, carte_data -> fichier_de_zone_de_niveau); 
-  message("Chargement en mémoire de %d textures pour le sol." "\n", carte_data -> texture_nb); 
-  if (carte_data -> texture_nb >= NB_MAX_TEXTURESOL) { 
-    messerr("ERREUR: Il n'y pas assez d'emplacements pour charger les textures du sol - [carte_data_textures = %d][NB_MAX_TEXTURES = %d]" "\n", carte_data -> texture_nb, NB_MAX_TEXTURESOL);
-    return -1; 
-  }; 
-  for (int i = 0; i < carte_data -> texture_nb; i++) { 
-    message("Chargement en mémoire de la texture %3d (couleur associée = %09d - fichier image = \"%s\")." "\n", i, carte_data -> texture_indice[i], carte_data -> texture_image[i]); 
-    this_parent -> AjouterTextureSol(this_parent, carte_data -> texture_image[i], carte_data -> texture_indice[i]); 
-  }; 
-  this_parent -> ChargerIndiceTextureBitmap(this_parent, carte_data -> fichier_de_zone_de_texture); 
-  
-  
+
+  // *** GENERAL DATA *** 
+#if 1 
+  this -> lattice_width  = carte_data -> lattice_width; 
+  this -> lattice_height = carte_data -> lattice_height;
+
+  this -> over_spanning_w = carte_data -> over_spanning_w; 
+  this -> over_spanning_h = carte_data -> over_spanning_h; 
+#else 
   this -> lattice_width  = this_parent -> TailleX; 
   this -> lattice_height = this_parent -> TailleY; 
 
   this -> over_spanning_w = this -> lattice_width  / 32; 
   this -> over_spanning_h = this -> lattice_height / 32; 
+#endif 
   
-  this -> global_map_i = map_i; 
-  this -> global_map_j = map_j; 
-  
+  this -> global_map_i = global_map_i; 
+  this -> global_map_j = global_map_j; 
 
+  this -> lattice_to_map_scale_factor__x = ((float) this -> over_spanning_w) / ((float) this -> lattice_width ); 
+  this -> lattice_to_map_scale_factor__y = ((float) this -> over_spanning_h) / ((float) this -> lattice_height); 
+  //this -> lattice_to_map_scale_factor__z = 2.0f / (((float) this -> lattice_width) + ((float) this -> lattice_height)); 
+  this -> lattice_to_map_scale_factor__z = (this -> lattice_to_map_scale_factor__x + this -> lattice_to_map_scale_factor__y) / 2.0f; 
+#if 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this -> lattice_to_map_scale_factor__x = %f "  "\n", __func__, this -> lattice_to_map_scale_factor__x); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this -> lattice_to_map_scale_factor__y = %f "  "\n", __func__, this -> lattice_to_map_scale_factor__y); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this -> lattice_to_map_scale_factor__z = %f "  "\n", __func__, this -> lattice_to_map_scale_factor__z); 
+#endif 
+  
+  
+  // *** GROUND *** 
+  //this_parent -> ZEau = carte_data -> niveau_eau; 
+  this_parent -> map_ZEau = carte_data -> niveau_eau * this -> lattice_to_map_scale_factor__z; 
+  
+  //message("Chargement en mémoire de %d textures pour le sol." "\n", carte_data -> texture_nb); 
+  if (carte_data -> texture_nb >= NB_MAX_TEXTURESOL) { 
+    messerr("ERREUR: Il n'y pas assez d'emplacements pour charger les textures du sol - [carte_data_textures = %d][NB_MAX_TEXTURES = %d]" "\n", carte_data -> texture_nb, NB_MAX_TEXTURESOL);
+    return -1; 
+  }; 
+  for (int i = 0; i < carte_data -> texture_nb; i++) { 
+    //message("Chargement en mémoire de la texture %3d (couleur associée = %09d - fichier image = \"%s\")." "\n", i, carte_data -> texture_indice[i], carte_data -> texture_image[i]); 
+    this_parent -> AjouterTextureSol(this_parent, carte_data -> texture_image[i], carte_data -> texture_indice[i]); 
+  }; 
+  //this_parent -> init(this_parent, global_map_i, global_map_j, /*over_spanning_w*/1, /*over_spanning_h*/1, our_manifold, /*z_filename*/carte_data -> fichier_de_zone_de_niveau, /*texture_filename*/carte_data -> fichier_de_zone_de_texture); 
+  this_parent -> init(this_parent, global_map_i, global_map_j, /*over_spanning_w*/this -> over_spanning_w, /*over_spanning_h*/this -> over_spanning_h, this -> lattice_to_map_scale_factor__z, our_manifold, /*z_filename*/carte_data -> fichier_de_zone_de_niveau, /*texture_filename*/carte_data -> fichier_de_zone_de_texture); 
+  
+  
+#if 1 
   const int TailleX = 1; //this_parent -> TailleX; 
   const int TailleY = 1; //this_parent -> TailleY; 
+#endif 
   
   
   // *** SCENERY OBJECTS & LIVING OBJECTS *** 
   for (int i = 0; i < carte_data -> objet_nb; i++) { 
     if (carte_data -> objet_anime_huh[i]) { 
+      //continue; 
+      //break; 
+      //{ static int count = 0; if (count == 0) { count++; continue; }; if (count > 1) break; count++; }; 
       CBonhomme    * bonhomme = CBonhomme__make(carte_data -> objet_fichier[i]); 
       CPhysicalObj * o        = (CPhysicalObj *) bonhomme; 
       o    -> SetPosition_vP3D(o, TPoint3D_make_struct(carte_data -> objet_x[i] / (float)TailleX, carte_data -> objet_y[i] / (float)TailleY, carte_data -> objet_z[i]), this); 
-      this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o);
+      CMap__NormalizePosition(this, o); 
+      this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o); 
+      o    -> np = o -> p; 
+      //break; 
       continue; 
-    }
-    else {
-      CObjNonAnime * nonanime = CObjNonAnime__make(carte_data -> objet_fichier[i]);
+    } 
+    else { 
+      //break; 
+      //continue; 
+      CObjNonAnime * nonanime = CObjNonAnime__make(carte_data -> objet_fichier[i]); 
       CPhysicalObj * o        = (CPhysicalObj *) nonanime; 
-      o -> SetPosition_vP3D(o, TPoint3D_make_struct(carte_data -> objet_x[i] / (float)TailleX, carte_data -> objet_y[i] / (float)TailleY, carte_data -> objet_z[i]), this); 
-      this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o);
+      o    -> SetPosition_vP3D(o, TPoint3D_make_struct(carte_data -> objet_x[i] / (float)TailleX, carte_data -> objet_y[i] / (float)TailleY, carte_data -> objet_z[i]), this); 
+      CMap__NormalizePosition(this, o); 
+      this -> AjouterObjet_nom(this, carte_data -> objet_nom[i], o); 
+      o    -> np = o -> p; 
+      nonanime -> angleZ = carte_data -> objet_angle_z[i] / 180.0f * PI; 
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " carte_data -> objet_angle_z[i] = %f "  "\n", __func__, carte_data -> objet_angle_z[i]); 
+      { 
+	const float rotated_dx =   cosf(nonanime -> angleZ) * o -> d.x + sinf(nonanime -> angleZ) * o -> d.y; 
+	const float rotated_dy = - sinf(nonanime -> angleZ) * o -> d.x + cosf(nonanime -> angleZ) * o -> d.y; 
+	o -> d.x = fabsf(rotated_dx); 
+	o -> d.y = fabsf(rotated_dy); 
+      }; 
+      //break; 
       continue; 
     }; 
   }; 

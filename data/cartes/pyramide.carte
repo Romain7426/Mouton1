@@ -4,21 +4,26 @@
 physique {
 }
 gameplay {
+ longueur := 32; 
+ largeur  := 32; 
+ recouvrement longueur := 1; 
+ recouvrement largeur  := 1; 
  arme := vrai ; 
  musique := "foret.mid"; 
- niveau eau := -.10.0; 
- vie eau :=  0; 
+ niveau eau := -0.5; 
+ vie eau :=  0;
+ 
 teleportation IDENT {
   destination := "chaman.carte";
   position := {
-     x := 20;
-     y := 0;
-     z := 0;
+     x := 23;
+     y := -1;
+     z := -1;
   };
   dimension := {
-     longueur := 10;  // x
-     largeur := 2;   // y
-     hauteur := 100;   // z
+     longueur := 7;  // x
+     largeur  := 2;   // y
+     hauteur  := 6;   // z
   };
   direction parcours := bas; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
@@ -28,23 +33,24 @@ teleportation IDENT {
   };
   destination direction parcours := bas;
 } 
+
 teleportation IDENT {
   destination := "niveau1_1.carte";
   position := {
      x := 13;
-     y := 14;
-     z := 0;
-  };
+     y := 16;
+     z := -1;
+  }; 
   dimension := {
-     longueur := 2;  // x
-     largeur := 3;   // y
-     hauteur := 100;   // z
-  };
+     longueur := 2; // x 
+     largeur  := 2; // y 
+     hauteur  := 6; // z 
+  }; 
   direction parcours := haut; // DIRECTION peut valoir "gauche", "droite", "haut", "bas"
   destination position := {
      x := 16;
-     y := 1;
-     z := 0;
+     y :=  1.1;
+     z :=   0;
   };
   destination direction parcours := haut;
 } 
@@ -942,7 +948,7 @@ y := 22.;
 z := 0.;
 angle x := 0.;
 angle y := 0.;
-angle z := 0.;
+angle z := -90.;
 };
 }
 

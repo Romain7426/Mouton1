@@ -1,7 +1,7 @@
 #include "global.h"
-#include "text.h"
 #include "action.h"
-#include "apiscript.h"
+#include "text.h"
+#include "script_api.h"
 
 CTexture * texAction1 = NULL;
 CTexture * texAction2 = NULL;
@@ -29,7 +29,7 @@ static char * CopyString(const char * const filename) {
 }; 
  
 CScriptLauncher * CScriptLauncher_make(const char * const filename, const char * const procedure_name) {
-  printf("Début Constructeur CScriptLauncher::CScriptLauncher(%s, %s)\n", filename, procedure_name);
+  //printf("Début Constructeur CScriptLauncher::CScriptLauncher(%s, %s)\n", filename, procedure_name);
   
   CScriptLauncher * this = NULL; 
   this = (CScriptLauncher *) malloc(sizeof(CScriptLauncher)); 
@@ -41,7 +41,7 @@ CScriptLauncher * CScriptLauncher_make(const char * const filename, const char *
   //this -> resPascal = new CPascal(filename);
   this -> resPascal = CPascal_make(filename);
   
-  printf("   cool on a capté la ressource pascal!!\n");
+  //printf("   cool on a capté la ressource pascal!!\n");
   this -> proc = CopyString(procedure_name);
   
   this -> Execute           = CScriptLauncher__Execute; 
@@ -51,7 +51,7 @@ CScriptLauncher * CScriptLauncher_make(const char * const filename, const char *
   this -> stack_push_string = CScriptLauncher__stack_push_string; 
 
   
-  printf("Fin Constructeur CScriptLauncher\n");             
+  //printf("Fin Constructeur CScriptLauncher\n");             
   
   return this; 
 }; 
@@ -63,15 +63,15 @@ void CScriptLauncher_delete(CScriptLauncher * this) {
 }; 
 
 void CScriptLauncher__Execute(CScriptLauncher * this) {
-  printf("Exécution du ScriptLauncher...");   
+  //printf("Exécution du ScriptLauncher...");   
   SCRIPT_Init();
-  printf("      on va executer la procédure %s...\n", this -> proc);
+  //printf("      on va executer la procédure %s...\n", this -> proc);
   //this -> resPascal->getObject()->execProcedure(proc);
   this -> resPascal -> execProcedure(this -> resPascal, this -> proc);
   //P->execProcedure(proc);
-  printf("      fin de l'exécution\n");
+  //printf("      fin de l'exécution\n");
   SCRIPT_Quit();
-  printf("      Exécution du ScriptLauncher réussie!!!");   
+  //printf("      Exécution du ScriptLauncher réussie!!!");   
 };
 
 void CScriptLauncher__init_step(CScriptLauncher * this) {
@@ -265,23 +265,20 @@ void CObjActionnable__ActionMenu_Render(const CObjActionnable * this) {
     this -> actions -> Render(this -> actions); 
 };
 
-void CObjActionnable__AjouterAction(CObjActionnable * this, const char * caption,
-                                    const char * nom_texture,
-                                    const char * fichier_pascal,
-                                    const char * proc)
-/*spécification d'entrée : si nom_texture == NULL ou nom_texture == "" alors 
-  il n'y a pas de textures*/
-{
-  printf("CObjActionnable__AjouterAction(...)\n");       
-  if (this -> actions == NULL) {
-    printf("Pour ajouter l'action, je dois d'abord créer un menu pour l'accueillir.\n");           
-    this -> actions = CActionsMenu_make();
-    printf("     Création du menu action réussi : pointeur = %p\n", this -> actions); 
+void CObjActionnable__AjouterAction(CObjActionnable * this, const char * caption, const char * nom_texture, const char * fichier_pascal, const char * proc) { 
+  // FS: /*spécification d'entrée : si nom_texture == NULL ou nom_texture == "" alors il n'y a pas de textures*/ 
+  printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this = %p, caption = '%s', nom_texture = '%s', fichier_pascal = '%s', proc ='%s' "  "\n", __func__, this, caption, nom_texture, fichier_pascal, proc); 
+  
+  //printf("CObjActionnable__AjouterAction(...)\n"); 
+  if (this -> actions == NULL) { 
+    //printf("Pour ajouter l'action, je dois d'abord créer un menu pour l'accueillir.\n"); 
+    this -> actions = CActionsMenu_make(); 
+    //printf("     Création du menu action réussi : pointeur = %p\n", this -> actions); 
   }; 
   
-  CScriptLauncher * sl = CScriptLauncher_make(fichier_pascal, proc);
-  this -> actions -> parent.Add_qch(&this -> actions -> parent, 0, caption, nom_texture, sl);    
-  printf("     Action ajoutée !!!\n");        
+  CScriptLauncher * sl = CScriptLauncher_make(fichier_pascal, proc); 
+  this -> actions -> parent.Add_qch(&this -> actions -> parent, 0, caption, nom_texture, sl); 
+  //printf("     Action ajoutée !!!\n"); 
 }; 
 
 
