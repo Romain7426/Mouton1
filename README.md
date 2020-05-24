@@ -29,7 +29,7 @@ Authors:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Music, Game engine, Level design <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://people.irisa.fr/Francois.Schwarzentruber/
  - Romain (myself)  <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scripts <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description languages <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
   
    
@@ -71,7 +71,9 @@ That was the starting point of the currently published project: *C++* is an unst
  
 Despite our lack of training in software design, we naturally wanted to divide & conquer that big dragon: cut that one big problem into smaller manageable problems. We still knew that the core, the game engine, would be big though. But we separated the character description, the music, the scenery items description, the level description, the narrative description, from the game engine. That way we could also divide the work among team members. 
  
-First, for the game stuffs descriptions, we designed small & quick purposed description languages (about that subject, one can check out that video [«Functional MzScheme DSLs in Game Development»](https://www.youtube.com/watch?v=Z8Xamkb-J2k), wherein they talk about «DSL» («data specific language)» (very bad audio sadly)). We ran into two issues: 
+### Spatial DSLs
+
+First, for the game stuffs descriptions, we designed small & quick purposed description languages (about that subject, one can check out that video [«Functional MzScheme DSLs in Game Development»](https://www.youtube.com/watch?v=Z8Xamkb-J2k), wherein they talk about «DSL» («data specific language») (very bad audio sadly)). We ran into two issues: 
  - (i) *Lex* & *Yacc* - In the very scarce software engineering lessons we had, we were advised to use *Lex* & *Yacc*. Well well well. *Lex* & *Yacc* are nice theoretical objects, but should not be used in real life. First one never knows whether the regular expressions are the right ones (and for some reasons, there are always weird issues). They are slow. They are weirdly designed. They are not thread-safe nor reentrant. And the syntax error management is terrible: *yacc* returns "syntax error" and that's it - you're stuck - it's very frustrating. And during these lectures, you're told about intricate weird issues. Great. In real life, description languages are trivial LL(1) languages. We're using a [BFG](https://en.wikipedia.org/wiki/BFG_(weapon)) to kill an ant; and worse, that [BFG](https://en.wikipedia.org/wiki/BFG_(weapon)) is broken and can't even do properly the job. <br> 
    So, one should not use *Lex* & *Yacc* ever. One should study them to understand the underlying issues of tokenizing & parsing, but one should not use these broken & useless tools. First, regarding tokenizing, it's way simpler to directly write the automata; automata are simple, and they simply do what you think they do. And do not write these automata as data arrays - for each token, just write a function that takes the current state, the being-read character, and returns the next state - that's it. It works perfectly, it's simple, and it's very fast. <br> 
    For parsing, LL(1) languages are trivial. So just do it. Basically it's a big automaton. The only location where it could be trickier is expression-parsing: infix expressions ("1 + 2") are why LALR(0) stuffs were developed; they can still be parsed, but a side stack is needed. That's it. It's very simple, and it works very well. And syntax errors can be understood and more explanatory than the hellish "syntax error". <br> 
@@ -80,10 +82,45 @@ First, for the game stuffs descriptions, we designed small & quick purposed desc
    Regarding typing, we then met [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)), and we had a cognitive dissonance: this language is amazing, but does not care about typing at all. From the user point of view, there's no type (of course, in-memory data are typed). And the language was so powerful and easy. With very few lines of code, we could run quite powerful programs. In spirit, [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)) was the opposite of [OCaml](https://en.wikipedia.org/wiki/OCaml), and it was way easier & simple to use. (A quick note about so-called "functional programming" & "first-order functions": it does not matter, nobody cares. An actual full-fledged functional language is very complex, for nothing; the issue is to remember the current stack of lexical environments; *OCaml* & *Scheme* cope with that complexity in removing variables and substituting them with "bindings", and so-called *let-bindings*. Such choices are definitely understandable, but are not user-friendly; variables are the way to go; let-bindings are a creepy work-around in spirit, and slow in facts. Having both, variables & lexical stacked environment remembered means that the whole call-stack must be remembered at & for each *lambda*, which is huge - basically, it means that the call-stack is duplicated each time - and obviously, implementing 'call/cc' is trivial with such a feature. If in-line anymous functions are handy, remembering lexical environment does not worth it - just provide the global the environment so such functions. Or one can do the *Pascal* way: local functions cannot be objects (which is not convenient at all).) <br> 
    So, please, type as less as possible your description languages. In spirit, description languages should be like [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)). And description languages implies that they are no variables (nor let-bindings). 
    
+ 
+ 
+### Temporal DSL 
 
+Then, after spatial descriptions (the «objects»), we wanted timporal description (the «narrative»). Well well well. Now we can tell you that this is a very very very big dragon. 
+ - (a) We quickly realized we need a «scripting» language: variables & procedures were needed. Better, at some point, we wanted the game to be driven from the narrative (makes sense, right). Duh... So a full-fledged scripting language was developed. <br> 
+       Such a choice is definitely understandable. But one should keep in mind that this is a very large & complex task, and that the scripting language should be kept as feature-less as possible - it should not make coffee & toasts. And it will already be very complicated. 
+ - (b) That task was started without any actual lecture on such a subject, which could have been very very useful. In the end, the dragon got defeated, the narrative description language did work, but it was ugly. 
+ - (c) Language design issues aside, the main issue is that, actually, they are two competiting sub-programs in one program: the script engine & the game engine. Technological speaking, what we needed were «cooperative threads» («non-preempting threads», «co-routines», «fibers»), but we did know that. With «cooperative threads», one can have the two engines running in their own environment, and then we just have to write some in-between communication stuffs. The advantage of that is both engines can be black boxes; especially, the scripting language can be taken from any where, and it could be run without knowing anything about it. Same thing for the game engine. <br> 
+   We were not aware of that useful technology. Instead, we flattened and linearized both engines, and we had kernel which ran each one step of the first engine and then one step of the second engine. We did not conceptually thought about that. We were looking for a way to defeat that dragon, and that's the bottom-up solution we came up with - we did not realize what we were doing, we implemented these features because we needed them. <br> 
+   A good consequence was that the game engine was rewritten - it was still not good, but before that it was just a hell bunch of global variables and mutually recursive functions, where no-one could infer any semantic except the main developer. So that was definitely an improvement. <br> 
+   On the other hand, scripting language are easier when recursively interpreted. But the linearization & step-wise design implied to break that down. What should have been was to take the full step and develop a bytecode. We did not know that, but, in facts, bytecode is not very complicated - so that step could have been taken. Instead, a halfway solution was designed, the worst of the two world: stepped interpretation. Never do «stepped interpretation» - it's complicated as hell - bytecode is simpler. 
+ - (d) As of now, I rewrote that whole part. It generates bytecode. It's easier, more powerfull, less buggy, and simpler. The narrative description language is called «PScript» for «Pascal Scripting Language». I tried to make as simple as possible, with variables, type-less as Scheme, no *lex* and no *yacc*. There are many things to be improved, to be tested, but the core works, and works pretty well. 
+ - (e) The program now has an explicit kernel part, and two explicit cooperative threads: script & game. It makes much more sense. 
+  
+  
+ 
 
+## Future & TODOs  
+ 
+First, that game is ***NOT*** maintained. Patches are welcome, but the program is not actively developed. The point of that GiHub repository is to show off the work that we did - and it's still not a bad piece of software. 
+ 
+Regarding the future & TODOs, there are many things: 
+ - (i) Be able to walk a negative-curvature manifold (projective plan) would be great. 
+ - (ii) Refactor the game engine which still a bunch functions bypassing each other, and breaking assertions and invariants. A lot of work here. 
+ - (iii) Make it compile and work on every arch & OS. A lot of uninteresting work here. 
+ - (iv) Refine the DSLs. 
+ - (v) Make the airteapot work. 
+ - (vi) Make the ice map work. 
+ - (vii) Develop many side tools (maps design, 3DS, etc.) 
+ - (viii) Fix & improve the current narrative (when the game engine won't be based on a jenga-tower design, it should be easier to expand the narrative). 
+ 
+That said, once again, the game is not being currently developed. Do not expect any improvement for the upcoming next twenty years.  
+ 
+For information, when we presented the game at the InterENS, the game was a jenga-tower. It's so much better now. 
+ 
+Thanks!! :smile: 
 
-
+And we all love you. :kissing_heart: 
 
  
 
