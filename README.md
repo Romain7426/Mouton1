@@ -49,7 +49,7 @@ Then, the game depends on [SDL](http://www.libsdl.org), [SDL_image](http://www.l
  
 Then, the game was compiled with gcc and clang. It might work with other compilers, but we can't know for sure. 
  
-Then, this repository is the main repository - we have small sub-projects that need to be compiled first: 
+Then, this repository is the main repository - there are small sub-projects that need to be compiled first: 
  - https://github.com/Romain7426/Mouton1-anime 
  - https://github.com/Romain7426/Mouton1-nonanime 
  - https://github.com/Romain7426/Mouton1-carte 
