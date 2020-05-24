@@ -50,6 +50,8 @@ end
 procedure village_chargement();
 begin
 
+   //writeln('village_chargement'); 
+   
    if a_tue_boss then 
    begin 
 	 //{on prépare la fête}
@@ -117,6 +119,7 @@ end;
 procedure village_entree_carte();
   var i:integer;
 begin
+   //writeln('village_entree_carte'); 
    if a_tue_boss then ymca();
 end;
 
@@ -155,30 +158,37 @@ begin
    boss.nom:= "boss";
 end; 
 
-procedure prendre_clef();
+procedure prendre_clef(); 
 var i :  integer; 
-begin
-   Writeln(Perso, " : Cool !! J'ai gagné une clef !!");
-   Wait(100);
-   Camera->defaut();
-   Musique("secte.mid");
-  
-   AjouterAnime("homme_g", "homme_bizarre.anime");
-   AjouterAnime("homme_d", "homme_bizarre.anime");
-   AjouterAnime("homme_rien", "homme_bizarre.anime");
+begin 
+   Writeln(Perso, " : Cool !! J'ai gagné une clef !!"); 
+   Wait(5); 
+   Camera->defaut(); 
+   Camera->Zoom(0.75);
    
-   homme_g -> setposition(18.0, 8.0, 2);
-   homme_rien -> setposition(19.0, 8.0, 2);
-   homme_d -> setposition(20.0, 8.0, 2);
+   Musique("secte.mid"); 
    
-   homme_g -> deplacer(18.0, 18.0, 2);
-   homme_rien -> deplacer(19.0, 18.0, 2);
-   homme_d -> deplacer(20.0, 18.0, 2);
-    
-   Waitfor(homme_g);
+   AjouterAnime("homme_g"   , "homme_bizarre.anime"); 
+   AjouterAnime("homme_d"   , "homme_bizarre.anime"); 
+   AjouterAnime("homme_rien", "homme_bizarre.anime"); 
+   
+   homme_g    -> setposition(20.0, 15.0, 2); 
+   homme_rien -> setposition(21.0, 15.0, 2); 
+   homme_d    -> setposition(22.0, 15.0, 2); 
+   
+   homme_g    -> deplacer(20.0, 17.0, 2); 
+   homme_rien -> deplacer(21.0, 17.0, 2); 
+   homme_d    -> deplacer(22.0, 17.0, 2); 
+   
+   Waitfor(homme_g); 
    
    Writeln("Homme de droite : Polisson !!");
-   heros -> deplacer(20.0, 20.0, 2);
+
+   heros -> deplacer(21.2, 18.2, 2); 
+   Waitfor(heros); 
+   heros -> deplacer(21.2, 17.9, 2); 
+   Waitfor(heros); 
+   
    Writeln("Homme de gauche : Sacripan !!");
    Writeln("Homme de rien : Rends nous les clefs de la cuisine !! On a faim !!");
    Writeln("Homme de droite : Ah oui c'est vrai... d'ailleurs... ");
@@ -187,18 +197,21 @@ begin
    Writeln("Homme de rien : Mais pas pour nous !!!! Elle l'est pour ", nom_boss, "...");
    
    heros -> deplacer(15.0, 20.0, 2);
+   Waitfor(heros); 
    
    carte("niveau1_2.carte", 15.0, 20.0, 1);
-   heros -> setpositionz(15.0, 20.0, 200.0, 2);
-   for i := 0 to 100 do
-   begin
-      heros -> setpositionz(0.0, 0.0, -. 3.0, 1);
-      Wait(1);
-   end;
+   heros -> setpositionz(15.0, 20.0, 200.0, 2); 
+   Wait(1); 
+   for i := 0 to 10 do 
+   begin 
+      heros -> setpositionz(0.0, 0.0, -. 3.0, 1); 
+      Wait(1); 
+   end; 
    
    carte("niveau1_1.carte", 15.0, 25.0, 1);
    heros -> setpositionz(15.0, 25.0, 200.0, 2);
-   for i := 0 to 100 do
+   Wait(1); 
+   for i := 0 to 10 do
    begin
       heros -> setpositionz(0.0, 0.0, -. 3.0, 1);
       Wait(1);
@@ -212,7 +225,8 @@ begin
    //{ chaman -> SetPosition(8.0, 10.0, 2);}
    
    heros -> setpositionz(6.0, 6.0, 200.0, 2);
-   for i := 0 to 50 do
+   Wait(1); 
+   for i := 0 to 10 do
    begin
       heros -> setpositionz(0.0, 0.0, -. 4.0, 1);
       Wait(1);
@@ -227,6 +241,12 @@ begin
    
    Musique("boss.mid");
    
+   
+end; 
+  
+procedure prendre_clef__X();
+var i :  integer; 
+begin
    //{chaman -> SupprimerObjet();}
   
 end;
@@ -333,9 +353,21 @@ begin
      end;
    
    
+   if false then 
+   begin 
    Writeln("Comme tu as gagné, tu peux aller faire un tour en avion avec Saint-Exupéry !!");
    musique("avion.mid");
    carte("tore.carte", 10.0, 10.0, 2);
+   end 
+   else 
+   begin 
+      pere_est_vivant := false;
+      a_la_potion := true;
+      chaman_la := false;
+      a_tue_boss := true;       
+      carte("foret.carte", 50.0, 60.0, 1);
+      writeln("Va au village!! Une surprise t'attendra...");
+   end; 
    
    
 end;
@@ -360,7 +392,7 @@ begin
    pere -> SetPosition (8.0, 5.0, 2);
    
    writeln("Homme de droite : On ne te le répétera pas deux fois... Tu sous-estimes les bénéfices de notre entreprise.");
-   writeln("Homme de gauche : Camarade, si tu colabores pas, Isidore souffrira avec toi...");
+   writeln("Homme de gauche : Camarade, si tu collabores pas, Isidore souffrira avec toi...");
 end;
 
 procedure conversationbis();
@@ -392,10 +424,10 @@ begin
    WaitFor(heros);
    
    writeln(Perso , ":  Chaman ! Chaman ! Mon père souffre, il me faut une potion.");
-   writeln("chaman : Ou sont localisées ses douleurs ?"); 
+   writeln("chaman : Où sont localisées ses douleurs ?"); 
    writeln(Perso, " : Elles sont abdominales.");
    writeln("chaman : Comment sont elles ?");
-   writeln(Perso, " : Elles sont abominables. la potion coutera chère ?");
+   writeln(Perso, " : Elles sont abominables. la potion coûtera chère ?");
    writeln("chaman : Oh les potions sont abordables.");
    writeln("chaman : Mais ton père est un bon ami.");
    writeln("chaman : Vous êtes adorables.");
@@ -421,7 +453,7 @@ begin
    writeln("Bob : Ouais, enfin, you know what I mean quoi ! In english QUOI !");
    writeln("Brigitte : Je suis triste (enfin un peu).");
    writeln("Brigitte (à elle même) : Qu'est ce qu'il est relou ce type.");
-   writeln("Juliette : Snif. Tu saurais pas ou est Roméo ?");
+   writeln("Juliette : Snif. Tu saurais pas où est Roméo ?");
    writeln(Perso, " : ..");
    writeln(Perso, " : ...");
    writeln(Perso, " : ....");
@@ -609,7 +641,7 @@ end;
 
 const original = true;
    
-procedure debut_drague();
+procedure debut_donut();
   var i:integer;
 begin
    //{Début du jeu : dehors ***********************************************************************************}
@@ -623,23 +655,31 @@ begin
    if original then
       readln(Perso);
    else
-      Perso := "Vladimir";
-
-
+      Perso := "Vladimir"; 
+   
+   
    writeln("Hello ", Perso,"!", newline, newline, "Le jeu commence par une cinématique...");
+end; 
+
+procedure debut_cinematique();
+  var i:integer;
+begin
+   carte("village.carte", 19.0, 11.0, 1); 
+   Camera -> Desolidariser(); 
+   Camera -> SetPosition(15.0, 20.0, 10.0, absolu); 
+   Camera -> Rotate(180.0, -. 10.0, 0.0, absolu); 
+   //{Camera -> Rotate(10.0, -. 0.0, 0.0, relatif);} 
+   Camera -> Zoom(4.0); 
+   //{writeln("Fuck 1");} 
    
-   Camera -> Desolidariser();
-   Camera -> SetPosition(15.0, 20.0, 10.0, absolu);
-   Camera -> Rotate(180.0, -. 10.0, 0.0, absolu);
-   //{Camera -> Rotate(10.0, -. 0.0, 0.0, relatif);}
-   Camera -> Zoom(4.0);
-   //{writeln("Fuck 1");}
-   carte("village.carte", 19.0, 11.0, 1);
+   //writeln("Fuck 2"); 
+   //writeln("Nom de la carte chargée: '", nomcarte(), "'"); 
+   //writeln("Fuck 3"); 
+end; 
    
-   //writeln("Fuck 2");
-   //writeln("Nom de la carte chargée: '", nomcarte(), "'");
-   //writeln("Fuck 3");
-   
+procedure debut_drague();
+  var i:integer;
+begin
    Musique("amour.mid");
    
    bob -> SupprimerObjet();
@@ -705,7 +745,7 @@ begin
    CameraDemiTourNeg();
 
    Writeln(Perso, " : Ni brigand, ni pirate... Ah, y'a tant d'hommes que je ne suis pas. Mais je veux t'aimer comme on ne t'a jamais aimé.");
-   Writeln("Ou tu iras j'irai. Quoi que tu fasses l'amour est partout ou tu regardes. Tu sais, je t'aimais, je t'aime et je t'aimerai.");
+   Writeln("Où tu iras j'irai. Quoi que tu fasses l'amour est partout où tu regardes. Tu sais, je t'aimais, je t'aime et je t'aimerai.");
    Writeln("Brigitte : Moi aussi je t'aime mais pas d'amour mais quoi qu'il arrive, je resterai ta meilleure amie.");
    
    for i := 0 to 50 do
@@ -755,18 +795,22 @@ begin
    WaitFor(heros);
    heros -> Deplacer(5.0,13.0,2);
    WaitFor(heros);
-
+   
    musique("");
    //{il s'endort puis se réveille}
    carte("", 5.0, 13.0, 1);
    Wait(30);
+end;
+
+procedure debut_pere_reveil();
+begin
    SetTemps(0.0);
    musique("mal.mid");
    carte("chezmoi.carte", 5.0, 13.0, 1);
    AjouterAnime(pere,"heros.anime");
    pere -> SetPosition (8.0, 5.0, 2);
    //{**t'y vas *****Cinématique}
-
+   
    Camera->Defaut();
    writeln("AAAAAAAAHHHHHHH... OUILLLLLLLLLEEE......");
    heros -> Deplacer(8.0,13.0,2);
@@ -788,8 +832,23 @@ end;
 
 procedure debutvrai();
 begin
-   SetTemps(0.5);
+   BloquerTemps(); 
+   SetTemps(0.5); 
+   //debut_donut(); 
+   //debut_cinematique(); 
+   //debut_drague(); 
+   //debut_pere(); 
+   debut_pere_reveil(); 
+   DebloquerTemps(); 
+   Camera->Solidariser();
+   Camera->Zoom(1.0);
+   Camera->Defaut();
+end; 
+
+procedure debutvrai_X();
+begin
    BloquerTemps();
+   SetTemps(0.5);
    debut_drague();
    debut_pere();
    DebloquerTemps();
@@ -942,6 +1001,15 @@ begin
    REPONSES[1]:="Et bien qu'est-ce que tu attends va voir le chaman";
    REPONSES[2]:="Non mais un peu de respect s'il te plaît !";
 
+if false then 
+begin 
+   writeln('REPONSES[-1] = ', REPONSES[-1]); 
+   writeln('REPONSES[ 0] = ', REPONSES[ 0]); 
+   writeln('REPONSES[ 1] = ', REPONSES[ 1]); 
+   writeln('REPONSES[ 2] = ', REPONSES[ 2]); 
+end
+else 
+begin 
    if pere_est_vivant then
      begin 
        writeln("Boujour ",Perso, "!");
@@ -965,6 +1033,7 @@ begin
 	    writeln("Bob : On n'a rien pu faire, il est décédé. Quand on est arrivé, il était encore vivant. C'est terrible.");
 	 end;
      end;
+end; 
 end;
 
 

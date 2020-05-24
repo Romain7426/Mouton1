@@ -182,7 +182,8 @@ CFLAGS_NO_CLANG := -Wno-unsequenced -Wno-pointer-sign
 CFLAGS_GCC := -ftrapv -fPIC -ggdb3 -pg #-Q 
 CFLAGS_NO_GCC := -Wno-nested-externs -Wno-unknown-pragmas  -Wno-uninitialized -Wno-undef -Wno-fatal-errors -Wno-error 
 CFLAGS_PCC := -pg -g  
-GCC_FLAGS_FOR_DEBUG := -O0 -Wall -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -Wfatal-errors -Werror-implicit-function-declaration -fno-exceptions -fstack-check -Werror -W  -Wparentheses -fverbose-asm -fno-omit-frame-pointer -ffreestanding -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions  -feliminate-unused-debug-types  -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type  -Wstrict-prototypes -Wpacked -Wcast-qual -Wcast-align -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas $(CFLAGS_NO) # -Wmissing-prototypes -Wmissing-declarations 
+# -fPIC => RL: Allows the object file to be then made as shared-object files (that can be dynamically loaded by the user). 
+GCC_FLAGS_FOR_DEBUG := -fPIC -O0 -Wall -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -Wfatal-errors -Werror-implicit-function-declaration -fno-exceptions -fstack-check -Werror -W  -Wparentheses -fverbose-asm -fno-omit-frame-pointer -ffreestanding -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions  -feliminate-unused-debug-types  -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type  -Wstrict-prototypes -Wpacked -Wcast-qual -Wcast-align -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas $(CFLAGS_NO) # -Wmissing-prototypes -Wmissing-declarations 
 ifeq ($(CC),clang) 
 GCC_FLAGS_FOR_DEBUG := $(GCC_FLAGS_FOR_DEBUG) $(CFLAGS_CLANG) $(CFLAGS_NO_CLANG) 
 endif
@@ -257,8 +258,10 @@ SRC_H := $(filter-out liste,$(SRC_H))
 #OBJ := $(patsubst %,build/$(PROG)$(FLAVOR)--%.o, $(SRC_C) $(SRC_Y))
 OBJ_S := $(patsubst %,build/%.s, $(SRC_C) $(SRC_Y))
 OBJ := $(patsubst %,build/%.o, $(SRC_C) $(SRC_Y))
+OBJ_SO := $(patsubst %,build/%.so, $(SRC_C) $(SRC_Y))
 #LIB := build/$(PROG)$(FLAVOR).a
 LIB := build/$(PROG).a
+LIB_SO := build/$(PROG).so
 #BIN := build/$(PROG)$(FLAVOR).exe
 BIN := build/$(PROG).exe
 #BIN_STRIPPED := build/$(PROG)$(FLAVOR)_stripped.exe
@@ -334,9 +337,12 @@ build.sh:
 #	for i in $(SRC_CT); do \
 	  echo "text2cstring src/$$i 2>&1" >> $@; \
 	done;
+#	$(info  $(SRC_C) $(SRC_Y))
+#	$(info $(CC) $(CFLAGS) -c src)
 	for i in $(SRC_C) $(SRC_Y); do \
 	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o  2>&1" >> $@; \
 	done;
+#ifeq (0,1)
 #	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o -aux-info build/$$i.aux 2>&1" >> $@; 
 	echo "ar -r -c $(LIB) $(OBJ) 2>&1" >> $@
 	echo "ranlib $(LIB) 2>&1" >> $@
@@ -345,6 +351,7 @@ build.sh:
 	echo "rm -f run" >> $@
 	echo "ln -s $(BIN) run" >> $@
 	echo "chmod +x run" >> $@
+#endif
 	echo "" >> $@
 	chmod +x build.sh
 
@@ -353,7 +360,7 @@ build.sh:
 .PHONY: Makefile
 Makefile: 
 	echo "" > $@
-	echo "default: Makefile build run.sh run-gdb.sh $(BIN)" >> $@
+	echo "default: Makefile build run.sh run-gdb.sh $(BIN) $(LIB_SO)" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "clean:" >> $@
@@ -398,7 +405,7 @@ Makefile:
 #	echo "	ln -s $(BIN) run" >> $@
 	echo "" >> $@
 	echo "" >> $@
-	echo "run.sh: $(BIN)" >> $@
+	echo "run.sh: " >> $@
 	echo "	rm -f run.sh" >> $@
 	echo "	echo \"#/bin/sh\" >> run.sh" >> $@
 	echo "	echo \"cd build && ../$(BIN)\" >> run.sh" >> $@
@@ -409,10 +416,10 @@ Makefile:
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
-	echo "run-gdb.sh: $(BIN)" >> $@
+	echo "run-gdb.sh: " >> $@
 	echo "	rm -f run-gdb.sh" >> $@
 	echo "	echo \"#/bin/sh\" >> run-gdb.sh" >> $@
-	echo "	echo \"cd build && gdb ../$(BIN)\" >> run-gdb.sh" >> $@
+	echo "	echo \"cd build && gdb -quiet -x ../.gdbinit ../$(BIN)\" >> run-gdb.sh" >> $@
 	echo "	echo \"\" >> run-gdb.sh" >> $@
 	echo "	chmod +x run-gdb.sh" >> $@
 	echo "" >> $@
@@ -427,12 +434,20 @@ Makefile:
 	echo "" >> $@
 	echo "$(BIN): $(LIB)" >> $@
 #	echo "	$(CC) -error-limit=1 -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
-	echo "	$(CC) -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+#	echo "	$(CC) -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+#	echo "	$(CC)  -Wl,\"--dynamic-list=main\",\"-v\"  -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+	echo "	$(CC)  -Wl,\"--dynamic-list=main\"  -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "$(LIB): $(OBJ)" >> $@
 	echo "	ar -r -c $(LIB) $(OBJ) 2>&1" >> $@
 	echo "	ranlib $(LIB) 2>&1" >> $@
+	echo "" >> $@
+	echo "" >> $@
+#	echo "$(LIB_SO): $(OBJ_SO)" >> $@
+#	echo "	$(CC) -shared -o $(LIB_SO) $(OBJ_SO) 2>&1" >> $@
+	echo "$(LIB_SO): $(OBJ) $(OBJ_SO)" >> $@
+	echo "	$(CC) -shared -o $(LIB_SO) $(OBJ) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
@@ -464,6 +479,7 @@ ifeq ($(SEPARATE_ASM),no)
 	      echo "build/$(file_o): src/$(file_c) $(wildcard src/*.h)" >> $@; \
 	      echo "	$(CC) $(CFLAGS) -c src/$(file_c) -o build/$(file_o)  2>&1" >> $@; \
 	      echo "" >> $@; \
+	      echo "" >> $@; \
 	    ) \
 	  ) \
 	)
@@ -488,6 +504,12 @@ endif
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
+	$(foreach file_noext,$(sort $(patsubst src/%.c,%,$(wildcard src/*.c)) $(patsubst src/%.y,%,$(wildcard src/*.y)) $(patsubst src/%.ct,%,$(wildcard src/*.ct))), \
+	  echo "build/$(file_noext).so: build/$(file_noext).o " >> $@; \
+	  echo "	$(CC) -shared build/$(file_noext).o -o build/$(file_noext).so  2>&1" >> $@; \
+	  echo "" >> $@; \
+	  echo "" >> $@; \
+	)
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@

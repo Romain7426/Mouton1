@@ -5,6 +5,8 @@
 #include "text.h" //pour enable2D
 //#include "camera.h" //pour initcamera
 #include "script_api.h"
+#include "015_game_events.h" 
+#include "010_game.h" 
 
 
 
@@ -81,7 +83,45 @@ bool CMoteurTeleportation__IsTeleportationEnCours(const CMoteurTeleportation * t
 
 
 void CMoteurTeleportation__Life(CMoteurTeleportation * this, CMap * * Map_ref, bool * EnVaisseau_ref, CBonhomme * * Hero_ref, bool * SCRIPT_SystemeRendMainAuScript_ref) {
-  if (this -> anim == 0) return;
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Map_ref = %p - EnVaisseau_ref = %p - Hero_ref = %p - SCRIPT_SystemeRendMainAuScript_ref = %p "   "\n", __func__, this, Map_ref, EnVaisseau_ref, Hero_ref, SCRIPT_SystemeRendMainAuScript_ref); 
+  
+  if (this -> anim <= 0) { 
+    *SCRIPT_SystemeRendMainAuScript_ref = true; 
+    return; 
+  }; 
+  
+#if 0 
+  if ((this -> anim == NB_ANIM2_TELEPORTATION) && (this -> zt -> destination_carte != NULL)  && (this -> zt -> destination_carte[0] != '\0')) { 
+    CMap__delete(*Map_ref); 
+    *Map_ref = NULL; 
+    
+    printf("Le moteur de téléportation charge la carte...\n");
+      
+    if (0 == strcmp(this -> zt -> destination_carte, "tore.carte")) {
+      printf("On est en vaisseau car on est sur tore.carte !!!\n");                         
+      *EnVaisseau_ref = true;
+    }
+    else {
+      *EnVaisseau_ref = false;
+      //  Camera.InitCamera();
+    }; 
+    
+    *Map_ref = CMap__make(this -> zt -> destination_carte, /*map_i*/0, /*map_j*/0, our_manifold, *EnVaisseau_ref);
+    CBonhomme * Hero = *Hero_ref; 
+    CPhysicalObj * aHero = &Hero -> parent1; 
+    //aHero -> SetPosition_vXY(aHero, this -> zt -> destination_position.x, this -> zt -> destination_position.y, mpABSOLU, *Map_ref); 
+    aHero -> SetPosition_vP3D(aHero, this -> zt -> destination_position, *Map_ref); 
+    if (aHero -> p.z < aHero -> z0) aHero -> p.z = aHero -> z0; 
+    Hero  -> SetDirection(Hero, this -> zt -> destination_direction); 
+    //aHero -> Acceleration_add_vXYZ(aHero, 0.0f, 0.0f, 200.0f); // RL: WHY??? // RL: The z-coordinate was not normalized... 
+    Hero  -> ViderOrdresDeplacement(Hero); 
+    
+    // FS: ne marche que si le changement de carte s'est effectué en dehors d'un script :) 
+    //RaiseEvenement(EVT_ChargementCarte); 
+    EvenementsModule -> Raise(EVT_ChargementCarte); 
+    
+  }; 
+#endif 
   
   this -> anim--;
   
@@ -91,22 +131,26 @@ void CMoteurTeleportation__Life(CMoteurTeleportation * this, CMap * * Map_ref, b
     
     (la boucle dans SCRIPT_ChangerDeCarte())
   */
-  if (this -> anim == 1) {
-    if (this -> zt -> destination_carte != NULL) {
-      //RaiseEvenement(EVT_EntreeSurCarte);
-      EvenementsModule -> Raise(EVT_EntreeSurCarte);
+  if (this -> anim == 1) { 
+    if (this -> zt -> destination_carte != NULL) { 
+      //RaiseEvenement(EVT_EntreeSurCarte); 
+      //EvenementsModule -> Raise(EVT_EntreeSurCarte); 
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Map_ref = %p - EnVaisseau_ref = %p - Hero_ref = %p - SCRIPT_SystemeRendMainAuScript_ref = %p "   "\n", __func__, this, Map_ref, EnVaisseau_ref, Hero_ref, SCRIPT_SystemeRendMainAuScript_ref); 
+      //Game_Events_Raise(GAME_EVENTS__MAP__LOADED_READY); 
     }; 
-    
-    *SCRIPT_SystemeRendMainAuScript_ref = true;
+    *SCRIPT_SystemeRendMainAuScript_ref = true; 
   }; 
-
-};
+  
+}; 
 
 
 void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Map_ref, bool * EnVaisseau_ref, CBonhomme * * Hero_ref, const riemann_t * our_manifold) {
-  if (this -> anim == 0) return;
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this = %p - Map_ref = %p - EnVaisseau_ref = %p - Hero_ref = %p - our_manifold = %p "   "\n", __func__, this, Map_ref, EnVaisseau_ref, Hero_ref, our_manifold); 
   
-  if (this -> anim >= NB_ANIM2_TELEPORTATION) {
+  if (this -> anim == 0) return;
+
+
+#if 1  
     // RL: Why that thing is in render??? Good Lord. 
     if ((this -> anim == NB_ANIM2_TELEPORTATION) && (this -> zt -> destination_carte != NULL)  && (this -> zt -> destination_carte[0] != '\0')) { 
       CMap__delete(*Map_ref); 
@@ -149,7 +193,9 @@ void CMoteurTeleportation__Render(const CMoteurTeleportation * this, CMap * * Ma
       
       
     }
+#endif 
 
+  if (this -> anim >= NB_ANIM2_TELEPORTATION) {
 #if 1
     glEnable2D(); {
       glDisable(GL_TEXTURE_2D);

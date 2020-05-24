@@ -19,7 +19,13 @@ CAffichageMainPierre * CAffichageMainPierre_make(void) {
 }; 
 
 
-void CAffichageMainPierre__Render(const CAffichageMainPierre * this, const float y, const float FacteurCompression) { //const CMap * Map) {
+void CAffichageMainPierre__Render(const CAffichageMainPierre * this, const float y, const float FacteurCompression) { //const CMap * Map) { 
+#if 0 
+  { 
+    int * a = NULL; 
+    *a = 1; 
+  }; 
+#endif 
   #define MAIN_PIERRE_X 550
   #define MAIN_PIERRE_Y 340  
   #define PIERRE_X 30

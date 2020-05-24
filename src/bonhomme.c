@@ -260,6 +260,8 @@ void CBonhomme__Life(CBonhomme * this) {
   
   o -> Life(o); 
   
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " this = '%s' "   "\n", __func__, this -> filename); 
+
   // FS: on anime le pantin en donnant les angles des membres
   for (int i = 0; i < p -> GetNbMembres(p); i++) {
     p -> SetAngleMembre(p, i, p -> Membre[i].angle_max * this -> iangle / MAX_IND_ANGLE); 
@@ -312,11 +314,23 @@ int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * dir, const cha
 #define LOG_SUFF ".log"
     char anime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1];
     strcat(strcat(strcpy(anime_log, LOGDIR), filename), LOG_SUFF);
-    anime_data = anime__make_from_file(anime_fullpath, anime_log); 
-    if (NULL == anime_data) { 
-      messerr("ERREUR: Le fichier de description de l'objet animé n'a pas pu être lu et/ou analysé: '%s'" "\n", anime_fullpath); 
-      messerr("        Pour plus d'information, veuillez vous reporter au compte-rendu rendant compte de cette tentative échouée: '%s'" "\n", anime_log); 
-      return -1; 
+    for(;;) { 
+      anime_data = anime__make_from_file(anime_fullpath, anime_log); 
+      if (NULL != anime_data) { break; }; 
+//      if (NULL == anime_data) { 
+      {
+	messerr("ERREUR: Le fichier de description de l'objet animé n'a pas pu être lu et/ou analysé: '%s'" "\n", anime_fullpath); 
+	messerr("        Pour plus d'information, veuillez vous reporter au compte-rendu rendant compte de cette tentative échouée: '%s'" "\n", anime_log); 
+	messerr("        Voulez-vous réessayer?" "\n"); 
+	{
+	  char c; 
+	  const int nb_read = read(stdin_d, &c, 1); 
+	  if (0 == nb_read) { continue; }; 
+	  if (c == 'n') { return -1; }; 
+	  continue; 
+	}; 
+	return -1; 
+      }; 
     }; 
   }; 
   
@@ -378,11 +392,11 @@ CBonhomme * CBonhomme__make(const char * filename) {
   this -> EstInvisible = CBonhomme__EstInvisible;
   this -> DevenirInvisible = CBonhomme__DevenirInvisible;
   this -> Avancer = CBonhomme__Avancer;
-  this -> AjouterOrdresDeplacement_vP = CBonhomme__AjouterOrdresDeplacement_vP;
+  this -> AjouterOrdresDeplacement_vP  = CBonhomme__AjouterOrdresDeplacement_vP;
   this -> AjouterOrdresDeplacement_vXY = CBonhomme__AjouterOrdresDeplacement_vXY;
-  this -> TraiterOrdresDeplacement = CBonhomme__TraiterOrdresDeplacement;
-  this -> ViderOrdresDeplacement = CBonhomme__ViderOrdresDeplacement;
-  this -> IsSoumisADesOrdres = CBonhomme__IsSoumisADesOrdres;
+  this -> TraiterOrdresDeplacement     = CBonhomme__TraiterOrdresDeplacement;
+  this -> ViderOrdresDeplacement       = CBonhomme__ViderOrdresDeplacement;
+  this -> IsSoumisADesOrdres           = CBonhomme__IsSoumisADesOrdres;
 
   this -> iangle = 0; 
   this -> sens_iangle = 1; 
@@ -546,9 +560,9 @@ void CBonhomme__AfficherPantin(const CBonhomme * this, const CPantin * pantin, c
 void CBonhomme__Render(const CBonhomme * this, const float lattice_to_map_scale_factor__x, const float lattice_to_map_scale_factor__y, const float lattice_to_map_scale_factor__z, const riemann_t * our_manifold, const CCamera * Camera) { 
   
   if (this -> invisible_etape % 2 == 1) return; 
-
+  
 #if 0
-  //fprintf(stderr, "HERE\n");
+  //fprintf(stderr, "HERE\n"); 
   if (0 != strcmp(filename, "./heros.anime")) {
     fprintf(stderr, "Bonhomme: Rendering: %s\n", filename);
     fflush(NULL);
@@ -566,7 +580,7 @@ void CBonhomme__Render(const CBonhomme * this, const float lattice_to_map_scale_
     fflush(NULL);
     count++; 
   }; 
-#endif
+#endif 
   //o -> Render(o, lattice_width, lattice_height, our_manifold); 
   o -> Render(o, lattice_to_map_scale_factor__x, lattice_to_map_scale_factor__y, lattice_to_map_scale_factor__z, our_manifold); 
   
@@ -578,8 +592,33 @@ void CBonhomme__Render(const CBonhomme * this, const float lattice_to_map_scale_
 #if 1 
       // RL: This is a change of origin and a change of the tangent vector basis: local coordinates. 
       our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, o -> p.x * lattice_to_map_scale_factor__x, o -> p.y * lattice_to_map_scale_factor__y, o -> p.z  * lattice_to_map_scale_factor__z); 
+
+
       glScalef(lattice_to_map_scale_factor__x, lattice_to_map_scale_factor__y, lattice_to_map_scale_factor__z); 
       glScalef(0.05f, 0.05f, 0.05f); // RL: Constant factor. Figured out of the blue. 
+#if 0 
+  glColor4f(1.0f, 0.0f, 0.0f, 1.0f); 
+  glBegin(GL_LINES); { 
+    for (int xx = 0; xx <= 1; xx++) { 
+      for (int yy = 0; yy <= 1; yy++) { 
+        for (int zz = 0; zz <= 1; zz++) { 
+          glVertex3f(-0.5f          , -0.5f + yy*1.0f, 0.0f + zz*1.0f); 
+          glVertex3f(-0.5f +    1.0f, -0.5f + yy*1.0f, 0.0f + zz*1.0f); 
+	  
+          glVertex3f(-0.5f + xx*1.0f, -0.5f          , 0.0f + zz*1.0f); 
+          glVertex3f(-0.5f + xx*1.0f, -0.5f +    1.0f, 0.0f + zz*1.0f); 
+	  
+          glVertex3f(-0.5f + xx*1.0f, -0.5f + yy*1.0f, 0.0f          ); 
+          glVertex3f(-0.5f + xx*1.0f, -0.5f + yy*1.0f, 0.0f +    1.0f); 
+        }; 
+      }; 
+    }; 
+  } glEnd(); 
+  glColor4f(1.0f, 1.0f, 1.0f, 1.0f); 
+#endif 
+
+
+
 #else 
       //Map -> MatricePour2D(Map, o -> p.x, o-> p.y, o -> p.z); 
       our_manifold -> MatricePour2D(our_manifold, /*map_i*/0, /*map_j*/0, o -> p.x / (float) lattice_width, o -> p.y / (float) lattice_height, o -> p.z); 
@@ -588,6 +627,8 @@ void CBonhomme__Render(const CBonhomme * this, const float lattice_to_map_scale_
       glScalef(1.0f / lattice_width, 1.0f / lattice_height, 1.0f / lattice_depth); 
       glScalef(0.05f, 0.05f, 40.0f); // RL: Constant factor. Figured out of the blue. 
 #endif 
+
+
       
       
       //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "    this -> Direction = %d"  "\n", __func__, this -> Direction); 
@@ -630,7 +671,8 @@ void CBonhomme__OrdreDeplacement_clear(CBonhomme * this) {
 
 COrdreDeplacement * CBonhomme__OrdreDeplacement_head(CBonhomme * this) {
   if (0 == this -> od_nb) return NULL; 
-  COrdreDeplacement * od = this -> od_array + this -> od_tail; 
+  //COrdreDeplacement * od = this -> od_array + this -> od_tail; 
+  COrdreDeplacement * od = this -> od_array + this -> od_head; 
   return od; 
 }; 
 
@@ -649,14 +691,16 @@ void CBonhomme__ViderOrdresDeplacement(CBonhomme * this) {
 };
 
 
-void CBonhomme__AjouterOrdresDeplacement_vP(CBonhomme * this, const TPoint3D pos) {
-  //printf("CBonhomme__AjouterOrdresDeplacement(TPoint3D pos)\n");   
-  //printf("On ajoute un ordre de déplacement au bonhomme %p vers le point (%f, %f, %f).\n", this, pos.x, pos.y, pos.z);
-
-#define epsilon 0.2f
+void CBonhomme__AjouterOrdresDeplacement_vP(CBonhomme * this, const TPoint3D pos) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " >>> this = %p - pos.x = %f - pos.y = %f "   "\n", __func__, this, pos.x, pos.y); 
+  //printf("CBonhomme__AjouterOrdresDeplacement(TPoint3D pos)\n"); 
+  //printf("On ajoute un ordre de déplacement au bonhomme %p vers le point (%f, %f, %f).\n", this, pos.x, pos.y, pos.z); 
+  
+#define epsilon 0.2f 
   const CPhysicalObj * o = &this -> parent1; 
   
-  if (fabs(o -> p.x - pos.x) > epsilon) {
+  
+  if (fabsf(o -> p.x - pos.x) > epsilon) { 
     COrdreDeplacement * od = CBonhomme__OrdreDeplacement_make(this);
     od -> destination = pos; 
     if (o -> p.x  < pos.x) 
@@ -665,24 +709,28 @@ void CBonhomme__AjouterOrdresDeplacement_vP(CBonhomme * this, const TPoint3D pos
       od -> direction =  PROFIL_VERS_G; 
     
     //printf("    minidéplacement de direction %i\n", od -> direction); 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " ---- this = %p - destination.x = %f - destination.y = %f  "   "\n", __func__, this, od -> destination.x, od -> destination.y); 
   }; 
    
   if (fabs(o -> p.y - pos.y) > epsilon) {
     COrdreDeplacement * od = CBonhomme__OrdreDeplacement_make(this);
     od -> destination = pos;
-    if (o -> p.y  < pos.y)
+    if (o -> p.y < pos.y)
       od -> direction =  DOS;
     else
       od -> direction =  FACE;     
     
     //printf("    puis minidéplacement de direction %i\n", od -> direction);
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " ---- this = %p - destination.x = %f - destination.y = %f  "   "\n", __func__, this, od -> destination.x, od -> destination.y); 
   }; 
+  
   
   // rem: on s'en fout de pos.z…
 };
 
 
-void CBonhomme__AjouterOrdresDeplacement_vXY(CBonhomme * this, const float x, const float y, const TMethodePlacement mp) {
+void CBonhomme__AjouterOrdresDeplacement_vXY(CBonhomme * this, const float x, const float y, const TMethodePlacement mp) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " >>> this = %p - x = %f - y = %f - mp = %d "   "\n", __func__, this, x, y, (int) mp); 
   TPoint3D pos; 
    
   if (mp == mpABSOLU) {
@@ -698,18 +746,22 @@ void CBonhomme__AjouterOrdresDeplacement_vXY(CBonhomme * this, const float x, co
 
 
 void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, const bool MoteurPhysiqueActif) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " >>> this = %p - Map = %p - MoteurPhysiqueActif = %s "   "\n", __func__, this, Map, MoteurPhysiqueActif ? "TRUE":"FALSE"); 
   COrdreDeplacement * od = CBonhomme__OrdreDeplacement_head(this); 
   if (od == NULL) { return; }; 
   //printf("ordre de déplacement qu'on traite : %p (%i) \n", od, od -> direction); 
-
+  
+  
   CPhysicalObj * o = &this -> parent1; 
   
 #define epsilon 0.2f 
   bool arrived_huh;
   
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " >>> this = '%s' - Map = %p - MoteurPhysiqueActif = %s - od -> destination.x = %f - o -> p.x = %f - od -> destination.y = %f - o -> p.y = %f -  "   "\n", __func__, this -> filename, Map, MoteurPhysiqueActif ? "TRUE":"FALSE", od -> destination.x, o -> p.x, od -> destination.y, o -> p.y) ; 
+  
   switch (od -> direction) {
-  case DOS          : case FACE         : arrived_huh = fabs(od -> destination.y - o -> p.y) < epsilon; break; 
-  case PROFIL_VERS_G: case PROFIL_VERS_D: arrived_huh = fabs(od -> destination.x - o -> p.x) < epsilon; break; 
+  case DOS          : case FACE         : arrived_huh = fabsf(od -> destination.y - o -> p.y) < epsilon; break; 
+  case PROFIL_VERS_G: case PROFIL_VERS_D: arrived_huh = fabsf(od -> destination.x - o -> p.x) < epsilon; break; 
   default: arrived_huh = true; assert(false); break; 
   }; 
 
@@ -738,9 +790,9 @@ void CBonhomme__TraiterOrdresDeplacement(CBonhomme * this, const CMap * Map, con
 
 
 
-bool CBonhomme__IsSoumisADesOrdres(const CBonhomme * this) {
-  return (0 == this -> od_nb); 
-};
+bool CBonhomme__IsSoumisADesOrdres(const CBonhomme * this) { 
+  return (0 != this -> od_nb); 
+}; 
 
 
 

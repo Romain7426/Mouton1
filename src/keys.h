@@ -88,9 +88,15 @@ extern CKey KeyF12;
 
 #define KEY_MENU_SYSTEME (KeyEchap.Appuye(&KeyEchap))
 
+#if 1 
+#define KEY_ACTION1 (KeyI.Appuye(&KeyO))
+#define KEY_ACTION2 (KeyO.Appuye(&KeyL)) // || KeyL.Appuye())
+#define KEY_ACTION3 (KeyP.Appuye(&KeyP))
+#else 
 #define KEY_ACTION1 (KeyI.Appuye(&KeyI))
 #define KEY_ACTION2 (KeyO.Appuye(&KeyO)) // || KeyL.Appuye())
 #define KEY_ACTION3 (KeyP.Appuye(&KeyP))
+#endif 
 
 #define KEY_ACTIVEDESACTIVEMOTEURPHYSIQUE (KeyF12.Appuye(&KeyF12))
 

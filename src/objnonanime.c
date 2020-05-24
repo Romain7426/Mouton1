@@ -43,9 +43,13 @@ void CObjNonAnime__delete(CObjNonAnime * this) {
 };
 
 CObjNonAnime * CObjNonAnime__make(const char * filename) {
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   CObjNonAnime * this = CObjNonAnime__make_core(); 
 
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   CPhysicalObj__make_aux(&this -> parent, CPhysicalObj_subtype_CObjNonAnime, filename); 
+
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
 
   this -> resobj3ds = NULL; 
   this -> angleZ    = 0.0f; 
@@ -57,7 +61,9 @@ CObjNonAnime * CObjNonAnime__make(const char * filename) {
 
   
   int ret;
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   ret = this -> ReadDescriptionFile(this, NONANIMESDIR, filename);
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
 
   if (0 == ret) { 
     //printf("Création de l'objet non-animé réalisée avec succès!!" "\n"); 
@@ -131,7 +137,9 @@ void CObjNonAnime__SetAngleZ(CObjNonAnime * this, const float thetaZ) {
 
 
 int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, const char * filename) { 
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   nonanime_t * nonanime_data = NULL; 
+  CObjActionnable * this_action =  this -> parent.actions; 
   
   { 
     char nonanime_fullpath[strlen(dir) + strlen(filename) + 1]; 
@@ -139,7 +147,10 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
 #define LOG_SUFF ".log" 
     char nonanime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1]; 
     strcat(strcat(strcpy(nonanime_log, LOGDIR), filename), LOG_SUFF); 
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
     nonanime_data = nonanime_make_from_file(nonanime_fullpath, nonanime_log); 
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
+    if (nonanime_data == NULL) { return -1; }; 
   }; 
   
   this -> parent.SetDimension(&this -> parent, nonanime_data -> choc_longueur, nonanime_data -> choc_largeur, nonanime_data -> choc_hauteur); 
@@ -148,10 +159,19 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
   this -> parent.Fixe_huh         = nonanime_data -> fixe; 
   this -> parent.pvmax            = nonanime_data -> vie; 
   
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   if (0 < nonanime_data -> elements_nb) { 
     this -> resobj3ds = C3DS__make(nonanime_data -> elements_image[0]); 
   }; 
+  
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   if (NULL == this -> filename) this -> filename = strcopy(filename); 
+  
+  for (int i = 0; i < nonanime_data -> actions_nb; i++) {
+    this_action -> AjouterAction(this_action, nonanime_data -> actions_array_affichage[i], nonanime_data -> actions_array_icone[i], nonanime_data -> actions_array_gestionnaire_fichier[i], nonanime_data -> actions_array_gestionnaire_proc[i]); 
+  };  
+  
+  
   
   nonanime_delete(nonanime_data); 
   

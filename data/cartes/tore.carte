@@ -2,6 +2,12 @@ physique {
  /* Pour l'instant il n'y a rien dans la physique d'une carte. */
 }
 gameplay {
+ longueur := 64; 
+ largeur  := 32; 
+ recouvrement longueur := 2; 
+ recouvrement largeur  := 1; 
+
+
  arme := vrai ; // A-t-on le droit de porter une arme ?
  musique := "avion.mid"; // musique de fond
  niveau eau := 45.8; // niveau de l'eau
@@ -60,12 +66,12 @@ graphique {
  }
 //vert fonc'e
  texture herbe {
-  image := "mur03.jpg";
+  image := "MUR03.JPG";
   indice := 32768;
  }
 //jaune
  texture desert {
-  image := "bois02.jpg";
+  image := "BOIS02.JPG";
   indice := 65535;
  }
 //rouge
@@ -80,12 +86,12 @@ graphique {
  }
 //bleu
  texture route {
-  image := "bois03.jpg";
+  image := "BOIS03.JPG";
   indice := 16711680;
  }
 //cyan
  texture route {
-  image := "bois04.jpg";
+  image := "BOIS04.JPG";
   indice := 16776960;
  }
 objet poteau1 {

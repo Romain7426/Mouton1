@@ -3,7 +3,13 @@
 # C'est encore un commentaire.
 physique {
 }
+
 gameplay {
+ longueur := 32; 
+ largeur  := 32; 
+ recouvrement longueur := 1; 
+ recouvrement largeur  := 1; 
+
  arme := vrai ; 
  musique := "boss.mid"; 
  niveau eau := 0.0; 
@@ -13,6 +19,7 @@ gameplay {
   traitement := { fichier := "script.pml"; procedure := "tue_boss"; } ;
  }
 }
+
 graphique {
  fichier de zone de niveau := "niveau1_0.niveau.png";
  fichier de zone de texture := "niveau1_0.textures.png";

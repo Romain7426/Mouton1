@@ -122,6 +122,10 @@ CCamera * CCamera__make(void) {
   return CCamera__make_aux(this); 
 }; 
 
+void CCamera__delete(CCamera * this) { 
+  free(this); 
+}; 
+
 
 void CCamera__SolidariserAuHeros(CCamera * this) {
   this -> solidaire_au_heros = true; 
@@ -198,6 +202,7 @@ void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const float lat
   //const float dist_factor = (fabsf(cosf(this -> angleXY)) * lattice_to_map_scale_factor__x + fabsf(sinf(this -> angleXY)) * lattice_to_map_scale_factor__y) * fabsf(sinf(this -> angleZ)) + fabsf(cosf(this -> angleZ)) * lattice_to_map_scale_factor__z; 
   //const float dist_factor = (powf(cosf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__x + powf(sinf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__y); 
   const float dist_factor = (powf(cosf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__x + powf(sinf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__y) * powf(sinf(this -> angleZ), 2.0f) + powf(cosf(this -> angleZ), 2.0f) * lattice_to_map_scale_factor__z; 
+  //const float dist_factor = (ldexpf(cosf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__x + ldexpf(sinf(this -> angleXY), 2.0f) * lattice_to_map_scale_factor__y) * ldexpf(sinf(	this -> angleZ), 1) + ldexpf(cosf(this -> angleZ), 1) * lattice_to_map_scale_factor__z; 
   this -> map__dist = dist_factor * this -> lattice__dist; 
   const float map_b = dist_factor * lattice_b; 
   
@@ -208,7 +213,7 @@ void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const float lat
   //our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map__target_position.x, this -> map__target_position.y, this -> map__target_position.z, /*dist*/b, /*angleXY*/this -> angleXY, /*angleZ*/this -> angleZ, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
   our_manifold -> camera__LookAt__Compute(our_manifold, /*map_i*/0, /*map_j*/0, this -> map__target_position.x, this -> map__target_position.y, this -> map__target_position.z, /*map_dist*/map_b, /*angleXY*/this -> angleXY, /*angleZ*/this -> angleZ, &this -> manifold__dist, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
   
-  this -> manifold__dist *= this -> lattice__dist / lattice_b; 
+  //this -> manifold__dist *= this -> lattice__dist / lattice_b; 
   
   if (this -> anim > 0) this -> anim --; 
 }; 

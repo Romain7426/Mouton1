@@ -34,11 +34,16 @@ void CAffichageCoeur_delete(CAffichageCoeur * this) {
 }; 
 
 void CAffichageCoeur__InformerNbPV(CAffichageCoeur * this, int inpv) {
-  if (pv == inpv) return;
-  if (JeSuisEnTrainDEtreAnimeDsl) return;
+  if (pv == inpv) return; 
+  if (JeSuisEnTrainDEtreAnimeDsl) return; 
   
-  message("Coeur : InformerNbPV(%i) (alors que l'ancien pv vaut %i)\n", inpv, pv);
-
+  message("Coeur : InformerNbPV(%i) (alors que l'ancien pv vaut %i)\n", inpv, pv); 
+  
+  if (pv < inpv) { 
+    pv = inpv; 
+    return; 
+  }; 
+  
   if (pv > inpv) {
     message("Coeur : %i, %i\n", inpv / 7, pv / 7 - 1);
     

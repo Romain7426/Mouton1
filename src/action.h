@@ -41,8 +41,9 @@ extern void CObjActionnable__AjouterAction(struct CObjActionnable * this, const 
   
 
 struct CScriptLauncher {
-  char * proc;
-  CPascal * resPascal;
+  char * fichier; 
+  char * proc; 
+  CPascal * resPascal; 
   
   void (* Execute)(CScriptLauncher * this);
   void (* init_step)(CScriptLauncher * this);

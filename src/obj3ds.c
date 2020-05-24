@@ -44,6 +44,7 @@ static void obj3ds_dico__release(const int i) {
 // ***** OBJECT ***** 
 
 static int C3DS__load(C3DS * this, const char * filename) { 
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   bool b3dModelLoaded;
   
   //printf("Importation du fichier 3DS '%s'" "\n", filename); 
@@ -53,28 +54,38 @@ static int C3DS__load(C3DS * this, const char * filename) {
     this -> g_Texture[i] = NULL; 
   }; 
   
+
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
   // RL: Reading the file. 
   { 
     CLoad3DS g_Load3ds; 
     //CLoad3DS_make_aux(&this -> g_Load3ds);
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(g_Load3ds) = %lu" "\n", __func__, (unsigned long) sizeof(g_Load3ds)); // 128 
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(*this) = %lu" "\n", __func__, (unsigned long) sizeof(*this)); // 861032...! 
     CLoad3DS_make_aux(&g_Load3ds);
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
     
     // First we need to actually load the .3DS file. 
     // We just pass in an address to our t3DModel structure and the file name string we want to load ("face.3ds"). 
     //printf("   Début de la lecture du fichier 3DS '%s' ... !!\n", filename); 
     //b3dModelLoaded = this -> g_Load3ds.Import3DS(&this -> g_Load3ds, &this -> g_3DModel, filename);         // Load our .3DS file into our model structure 
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
     b3dModelLoaded = g_Load3ds.Import3DS(&g_Load3ds, &this -> g_3DModel, filename); // Load our .3DS file into our model structure 
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
     //g_Load3ds.CleanUp(&g_Load3ds); 
     if (!b3dModelLoaded) { 
       messerr("ERREUR: " "Impossible de charger le fichier 3DS '%s' ; soit le fichier n'existe pas, soit il est corrompu.", filename); 
       fflush(NULL); 
       return false; 
     }; 
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   }; 
   
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   //printf("   Lecture du fichier 3DS '%s' terminée !!\n", filename); 
-  fflush(NULL); 
+  
+  //fflush(NULL); 
   
   
   // RL: Looking for texture files. 
@@ -82,6 +93,8 @@ static int C3DS__load(C3DS * this, const char * filename) {
   // If you want to load other files than bitmaps, you will need to adjust CreateTexture().
   // Below, we go through all of the materials and check if they have a texture map to load.
   // Otherwise, the material just holds the color information and we don't need to load a texture.
+
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
   // Go through all the materials
   //printf("   Récupération des textures du 3DS %s terminé !!\n", filename); 
@@ -122,6 +135,7 @@ static int C3DS__load(C3DS * this, const char * filename) {
   
   
   
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
   // RL: Generating an OpenGL DisplayList 
   this -> Liste = glGenLists(1);        // RL: Getting the list ID. // RL: '0' is an invalid display-list index. 
@@ -129,6 +143,7 @@ static int C3DS__load(C3DS * this, const char * filename) {
   this -> RenderGL(this);               // RL: Recorded OpenGL operations. 
   glEndList();                          // RL: End recording. 
   
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
   printf("<<< Objet 3DS chargé: '%s' " "\n", filename); 
   return true;  
@@ -284,9 +299,11 @@ static C3DS * C3DS__copy(const C3DS * this) {
 }; 
 
 C3DS * C3DS__make(const char * filename) { 
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   const int lookedup_index = obj3ds_dico__lookup(filename); 
   if (lookedup_index >= 0) { return obj3ds_dico__get(lookedup_index); }; 
   
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   MALLOC_BZERO(C3DS,this); 
   
   ASSIGN_METHOD(C3DS,this,make); 
@@ -301,10 +318,13 @@ C3DS * C3DS__make(const char * filename) {
   char realfile[strlen(T3DSDIR) + strlen(filename) + 1]; 
   strcat(strcpy(realfile, T3DSDIR), filename); 
   
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   C3DS__load(this, realfile); 
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
   this -> dico_i = obj3ds_dico__push(filename, this); 
   
+  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   return this; 
 }; 
 

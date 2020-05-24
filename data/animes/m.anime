@@ -13,8 +13,8 @@ physique {
 
 gameplay {
  points de vie := 9999;
- invinsible := vrai;
- hostile := vrai;
+ invincible := vrai;
+ hostile := faux;
  
  /* action parler {
   affichage := "parler";

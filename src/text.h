@@ -1,6 +1,13 @@
 #ifndef TEXT_H
 #define TEXT_H
 
+// RL: ??? 
+extern struct CText * Text;
+#if 0 
+extern struct CMessageTexte * MessageTexte;
+#endif 
+
+
 /*
  * Cette classe représente le moteur de rendu de texte à l'écran. (il utilise
  * OpenGL et charge en fait une texture : font.png.
@@ -101,9 +108,6 @@ extern void CMessageTexte_delete(CMessageTexte * this);
 extern void glEnable2D(void);
 extern void glDisable2D(void);
 
-extern struct CText * Text;
-extern struct CMessageTexte * MessageTexte;
-
               
 /*
  * truc pour afficher une image 2D à l'écran
@@ -146,7 +150,7 @@ extern struct CMessageTexte * MessageTexte;
 
 
 #define BEGIN_BLIT_END(cx, cy, ttx, tty, tx, ty, w, h) \
-      glBegin(GL_QUADS); BLIT(cx, cy, ttx, tty, tx, ty, w, h); glEnd();                               
+      glBegin(GL_QUADS); BLIT(cx, cy, ttx, tty, tx, ty, w, h); glEnd(); 
 
 
 

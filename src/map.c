@@ -1,5 +1,7 @@
 #include "global.h"
 #include "map.h"
+#include "015_game_events.h" 
+#include "010_game.h" 
 #include "physicalobj.h"
 #include "objnonanime.h"
 #include "bonhomme.h"
@@ -296,6 +298,8 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
   
   //printf("Fin de la construction CMap__CMap()\n"); 
   
+  Game_Events_Raise(GAME_EVENTS__MAP__LOADED_STARTING_FADING); 
+
   return this; 
 }; 
 
@@ -529,7 +533,9 @@ const CZoneTeleportation * CMap__VaTonBouger(const CMap * this, const CPhysicalO
 }; 
 
 
-void CMap__TraiterOrdresDeplacement(CMap * this, CBonhomme * aHero, const bool MoteurPhysiqueActif) {
+void CMap__TraiterOrdresDeplacement(CMap * this, CBonhomme * aHero, const bool MoteurPhysiqueActif) { 
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " >>> this = %p - aHero = %p - MoteurPhysiqueActif = %s "   "\n", __func__, this, aHero, MoteurPhysiqueActif ? "TRUE":"FALSE"); 
+
   aHero -> TraiterOrdresDeplacement(aHero, this, MoteurPhysiqueActif);
 
   PARCOURS_OBJETS
@@ -620,12 +626,16 @@ void CMap__Life(CMap * this, const bool EnVaisseau) {
 
 
 //void CMap__Life_GamePlay(CMap * this, const int i1, const int j1, const int i2, const int j2, const bool EnVaisseau) {
-void CMap__Life_GamePlay(CMap * this, const bool EnVaisseau) { 
+void CMap__Life_GamePlay(CMap * this, const int animate_but_do_not_aliven_huh, const bool EnVaisseau) { 
   if (EnVaisseau) return; 
 
+  int hostile_nb = 0; 
+  
   PARCOURS_OBJETS 
   //PARCOURS_OBJETS_VOISINAGES_PROCHE(pos) 
     { 
+      if (o_parcours -> Hostile_huh) hostile_nb ++; 
+      
       if (CPhysicalObj_subtype_CBonhomme == o_parcours -> subtype) { 
 	CBonhomme * b = (CBonhomme *) o_parcours; 
 	b -> Life(b); 
@@ -642,6 +652,10 @@ void CMap__Life_GamePlay(CMap * this, const bool EnVaisseau) {
     }
   PARCOURS_OBJETS_FIN;
   //PARCOURS_OBJETS_VOISINAGES_FIN;
+
+  if (not(animate_but_do_not_aliven_huh)) { 
+    if (0 == hostile_nb) { Game_Events_Raise(GAME_EVENTS__MAP__ALL_HOSTILES_DEAD); }; 
+  }; 
 };
 
 
@@ -1249,6 +1263,7 @@ void CMap__Render(const CMap * this, const CCamera * Camera, const riemann_t * o
     PARCOURS_ZONESTELEPORTATIONS { 
       //fprintf(stderr, "ZoneTeleportationRender: i = %d\n", i++); 
       if (show_choc_cube_huh) { 
+	glColor4f(1.0f, 1.0f, 1.0f, 1.0f); 
 	our_manifold -> AfficherCube(our_manifold, /*map_i*/0, /*map_j*/0, zt_parcours -> position.x * this -> lattice_to_map_scale_factor__x, zt_parcours -> position.y * this -> lattice_to_map_scale_factor__y, zt_parcours -> position.z * this -> lattice_to_map_scale_factor__z, zt_parcours -> dimension.x * this -> lattice_to_map_scale_factor__x, zt_parcours -> dimension.y * this -> lattice_to_map_scale_factor__y, zt_parcours -> dimension.z * this -> lattice_to_map_scale_factor__z); 
       }; 
     } PARCOURS_ZONESTELEPORTATIONS_FIN; 
@@ -1299,11 +1314,11 @@ int CMap__ReadDescriptionFile(CMap * this, const int global_map_i, const int glo
     }; 
   }; 
 
-#if 1 
+#if 0 
   // RL: TODO XXX FIXME 
   SCRIPT_JouerMusique(carte_data -> musique); 
-#else   
-  if (!SCRIPT_EstEnTrainDExecuterUnScript()) {
+#else 
+  if (!SCRIPT_EstEnTrainDExecuterUnScript()) { 
     SCRIPT_JouerMusique(carte_data -> musique); 
   }; 
 #endif 
@@ -1414,6 +1429,30 @@ int CMap__ReadDescriptionFile(CMap * this, const int global_map_i, const int glo
   for (int i = 0; i < carte_data -> events_nb; i++) { 
     //AddTraitementEvenement((type_evt)carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]); 
     EvenementsModule -> AddTraitement((type_evt)carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]); 
+  }; 
+  
+  Game_EventsHandlers__reset(); 
+  for (int i = 0; i < carte_data -> events_nb; i++) { 
+    //AddTraitementEvenement((type_evt)carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]); 
+    //EvenementsModule -> AddTraitement((type_evt)carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]); 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " carte_data -> events_genere[i] = %d - carte_data -> events_gestion_fichier[i] = %s - carte_data -> events_gestion_proc[i] = %s " "\n", __func__, carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]); 
+    if (3 == carte_data -> events_genere[i]) { 
+      const int evt_type = GAME_EVENTS__MAP__ALL_HOSTILES_DEAD; 
+      Game_EventsHandlers__push_script(evt_type, /*script_file*/carte_data -> events_gestion_fichier[i], /*script_name*/carte_data -> events_gestion_proc[i]); 
+      continue; 
+    }; 
+    if (1 == carte_data -> events_genere[i]) { 
+      const int evt_type = GAME_EVENTS__MAP__LOADED_STARTING_FADING; 
+      Game_EventsHandlers__push_script(evt_type, /*script_file*/carte_data -> events_gestion_fichier[i], /*script_name*/carte_data -> events_gestion_proc[i]); 
+      continue; 
+    }; 
+    if (2 == carte_data -> events_genere[i]) { 
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " carte_data -> events_genere[i] = %d - carte_data -> events_gestion_fichier[i] = %s - carte_data -> events_gestion_proc[i] = %s " "\n", __func__, carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]); 
+      const int evt_type = GAME_EVENTS__MAP__LOADED_READY; 
+      Game_EventsHandlers__push_script(evt_type, /*script_file*/carte_data -> events_gestion_fichier[i], /*script_name*/carte_data -> events_gestion_proc[i]); 
+      continue; 
+    }; 
+    messerr(" carte_data -> events_genere[i] = %d - carte_data -> events_gestion_fichier[i] = %s - carte_data -> events_gestion_proc[i] = %s " "\n", carte_data -> events_genere[i], carte_data -> events_gestion_fichier[i], carte_data -> events_gestion_proc[i]); 
   }; 
   
   

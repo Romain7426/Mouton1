@@ -89,7 +89,7 @@ char * fichier_nom_sans_extension(const char * filename) {
 
 
 void CMusique__Jouer(CMusique * this) {
-  if (this -> NomMusique == NULL) {
+  if (this == NULL || this -> NomMusique == NULL) {
     Mix_HaltMusic();
     return; 
   }; 

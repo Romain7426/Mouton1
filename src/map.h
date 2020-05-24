@@ -188,7 +188,7 @@ extern const CZoneTeleportation * CMap__VaTonBouger(const CMap * this, const CPh
 
 
 
-extern void           CMap__Life_GamePlay              (CMap * this, const bool EnVaisseau); 
+extern void           CMap__Life_GamePlay              (CMap * this, const int animate_but_do_not_aliven_huh, const bool EnVaisseau); 
 extern void           CMap__Life_NewtonEngine_Objects  (CMap * this, const bool EnVaisseau); 
 //extern void           CMap__Life_NewtonEngine_Sword    (CMap * this, const CPhysicalObj * Hero_o); 
 extern void           CMap__Life_Choc_Sword(CMap * this, const CPhysicalObj * Hero_o); 

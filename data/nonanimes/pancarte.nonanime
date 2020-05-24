@@ -21,6 +21,12 @@ action parler {
   gestionnaire := { fichier := "script.pml"; procedure := "prendre_clef"; } ;
  }
 
+action parler2 {
+  affichage := "Prendre la clef ? (-*-C-*-)" ;
+  icone  := "";
+  gestionnaire := { fichier := ""; procedure := "prendre_clef"; } ;
+ }
+
 
 }
 

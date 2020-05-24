@@ -3,26 +3,30 @@
 #include "text.h"
 #include "script_api.h"
 
-CTexture * texAction1 = NULL;
-CTexture * texAction2 = NULL;
-CTexture * texAction3 = NULL;
+static CTexture * texAction1 = NULL;
+static CTexture * texAction2 = NULL;
+static CTexture * texAction3 = NULL;
+//static CText    * Text       = NULL; //*(api_contexte.Text_ref); 
+
 
 void init_actions(void) {
   texAction1 = CTexture_make("action/action1.png"); 
   texAction2 = CTexture_make("action/action2.png"); 
   texAction3 = CTexture_make("action/action3.png"); 
+  //Text = CText_make(); 
 };
 
-
-void free_actions(void) {
-  CTexture_delete(texAction1);
-  CTexture_delete(texAction2);
+void free_actions(void) { 
+  //CText_delete(Text); 
+  CTexture_delete(texAction1); 
+  CTexture_delete(texAction2); 
   CTexture_delete(texAction3);    
-};
+}; 
 
 
 static char * CopyString(const char * const filename) {
   //char* s = new char[strlen(filename)+1];
+  if (filename == NULL) return NULL; 
   char * s = (char *) malloc((sizeof(char)) * (strlen(filename)+1));
   strcpy(s, filename);
   return s; 
@@ -33,25 +37,29 @@ CScriptLauncher * CScriptLauncher_make(const char * const filename, const char *
   
   CScriptLauncher * this = NULL; 
   this = (CScriptLauncher *) malloc(sizeof(CScriptLauncher)); 
+  bzero(this, sizeof(*this)); 
   
-  //resPascal = gestionPascal.prendre(filename);
-  //char * newfilename = CopyString(filename);
-  //P = new CPascal(filename);
-  //this -> resPascal = gestionPascal.prendre(filename);
-  //this -> resPascal = new CPascal(filename);
-  this -> resPascal = CPascal_make(filename);
+  //resPascal = gestionPascal.prendre(filename); 
+  //char * newfilename = CopyString(filename); 
+  //P = new CPascal(filename); 
+  //this -> resPascal = gestionPascal.prendre(filename); 
+  //this -> resPascal = new CPascal(filename); 
+  if (filename != NULL && *filename != '\0') { 
+    this -> resPascal = CPascal_make(filename); 
+  }; 
   
-  //printf("   cool on a capté la ressource pascal!!\n");
-  this -> proc = CopyString(procedure_name);
+  //printf("   cool on a capté la ressource pascal!!\n"); 
+  this -> fichier = CopyString(filename); 
+  this -> proc    = CopyString(procedure_name); 
   
   this -> Execute           = CScriptLauncher__Execute; 
   this -> init_step         = CScriptLauncher__init_step; 
   this -> execute_step      = CScriptLauncher__execute_step; 
   this -> stack_push_int    = CScriptLauncher__stack_push_int; 
   this -> stack_push_string = CScriptLauncher__stack_push_string; 
-
   
-  //printf("Fin Constructeur CScriptLauncher\n");             
+  
+  //printf("Fin Constructeur CScriptLauncher\n"); 
   
   return this; 
 }; 
@@ -59,18 +67,19 @@ CScriptLauncher * CScriptLauncher_make(const char * const filename, const char *
 
 void CScriptLauncher_delete(CScriptLauncher * this) {
   free(this -> proc); 
-  CPascal_delete(this -> resPascal); 
+  free(this -> proc); 
+  if (this -> resPascal != NULL) CPascal_delete(this -> resPascal); 
 }; 
 
-void CScriptLauncher__Execute(CScriptLauncher * this) {
-  //printf("Exécution du ScriptLauncher...");   
-  SCRIPT_Init();
-  //printf("      on va executer la procédure %s...\n", this -> proc);
-  //this -> resPascal->getObject()->execProcedure(proc);
-  this -> resPascal -> execProcedure(this -> resPascal, this -> proc);
-  //P->execProcedure(proc);
-  //printf("      fin de l'exécution\n");
-  SCRIPT_Quit();
+void CScriptLauncher__Execute(CScriptLauncher * this) { 
+  //printf("Exécution du ScriptLauncher..."); 
+  SCRIPT_Init(); 
+  //printf("      on va executer la procédure %s...\n", this -> proc); 
+  //this -> resPascal->getObject()->execProcedure(proc); 
+  this -> resPascal -> execProcedure(this -> resPascal, this -> proc); 
+  //P->execProcedure(proc); 
+  //printf("      fin de l'exécution\n"); 
+  SCRIPT_Quit(); 
   //printf("      Exécution du ScriptLauncher réussie!!!");   
 };
 
@@ -81,16 +90,16 @@ void CScriptLauncher__init_step(CScriptLauncher * this) {
   this -> resPascal -> execProcedure_step(this -> resPascal, this -> proc);
 };
 
-bool CScriptLauncher__execute_step(CScriptLauncher * this) {
+bool CScriptLauncher__execute_step(CScriptLauncher * this) { 
   //message("%s" "\n", __func__); 
-  bool fini_huh;
-  int ret;
-
-  ret = this -> resPascal -> next_step(this -> resPascal, &fini_huh);
-
+  bool fini_huh; 
+  int ret; 
+  
+  ret = this -> resPascal -> next_step(this -> resPascal, &fini_huh); 
+  
   //message("%s: " "ret = %d ; fini_huh = %d " "\n", __func__, ret, fini_huh); 
-
-  return (fini_huh || ret != 0);
+  
+  return (fini_huh || ret != 0); 
 };
 
 void CScriptLauncher__stack_push_int(CScriptLauncher * this, int a) {
@@ -139,17 +148,59 @@ int CActionsMenu__Input(CActionsMenu * this) {
     
     if (KEY_ACTION1) { 
       CScriptLauncher * c = Items[0][0 /*action n° 1 - 1*/].qch; 
-      if (NULL != c) c -> Execute(c); 
+#if 1 
+      if (NULL != c) { 
+	Kernel_Script_Start(c -> fichier, c -> proc); 
+      }; 
+#else 
+      if (NULL != c) { 
+	if (c -> resPascal != NULL) { 
+	  c -> Execute(c); 
+	} 
+	else { 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " SCRIPT_C = '%s' "   "\n", __func__, c -> proc); 
+	  Kernel_Script_Start("", c -> proc); 
+	}; 
+      }; 
+#endif 
     }; 
     
     if(KEY_ACTION2) {
       CScriptLauncher * c = (CScriptLauncher *) (Items[0][1 /*action n° 2 - 1*/].qch); 
-      if (NULL != c) c -> Execute(c); 
+#if 1 
+      if (NULL != c) { 
+	Kernel_Script_Start(c -> fichier, c -> proc); 
+      }; 
+#else 
+      if (NULL != c) { 
+	if (c -> resPascal != NULL) { 
+	  c -> Execute(c); 
+	} 
+	else { 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " SCRIPT_C = '%s' "   "\n", __func__, c -> proc); 
+	  Kernel_Script_Start("", c -> proc); 
+	}; 
+      }; 
+#endif 
     }; 
     
     if(KEY_ACTION3) { 
       CScriptLauncher * c = (CScriptLauncher *) (Items[0][2 /*action n° 3 - 1*/].qch); 
-      if (NULL != c) c -> Execute(c); 
+#if 1 
+      if (NULL != c) { 
+	Kernel_Script_Start(c -> fichier, c -> proc); 
+      }; 
+#else 
+      if (NULL != c) { 
+	if (c -> resPascal != NULL) { 
+	  c -> Execute(c); 
+	} 
+	else { 
+	  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " SCRIPT_C = '%s' "   "\n", __func__, c -> proc); 
+	  Kernel_Script_Start("", c -> proc); 
+	}; 
+      }; 
+#endif 
     }; 
   
   
@@ -166,6 +217,8 @@ void CActionsMenu__Render(const CActionsMenu * this) {
   //MenuItem * * Items = this -> parent.Items; 
   //MenuItem * * Items = &this -> parent.Items[0]; 
   //MenuItem * * Items = &this -> parent.Items[0][0]; 
+
+  //CText * Text = *(api_contexte.Text_ref); 
 
   glEnable2D(); { 
     int i = 0; //iphi = 0  
@@ -277,7 +330,13 @@ void CObjActionnable__AjouterAction(CObjActionnable * this, const char * caption
   }; 
   
   CScriptLauncher * sl = CScriptLauncher_make(fichier_pascal, proc); 
-  this -> actions -> parent.Add_qch(&this -> actions -> parent, 0, caption, nom_texture, sl); 
+  if (fichier_pascal == NULL || *fichier_pascal == '\0') { 
+    if (sl -> resPascal != NULL) CPascal_delete(sl -> resPascal); 
+    sl -> resPascal = NULL; 
+  }; 
+
+  CMenuAbstrait * m = &this -> actions -> parent; 
+  m -> Add_qch(m, /*ssMenu*/0, caption, nom_texture, sl); 
   //printf("     Action ajoutée !!!\n"); 
 }; 
 

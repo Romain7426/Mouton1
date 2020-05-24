@@ -31,6 +31,10 @@ int CPhysicalObj__GetPV(const CPhysicalObj * this) {
   return this -> pv;   
 }; 
 
+void CPhysicalObj__SetPV(CPhysicalObj * this, const int nbpv) {
+  this -> pv = nbpv;   
+}; 
+
 bool CPhysicalObj__Is0PV(const CPhysicalObj * this) {
   return (this -> pv <= 0); 
 }; 
@@ -578,9 +582,12 @@ void CPhysicalObj__Render(const CPhysicalObj * this, const float lattice_to_map_
   const TPoint3D d = this -> GetDimension(this); 
 
 #if 1 
-  glColor3f(1.0f, 1.0f, 1.0f); 
+  //glColor3f(1.0f, 1.0f, 1.0f); 
+  glColor4f(1.0f, 1.0f, 1.0f, 1.0f); 
+  //glColor4f(1.0f, 1.0f, 1.0f, 0.0f); 
 #else 
   
+#if 0 
   // FS: /* les cubes pour lesquels on a rejeté la position, sont rouges */ 
   if (!this -> nvalid_position) { 
     glColor3f(1.0f, 0.0f, 0.0f); 
@@ -589,6 +596,7 @@ void CPhysicalObj__Render(const CPhysicalObj * this, const float lattice_to_map_
   if (this -> Immerge_huh) { 
     glColor3f(0.0f, 0.0f, 1.0f); 
   }; 
+#endif 
   
 #if 0
   if (this -> IsVolumeNul(this)) { 
@@ -660,6 +668,7 @@ CPhysicalObj * CPhysicalObj__make_assign_methods(CPhysicalObj * this) {
   ASSIGN_METHOD(CPhysicalObj,this,SetPVMax); 
   ASSIGN_METHOD(CPhysicalObj,this,GagnerPV); 
   ASSIGN_METHOD(CPhysicalObj,this,GetPV); 
+  ASSIGN_METHOD(CPhysicalObj,this,SetPV); 
   ASSIGN_METHOD(CPhysicalObj,this,SetObjetEphemere);
   
   ASSIGN_METHOD(CPhysicalObj,this,Acceleration_add_vP3D); 

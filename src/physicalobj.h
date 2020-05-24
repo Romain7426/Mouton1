@@ -114,6 +114,7 @@ struct CPhysicalObj {
   void (* SetPVMax        )(      struct CPhysicalObj * this, const int nbpv, const int set_pv_as_well_huh);
   void (* GagnerPV        )(      struct CPhysicalObj * this, const int nbpv);
   int  (* GetPV           )(const struct CPhysicalObj * this);
+  void (* SetPV           )(      struct CPhysicalObj * this, const int nbpv);
   void (* SetObjetEphemere)(      struct CPhysicalObj * this, const int nbPV); 
   
   TPoint3D (* GetDimension)(const struct CPhysicalObj * this); 

@@ -22,6 +22,18 @@ gameplay {
   gestionnaire := { fichier := "script.pml"; procedure := "brigitte_parler"; } ;
  }
 
+ action parler2 {
+  affichage := "Bonjour!";
+  icone := "";
+  gestionnaire := { fichier := ""; procedure := "brigitte_bonjour"; } ;
+ }
+
+ action parler3 {
+  affichage := "Brigitte te fait signe.";
+  icone := "";
+  gestionnaire := { fichier := ""; procedure := "brigitte_pastas"; } ;
+ }
+
 
 }
 

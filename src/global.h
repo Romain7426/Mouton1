@@ -48,6 +48,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <langinfo.h> 
+#include <sys/mman.h> // RL: For cooperative threads, 'mmap' is needed. 
 
 #ifdef FENV_H_EXISTS
 #  include <fenv.h> // floating-point environment 
@@ -483,7 +484,7 @@ typedef struct C3DS C3DS;
 #include "son.h"
 #include "structures.h"
 #include "text.h"
-#include "timer.h"
+//#include "timer.h"
 #include "utilities.h"
 
 #include "affichagemainpierre.h"

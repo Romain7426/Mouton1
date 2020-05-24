@@ -34,7 +34,10 @@ unsigned char conversionpourrie_(const uint8_t c0, const uint8_t c1, int * used_
   unsigned char d = c0; 
   *used_ref = 1; 
   switch (c0) {
-  case 195: 
+  case '	': d = ' '; break; // TAB 
+  case 195:  
+    if (137 == c1) { d = 'E'; *used_ref = 2; break; };  // É 
+    if (138 == c1) { d = 'E'; *used_ref = 2; break; };  // Ê 
     if (160 == c1) { d = 133; *used_ref = 2; break; };  // à 
     if (162 == c1) { d = 131; *used_ref = 2; break; };  // â 
     if (167 == c1) { d = 135; *used_ref = 2; break; };  // ç 
@@ -43,6 +46,8 @@ unsigned char conversionpourrie_(const uint8_t c0, const uint8_t c1, int * used_
     if (170 == c1) { d = 136; *used_ref = 2; break; };  // ê 
     if (174 == c1) { d = 140; *used_ref = 2; break; };  // î 
     if (180 == c1) { d = 147; *used_ref = 2; break; };  // ô 
+    if (185 == c1) { d = 'u'; *used_ref = 2; break; };  // ù 
+    if (187 == c1) { d = 'u'; *used_ref = 2; break; };  // û 
     break;
   }; 
   return d;
@@ -75,9 +80,11 @@ unsigned char conversionpourrie(const unsigned char c) {
 #endif 
 
 
-
+#if 0 
+// RL: ??? 
 CText * Text;
 CMessageTexte * MessageTexte;
+#endif 
 
 
 void glEnable2D(void) {
@@ -261,6 +268,46 @@ float CText__print2(CText * this, float l, const int nblignes, const int nbcarac
 	    };
 	    {
 	      static const unsigned char c_cedille[] = "b"; 
+	      messerr("CText__print: c_cedille[]: %s" "\n", c_cedille); // UTF-8: 
+	      messerr("CText__print: sizeof(c_cedille[]): %d" "\n", sizeof(c_cedille)); // UTF-8: sizeof(c_cedille): 2 
+	      messerr("CText__print: ARRAY_SIZE(c_cedille[]): %d" "\n", ARRAY_SIZE(c_cedille)); // UTF-8: ARRAY_SIZE(c_cedille): 2 
+	      messerr("CText__print: c_cedille[0]: %d" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %d" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	      messerr("CText__print: c_cedille[0]: %x" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %x" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	    };
+	    {
+	      static const unsigned char c_cedille[] = "û"; 
+	      messerr("CText__print: c_cedille[]: %s" "\n", c_cedille); // UTF-8: 
+	      messerr("CText__print: sizeof(c_cedille[]): %d" "\n", sizeof(c_cedille)); // UTF-8: sizeof(c_cedille): 2 
+	      messerr("CText__print: ARRAY_SIZE(c_cedille[]): %d" "\n", ARRAY_SIZE(c_cedille)); // UTF-8: ARRAY_SIZE(c_cedille): 2 
+	      messerr("CText__print: c_cedille[0]: %d" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %d" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	      messerr("CText__print: c_cedille[0]: %x" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %x" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	    };
+	    {
+	      static const unsigned char c_cedille[] = "É"; 
+	      messerr("CText__print: c_cedille[]: %s" "\n", c_cedille); // UTF-8: 
+	      messerr("CText__print: sizeof(c_cedille[]): %d" "\n", sizeof(c_cedille)); // UTF-8: sizeof(c_cedille): 2 
+	      messerr("CText__print: ARRAY_SIZE(c_cedille[]): %d" "\n", ARRAY_SIZE(c_cedille)); // UTF-8: ARRAY_SIZE(c_cedille): 2 
+	      messerr("CText__print: c_cedille[0]: %d" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %d" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	      messerr("CText__print: c_cedille[0]: %x" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %x" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	    };
+	    {
+	      static const unsigned char c_cedille[] = "ù"; 
+	      messerr("CText__print: c_cedille[]: %s" "\n", c_cedille); // UTF-8: 
+	      messerr("CText__print: sizeof(c_cedille[]): %d" "\n", sizeof(c_cedille)); // UTF-8: sizeof(c_cedille): 2 
+	      messerr("CText__print: ARRAY_SIZE(c_cedille[]): %d" "\n", ARRAY_SIZE(c_cedille)); // UTF-8: ARRAY_SIZE(c_cedille): 2 
+	      messerr("CText__print: c_cedille[0]: %d" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %d" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	      messerr("CText__print: c_cedille[0]: %x" "\n", c_cedille[0]); // UTF-8: c_cedille[0]: 98 - 0x62 
+	      messerr("CText__print: c_cedille[1]: %x" "\n", c_cedille[1]); // UTF-8: c_cedille[1]: '\0'- 00 
+	    };
+	    {
+	      static const unsigned char c_cedille[] = "Ê"; 
 	      messerr("CText__print: c_cedille[]: %s" "\n", c_cedille); // UTF-8: 
 	      messerr("CText__print: sizeof(c_cedille[]): %d" "\n", sizeof(c_cedille)); // UTF-8: sizeof(c_cedille): 2 
 	      messerr("CText__print: ARRAY_SIZE(c_cedille[]): %d" "\n", ARRAY_SIZE(c_cedille)); // UTF-8: ARRAY_SIZE(c_cedille): 2 
