@@ -43,6 +43,47 @@ However, as it seems that backward copyrighting could exist, we do have a licenc
    
 ## Technicalities 
 
-First, likely, the game won't compile on your computer: too many things to make it work. And as the saying goes, 'libtool is hell'.    
+First, likely, the game won't compile right off the bat on your computer: too many things to make it work. And as the saying goes, 'libtool is hell'. I might look into that in twenty years. It used to compile and work on Windows & MacOSX. Currently, it compiled & works on BSD. 
+ 
+Then, the game depends on [SDL](http://www.libsdl.org), [SDL_image](http://www.libsdl.org/projects/SDL_image/release-1.2.html), [SDL_mixer](http://www.libsdl.org/projects/SDL_mixer/release-1.2.html). If these libraries do not work on your computer, then it's just can't work. But that's its only library depencies, so it's not that bad (to be fair, SDL_image & SDL_mixer need sub-libraries, like libjpeg, libpng, libvorbis, libogg, etc.). 
+ 
+Then, the game was compiled with gcc and clang. It might work with other compilers, but we can't know for sure. 
+ 
+Then, this repository is the main repository - we have small sub-projects that needs to be compiled first: 
+ - https://github.com/Romain7426/Mouton1-anime 
+ - https://github.com/Romain7426/Mouton1-nonanime 
+ - https://github.com/Romain7426/Mouton1-carte 
+ - https://github.com/Romain7426/Mouton1-pscript 
+  
+I do not know how to integrate all of them in a single GitHub repository. So, in a user-unfriendly spirit, these have to be downloaded and compiled first. However, the idea was that these sub-projects were separate from the main project, and should be able to compile & run on their own. 
+ 
+Then, as of now, loading of 3DS object work on little-endian system, but cannot properly work on non-little-endian system as non-little-endian endian-ness is not properly handled (bytes have to be swapped while reading 3DS files). 
+ 
+All that being said, after downloading the project, type 'gmake -f Makefile-gen.mkf' and then 'make' and, supposedly, it should work. I would not bet my bottom dollar on it though. 
+ 
+Also, the game used to be first developed in *C++*. Along with many critics, we ran into *C++* confusedness: (i) it always compiles whatever one writes; (ii) nobody has any idea about the actual semantic; (iii) compiling errors, when the compiler fails to somehow find a random semantic, are cryptic; (iv) output results are weird and very tough to debug; (v) very slow to compile (we were used to [Turbo Pascal](https://en.wikipedia.org/wiki/Turbo_Pascal), whose compilation was immediate); (vi) with the years, the game just stopped from compiling; (vii) no two *C++* compilers behave the same way. <br> 
+For our second game, we switched to old *C*, and it was so much better - we did not regret it. 
+ 
+That was the starting point of the currently published project: *C++* is an unstable language, the game did not compile any longer, and the game deserved to be published - so I decided to clean it up and to switch it to *C*, to make it work, and then to publish it to GitHub (for the record, as usual, we took way longer than initially planned). Here we are.  
+ 
+  
+## Architecture & Structuring ideas 
+ 
+Despite our lack of training in software design, we naturally wanted to divide & conquer that big dragon: cut that one big problem into smaller manageable problems. We still knew that the core, the game engine, would be big though. But we separated the character description, the music, the scenery items description, the level description, the narrative description, from the game engine. That way we could also divide the work among team members. 
+ 
+First, for the game stuffs descriptions, we designed small & quick purposed description languages (about that subject, one can check out that video [«Functional MzScheme DSLs in Game Development»](https://www.youtube.com/watch?v=Z8Xamkb-J2k), wherein they talk about «DSL» («data specific language)» (very bad audio sadly)). We ran into two issues: 
+ - (i) *Lex* & *Yacc* - In the very scarce software engineering lessons we had, we were advised to use *Lex* & *Yacc*. Well well well. *Lex* & *Yacc* are nice theoretical objects, but should not be used in real life. First one never knows whether the regular expressions are the right ones (and for some reasons, there are always weird issues). They are slow. They are weirdly designed. They are not thread-safe nor reentrant. And the syntax error management is terrible: *yacc* returns "syntax error" and that's it - you're stuck - it's very frustrating. And during these lectures, you're told about intricate weird issues. Great. In real life, description languages are trivial LL(1) languages. We're using a [BFG](https://en.wikipedia.org/wiki/BFG_(weapon)) to kill an ant; and worse, that [BFG](https://en.wikipedia.org/wiki/BFG_(weapon)) is broken and can't even do properly the job. <br> 
+   So, one should not use *Lex* & *Yacc* ever. One should study them to understand the underlying issues of tokenizing & parsing, but one should not use these broken & useless tools. First, regarding tokenizing, it's way simpler to directly write the automata; automata are simple, and they simply do what you think they do. And do not write these automata as data arrays - for each token, just write a function that takes the current state, the being-read character, and returns the next state - that's it. It works perfectly, it's simple, and it's very fast. <br> 
+   For parsing, LL(1) languages are trivial. So just do it. Basically it's a big automaton. The only location where it could be trickier is expression-parsing: infix expressions ("1 + 2") are why LALR(0) stuffs were developed; they can still be parsed, but a side stack is needed. That's it. It's very simple, and it works very well. And syntax errors can be understood and more explanatory than the hellish "syntax error". <br> 
+   So, please, *Lex* & *Yacc* are nice curiosities, proofs of concept, but should bot be used. Even for our very simple description languages, they poorly failed. 
+ - (ii) *Typing* - As computer scientists, we were introduced to *OCaml*, typing inference, and program correctness-proof giving. Typing is seen as a way to automatically prove, at least partially, the correctness of a program. Duh... Academically speaking, I do understand the attractiveness of such concepts, and *OCaml* is a very nice language (*pattern-matching* is still really great), but in real life, what one actually wants, it's something like *Visual Basic*: proofs do not matter, the program should work - that's it - the team member who wants to describe the object he is working on does not care about typing - it should just work - typing does not even make sense to him. Unfortunately, we learnt it the hard way. <br> 
+   Regarding typing, we then met [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)), and we had a cognitive dissonance: this language is amazing, but does not care about typing at all. From the user point of view, there's no type (of course, in-memory data are typed). And the language was so powerful and easy. With very few lines of code, we could run quite powerful programs. In spirit, [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)) was the opposite of [OCaml](https://en.wikipedia.org/wiki/OCaml), and it was way easier & simple to use. (A quick note about so-called "functional programming" & "first-order functions": it does not matter, nobody cares. An actual full-fledged functional language is very complex, for nothing; the issue is to remember the current stack of lexical environments; *OCaml* & *Scheme* cope with that complexity in removing variables and substituting them with "bindings", and so-called *let-bindings*. Such choices are definitely understandable, but are not user-friendly; variables are the way to go; let-bindings are a creepy work-around in spirit, and slow in facts. Having both, variables & lexical stacked environment remembered means that the whole call-stack must be remembered at & for each *lambda*, which is huge - basically, it means that the call-stack is duplicated each time - and obviously, implementing 'call/cc' is trivial with such a feature. If in-line anymous functions are handy, remembering lexical environment does not worth it - just provide the global the environment so such functions. Or one can do the *Pascal* way: local functions cannot be objects (which is not convenient at all).) <br> 
+   So, please, type as less as possible your description languages. In spirit, description languages should be like [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)). And description languages implies that they are no variables (nor let-bindings). 
+   
 
+
+
+
+
+ 
 
