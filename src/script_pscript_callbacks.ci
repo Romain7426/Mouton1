@@ -1,0 +1,1206 @@
+
+//static const char * CPascal__method_callback__CBonhomme__get_qui(void * callback_data, const int argc, const char argv_core_type[], const int bool_nb, const char bool_stack[], const int integer_nb, const int integer_stack[], const int float_nb, const float float_stack[], const int char_nb, const char char_stack[], const int string_nb, const int string_stack[], const int pointer_nb, const int pointer_type[], const int pointer_stack[], const int proxy_nb, const int proxy_type[], const int proxy_stack[], const int array_nb, const int array_type[], const int array_offset[], const int array_mem_size, const char array_mem[], const int record_nb, const int record_type[], const int record_offset[], const int record_mem_size, const char record_mem[], const int udf_nb, const int udf_type[], const int udf_offset[], const int udf_mem_size, const char udf_mem[]) {
+static const char * CPascal__method_callback__CType__get_qui__arg_i(void * callback_data, const char * ctype_name_cstr, const int arg_i, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  CPascal * this = callback_data; 
+  assert(arg_nb >= 1); 
+  //assert(argv_core_type[0] == PSCRIPT_TYPE__USER); 
+  int udf_type0; 
+  const int arg_core_type0 = pscript_type__get_core_type(this -> pscript_env -> type_env, arg_type[arg_i]); 
+  if (PSCRIPT_TYPE__PROXY == arg_core_type0) { 
+    udf_type0 = pscript_type__proxy__get_subtype(this -> pscript_env -> type_env, arg_type[arg_i]); 
+  } 
+  else if (PSCRIPT_TYPE__USER == arg_core_type0) { 
+    udf_type0 = arg_type[arg_i]; 
+  } 
+  else {
+    assert(false); 
+    udf_type0 = -1; 
+  }; 
+  const char * udf_name_cstr = pscript_type__user_defined_type__get_name_cstr(this -> pscript_env -> type_env, udf_type0); 
+  //assert(0 == strcmp("cbonhomme", udf_name_cstr)); 
+  assert(0 == strcmp(ctype_name_cstr, udf_name_cstr)); 
+  const int subtype = pscript_type__user_defined_type__get_subtype(this -> pscript_env -> type_env, udf_type0); 
+  const int subtype_core = pscript_type__get_core_type(this -> pscript_env -> type_env, subtype); 
+  assert(PSCRIPT_TYPE__RECORD == subtype_core); 
+  const int field_pstr = pscript_string__push(this -> pscript_env -> string_env, "nom"); 
+  const int field_index = pscript_type__record__get_field_index(this -> pscript_env -> type_env, subtype, field_pstr); 
+  assert(field_index >= 0); 
+  const int field_type = pscript_type__record__get_field_type(this -> pscript_env -> type_env, subtype, field_index); 
+  assert(field_type == pscript_type__get__string(this -> pscript_env -> type_env)); 
+  const int field_offset = pscript_type__record__get_field_offset(this -> pscript_env -> type_env, subtype, field_index); 
+  const char * udf_value; 
+  if (PSCRIPT_TYPE__PROXY == arg_core_type0) {
+    const int udf_mem_offset = *(const int_pscript_mem_t *) (arg_mem + arg_offset[arg_i]); 
+    udf_value = pscript_mem__get_pointer(this -> pscript_env -> mem_env, udf_mem_offset); 
+  }
+  else if (PSCRIPT_TYPE__USER == arg_core_type0) {
+    udf_value = arg_mem + arg_offset[arg_i]; 
+  }
+  else {
+    assert(false); 
+    udf_value = NULL; 
+  }; 
+  
+  const int    field_value_pstr = *(const int_pscript_string_t *) (udf_value + field_offset); 
+  const char * field_value_cstr = pscript_string__get_cstr(this -> pscript_env -> string_env, field_value_pstr); 
+  
+  
+  const char * qui = field_value_cstr; 
+  
+  return qui; 
+}; 
+
+
+
+static const char * CPascal__method_callback__CBonhomme__get_qui__arg_i(void * callback_data, const int arg_i, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  const char * qui = CPascal__method_callback__CType__get_qui__arg_i(callback_data, "cbonhomme", 0, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  return qui; 
+}; 
+
+static const char * CPascal__method_callback__CObjNonAnime__get_qui__arg_i(void * callback_data, const int arg_i, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  const char * qui = CPascal__method_callback__CType__get_qui__arg_i(callback_data, "cobjnonanime", arg_i, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  return qui; 
+}; 
+
+
+static const char * CPascal__method_callback__CBonhomme__get_qui(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui__arg_i(callback_data, 0, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  return qui; 
+}; 
+
+static const char * CPascal__method_callback__CObjNonAnime__get_qui(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  const char * qui = CPascal__method_callback__CObjNonAnime__get_qui__arg_i(callback_data, /*arg_i*/0, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  return qui; 
+}; 
+
+  
+
+static int CPascal__cast_arg(const int arg_i, const int target_type, const int target_sizeof, char target_value[], void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  CPascal * this = callback_data; 
+  assert(arg_nb >= arg_i + 1); 
+  
+  //extern void pscript_value__cast_generic(pscript_type_env_t * type_env, const int type1, const int type2, const int value2_sizeof, const char value2[], const int cast_value2_sizeof, char cast_value2[]); 
+  pscript_value__cast_generic(this -> pscript_env, target_type, arg_type[arg_i], arg_sizeof[arg_i], arg_mem + arg_offset[arg_i], target_sizeof, target_value); 
+  return 0; 
+}; 
+  
+
+static int CPascal__method_callback__CBonhomme_setposition(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  //const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { 
+    return -1; 
+  }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 3; 
+  if (arg_nb != 1 + arg_requested) {
+    messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); 
+    return -1; 
+  }; 
+  
+  const int arg1_type = pscript_type__get__float(this -> pscript_env -> type_env); 
+  const int arg1_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg1_type); 
+  char arg1_value[arg1_sizeof]; 
+  //allright_huh = CPascal__cast_arg(1, arg1_type, arg1_sizeof, arg1_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  allright_huh = CPascal__cast_arg(1, arg1_type, arg1_sizeof, arg1_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  const float arg1 = *(float *) arg1_value; 
+  
+  const int arg2_type = pscript_type__get__float(this -> pscript_env -> type_env); 
+  const int arg2_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg2_type); 
+  char arg2_value[arg2_sizeof]; 
+  //allright_huh = CPascal__cast_arg(2, arg2_type, arg2_sizeof, arg2_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  allright_huh = CPascal__cast_arg(2, arg2_type, arg2_sizeof, arg2_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  const float arg2 = *(float *) arg2_value; 
+  
+  const int arg3_type = pscript_type__get__integer(this -> pscript_env -> type_env); 
+  const int arg3_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg3_type); 
+  char arg3_value[arg3_sizeof]; 
+  //allright_huh = CPascal__cast_arg(3, arg3_type, arg3_sizeof, arg3_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  allright_huh = CPascal__cast_arg(3, arg3_type, arg3_sizeof, arg3_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  const int arg3_raw = *(int *) arg3_value; 
+  const int arg3 = arg3_raw == 2 ? mpABSOLU : mpRELATIF; 
+  
+  SCRIPT_SetPosition_vXY(qui, arg1, arg2, arg3);
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+
+
+
+
+static int CPascal__method_callback__CBonhomme_setz(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { 
+    return -1; 
+  }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 2; 
+  if (arg_nb != 1 + arg_requested) {
+    messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); 
+    return -1; 
+  }; 
+
+  float arg1; 
+  { 
+    const int arg_i = 1; 
+    const int target_type = pscript_type__get__float(this -> pscript_env -> type_env); 
+    const int target_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, target_type); 
+    char target_value[target_sizeof]; 
+    pscript_value__cast_generic(this -> pscript_env, target_type, arg_type[arg_i], arg_sizeof[arg_i], arg_mem + arg_offset[arg_i], target_sizeof, target_value); 
+    arg1 = *(float *) target_value; 
+  }; 
+  
+  int arg2; 
+  { 
+    const int arg_i = 2; 
+    const int target_type = pscript_type__get__integer(this -> pscript_env -> type_env); 
+    const int target_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, target_type); 
+    char target_value[target_sizeof]; 
+    pscript_value__cast_generic(this -> pscript_env, target_type, arg_type[arg_i], arg_sizeof[arg_i], arg_mem + arg_offset[arg_i], target_sizeof, target_value); 
+    arg2 = *(int *) target_value; 
+  }; 
+  
+  SCRIPT_SetZ(qui, arg1, arg2);
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+
+
+#define GET_ARG_VALUE(type_t,arg_j,j,pcasttype)				\
+  type_t arg_j;								\
+  {									\
+    const int arg_i = j;						\
+    const int target_type = pcasttype(this -> pscript_env -> type_env);		\
+    const int target_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, target_type); \
+    char target_value[target_sizeof];					\
+    pscript_value__cast_generic(this -> pscript_env, target_type, arg_type[arg_i], arg_sizeof[arg_i], arg_mem + arg_offset[arg_i], target_sizeof, target_value); \
+    arg_j = *(type_t *) target_value;					\
+  };									
+
+static int CPascal__method_callback__CBonhomme_setpositionz(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { return -1; }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 4; 
+  if (arg_nb != 1 + arg_requested) {
+    messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); 
+    return -1; 
+  }; 
+  
+  GET_ARG_VALUE(float,arg1,1,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg2,2,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg3,3,pscript_type__get__float); 
+  GET_ARG_VALUE(int,arg4_raw,4,pscript_type__get__integer); 
+  const int arg4 = arg4_raw == 2 ? mpABSOLU : mpRELATIF; 
+  
+  SCRIPT_SetPosition_vXY(qui, arg1, arg2, arg4);
+  SCRIPT_SetZ(qui, arg3, arg4);
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CBonhomme_deplacer(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { return -1; }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 3; 
+  if (arg_nb != 1 + arg_requested) {
+    messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); 
+    return -1; 
+  }; 
+  
+  GET_ARG_VALUE(float,arg1,1,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg2,2,pscript_type__get__float); 
+  GET_ARG_VALUE(int,arg3_raw,3,pscript_type__get__integer); 
+  const int arg3 = arg3_raw == 2 ? mpABSOLU : mpRELATIF; 
+
+
+  SCRIPT_Deplacer(qui, arg1, arg2, arg3); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CBonhomme_SupprimerObjet(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { return -1; }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  SCRIPT_SupprimerObjet(qui); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CBonhomme_Frapper(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { return -1; }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  SCRIPT_Frapper(qui); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CBonhomme_SetDirection(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  const char * qui = CPascal__method_callback__CBonhomme__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { return -1; }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int,arg1,1,pscript_type__get__integer); 
+
+  SCRIPT_SetDirection(qui, arg1); 
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+
+
+static int CPascal__method_callback__CObjNonAnime_setposition(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  
+  //const char * qui = CPascal__method_callback__CObjNonAnime__get_qui(callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  const char * qui = CPascal__method_callback__CObjNonAnime__get_qui(callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  if (NULL == qui) { 
+    return -1; 
+  }; 
+  
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 3; 
+  if (arg_nb != 1 + arg_requested) {
+    messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); 
+    return -1; 
+  }; 
+  
+  const int arg1_type = pscript_type__get__float(this -> pscript_env -> type_env); 
+  const int arg1_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg1_type); 
+  char arg1_value[arg1_sizeof]; 
+  //allright_huh = CPascal__cast_arg(1, arg1_type, arg1_sizeof, arg1_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  allright_huh = CPascal__cast_arg(1, arg1_type, arg1_sizeof, arg1_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  const float arg1 = *(float *) arg1_value; 
+  
+  const int arg2_type = pscript_type__get__float(this -> pscript_env -> type_env); 
+  const int arg2_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg2_type); 
+  char arg2_value[arg2_sizeof]; 
+  //allright_huh = CPascal__cast_arg(2, arg2_type, arg2_sizeof, arg2_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  allright_huh = CPascal__cast_arg(2, arg2_type, arg2_sizeof, arg2_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  const float arg2 = *(float *) arg2_value; 
+  
+  const int arg3_type = pscript_type__get__integer(this -> pscript_env -> type_env); 
+  const int arg3_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg3_type); 
+  char arg3_value[arg3_sizeof]; 
+  //allright_huh = CPascal__cast_arg(3, arg3_type, arg3_sizeof, arg3_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
+  allright_huh = CPascal__cast_arg(3, arg3_type, arg3_sizeof, arg3_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  const int arg3_raw = *(int *) arg3_value; 
+  const int arg3 = arg3_raw == 2 ? mpABSOLU : mpRELATIF; 
+  
+  SCRIPT_SetPosition_vXY(qui, arg1, arg2, arg3);
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static int CPascal__method_callback__CCamera_SetPosition(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "Camera"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 4; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(float,arg1,1,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg2,2,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg3,3,pscript_type__get__float); 
+  GET_ARG_VALUE(int,arg4_raw,4,pscript_type__get__integer); 
+  const int arg4 = arg4_raw == 2 ? mpABSOLU : mpRELATIF; 
+
+  SCRIPT_Camera_SetPosition(arg1, arg2, arg3, arg4); 
+  
+  return 0; 
+}; 
+
+static int CPascal__method_callback__CCamera_Rotate(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "Camera"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 4; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(float,arg1,1,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg2,2,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg3,3,pscript_type__get__float); 
+  GET_ARG_VALUE(int,arg4,4,pscript_type__get__integer); 
+
+  SCRIPT_Camera_Rotate(arg1, arg2, arg3, arg4); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CCamera_Zoom(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "Camera"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(float,arg1,1,pscript_type__get__float); 
+
+  SCRIPT_Camera_Zoom(arg1); 
+  
+  return 0; 
+}; 
+
+static int CPascal__method_callback__CCamera_Defaut(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "Camera"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  //int * a = NULL; *a = 0; 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  //Camera -> InitCamera(Camera); 
+  SCRIPT_Camera_Init(); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CCamera_Solidariser(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "Camera"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  //Camera -> SolidariserAuHeros(Camera); 
+  SCRIPT_Camera_SolidariserAuHeros();
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CCamera_DeSolidariser(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "Camera"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != 1 + arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  //Camera -> DeSolidariser(Camera); 
+  SCRIPT_Camera_DeSolidariser();
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static int CPascal__method_callback__CMouton1_WaitFor(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,1,pscript_type__get__string); 
+  const char * arg1_cstr = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+
+  SCRIPT_WaitFor(arg1_cstr); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CMouton1_Wait(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg1,1,pscript_type__get__string); 
+
+  SCRIPT_Wait(arg1); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CMouton1_Musique(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,1,pscript_type__get__string); const char * arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+
+  SCRIPT_JouerMusique(arg1); 
+  
+  return 0; 
+}; 
+
+
+
+static int CPascal__method_callback__CMouton1_AjouterAnime(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  const int arg_this = 1; 
+  
+  const int arg_requested = 2; 
+  if (arg_nb != arg_requested + arg_this) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  const char * arg1; 
+  if (PSCRIPT_TYPE__STRING == pscript_type__get_core_type(this -> pscript_env -> type_env, arg_type[0 + arg_this])) { 
+    GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,0 + arg_this,pscript_type__get__string); 
+    arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  } 
+  else { 
+    arg1 = CPascal__method_callback__CBonhomme__get_qui__arg_i(callback_data, 0 + arg_this, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  }; 
+  GET_ARG_VALUE(int_pscript_string_t,arg2_pstr,1 + arg_this,pscript_type__get__string); const char * arg2 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg2_pstr); 
+
+  SCRIPT_AjouterObjetAnime(arg1, arg2); 
+  
+  return 0; 
+}; 
+
+
+
+static int CPascal__method_callback__CMouton1_AjouterNonAnime(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 2; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,1,pscript_type__get__string); const char * arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  GET_ARG_VALUE(int_pscript_string_t,arg2_pstr,2,pscript_type__get__string); const char * arg2 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg2_pstr); 
+
+  SCRIPT_AjouterObjetNonAnime(arg1, arg2); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CMouton1_SetTemps(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(float,arg1,1,pscript_type__get__float); 
+
+  SCRIPT_SetTemps(arg1); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CMouton1_BloquerTemps(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  SCRIPT_BloquerTemps(); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__method_callback__CMouton1_DebloquerTemps(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  SCRIPT_DebloquerTemps(); 
+  
+  return 0; 
+}; 
+
+
+
+static int CPascal__method_callback__CMouton1_carte(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "CMouton1"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 2; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb - 1, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,1,pscript_type__get__string); const char * arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  GET_ARG_VALUE(float,arg2,2,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg3,3,pscript_type__get__float); 
+  GET_ARG_VALUE(int,arg4,4,pscript_type__get__integer); 
+
+  //SCRIPT_ChangerDeCarte_vXY(&MoteurTeleportation, arg1, arg2, arg3, arg4); 
+  SCRIPT_ChangerDeCarte_vXY(arg1, arg2, arg3, arg4); 
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static int CPascal__ffiproc_callback__WaitFor(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  const int arg_this = 0; // RL: '0' for a regular function, '1' for a method. 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+#if 0 
+  GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,0,pscript_type__get__string); 
+  const char * arg1_cstr = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  SCRIPT_WaitFor(arg1_cstr); 
+#else 
+  const char * arg1; 
+  if (PSCRIPT_TYPE__STRING == pscript_type__get_core_type(this -> pscript_env -> type_env, arg_type[0 + arg_this])) { 
+    GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,0 + arg_this,pscript_type__get__string); 
+    arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  } 
+  else { 
+    arg1 = CPascal__method_callback__CBonhomme__get_qui__arg_i(callback_data, 0 + arg_this, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  }; 
+  SCRIPT_WaitFor(arg1); 
+#endif 
+
+  
+  return 0; 
+}; 
+
+
+static int CPascal__ffiproc_callback__Wait(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+  //GET_ARG_VALUE(int_pscript_string_t,arg1,0,pscript_type__get__string); 
+  GET_ARG_VALUE(int,arg1,0,pscript_type__get__integer); 
+
+  SCRIPT_Wait(arg1); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__ffiproc_callback__Musique(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,0,pscript_type__get__string); const char * arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+
+  SCRIPT_JouerMusique(arg1); 
+  
+  return 0; 
+}; 
+
+
+
+static int CPascal__ffiproc_callback__AjouterAnime(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  const int arg_this = 0; 
+  
+  const int arg_requested = 2; 
+  if (arg_nb != arg_requested + arg_this) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+  const char * arg1; 
+  if (PSCRIPT_TYPE__STRING == pscript_type__get_core_type(this -> pscript_env -> type_env, arg_type[0 + arg_this])) { 
+    GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,0 + arg_this,pscript_type__get__string); 
+    arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  } 
+  else { 
+    arg1 = CPascal__method_callback__CBonhomme__get_qui__arg_i(callback_data, 0 + arg_this, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg2_pstr,1 + arg_this,pscript_type__get__string); const char * arg2 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg2_pstr); 
+  
+  SCRIPT_AjouterObjetAnime(arg1, arg2); 
+  
+  return 0; 
+}; 
+
+
+
+static int CPascal__ffiproc_callback__AjouterNonAnime(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 2; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(int_pscript_string_t,arg1_pstr,0,pscript_type__get__string); const char * arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  GET_ARG_VALUE(int_pscript_string_t,arg2_pstr,1,pscript_type__get__string); const char * arg2 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg2_pstr); 
+
+  SCRIPT_AjouterObjetNonAnime(arg1, arg2); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__ffiproc_callback__SetTemps(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 1; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+  GET_ARG_VALUE(float,arg1,0,pscript_type__get__float); 
+
+  SCRIPT_SetTemps(arg1); 
+  
+  return 0; 
+}; 
+
+
+static int CPascal__ffiproc_callback__BloquerTemps(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+#if 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  { char buffer[] = "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "  " "\n"; write(fileno(stdout), buffer, sizeof(buffer)); }; 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  fprintf(stderr, "'-' = %x \n", (int) '-'); 
+
+  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf); }; 
+  { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", stderr -> _bf); }; 
+
+  flockfile(stdout); 
+  { const char u[] = "Hop lala ------------------------------------------------------------------------------\n"; }; 
+  funlockfile(stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+
+  flockfile(stdout); 
+  { const char u[] = "--------------------------------"; dprintf(fileno(stdout), "%s\n", u); }; 
+  funlockfile(stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+
+  flockfile(stdout); 
+  { const char u[] = "--------------------------------"; printf("%s\n", u); }; 
+  funlockfile(stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+
+  flockfile(stdout); 
+  { const char u[] = "Hop lala ------------------------------------------------------------------------------\n"; printf("%s", u); }; 
+  funlockfile(stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+
+  flockfile(stdout); 
+  printf("Hop lala ------------------------------------------------------------------------------\n"); 
+  funlockfile(stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+
+  flockfile(stdout); 
+  printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<NA()>}: " " stdout = NA " "\n"); 
+  funlockfile(stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+#endif 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  messlog("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+#if 0 
+  //const char __function__[] = __func__; 
+  const char * __function__ = __func__; 
+  //messlog("Callback of '%s' on object '%s'." "\n", __function__, qui); 
+  //messlog("Callback of '%s' on object '%s'." "\n", "ALBERT", qui); 
+  //messerr("Yallah!." "\n"); 
+  {
+    //const char __VA_ARGS__[] = "Yallah" "\n"; 
+    //{ if (zeldafnotice) fprintf(zeldafnotice, "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " "%s", __VA_ARGS__); }; 
+    //{ if (zeldaferror)  fprintf(zeldaferror , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": " "%s", __VA_ARGS__); }; 
+    //{ fprintf                  (stdout_FILE , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": "  "%s",__VA_ARGS__); }; 
+    //{ fprintf                  (stderr_FILE , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": "  "%s",__VA_ARGS__); }; 
+
+    //{ fprintf                  (stdout_FILE , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__func__) ": "  "\n"); }; 
+
+    //{ fprintf                  (stdout_FILE , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(234) ": "  "\n"); }; 
+    //{ fprintf                  (stdout , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(234) ": "  "\n"); }; 
+    //{ fprintf                  (stdout , "ERREUR: " __FILE__ ": " BIGLIB_STRING(__LINE__) ": "  ": "  "\n"); }; 
+    //{ fprintf                  (stdout , "ERREUR: " __FILE__ ": "  ": "  ": "  "\n"); }; 
+    //{ fprintf                  (stdout , "ERREUR: " "%s" ": "  ": "  ": "  "\n", __FILE__); }; 
+    { const char __my_file__[] = __FILE__; fprintf                  (stdout, "ERREUR: " "%s" ": "  ": "  ": "  "\n", __my_file__); }; 
+    { const char * __my_file__ = __FILE__; fprintf                  (stdout, "ERREUR: " "%s" ": "  ": "  ": "  "\n", __my_file__); }; 
+    { fprintf                  (stdout, "ERREUR: "  ": "  "\n"); }; 
+  }; 
+
+  
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+#endif 
+
+  const int arg_requested = 0; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+  
+  SCRIPT_BloquerTemps(); 
+  
+  //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " callback_data = %p - arg_nb = %d - arg_type = %p - arg_sizeof = %p - arg_offset = %p - arg_mem_size = %d - arg_mem = %p - retval_type = %d - retval_allocated_size = %d - retval_value = %p "   "\n", __func__, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
+
+  return 0; 
+}; 
+
+
+static int CPascal__ffiproc_callback__DebloquerTemps(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 0; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+  
+  SCRIPT_DebloquerTemps(); 
+  
+  return 0; 
+}; 
+
+
+
+static int CPascal__ffiproc_callback__carte(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  //CPascal * this = callback_data; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  
+  const int arg_requested = 4; 
+  if (arg_nb != arg_requested) { messerr("Calling method '%s' of object '%s' with %d arguments whereas %d are requested." "\n", __func__, qui, arg_nb, arg_requested); return -1;  }; 
+
+  
+  //GET_ARG_VALUE(int,arg1_pstr,1,pscript_type__get__string); const char * arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 
+  int arg1_pstr;								
+  {									
+    const int arg_i         = 1 - 1; 
+    const int target_type   = pscript_type__get__string(this -> pscript_env -> type_env); 
+    const int target_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, target_type); 
+    char target_value[target_sizeof]; 
+    pscript_value__cast_generic(this -> pscript_env, target_type, arg_type[arg_i], arg_sizeof[arg_i], arg_mem + arg_offset[arg_i], target_sizeof, target_value); 
+    arg1_pstr = *(int_pscript_string_t *) target_value;					
+  };							
+  const char * arg1 = pscript_string__get_cstr(this -> pscript_env -> string_env, arg1_pstr); 		
+
+  GET_ARG_VALUE(float,arg2,2-1,pscript_type__get__float); 
+  GET_ARG_VALUE(float,arg3,3-1,pscript_type__get__float); 
+  GET_ARG_VALUE(int,arg4,4-1,pscript_type__get__integer); 
+
+  //SCRIPT_ChangerDeCarte_vXY(&MoteurTeleportation, arg1, arg2, arg3, arg4); 
+  SCRIPT_ChangerDeCarte_vXY(arg1, arg2, arg3, arg4); 
+  
+  return 0; 
+}; 
+
+
+
+
+
+
+static int CPascal__ffiproc_callback__Readln(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  const int arg_this = 0; 
+
+# if 0 
+  const int arg1_i = 0 + arg_this; 
+  const int arg1_type = arg_type[arg1_i]; 
+  const int arg1_type_core = pscript_type__get_core_type(this -> pscript_env -> type_env, arg1_type); 
+  messerr("FIRST Actual type: %s (arg_nb = %d) " "\n", pscript_type__get_cstr(this -> pscript_env -> type_env, arg1_type), arg_nb); 
+#endif 
+  
+#if 1 
+  this -> readln__arg_nb = arg_nb; 
+  bcopy(arg_type,   this -> readln__arg_type,   arg_nb * sizeof(*arg_type)); 
+  bcopy(arg_sizeof, this -> readln__arg_sizeof, arg_nb * sizeof(*arg_sizeof)); 
+  bcopy(arg_offset, this -> readln__arg_offset, arg_nb * sizeof(*arg_offset)); 
+  this -> readln__arg_mem_size = arg_mem_size; 
+  this -> readln__arg_mem = malloc(arg_mem_size); 
+  bcopy(arg_mem, this -> readln__arg_mem, arg_mem_size); 
+  this -> readln__retval_allocated_size = retval_allocated_size;  
+  this -> readln__retval_value          = retval_value; 
+#else 
+  // Those things get deallocated on return. 
+  this -> readln__arg_nb       = arg_nb; 
+  this -> readln__arg_type     = arg_type;  
+  this -> readln__arg_sizeof   = arg_sizeof;  
+  this -> readln__arg_offset   = arg_offset;  
+  this -> readln__arg_mem_size = arg_mem_size; 
+  this -> readln__arg_mem      = arg_mem; 
+  this -> readln__retval_allocated_size = retval_allocated_size;  
+  this -> readln__retval_value          = retval_value; 
+#endif 
+  
+  //SCRIPT_Readln(MenuEntreeNom); // ASYNC ! 
+  SCRIPT_Readln(); // ASYNC ! 
+  
+  return 0; 
+}; 
+
+
+
+
+int CPascal__ffiproc_callback__Readln__async_reverse_callback__push_return_value(CPascal * this, const char * readln_cstr) { 
+  int retval = 0; 
+  do { 
+    const int    arg_nb       = this -> readln__arg_nb; 
+    const char * arg_type     = this -> readln__arg_type; 
+    const int  * arg_sizeof   = this -> readln__arg_sizeof; 
+    const int  * arg_offset   = this -> readln__arg_offset; 
+    const int    arg_mem_size = this -> readln__arg_mem_size; 
+    const char * arg_mem      = this -> readln__arg_mem; 
+    const int    retval_allocated_size = this -> readln__retval_allocated_size; 
+    char *       retval_value          = this -> readln__retval_value; 
+    
+    int allright_huh; 
+    const char * qui = "<global>"; 
+    message("ASync Reverse Callback of '%s' on object '%s' - readln_cstr = '%s'" "\n", __func__, qui, readln_cstr); 
+    const int arg_this = 0; 
+    
+    if (arg_nb == 0 + arg_this) { break; }; 
+    
+    if (arg_nb > 1 + arg_this) { 
+      messerr("Calling method '%s' of object '%s' with more than one argument has not been implemented yet." "\n", __func__, qui); 
+      retval = -1; 
+      break; 
+    }; 
+    
+    const int arg1_i         = 0 + arg_this; 
+    const int arg1_type      = arg_type[arg1_i]; 
+    const int arg1_type_core = pscript_type__get_core_type(this -> pscript_env -> type_env, arg1_type); 
+    int       arg1_subtype   = -1; 
+    if (PSCRIPT_TYPE__PROXY == arg1_type_core) { 
+      arg1_subtype = pscript_type__proxy__get_subtype(this -> pscript_env -> type_env, arg1_type); 
+    } 
+    else if (PSCRIPT_TYPE__POINTER == arg1_type_core) { 
+      arg1_subtype = pscript_type__pointer__get_subtype(this -> pscript_env -> type_env, arg1_type); 
+    }
+    else { 
+      messerr("Calling method '%s' of object '%s': internal error: the argument should be byref." "\n", __func__, qui); 
+      messerr("Actual type: %s " "\n", pscript_type__get_cstr(this -> pscript_env -> type_env, arg1_type)); 
+      retval = -2; 
+      break; 
+    }; 
+    //const int    arg1_subtype = pscript_type__proxy__get_subtype(this -> pscript_env -> type_env, arg1_type); 
+    const int    arg1_offset         = arg_offset[arg1_i]; 
+    const int    arg1_sizeof         = arg_sizeof[arg1_i]; 
+    const char * arg1_value          = arg_mem + arg1_offset; 
+    const int    arg1_subtype_offset = *(const int_pscript_mem_t *) arg1_value; 
+    
+    const int readln_pstr = pscript_string__push(this -> pscript_env -> string_env, readln_cstr); 
+    //pscript_stack__push_value(this -> pscript_env -> stack_env, pscript_type__get__string(this -> pscript_env -> type_env), sizeof(readln_pstr), (const char *) &readln_pstr); 
+    
+    const int    cast_target_type   = arg1_subtype; 
+    const int    cast_target_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, cast_target_type); 
+    //char         cast_target_value[cast_target_sizeof]; 
+    char *       cast_target_value = pscript_mem__get_pointer_writable(this -> pscript_env -> mem_env, arg1_subtype_offset); 
+    
+    pscript_value__cast_generic(this -> pscript_env, cast_target_type, pscript_type__get__string(this -> pscript_env -> type_env), sizeof(readln_pstr), (const char *) &readln_pstr, cast_target_sizeof, cast_target_value); 
+    
+  } while (false); 
+  free(this -> readln__arg_mem); 
+  return retval; 
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+int CPascal__ffiproc_callback__Menu__async_reverse_callback__push_return_value(CPascal * this, const int choice) { 
+  const char * qui = "<global>"; 
+  message("<%s>: " "ASync Reverse Callback on object '%s' - choice = '%s'" "\n", __func__, qui, int_string__stack(choice)); 
+  const int retval_type = pscript_type__get__integer(this -> pscript_env -> type_env); 
+  const int retval_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, retval_type); 
+  char retval_value[retval_sizeof]; 
+  *((int *) retval_value) = choice; 
+  pscript_stack__drop(this -> pscript_env -> stack_env); // RL: A dummy value was pushed onto the stack. 
+  pscript_stack__push_value(this -> pscript_env -> stack_env, retval_type, retval_sizeof, retval_value); 
+  return 0; 
+}; 
+
+
+
+
+
+static int CPascal__menu_async_set(const char * menu_title, const int menu_item_nb, const char * item[]) { 
+#if 0 
+  messerr("%s: " "msg = %s" "\n", __func__, menu_title); 
+#endif 
+  CMenuAbstrait * MiniMenu = NULL; 
+  MiniMenu = SCRIPT_BeginAfficherMenu(); 
+  for (int i = 0; i < menu_item_nb; i++) { 
+#if 0 
+    messerr("%s: " "\t" "item = %s" "\n", __func__, item[i]); 
+#endif 
+    MiniMenu -> Add(MiniMenu, 0, item[i], NULL); 
+  }; 
+  
+  // RL: The return value is async. 
+  //     The game called a pscript function, which in turn called a game function. 
+  //     That last game function is async - it changed the game mode at the top level - and when the PScript came back to the top level, 
+  //     the code for the nested function is actually run. 
+  //     But, then, a consequence is that this function must push the value on its own on the stack. 
+  //     Therefore the PScript VM does not see the returned value. And it won't see it. 
+  //     It will be there at the next PScript VM instruction, but the VM did not push it. 
+  //     It was pushed on the stack by the game (as this call is async). 
+  SCRIPT_AfficherMenu(menu_title); // RL: ASYNC 
+  return 0; 
+}; 
+
+static int CPascal__ffiproc_callback__Menu(void * callback_data, const int arg_nb, const char arg_type[], const int arg_sizeof[], const int arg_offset[], const int arg_mem_size, const char arg_mem[], const int retval_type, const int retval_allocated_size, char * retval_value) { 
+  int allright_huh; 
+  CPascal * this = callback_data; 
+  const char * qui = "<global>"; 
+  message("Callback of '%s' on object '%s'." "\n", __func__, qui); 
+  const int arg_this = 0; 
+  
+# if 0 
+  const int arg1_i         = 0 + arg_this; 
+  const int arg1_type      = arg_type[arg1_i]; 
+  const int arg1_type_core = pscript_type__get_core_type(this -> pscript_env -> type_env, arg1_type); 
+  messerr("FIRST Actual type: %s (arg_nb = %d) " "\n", pscript_type__get_cstr(this -> pscript_env -> type_env, arg1_type), arg_nb); 
+#endif 
+  
+  // RL: 'Menu' is an async FFI. 
+  //      Meaning that we set the current state, and then the ffi will return into the PScript VM without the return value. 
+  //      The kernel won't be running the PScript bytecode anyfurther, 
+  //      it will run the game engine, 
+  //      until the game engine gives a value for the PScript. 
+  //      The kernel then pushes that value onto the PScript stack, and then run PScript bytecode again. 
+  
+  if (arg_nb < 1) { goto xxx_error__MENU; }; 
+
+  { 
+    const char * arg_string[arg_nb]; 
+    
+    for (int i = 0; i < arg_nb; i++) { 
+      const int    type1        = arg_type[i]; 
+      const int    type1_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, type1); 
+      const char * value1       = arg_mem + arg_offset[i]; 
+      arg_string[i]             = pscript_value__get_cstr(this -> pscript_env, type1, type1_sizeof, value1); 
+    }; 
+    
+    const char *   menu_title   = arg_string[0]; 
+    const int      menu_item_nb = arg_nb - 1; 
+    const char * * menu_items   = arg_string + 1; 
+    
+    CPascal__menu_async_set(menu_title, menu_item_nb, menu_items); 
+  }; 
+  
+  return 0; 
+  
+xxx_error__MENU: { 
+    const int retval = -1; 
+    bcopy((const char *)&retval, retval_value, MIN((int)sizeof(retval), retval_allocated_size)); 
+    return -1; 
+  }; 
+}; 
+
+
+
+
+
+
