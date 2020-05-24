@@ -96,6 +96,7 @@ Then, after spatial descriptions (the «objects»), we wanted temporal descripti
    On the other hand, scripting language are easier when recursively interpreted. But the linearization & step-wise design implied to break that down. What should have been was to take the full step and develop a bytecode. We did not know that, but, in facts, bytecode is not very complicated - so that step could have been taken. Instead, a halfway solution was designed, the worst of the two worlds: stepped interpretation (it's an oxymoron; by definition, interpretation is a recursive process). Never do «stepped interpretation» - it's complicated as hell - bytecode is simpler. 
  - (d) As of now, I rewrote that whole part. It generates bytecode. It's easier, more powerfull, less buggy, and simpler. The narrative description language is called «PScript» for «Pascal Scripting Language». I tried to make as simple as possible, with variables, type-less as Scheme, no *lex* and no *yacc*. There are many things to be improved, to be tested, but the core works, and works pretty well. 
  - (e) The program now has an explicit kernel part, and two explicit cooperative threads: script & game. It makes much more sense. 
+ - (f) A good consequence of cooperative threads is that the temporal DSL can be in any language, including plain *C*. As a proof of concept, I did implement some scripts in plain *C*. Meaning that it is not even necessary to develop to dedicated languages to do that. (Geez - Had we known that...!) 
   
   
  
