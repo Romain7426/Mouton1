@@ -1,4 +1,4 @@
-# *Dessine-moi un mouton!* 
+# *Dessine-moi un mouton!* :relaxed: 
 
 Hello everyone! :relaxed: 
 
