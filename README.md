@@ -117,7 +117,7 @@ Regarding the future & TODOs, there are many things:
  - (ix) There are obviously many bugs everywhere. 
  - (x) There are many useless files & lines of code. 
  
-That said, once again, the game is not being currently developed. Do not expect any improvement for the upcoming twenty years.  
+That said, once again, the game is not being currently developed. Do not expect any improvement for the upcoming twenty years (today is sunday the 24th of may 2020).  
  
 For information, when we presented the game at the InterENS, the game was a broken buggy jenga-tower. It's so much better now. 
  
