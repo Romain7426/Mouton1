@@ -105,7 +105,7 @@ Then, after spatial descriptions (the «objects»), we wanted temporal descripti
 First, that game is ***NOT*** maintained. Patches are welcome, but the program is not actively developed. The point of that GiHub repository is to show off the work that we did - and it's still not a bad piece of software. 
  
 Regarding the future & TODOs, there are many things: 
- - (i) Be able to walk a negative-curvature manifold (projective plan) would be great. 
+ - (i) Being able to walk a negative-curvature manifold (projective plan) would be great. 
  - (ii) Refactor the game engine which still a bunch functions bypassing each other, and breaking assertions and invariants. A lot of work here. 
  - (iii) Make it compile and work on every arch & OS. A lot of uninteresting work here. 
  - (iv) Refine the DSLs. 
@@ -113,6 +113,7 @@ Regarding the future & TODOs, there are many things:
  - (vi) Make the ice map work. 
  - (vii) Develop many side tools (maps design, 3DS, etc.) 
  - (viii) Fix & improve the current narrative (when the game engine won't be based on a jenga-tower design, it should be easier to expand the narrative). 
+ - (ix) There are obviously many bugs everywhere. 
  
 That said, once again, the game is not being currently developed. Do not expect any improvement for the upcoming twenty years.  
  
