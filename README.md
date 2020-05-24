@@ -28,7 +28,7 @@ Authors:
  - [François](https://github.com/francoisschwarzentruber) <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Music, Game engine, Level design <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://people.irisa.fr/Francois.Schwarzentruber/
- - Romain (myself)  <br> 
+ - [Romain](https://github.com/Romain7426) (myself)  <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description languages <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
   
