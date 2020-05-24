@@ -2,7 +2,7 @@
 
 Hello everyone! :relaxed: 
 
-**Dessine-moi un mouton!** is a game that we wrote during our university second year. That was a fairly long time ago (time flies, guys). 
+***Dessine-moi un mouton!*** is a game that we wrote during our university second year. That was a fairly long time ago (time flies, guys). 
 We're french, so the game is in french. 
 
 The main spirit underlying the game is that we were (still are) great fans of [*The Legend of Zelda*](https://en.wikipedia.org/wiki/The_Legend_of_Zelda) and [*Secret of Mana*](https://en.wikipedia.org/wiki/Secret_of_Mana). We also happened to be mathematicians & computer scientists, meaning that this software a bit wild & crazy. However, 'computer scientists' does not mean 'software engineers', and we did not have any lecture on software designing (seems like it's still an academic issue though); so, we learnt through our [trials and our errors](https://en.wikipedia.org/wiki/Trial_and_error), but the game was not thought nor designed. It was our first large project, with a team of artists (!), and we had too many ideas that we did not know were too big for the project. And our software lectures being quite scarce & poor, we rushed into it without knowing the dragons that we would meet nor how to properly & simply defeat them. Retrospectively, the result is not that bad considering the context (we also had to play *World of Warcraft*, exams to pass, academic projects, eating crêpes, drinking apple cider, working on internship essays, and so forth). <br> 
