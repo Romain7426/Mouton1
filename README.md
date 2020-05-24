@@ -107,7 +107,7 @@ First, that game is ***NOT*** maintained. Patches are welcome, but the program i
  
 Regarding the future & TODOs, there are many things: 
  - (i) Being able to walk a negative-curvature manifold (projective plan) would be great. 
- - (ii) Refactor the game engine which still a bunch functions bypassing each other, and breaking assertions and invariants. A lot of work here. 
+ - (ii) Refactor the game engine which is still a bunch of functions bypassing each other, breaking assertions and invariants. A lot of work here. 
  - (iii) Make it compile and work on every arch & OS. A lot of uninteresting work here. 
  - (iv) Refine the DSLs. 
  - (v) Make the airteapot work. 
