@@ -25,7 +25,7 @@ Authors:
  - Ludovic <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scenery items design <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://goudenege.perso.math.cnrs.fr/output/
- - François <br> 
+ - [François](https://github.com/francoisschwarzentruber) <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Music, Game engine, Level design <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://people.irisa.fr/Francois.Schwarzentruber/
  - Romain (myself)  <br> 
