@@ -57,7 +57,7 @@ Then, this repository is the main repository - there are small sub-projects that
   
 I do not know how to integrate all of them in a single GitHub repository. So, in a user-unfriendly spirit, these have to be downloaded and compiled first. However, the idea was that these sub-projects were separate from the main project, and should be able to compile & run on their own. 
  
-Then, as of now, loading of 3DS object work on little-endian system, but cannot properly work on non-little-endian system as non-little-endian endian-ness is not properly handled (bytes have to be swapped while reading 3DS files). 
+Then, as of now, loading of 3DS object works on little-endian system, but cannot properly work on non-little-endian system as non-little-endian endian-ness is not properly handled (bytes have to be swapped while reading 3DS files). 
  
 All that being said, after downloading the project, type 'gmake -f Makefile-gen.mkf' and then 'make' and, supposedly, it should work. I would not bet my bottom dollar on it though. 
  
