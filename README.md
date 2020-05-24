@@ -114,6 +114,7 @@ Regarding the future & TODOs, there are many things:
  - (vii) Develop many side tools (maps design, 3DS, etc.) 
  - (viii) Fix & improve the current narrative (when the game engine won't be based on a jenga-tower design, it should be easier to expand the narrative). 
  - (ix) There are obviously many bugs everywhere. 
+ - (x) There are many useless files & lines of code. 
  
 That said, once again, the game is not being currently developed. Do not expect any improvement for the upcoming twenty years.  
  
