@@ -45,7 +45,7 @@ However, as it seems that backward copyrighting could exist, therefore we did no
 
 First, likely, the game won't compile right off the bat on your computer: too many things to make it work. And as the saying goes, ['libtool is hell'](https://en.wikipedia.org/wiki/Autohell). I might look into that in twenty years. It used to compile and work on Windows & MacOSX. Currently, it compiles & works on BSD. 
  
-Then, the game depends on [SDL](http://www.libsdl.org), [SDL_image](http://www.libsdl.org/projects/SDL_image/release-1.2.html), [SDL_mixer](http://www.libsdl.org/projects/SDL_mixer/release-1.2.html). If these libraries do not work on your computer, then it's just can't work. But that's its only library depencies, so it's not that bad (to be fair, SDL_image & SDL_mixer depend on sub-libraries, like libjpeg, libpng, libvorbis, libogg, etc.). 
+Then, the game depends on [SDL](http://www.libsdl.org), [SDL_image](http://www.libsdl.org/projects/SDL_image/release-1.2.html), [SDL_mixer](http://www.libsdl.org/projects/SDL_mixer/release-1.2.html). If these libraries do not work on your computer, then it just can't work. But that's its only library depencies, so it's not that bad (to be fair, SDL_image & SDL_mixer depend on sub-libraries, like libjpeg, libpng, libvorbis, libogg, etc.). 
  
 Then, the game was compiled with [gcc](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) and [clang](https://en.wikipedia.org/wiki/Clang). It might work with other compilers, but we can't know for sure. 
  
