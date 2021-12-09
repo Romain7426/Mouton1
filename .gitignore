@@ -17,3 +17,6 @@ src-tarball-*
 *.img
 *.gz
 tools/bin
+log
+*.202*
+
