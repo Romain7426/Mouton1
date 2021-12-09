@@ -50,7 +50,21 @@ int main(const int argc, const char * argv[]) {
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
   { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
 #if 1 
-  freopen(stdout_log_filename, "wb", stdout); 
+  if (-1 == access(LOGDIR, R_OK | W_OK | X_OK | F_OK)) { 
+#if 1 
+    if (-1 == mkdir(LOGDIR, (mode_t) 0777)) { 
+      assert(false); 
+    }; 
+#else 
+    static char logdir[] = LOGDIR; 
+    logdir[sizeof(LOGDIR)-1] = '\0'; 
+    //if (-1 == mkdir(LOGDIR ".", (mode_t) 0777)) { 
+    if (-1 == mkdir(logdir, (mode_t) 0777)) { 
+      assert(false); 
+    }; 
+#endif 
+  }; 
+  { const FILE * retval = freopen(stdout_log_filename, "wb", stdout); assert(NULL != retval); }; 
   char stdout_buffer[1 << 12]; 
   //setvbuf(stdout, stdout_buffer, _IONBF, sizeof(stdout_buffer)); // RL: Unbuffered. 
   //setvbuf(stdout, stdout_buffer, _IOLBF, sizeof(stdout_buffer)); // RL: Line buffered. 
