@@ -6,7 +6,7 @@
 #include "objnonanime.h"
 #include "bonhomme.h"
 #include "evenement.h"
-#include "carte.h"
+#include <carte.h>
 
 TDirection DirectionAleatoire(void) {
   //return (TDirection) (rand() % 4);

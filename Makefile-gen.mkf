@@ -1,7 +1,17 @@
+#! /usr/local/bin/gmake -f
+#! /usr/local/bin/gmake -r -R -S -j 1 --warn-undefined-variables -f 
+#!/usr/bin/env gmake -f
+#!/usr/bin/env env gmake -r -R -S -j 1 --warn-undefined-variables -f 
+#!/usr/bin/env gmake
+#!/usr/bin/env gmake -r -R -S -j 1 --warn-undefined-variables -f 
+#!/bin/sh -c 'gmake -r -R -S -j 1 --warn-undefined-variables -f '
+#!/bin/sh
 #!gmake -r -R -S -j 1 --warn-undefined-variables -f 
+#!gmake
 SHELL:= /bin/sh
 .SHELLFLAGS: -u -e  
 #MAKEFLAGS:= $(MAKEFLAGS) --warn-undefined-variables 
+#MAKEFLAGS:= $(MAKEFLAGS) -r -R -S -j 1 --warn-undefined-variables 
 #MAKEFLAGS:= $(filter-out  --warn-undefined-variables,$(MAKEFLAGS)) 
 .SUFFIXES: 
 .SILENT:
@@ -10,15 +20,6 @@ SHELL:= /bin/sh
 .SECONDARY:
 .PRECIOUS:
 .ONESHELL:
-
-
-
-#CMD_TO_GET_DEPS_FUN = function get_deps { cat $$1 | c-file-local-include-list | line-prefix-add src/ | newline2space ; } 
-
-#CMD_TO_GET_DEPS_ITER = LIST=$(1) LEN=`length $$LIST`; $(CMD_TO_GET_DEPS_FUN);  while true; do NEWLIST=""; for ddd in $$LIST; do NEWLIST=$$NEWLIST" "`get_deps $$ddd`; done; NEWLIST=`remove-doublon $$NEWLIST`; NEWLEN=`length $$NEWLIST`; if test $$LEN = $$NEWLEN; then break; fi; LIST=$$LIST" "$$NEWLIST LEN=$$NEWLEN; done; echo $$LIST
-
-#CMD_TO_GET_DEPS_CLOS = LIST="" CURRENT_LIST=$(1); $(CMD_TO_GET_DEPS_FUN);  while true; do NEWLIST=""; for ddd in $$CURRENT_LIST; do NEWLIST=$$NEWLIST" "\`get_deps $$ddd\`; done; NEWLIST=\`remove-doublon $$NEWLIST\`; CURRENT_LIST=\`list-diff $$NEWLIST @ $$LIST\`; LIST=$$LIST" "$$CURRENT_LIST; if test \`length $$CURRENT_LIST\` = 0; then break; fi; done; echo $$LIST
-
 
 
 .PHONY: default
@@ -32,48 +33,59 @@ clean:
 	rm -f Makefile build.sh
 
 
+# ***************************************************************************** 
+# PROJECT 
+
 #PROJECT_NAME := $(shell ./tools/bin/filename_without_path $$PWD)
 PROJECT_NAME := mouton1
-#SUBDIRS:=$(shell cd src; ldir | newline2space)
-#SUBLIBS:=$(SUBDIRS)
-SUBLIBS:=
-SUBLIBS_A:=$(patsubst %,lib%.a,$(SUBLIBS))
-SUBLIBS_A:=$(patsubst liblib%,lib%,$(SUBLIBS_A))
-#UNAME:=$(shell uname)
-#UNAME_M:=$(shell uname -m)
-#PROJECT_TOOLS := $(shell echo $$PROJECT_TOOLS)
-#GCC_VERSION_MAJOR := $(shell tools/bin/gcc-version-major)
+DATETIME_UTC := $(shell TZ="UTC" date "+%Z[%z] %Y_%m_%d-%Hh%Mm%Ss %A")
 
-CONFIGURE__SDL := --prefix=$PWD/destroot/ --disable-oss 
 
-#PATCHES
+# ***************************************************************************** 
+# COMPILER & SYSTEM 
 
-#$(error $(SUBLIBS_A))
+#CC           := $(if $(strip $(CC)),$(if $(strip $(filter $(CC),cc)),$(shell which cc),$(CC)),$(shell which cc))
+#$(info $(origin CC)) # returns "undefined" or something else 
+ifdef CC
+#$(info CC is defined)
+CC           := $(if $(strip $(filter $(CC),cc)),$(shell which cc),$(CC))
+else
+#$(info CC is undefined)
+CC           := $(if $(strip $(wildcard CC)),$(shell cat CC),$(shell which cc))
+endif
+$(info CC          : $(CC))
 
-# DEBUG OPT INLINE GC PROF
-#   DEBUG  [yes/no] -> mode de compilation du programme
-#   OPT    [yes/no] -> optimise-t-on le programme? 
-#   INLINE [yes/no] -> optimise-t-on le programme? 
-#   GC     [yes/no] -> gc'ed-t-on le code? 
-#   PROF   [yes/no] -> profile-t-on le code? 
-DEBUG := yes
-OPT := no
-INLINE := no
-GC := no
-PROF := no
+CC_WORKS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_WORKS_HUH),0) 
+  CC_WORKS_HUH := yes
+else 
+  CC_WORKS_HUH := no
+endif 
 
-SYSTEME := $(shell uname)
-ENDIAN := $(shell ./tools/bin/endianness-detect)
-ARCH := $(shell arch) # RL: Synonym of 'machine' 
-MACHINE := $(shell machine)
-HARDWARE := $(shell uname -m)
+$(info CC_WORKS_HUH: $(CC_WORKS_HUH))
+
+ifeq ($(CC_WORKS_HUH),no) 
+   $(info --> Specified compiler failed to compile a test trivial program.)
+   $(info -->   Seems like your compiler does not work.) 
+   $(error ABORTING)
+endif 
+
+
+
+CC_NAME      := $(shell mkdir -p tmp && $(CC) ./tools/src/compiler-detect.c -o tmp/compiler-detect.exe && ./tmp/compiler-detect.exe) 
+UNAME        := $(shell uname)
+#ENDIAN       := $(shell ./tools/bin/endianness-detect)
+ENDIAN       := $(shell mkdir -p tmp && $(CC) ./tools/src/endianness-detect.c -o tmp/endianness-detect.exe && ./tmp/endianness-detect.exe) 
+ARCH         := $(shell arch)
+MACHINE      := $(shell machine)
+HARDWARE     := $(shell uname -m)
 
 UNAME_LIST := FreeBSD NetBSD OpenBSD Darwin Linux MINGW32_NT-6.1 MINGW32_NT-5.1 windows DOS
 OS_LIST := freebsd netbsd openbsd macosx linux windows windows windows dos
 ifneq ($(words $(UNAME_LIST)),$(words $(OS_LIST)))
   $(error The number of elements in the UNAME_LIST is not equal to the number of elements of the OS_LIST)
 endif
-UNAME_IDX := $(shell ./tools/bin/list-match $(SYSTEME) $(UNAME_LIST) $(SYSTEME))
+UNAME_IDX := $(shell ./tools/bin/list-match $(UNAME) $(UNAME_LIST) $(UNAME))
 OS := $(word $(UNAME_IDX), $(OS_LIST) unknown_os)
 
 HW_LIST := i386 amd64 x86_64 i686 386 8086
@@ -82,33 +94,47 @@ ifneq ($(words $(HW_LIST)),$(words $(INTSIZE_LIST)))
   $(error The number of elements in the HW_LIST is not equal to the number of elements of the INTSIZE_LIST)
 endif
 HW_IDX := $(shell tools/bin/list-match $(HARDWARE) $(HW_LIST) $(HARDWARE))
-INTSIZE := $(word $(HW_IDX), $(INTSIZE_LIST) unknown_intsize)
+#INTSIZE := $(word $(HW_IDX), $(INTSIZE_LIST) unknown_intsize)
 
-$(info OS: $(OS))
-$(info ARCH: $(MACHINE))
-$(info INTSIZE: $(INTSIZE))
+#INTSIZE := $(shell tools/bin/intsize)
+#PTRSIZE := $(shell tools/bin/ptrsize)
 
-GCC_HUH   := $(shell gcc   --version > /dev/null 2>&1 ; echo $$?)
-CLANG_HUH := $(shell clang --version > /dev/null 2>&1 ; echo $$?)
-PCC_HUH   := $(shell pcc   --version > /dev/null 2>&1 ; echo $$?)
+INTSIZE  := $(shell mkdir -p tmp && $(CC) ./tools/src/intsize.c -o tmp/intsize.exe && ./tmp/intsize.exe) 
+PTRSIZE  := $(shell mkdir -p tmp && $(CC) ./tools/src/ptrsize.c -o tmp/ptrsize.exe && ./tmp/ptrsize.exe) 
+CHARSIZE        := $(shell mkdir -p tmp && $(CC) ./tools/src/charsize.c        -o tmp/charsize.exe        && ./tmp/charsize.exe       ) 
+SHORTINTSIZE    := $(shell mkdir -p tmp && $(CC) ./tools/src/shortintsize.c    -o tmp/shortintsize.exe    && ./tmp/shortintsize.exe   ) 
+LONGINTSIZE     := $(shell mkdir -p tmp && $(CC) ./tools/src/longintsize.c     -o tmp/longintsize.exe     && ./tmp/longintsize.exe    ) 
+LONGLONGINTSIZE := $(shell mkdir -p tmp && $(CC) ./tools/src/longlongintsize.c -o tmp/longlongintsize.exe && ./tmp/longlongintsize.exe) 
+ENUMSIZE        := $(shell mkdir -p tmp && $(CC) ./tools/src/enumsize.c        -o tmp/enumsize.exe        && ./tmp/enumsize.exe       ) 
+FLOATSIZE       := $(shell mkdir -p tmp && $(CC) ./tools/src/floatsize.c       -o tmp/floatsize.exe       && ./tmp/floatsize.exe      ) 
+DOUBLESIZE      := $(shell mkdir -p tmp && $(CC) ./tools/src/doublesize.c      -o tmp/doublesize.exe      && ./tmp/doublesize.exe     ) 
+LONGDOUBLESIZE  := $(shell mkdir -p tmp && $(CC) ./tools/src/longdoublesize.c  -o tmp/longdoublesize.exe  && ./tmp/longdoublesize.exe ) 
+
+
+#$(info DATETIME_UTC  : $(DATETIME_UTC)) 
+#$(info PROJECT_NAME: $(PROJECT_NAME)) 
+#$(info CC          : $(CC))
+$(info CC_NAME     : $(CC_NAME))
+#$(info OS          : $(OS))
+#$(info UNAME       : $(UNAME))
+#$(info MACHINE     : $(MACHINE))
+$(info INTSIZE     : $(INTSIZE))
+$(info PTRSIZE     : $(PTRSIZE))
+$(info ENUMSIZE    : $(ENUMSIZE)) 
+ifeq "a" "b"
+$(info ENDIANNESS  : $(ENDIAN))
+$(info CHARSIZE       : $(CHARSIZE)       ) 
+$(info SHORTINTSIZE   : $(SHORTINTSIZE)   ) 
+$(info LONGINTSIZE    : $(LONGINTSIZE)    ) 
+$(info LONGLONGINTSIZE: $(LONGLONGINTSIZE)) 
+$(info FLOATSIZE      : $(FLOATSIZE)      ) 
+$(info DOUBLESIZE     : $(DOUBLESIZE)     ) 
+$(info LONGDOUBLESIZE : $(LONGDOUBLESIZE) ) 
+endif 
+
 YASM_HUH  := $(shell yasm  --version > /dev/null 2>&1 ; echo $$?)
 GAS_HUH   := $(shell gas   --version > /dev/null 2>&1 ; echo $$?)
 AS_HUH    := $(shell as    --version > /dev/null 2>&1 ; echo $$?)
-ifeq ($(GCC_HUH),0) 
-  GCC_HUH := yes
-else 
-  GCC_HUH := no
-endif
-ifeq ($(CLANG_HUH),0) 
-  CLANG_HUH := yes
-else 
-  CLANG_HUH := no
-endif
-ifeq ($(PCC_HUH),0) 
-  PCC_HUH := yes
-else 
-  PCC_HUH := no
-endif
 ifeq ($(YASM_HUH),0) 
   YASM_HUH := yes
 else 
@@ -124,38 +150,9 @@ ifeq ($(AS_HUH),0)
 else 
   AS_HUH := no
 endif
-$(info Has CLANG? $(CLANG_HUH)) 
-$(info Has GCC?   $(GCC_HUH)) 
-$(info Has PCC?   $(PCC_HUH)) 
 $(info Has YASM?  $(YASM_HUH)) 
 $(info Has GAS?   $(GAS_HUH)) 
 $(info Has AS?    $(AS_HUH)) 
-
-CC := gcc # RL: GCC advantage is that it adds profiling data ('-pg' option). 
-CC := pcc # RL: PCC fails to compile the software. 
-CC := clang 
-CC := cc 
-ifeq ($(CLANG_HUH),yes) 
-  CC_IS_CLANG_HUH := $(shell echo "int main(int argc, char * argv[]) { return (int) __clang__; }; " | cc -x c -std=c99 -O0 -c - -o - > /dev/null 2>&1 ; echo $$?)
-  ifeq ($(CC_IS_CLANG_HUH),0) 
-    CC := clang
-  endif 
-else ifeq ($(GCC_HUH),yes) 
-  CC_IS_GCC_HUH   := $(shell echo "int main(int argc, char * argv[]) { return (int) __GNUC__ ; }; " | cc -x c -std=c99 -O0 -c - -o - > /dev/null 2>&1 ; echo $$?)
-  ifeq ($(CC_IS_GCC_HUH),0) 
-    CC := gcc
-  endif 
-else ifeq ($(PCC_HUH),yes) 
-  CC_IS_PCC_HUH   := $(shell echo "int main(int argc, char * argv[]) { return (int) __PCC__  ; }; " | cc -x c -std=c99 -O0 -c - -o - > /dev/null 2>&1 ; echo $$?)
-  ifeq ($(CC_IS_GCC_HUH),0) 
-    CC := pcc
-  endif 
-endif
-
-$(info CC is:  $(CC)) 
-
-
-
 
 ASM := yasm 
 
@@ -163,10 +160,284 @@ SEPARATE_ASM := yes
 SEPARATE_ASM := $(YASM_HUH)
 SEPARATE_ASM := no
 
-CC_FLAGS := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -D SRCFILE_UTF8  
 
-#CC_FLAGS := $(CC_FLAGS) -D MIN_IS_NOT_PROVIDED
-#CC_FLAGS := $(CC_FLAGS) -D MAX_IS_NOT_PROVIDED
+# *** OpenGL *** 
+OPENGL_INC := /usr/X11R6/include
+# "GL" sub-directory is used by regular OS. 
+# "OpenGL" sub-directory is used by MacOSX. 
+OPENGL_HAS_GL_HUH := $(shell test -e $(OPENGL_INC)/GL > /dev/null 2>&1 ; echo $$?)
+OPENGL_HAS_OPENGL_HUH := $(shell test -e $(OPENGL_INC)/OpenGL > /dev/null 2>&1 ; echo $$?)
+ifeq ($(OPENGL_HAS_GL_HUH),0) 
+  OPENGL_HAS_GL_HUH := yes
+else 
+  OPENGL_HAS_GL_HUH := no
+endif
+ifeq ($(OPENGL_HAS_OPENGL_HUH),0)
+  OPENGL_HAS_OPENGL_HUH := yes
+else
+  OPENGL_HAS_OPENGL_HUH := no
+endif
+#$(info OPENGL_HAS_GL_HUH: $(OPENGL_HAS_GL_HUH)) 
+#$(info OPENGL_HAS_OPENGL_HUH: $(OPENGL_HAS_OPENGL_HUH)) 
+ifeq ($(OPENGL_HAS_GL_HUH),yes) 
+  $(info OpenGL sub-dir: $(OPENGL_INC)/GL) 
+else ifeq ($(OPENGL_HAS_OPENGL_HUH),yes) 
+  $(info OpenGL sub-dir: $(OPENGL_INC)/OpenGL) 
+else
+   $(info --> I could not find where your OpenGL include files are located.)
+   $(info --> Please edit this file, look for the variable 'OPENGL_INC', and edit it to specify the OpenGL include files location.) 
+   $(error ABORTING)
+endif
+
+
+# *** LIBSDL *** 
+SDLCONFIG := sdl-config
+SDLCONFIG_HUH  := $(shell $(SDLCONFIG)   --version > /dev/null 2>&1 ; echo $$?)
+ifeq ($(SDLCONFIG_HUH),0) 
+  SDLCONFIG_HUH := yes
+else 
+  SDLCONFIG_HUH := no
+endif
+$(info Has SDL-CONFIG?  $(SDLCONFIG_HUH)) 
+ifeq ($(SDLCONFIG_HUH),no) 
+   $(info --> 'sdl-config' was not found.)
+   $(info -->   1. Is SDL installed? If not so, please see https://www.libsdl.org/) 
+   $(info -->   2. If SDL is installed but in some esoteric location, please edit this file, look for the variable 'SDLCONFIG', and edit it to specify 'sdl-config' location.) 
+   $(error ABORTING)
+endif
+
+SDLCONFIG_CFLAGS := $(shell $(SDLCONFIG) --cflags) 
+$(info SDLCONFIG_CFLAGS: $(SDLCONFIG_CFLAGS)) 
+
+SDLCONFIG_LIBS := $(shell $(SDLCONFIG) --libs) 
+$(info SDLCONFIG_LIBS  : $(SDLCONFIG_LIBS)) 
+
+
+# *** PKGCONFIG *** 
+PKGCONFIG := pkg-config
+PKGCONFIG_HUH  := $(shell $(PKGCONFIG)   --version > /dev/null 2>&1 ; echo $$?)
+ifeq ($(PKGCONFIG_HUH),0) 
+  PKGCONFIG_HUH := yes
+else 
+  PKGCONFIG_HUH := no
+endif
+$(info Has PKG-CONFIG?  $(PKGCONFIG_HUH)) 
+ifeq ($(PKGCONFIG_HUH),no) 
+   $(info --> 'pkg-config' was not found.)
+   $(info -->   1. Is pkg-config installed? If not so, please see https://www.freedesktop.org/wiki/Software/pkg-config/) 
+   $(info -->   2. If pkg-config is installed but in some esoteric location, please edit this file, look for the variable 'PKGCONFIG', and edit it to specify 'pkg-config' location.) 
+   $(error ABORTING)
+endif
+
+
+# *** LIBSDLIMAGE *** 
+LIBSDLIMAGE_EXISTS_HUH := $(shell $(PKGCONFIG) SDL_image --exists > /dev/null 2>&1 ; echo $$?)
+#$(info LIBSDLIMAGE_EXISTS_HUH: $(LIBSDLIMAGE_EXISTS_HUH)) 
+ifeq ($(strip $(LIBSDLIMAGE_EXISTS_HUH)),0) 
+  LIBSDLIMAGE_EXISTS_HUH := yes
+else 
+  LIBSDLIMAGE_EXISTS_HUH := no
+endif
+#$(info LIBSDLIMAGE_EXISTS_HUH: $(LIBSDLIMAGE_EXISTS_HUH)) 
+ifeq ($(LIBSDLIMAGE_EXISTS_HUH),no) 
+   $(info --> 'pkg-config' did not find 'SDL_image'.)
+   $(info -->   1. Is SDL_image installed? If not so, please see https://www.libsdl.org/projects/SDL_image/) 
+   $(info -->   2. If SDL_image is installed but in some esoteric location, please edit this file, look for variables 'LIBSDLIMAGE_EXISTS_HUH', 'LIBSDLIMAGE_CFLAGS', and 'LIBSDLIMAGE_LIBS', and specify them accordingly.) 
+   $(error ABORTING)
+endif
+
+LIBSDLIMAGE_CFLAGS := $(shell $(PKGCONFIG) SDL_image --cflags) 
+$(info LIBSDLIMAGE_CFLAGS: $(LIBSDLIMAGE_CFLAGS)) 
+
+LIBSDLIMAGE_LIBS := $(shell $(PKGCONFIG) SDL_image --libs) 
+$(info LIBSDLIMAGE_LIBS  : $(LIBSDLIMAGE_LIBS)) 
+
+
+
+# *** LIBSDLMIXER *** 
+LIBSDLMIXER_EXISTS_HUH := $(shell $(PKGCONFIG) SDL_mixer --exists > /dev/null 2>&1 ; echo $$?)
+#$(info LIBSDLMIXER_EXISTS_HUH: $(LIBSDLMIXER_EXISTS_HUH)) 
+ifeq ($(strip $(LIBSDLMIXER_EXISTS_HUH)),0) 
+  LIBSDLMIXER_EXISTS_HUH := yes
+else 
+  LIBSDLMIXER_EXISTS_HUH := no
+endif
+#$(info LIBSDLMIXER_EXISTS_HUH: $(LIBSDLMIXER_EXISTS_HUH)) 
+ifeq ($(LIBSDLMIXER_EXISTS_HUH),no) 
+   $(info --> 'pkg-config' did not find 'SDL_mixer'.)
+   $(info -->   1. Is SDL_mixer installed? If not so, please see https://www.libsdl.org/projects/SDL_mixer/) 
+   $(info -->   2. If SDL_mixer is installed but in some esoteric location, please edit this file, look for variables 'LIBSDLMIXER_EXISTS_HUH', 'LIBSDLMIXER_CFLAGS', and 'LIBSDLMIXER_LIBS', and specify them accordingly.) 
+   $(error ABORTING)
+endif
+
+LIBSDLMIXER_CFLAGS := $(shell $(PKGCONFIG) SDL_mixer --cflags) 
+$(info LIBSDLMIXER_CFLAGS: $(LIBSDLMIXER_CFLAGS)) 
+
+LIBSDLMIXER_LIBS := $(shell $(PKGCONFIG) SDL_mixer --libs) 
+$(info LIBSDLMIXER_LIBS  : $(LIBSDLMIXER_LIBS)) 
+
+
+
+# *** LIBPNG *** 
+LIBPNG_EXISTS_HUH := $(shell $(PKGCONFIG) libpng --exists > /dev/null 2>&1 ; echo $$?)
+#$(info LIBPNG_EXISTS_HUH: $(LIBPNG_EXISTS_HUH)) 
+ifeq ($(strip $(LIBPNG_EXISTS_HUH)),0) 
+  LIBPNG_EXISTS_HUH := yes
+else 
+  LIBPNG_EXISTS_HUH := no
+endif
+#$(info LIBPNG_EXISTS_HUH: $(LIBPNG_EXISTS_HUH)) 
+ifeq ($(LIBPNG_EXISTS_HUH),no) 
+   $(info --> 'pkg-config' did not find 'libpng'.)
+   $(info -->   1. Is libpng installed? If not so, please see http://www.libpng.org/pub/png/libpng.html) 
+   $(info -->   2. If libpng is installed but in some esoteric location, please edit this file, look for variables 'LIBPNG_EXISTS_HUH', 'LIBPNG_CFLAGS', and 'LIBPNG_LIBS', and specify them accordingly.) 
+   $(error ABORTING)
+endif
+
+LIBPNG_CFLAGS := $(shell $(PKGCONFIG) libpng --cflags) 
+$(info LIBPNG_CFLAGS: $(LIBPNG_CFLAGS)) 
+
+LIBPNG_LIBS := $(shell $(PKGCONFIG) libpng --libs) 
+$(info LIBPNG_LIBS  : $(LIBPNG_LIBS)) 
+
+
+# *** LIBJPEG *** 
+LIBJPEG_EXISTS_HUH := $(shell $(PKGCONFIG) libjpeg --exists > /dev/null 2>&1 ; echo $$?)
+#$(info LIBJPEG_EXISTS_HUH: $(LIBJPEG_EXISTS_HUH)) 
+ifeq ($(strip $(LIBJPEG_EXISTS_HUH)),0) 
+  LIBJPEG_EXISTS_HUH := yes
+else 
+  LIBJPEG_EXISTS_HUH := no
+endif
+#$(info LIBJPEG_EXISTS_HUH: $(LIBJPEG_EXISTS_HUH)) 
+ifeq ($(LIBJPEG_EXISTS_HUH),no) 
+   $(info --> 'pkg-config' did not find 'libjpeg'.)
+   $(info -->   1. Is libjpeg installed? If not so, please see XXX) 
+   $(info -->   2. If libjpeg is installed but in some esoteric location, please edit this file, look for variables 'LIBJPEG_EXISTS_HUH', 'LIBJPEG_CFLAGS', and 'LIBJPEG_LIBS', and specify them accordingly.) 
+   $(error ABORTING)
+endif
+
+LIBJPEG_CFLAGS := $(shell $(PKGCONFIG) libjpeg --cflags) 
+$(info LIBJPEG_CFLAGS: $(LIBJPEG_CFLAGS)) 
+
+LIBJPEG_LIBS := $(shell $(PKGCONFIG) libjpeg --libs) 
+$(info LIBJPEG_LIBS  : $(LIBJPEG_LIBS)) 
+
+
+# *** LIBVORBISFILE *** 
+LIBVORBISFILE_EXISTS_HUH := $(shell $(PKGCONFIG) vorbisfile --exists > /dev/null 2>&1 ; echo $$?)
+#$(info LIBVORBISFILE_EXISTS_HUH: $(LIBVORBISFILE_EXISTS_HUH)) 
+ifeq ($(strip $(LIBVORBISFILE_EXISTS_HUH)),0) 
+  LIBVORBISFILE_EXISTS_HUH := yes
+else 
+  LIBVORBISFILE_EXISTS_HUH := no
+endif
+#$(info LIBVORBISFILE_EXISTS_HUH: $(LIBVORBISFILE_EXISTS_HUH)) 
+ifeq ($(LIBVORBISFILE_EXISTS_HUH),no) 
+   $(info --> 'pkg-config' did not find 'libvorbisfile'.)
+   $(info -->   1. Is libvorbisfile installed? If not so, please see XXX) 
+   $(info -->   2. If libvorbisfile is installed but in some esoteric location, please edit this file, look for variables 'LIBVORBISFILE_EXISTS_HUH', 'LIBVORBISFILE_CFLAGS', and 'LIBVORBISFILE_LIBS', and specify them accordingly.) 
+   $(error ABORTING)
+endif
+
+LIBVORBISFILE_CFLAGS := $(shell $(PKGCONFIG) vorbisfile --cflags) 
+$(info LIBVORBISFILE_CFLAGS: $(LIBVORBISFILE_CFLAGS)) 
+
+LIBVORBISFILE_LIBS := $(shell $(PKGCONFIG) vorbisfile --libs) 
+$(info LIBVORBISFILE_LIBS  : $(LIBVORBISFILE_LIBS)) 
+
+
+# *** LIBVORBIS *** 
+LIBVORBIS_EXISTS_HUH := $(shell $(PKGCONFIG) vorbis --exists > /dev/null 2>&1 ; echo $$?)
+#$(info LIBVORBIS_EXISTS_HUH: $(LIBVORBIS_EXISTS_HUH)) 
+ifeq ($(strip $(LIBVORBIS_EXISTS_HUH)),0) 
+  LIBVORBIS_EXISTS_HUH := yes
+else 
+  LIBVORBIS_EXISTS_HUH := no
+endif
+#$(info LIBVORBIS_EXISTS_HUH: $(LIBVORBIS_EXISTS_HUH)) 
+ifeq ($(LIBVORBIS_EXISTS_HUH),no) 
+   $(info --> 'pkg-config' did not find 'libvorbis'.)
+   $(info -->   1. Is libvorbis installed? If not so, please see XXX) 
+   $(info -->   2. If libvorbis is installed but in some esoteric location, please edit this file, look for variables 'LIBVORBIS_EXISTS_HUH', 'LIBVORBIS_CFLAGS', and 'LIBVORBIS_LIBS', and specify them accordingly.) 
+   $(error ABORTING)
+endif
+
+LIBVORBIS_CFLAGS := $(shell $(PKGCONFIG) vorbis --cflags) 
+$(info LIBVORBIS_CFLAGS: $(LIBVORBIS_CFLAGS)) 
+
+LIBVORBIS_LIBS := $(shell $(PKGCONFIG) vorbis --libs) 
+$(info LIBVORBIS_LIBS  : $(LIBVORBIS_LIBS)) 
+
+
+# *** LIBOGG *** 
+LIBOGG_EXISTS_HUH := $(shell $(PKGCONFIG) ogg --exists > /dev/null 2>&1 ; echo $$?)
+#$(info LIBOGG_EXISTS_HUH: $(LIBOGG_EXISTS_HUH)) 
+ifeq ($(strip $(LIBOGG_EXISTS_HUH)),0) 
+  LIBOGG_EXISTS_HUH := yes
+else 
+  LIBOGG_EXISTS_HUH := no
+endif
+#$(info LIBOGG_EXISTS_HUH: $(LIBOGG_EXISTS_HUH)) 
+ifeq ($(LIBOGG_EXISTS_HUH),no) 
+   $(info --> 'pkg-config' did not find 'libogg'.)
+   $(info -->   1. Is libogg installed? If not so, please see XXX) 
+   $(info -->   2. If libogg is installed but in some esoteric location, please edit this file, look for variables 'LIBOGG_EXISTS_HUH', 'LIBOGG_CFLAGS', and 'LIBOGG_LIBS', and specify them accordingly.) 
+   $(error ABORTING)
+endif
+
+LIBOGG_CFLAGS := $(shell $(PKGCONFIG) ogg --cflags) 
+$(info LIBOGG_CFLAGS: $(LIBOGG_CFLAGS)) 
+
+LIBOGG_LIBS := $(shell $(PKGCONFIG) ogg --libs) 
+$(info LIBOGG_LIBS  : $(LIBOGG_LIBS)) 
+
+
+# *** NON-ANIME, ANIME, CARTE, PSCRIPT *** 
+NONANIME_DESTROOT := $(PWD)/libs/nonanime/destroot
+ANIME_DESTROOT    := $(PWD)/libs/anime/destroot
+CARTE_DESTROOT    := $(PWD)/libs/carte/destroot
+PSCRIPT_DESTROOT  := $(PWD)/libs/pscript/destroot
+
+ifneq (0,$(strip $(shell test -e $(NONANIME_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
+   $(info --> The installation directory ('destroot') of the sub-lib 'non-anime' was not found.)
+   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-nonanime) 
+   $(info -->   2. If so, please edit the './libs/nonanime' symlink so that it points to its directory ('./libs/nonanime/destroot' should exist).) 
+   $(error ABORTING)
+endif
+
+ifneq (0,$(strip $(shell test -e $(ANIME_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
+   $(info --> The installation directory ('destroot') of the sub-lib 'anime' was not found.)
+   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-anime) 
+   $(info -->   2. If so, please edit the './libs/anime' symlink so that it points to its directory ('./libs/anime/destroot' should exist).) 
+   $(error ABORTING)
+endif
+
+ifneq (0,$(strip $(shell test -e $(CARTE_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
+   $(info --> The installation directory ('destroot') of the sub-lib 'carte' was not found.)
+   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-carte) 
+   $(info -->   2. If so, please edit the './libs/carte' symlink so that it points to its directory ('./libs/carte/destroot' should exist).) 
+   $(error ABORTING)
+endif
+
+ifneq (0,$(strip $(shell test -e $(PSCRIPT_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
+   $(info --> The installation directory ('destroot') of the sub-lib 'pscript' was not found.)
+   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-pscript) 
+   $(info -->   2. If so, please edit the './libs/pscript' symlink so that it points to its directory ('./libs/pscript/destroot' should exist).) 
+   $(error ABORTING)
+endif
+
+$(info NONANIME_DESTROOT: $(NONANIME_DESTROOT))
+$(info ANIME_DESTROOT   : $(ANIME_DESTROOT))
+$(info CARTE_DESTROOT   : $(CARTE_DESTROOT))
+$(info PSCRIPT_DESTROOT : $(PSCRIPT_DESTROOT))
+
+
+
+# ***************************************************************************** 
+# MAKEFILE GENERATION 
+
+CC_FLAGS0 := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -O0  -D SRCFILE_UTF8  
 
 #       -aux-info filename
 #           Output to the given filename prototyped declarations for all functions declared and/or defined in a translation
@@ -174,45 +445,53 @@ CC_FLAGS := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -D SRCFIL
 
 
 # -pedantic -pedantic-errors 
-#CINC := -I /usr/X11R6/include  -I ./libs/SDL-1.2.15/destroot/include -I ./libs/SDL_image/src/SDL_image/ -I ./libs/SDL_mixer/src/SDL_mixer/ -I ./libs/nonanime/destroot/include/ -I ./libs/anime/destroot/include/ -I ./libs/carte/destroot/include/  -I ./libs/pscript/destroot/include/ 
-CINC := -I /usr/X11R6/include  -I ./libs/SDL-1.2.15/destroot/include/ -I ./libs/SDL_image/src/SDL_image/ -I /usr/local/include/SDL/ -I ./libs/nonanime/destroot/include/ -I ./libs/anime/destroot/include/ -I ./libs/carte/destroot/include/  -I ./libs/pscript/destroot/include/ 
-CFLAGS_NO :=  -Wno-system-headers -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function -Wno-switch-default -Wno-format-nonliteral -Wno-cast-align 
-CFLAGS_CLANG := -gfull -Wnewline-eof  -Waddress-of-packed-member -fwrapv -gmodules -fstandalone-debug -ftrapv # -Wpointer-sign -### 
-CFLAGS_NO_CLANG := -Wno-unsequenced -Wno-pointer-sign
-CFLAGS_GCC := -ftrapv -fPIC -ggdb3 -pg #-Q 
-CFLAGS_NO_GCC := -Wno-nested-externs -Wno-unknown-pragmas  -Wno-uninitialized -Wno-undef -Wno-fatal-errors -Wno-error 
-CFLAGS_PCC := -pg -g  
-# -fPIC => RL: Allows the object file to be then made as shared-object files (that can be dynamically loaded by the user). 
-GCC_FLAGS_FOR_DEBUG := -fPIC -O0 -Wall -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -Wfatal-errors -Werror-implicit-function-declaration -fno-exceptions -fstack-check -Werror -W  -Wparentheses -fverbose-asm -fno-omit-frame-pointer -ffreestanding -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions  -feliminate-unused-debug-types  -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type  -Wstrict-prototypes -Wpacked -Wcast-qual -Wcast-align -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas $(CFLAGS_NO) # -Wmissing-prototypes -Wmissing-declarations 
-ifeq ($(CC),clang) 
-GCC_FLAGS_FOR_DEBUG := $(GCC_FLAGS_FOR_DEBUG) $(CFLAGS_CLANG) $(CFLAGS_NO_CLANG) 
-endif
-ifeq ($(CC),gcc) 
-GCC_FLAGS_FOR_DEBUG := $(GCC_FLAGS_FOR_DEBUG) $(CFLAGS_GCC)   $(CFLAGS_NO_GCC) 
-endif
-GCC_FLAGS_FOR_DEBUG := $(GCC_FLAGS_FOR_DEBUG) $(CINC) 
+CC_FLAGS_F := -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -fstack-check  -fverbose-asm -ffreestanding -feliminate-unused-debug-types 
+CC_FLAGS_F_NO := -fno-exceptions -fno-omit-frame-pointer  -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions 
+# unknown: -fno-early-inlining -fno-gcse-lm -fno-move-loop-invariants -fno-peephole  -fno-sched-interblock -fno-sched-spec -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-tree-loop-optimize -fno-tree-vect-loop-version -fno-tree-loop-im -fno-tree-loop-ivcanon 
+CC_FLAGS_W := -Wall -W -Wextra  -Werror -Wfatal-errors  -Werror-implicit-function-declaration -Wparentheses -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type -Wstrict-prototypes -Wpacked -Wcast-qual -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas
+CC_FLAGS_W_NO := -Wno-cast-align -Wno-system-headers  -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function -Wno-switch-default -Wno-format-nonliteral 
+# unknown: -gstabs+3 
 
-# unknown: -gstabs+3 -fno-early-inlining -fno-gcse-lm -fno-move-loop-invariants -fno-peephole  -fno-sched-interblock -fno-sched-spec -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-tree-loop-optimize -fno-tree-vect-loop-version -fno-tree-loop-im -fno-tree-loop-ivcanon 
+# -I /usr/X11R6/include  -I ./libs/SDL-1.2.15/destroot/include -I ./src/SDL_image -I ./src/SDL_mixer # -Wmissing-prototypes -Wmissing-declarations 
 # Linker option: -aux-info build/action.aux 
 # unsupported: -fpcc-struct-return -fno-ivopts -fno-inline-functions-called-once 
 # unused: -fno-eliminate-unused-debug-symbols 
 
+CLANG_FLAGS := -fPIC -gfull -W -Wextra -Wnewline-eof -Wno-unsequenced 
+#GCC: -gstabs+3: does not work: «SHF_MERGE section size must be a multiple of sh_entsize» 
+#pragma GCC diagnostics disable "-Wtype-limits" 
+GCC_FLAGS := -g3  -fno-early-inlining -fno-gcse-lm -fno-move-loop-invariants -fno-peephole  -fno-sched-interblock -fno-sched-spec -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-tree-loop-optimize -fno-tree-vect-loop-version -fno-tree-loop-im -fno-tree-loop-ivcanon  -fno-stack-check -Wno-error -Wno-enum-compare #-Wno-extra -Wno-sign-compare #-Werror=no-type-limits #-Wno-absolute-value #-Wno-type-limits #-Wframe-larger-than=76368 #-Wframe-larger-than=1844674407370955161 #-Wframe-larger-than=18446744073709551615 #-Wframe-larger-than=18446744073709551615UL #-Wframe-larger-than='18446744073709551615UL' #-Wframe-larger-than='SIZE_MAX' #-Wno-frame-larger-than # -Wno-stack-usage # -Wstack-usage=1844674407370955161
+#PCC: -g: does not work: «SHF_MERGE section size must be a multiple of sh_entsize» 
+PCC_FLAGS := -fpic #-g #-fpic 
+TCC_FLAGS := -g -bt100 #-b #-fpic #-g #-fpic 
+
+CC_FLAGS_SPEC := 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),clang)),$(CLANG_FLAGS),) 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),gcc)),$(GCC_FLAGS),) 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),pcc)),$(PCC_FLAGS),) 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_FLAGS),) 
 
 
-CC_FLAGS := $(CC_FLAGS) $(GCC_FLAGS_FOR_DEBUG)
+CC_FLAGS := $(CC_FLAGS0) $(CC_FLAGS_F) $(CC_FLAGS_W) $(CC_FLAGS_SPEC) $(CC_FLAGS_F_NO) $(CC_FLAGS_W_NO) 
 
+#CINC := -I /usr/X11R6/include  -I ./libs/SDL-1.2.15/destroot/include/ -I ./libs/SDL_image/src/SDL_image/ -I /usr/local/include/SDL/ -I ./libs/nonanime/destroot/include/ -I ./libs/anime/destroot/include/ -I ./libs/carte/destroot/include/  -I ./libs/pscript/destroot/include/ 
+CFLAGS_LIBS := -I$(OPENGL_INC) $(SDLCONFIG_CFLAGS) $(LIBSDLIMAGE_CFLAGS) $(LIBSDLMIXER_CFLAGS) -I$(NONANIME_DESTROOT)/include -I$(ANIME_DESTROOT)/include -I$(CARTE_DESTROOT)/include -I$(PSCRIPT_DESTROOT)/include
+#$(info CFLAGS_LIBS: $(CFLAGS_LIBS))
+CFLAGS_LIBS := $(shell ./tools/bin/remove-doublon $(CFLAGS_LIBS))
+#$(info CFLAGS_LIBS: $(CFLAGS_LIBS))
 
-BISON_FLAGS := --report=all,state,look-ahead,itemset --token-table --debug #--graph 
+CFLAGS := $(CC_FLAGS) $(CFLAGS_LIBS) 
 
-# LIBPROG_CFLAGS := 
-# LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_SYS_$(shell toupper $(OS))  
-# LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_ENDIAN_$(shell toupper $(ENDIAN))  
-# LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_DEBUG_$(shell toupper $(DEBUG))
-# LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_OPT_$(shell toupper $(OPT))
-# LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_INLINE_$(shell toupper $(INLINE))
-# LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_GC_$(shell toupper $(GC))
-# LIBPROG_CFLAGS := $(LIBPROG_CFLAGS) -D LIBPROG_PROF_$(shell toupper $(PROF))
-# LIBPROG_LIBS := build/libprog/libprog.a
+#SUBDIRS:=$(shell cd src; ldir | newline2space)
+#SUBLIBS:=$(SUBDIRS)
+#SUBLIBS:=
+#SUBLIBS_A:=$(patsubst %,lib%.a,$(SUBLIBS))
+#SUBLIBS_A:=$(patsubst liblib%,lib%,$(SUBLIBS_A))
+#$(error $(SUBLIBS_A))
+
+#BISON_FLAGS := --report=all,state,look-ahead,itemset --token-table --debug -d #--graph 
+#BSD_YACC_FLAGS := -d -t -p yyanime -r -v 
+BISON_FLAGS :=
 
 #EDITLINE_CFLAGS := $(shell pkg-config libedit --cflags)
 #EDITLINE_LFLAGS := 
@@ -222,52 +501,40 @@ BISON_FLAGS := --report=all,state,look-ahead,itemset --token-table --debug #--gr
 #EDITLINE_CFLAGS := 
 #EDITLINE_LIBS :=  #build/libedit-20090923-3.0/libedit-20090923-3.0--sys_macosx--endian_little--debug_yes--opt_no--inline_no--gc_no--prof_no.a -ltermcap
 
+# For some floating operations ('floorf') 
+MATH_LIB__LIBS_FLAGS := -lm 
 
-#CFLAGS := $(GCC_FLAGS) $(LIBPROG_CFLAGS) $(EDITLINE_CFLAGS) -I src/libprog
-#LIBS   := $(LIBPROG_LIBS) $(EDITLINE_LIBS) -lm 
-CFLAGS := $(CC_FLAGS) 
-LIBS__SDL_IMAGE := ./libs/SDL_image/destroot/lib/SDL_image.a  $(shell pkg-config libpng --libs) ./libs/libjpeg/destroot/lib/libjpeg.a 
-#LIBS__SDL_IMAGE := $(shell pkg-config SDL_image --libs) 
-LIBS__SDL_MIXER := ./libs/SDL_mixer/destroot/lib/SDL_mixer.a  $(shell pkg-config vorbisfile --libs) $(shell pkg-config vorbis --libs) $(shell pkg-config ogg --libs) 
-#LIBS__SDL_MIXER := $(shell pkg-config SDL_mixer --libs) 
-#LIBS__SDL_MIXER := /usr/local/lib/libSDL_mixer.a  /usr/local/lib/libmikmod.a  /usr/local/lib/libFLAC.a    /usr/local/lib/libsmpeg.a   -lstdc++   /usr/local/lib/libvorbisfile.a        /usr/local/lib/libogg.a        /usr/local/lib/libvorbis.a  
-#LIBS__SDL := ./libs/SDL-1.2.15/destroot/lib/libSDL.a 
-#LIBS__SDL := /usr/local/lib/libSDL.a -L /usr/local/lib/ -pthread -liconv -lm -lsndio -lusbhid -pthread
-#LIBS__SDL := $(shell sdl-config --static-libs) 
-LIBS__SDL := $(shell sdl-config --libs) 
-#LIBS__SDL := ./libs/SDL-1.2.15/destroot/lib/libSDL.a -L /usr/local/lib/ -pthread -liconv -lm -lsndio -lusbhid -pthread 
-#LIBS   := -lm ./libs/nonanime/destroot/lib/nonanime.a  ./libs/anime/destroot/lib/anime.a  ./libs/carte/destroot/lib/carte.a  ./libs/pscript/destroot/lib/pscript.a  ./libs/SDL_image/destroot/lib/SDL_image.a  ./libs/SDL-1.2.15/destroot/lib/libSDL.a /usr/X11R6/lib/libGL.so.17.1 /usr/X11R6/lib/libGLU.a
-#LIBS   := -lm ./libs/nonanime/destroot/lib/nonanime.a  ./libs/anime/destroot/lib/anime.a  ./libs/carte/destroot/lib/carte.a  ./libs/pscript/destroot/lib/pscript.a  /usr/local/lib/libSDL_mixer.a  /usr/local/lib/libmikmod.a  ./libs/SDL_image/destroot/lib/SDL_image.a  ./libs/SDL-1.2.15/destroot/lib/libSDL.a /usr/X11R6/lib/libGL.so.17.1 /usr/X11R6/lib/libGLU.a
-#LIBS   := -lm ./libs/nonanime/destroot/lib/nonanime.a  ./libs/anime/destroot/lib/anime.a  ./libs/carte/destroot/lib/carte.a  ./libs/pscript/destroot/lib/libpscript.a  $(LIBS__SDL_MIXER)  $(LIBS__SDL_IMAGE)  $(LIBS__SDL)  /usr/X11R6/lib/libGL.so.17.1 /usr/X11R6/lib/libGLU.a    /home/romain/projects/libedit-20090923-3.0/destroot/lib/libedit.a  /usr/lib/libtermcap.a /usr/lib/libm.a #RL: Adding 'libc.a' breaks the SDL... /usr/lib/libc.a # RL: Actually, it's libedit which breaks the SDL - should be dynamically loaded using 'dlopen'.     
-LIBS   :=  ./libs/nonanime/destroot/lib/nonanime.a  ./libs/anime/destroot/lib/anime.a  ./libs/carte/destroot/lib/carte.a  ./libs/pscript/destroot/lib/libpscript.a  $(LIBS__SDL_MIXER)  $(LIBS__SDL_IMAGE)  $(LIBS__SDL) -L/usr/X11R6/lib -lGL -lGLU   -lm #/usr/X11R6/lib/libGL.so.17.1 /usr/X11R6/lib/libGLU.a    /usr/lib/libm.a # /usr/lib/libc.a #RL: Adding 'libc.a' breaks the SDL...  # RL: Actually, it's libedit which breaks the SDL - should be dynamically loaded using 'dlopen'.     
+TCC_LIBS := #-ltcc 
 
-#SVN_REVISION := $(shell svn-revision.sh)
-#GIT_REVISION := $(shell git-revision.sh)
-#DATE := $(shell date "+%Y-%m-%d--%H-%M-%S")
+LIBS_SPEC := 
+LIBS_SPEC := $(LIBS_SPEC) $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_LIBS),) 
 
+LIBS := $(LIBS_SPEC) $(NONANIME_DESTROOT)/lib/nonanime.a $(ANIME_DESTROOT)/lib/anime.a $(CARTE_DESTROOT)/lib/carte.a $(PSCRIPT_DESTROOT)/lib/libpscript.a $(LIBSDLMIXER_LIBS)  $(LIBSDLIMAGE_LIBS) $(SDLCONFIG_LIBS) -L$(OPENGL_INC)/../lib -lGL -lGLU -lm 
 
-PROG := $(PROJECT_NAME)
-SRC_C := $(patsubst src/%.c,%,$(wildcard src/*.c))
-SRC_H := $(patsubst src/%.h,%,$(wildcard src/*.h))
-SRC_Y := $(patsubst src/%.y,%,$(wildcard src/*.y))
+PROG    := $(PROJECT_NAME)
+SRC_C   := $(patsubst src/%.c,%,$(wildcard src/*.c))
+SRC_H   := $(patsubst src/%.h,%,$(wildcard src/*.h))
+#SRC_Y  := $(patsubst src/%.y,%,$(wildcard src/*.y))
+SRC_Y   := $(patsubst src/%.y,%.tab,$(wildcard src/*.y)) $(patsubst src/%.y,%.code,$(wildcard src/*.y))
+SRC_L   := $(patsubst src/%.l,%,$(wildcard src/*.l))
 #SRC_CT := $(patsubst src/%.ct,%,$(wildcard src/*.ct))
-#SRC_C := $(sort $(SRC_C) $(SRC_Y)) # removes duplicates
-SRC_C := $(filter-out $(SRC_Y),$(SRC_C)) 
-SRC_C := $(filter-out liste,$(SRC_C)) 
-SRC_H := $(filter-out liste,$(SRC_H)) 
-#OBJ := $(patsubst %,build/$(PROG)$(FLAVOR)--%.o, $(SRC_C) $(SRC_Y))
-OBJ_S := $(patsubst %,build/%.s, $(SRC_C) $(SRC_Y))
-OBJ := $(patsubst %,build/%.o, $(SRC_C) $(SRC_Y))
-OBJ_SO := $(patsubst %,build/%.so, $(SRC_C) $(SRC_Y))
-#LIB := build/$(PROG)$(FLAVOR).a
-LIB := build/$(PROG).a
-LIB_SO := build/$(PROG).so
-#BIN := build/$(PROG)$(FLAVOR).exe
-BIN := build/$(PROG).exe
+#SRC_C  := $(sort $(SRC_C) $(SRC_Y)) # removes duplicates
+SRC_C   := $(filter-out $(SRC_Y),$(SRC_C)) 
+SRC_C   := $(filter-out liste,$(SRC_C)) 
+SRC_C   := $(filter-out main,$(SRC_C)) 
+SRC_H   := $(filter-out liste,$(SRC_H)) 
+SRC_H   := $(filter-out main,$(SRC_H)) 
+OBJ     := $(patsubst %,build/%.o, $(SRC_C) $(SRC_Y) $(SRC_L))
+OBJ_SO  := $(patsubst %,build/%.so, $(SRC_C) $(SRC_Y) $(SRC_L))
+LIB     := build/$(PROG).a
+LIB_SO  := build/$(PROG).so
+BIN     := build/$(PROG).exe
 #BIN_STRIPPED := build/$(PROG)$(FLAVOR)_stripped.exe
 #BIN_STRIPPED := build/$(PROG)_stripped.exe
-#FILES := $(patsubst src/%.c,%, $(SRC))
+#FILES  := $(patsubst src/%.c,%, $(SRC))
 
+#$(info SRC_C: $(SRC_C))
+#$(info SRC_H: $(SRC_H))
 
 
 
@@ -306,7 +573,7 @@ build.sh:
 	  $(foreach sublib_i_name,$(patsubst liblib%,lib%,lib$(sublib_i).a), \
 	    $(foreach file_c,$(wildcard src/$(sublib_i)/*.c), \
 	    $(foreach file_o,$(patsubst src/%.c,%.o,$(file_c)), \
-	      echo "gcc $(CFLAGS)  `$(FUN_LOCAL_FLAGS) ; local_flags $(file_c)`  -c $(file_c) -o build/$(file_o) 2>&1" >> $@; \
+	      echo "$(CC) $(CFLAGS)  `$(FUN_LOCAL_FLAGS) ; local_flags $(file_c)`  -c $(file_c) -o build/$(file_o) 2>&1" >> $@; \
 	    ) \
 	    ) \
 	  ) \
@@ -337,21 +604,19 @@ build.sh:
 #	for i in $(SRC_CT); do \
 	  echo "text2cstring src/$$i 2>&1" >> $@; \
 	done;
-#	$(info  $(SRC_C) $(SRC_Y))
-#	$(info $(CC) $(CFLAGS) -c src)
 	for i in $(SRC_C) $(SRC_Y); do \
 	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o  2>&1" >> $@; \
 	done;
-#ifeq (0,1)
 #	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o -aux-info build/$$i.aux 2>&1" >> $@; 
 	echo "ar -r -c $(LIB) $(OBJ) 2>&1" >> $@
 	echo "ranlib $(LIB) 2>&1" >> $@
-	echo "$(CC) -o $(BIN) $(LIBS) $(LIB) 2>&1" >> $@
+#	echo "$(CC) -o $(BIN) $(LIBS) $(LIB) 2>&1" >> $@
+#	echo "$(CC) -o $(BIN) $(LIB) 2>&1" >> $@
+	echo "$(CC) -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
 	echo "" >> $@
 	echo "rm -f run" >> $@
 	echo "ln -s $(BIN) run" >> $@
 	echo "chmod +x run" >> $@
-#endif
 	echo "" >> $@
 	chmod +x build.sh
 
@@ -360,14 +625,33 @@ build.sh:
 .PHONY: Makefile
 Makefile: 
 	echo "" > $@
-	echo "default: Makefile build run.sh run-gdb.sh $(BIN) $(LIB_SO)" >> $@
+#	echo "default: Makefile build run $(BIN)" >> $@
+#	echo "default: Makefile build $(LIB) $(BIN) run " >> $@
+	echo "default: Makefile build build_h build_ci build_i build_o build_so $(LIB) $(LIB_SO) $(BIN) run " >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "SHELL:= /bin/sh" >> $@
+	echo ".SHELLFLAGS: -u -e  " >> $@
+	echo "#MAKEFLAGS:= $(MAKEFLAGS) --warn-undefined-variables " >> $@
+	echo "#MAKEFLAGS:= $(filter-out  --warn-undefined-variables,$(MAKEFLAGS)) " >> $@
+	echo ".SUFFIXES: " >> $@
+	echo "#.SILENT:" >> $@
+	echo ".NOTPARALLEL:" >> $@
+	echo ".EXPORT_ALL_VARIABLES:" >> $@
+	echo ".SECONDARY:" >> $@
+	echo ".PRECIOUS:" >> $@
+	echo ".ONESHELL:" >> $@
+	echo "" >> $@
+	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "clean:" >> $@
 	echo "	rm -Rf build 2>&1" >> $@
 	echo "" >> $@
 	echo "clean-all: clean" >> $@
-	echo "	rm -Rf destroot run run.sh run-gdb.sh rundir *~ .*~ src/*~ src/*.output COPYING_at_start_of_c_files $(patsubst %,src/%.c,$(SRC_Y)) 2>&1" >> $@
+	echo "	rm -Rf destroot run rundir *~ .*~ src/*~ src/*.output COPYING_at_start_of_c_files $(patsubst %,src/%.c,$(SRC_Y)) $(patsubst %,src/%.c,$(SRC_L)) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "Makefile: Makefile-gen.mkf" >> $@
@@ -376,22 +660,20 @@ Makefile:
 	echo "" >> $@
 	echo "build:" >> $@
 	echo "	mkdir -p build 2>&1 " >> $@
-	echo "	cp -fp src/Makefile build/ 2>&1 " >> $@
-	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "install: destroot_do" >> $@
 	echo "" >> $@
 	echo "destroot_do:" >> $@
-#	echo "destroot:" >> $@
 #	echo "	chmod -Rf a+w destroot" >> $@
 	echo "	rm -Rf destroot" >> $@
 	echo "	mkdir -p destroot" >> $@
 	echo "	mkdir -p destroot/bin" >> $@
-	echo "	mkdir -p destroot/data" >> $@
-	echo "	mkdir -p destroot/log" >> $@
-	echo "	cp -fp build/*.exe destroot/bin/" >> $@
-	echo "	cp -Rfp data/* destroot/data/" >> $@
+	echo "	cp -fp build/*.exe destroot/bin/$(PROG)" >> $@
+	echo "	mkdir -p destroot/lib" >> $@
+	echo "	cp -fp build/$(PROG).a destroot/lib/$(PROG).a" >> $@
+	echo "	mkdir -p destroot/include" >> $@
+	echo "#	cp -fp src/decimal.h destroot/include/" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
@@ -400,42 +682,15 @@ Makefile:
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
-#	echo "run: $(BIN)" >> $@
-#	echo "	rm -f run" >> $@
-#	echo "	ln -s $(BIN) run" >> $@
+	echo "run: $(BIN)" >> $@
+	echo "	rm -f run" >> $@
+	echo "	ln -s run.sh run" >> $@
 	echo "" >> $@
 	echo "" >> $@
-	echo "run.sh: " >> $@
-	echo "	rm -f run.sh" >> $@
-	echo "	echo \"#/bin/sh\" >> run.sh" >> $@
-	echo "	echo \"cd build && ../$(BIN)\" >> run.sh" >> $@
-	echo "	echo \"\" >> run.sh" >> $@
-	echo "	chmod +x run.sh" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "run-gdb.sh: " >> $@
-	echo "	rm -f run-gdb.sh" >> $@
-	echo "	echo \"#/bin/sh\" >> run-gdb.sh" >> $@
-	echo "	echo \"cd build && gdb -quiet -x ../.gdbinit ../$(BIN)\" >> run-gdb.sh" >> $@
-	echo "	echo \"\" >> run-gdb.sh" >> $@
-	echo "	chmod +x run-gdb.sh" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
-	echo "$(BIN): $(LIB)" >> $@
-#	echo "	$(CC) -error-limit=1 -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
-#	echo "	$(CC) -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
-#	echo "	$(CC)  -Wl,\"--dynamic-list=main\",\"-v\"  -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+#	echo "$(BIN): $(LIB) build/main.o " >> $@
+	echo "$(BIN): $(LIB)  " >> $@
+#	echo "	$(CC) -o $(BIN) build/main.o $(LIB) $(LIBS) 2>&1" >> $@
+#	echo "	$(CC) -o $(BIN) build/main.o $(LIB) 2>&1" >> $@
 	echo "	$(CC)  -Wl,\"--dynamic-list=main\"  -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
@@ -444,8 +699,6 @@ Makefile:
 	echo "	ranlib $(LIB) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
-#	echo "$(LIB_SO): $(OBJ_SO)" >> $@
-#	echo "	$(CC) -shared -o $(LIB_SO) $(OBJ_SO) 2>&1" >> $@
 	echo "$(LIB_SO): $(OBJ) $(OBJ_SO)" >> $@
 	echo "	$(CC) -shared -o $(LIB_SO) $(OBJ) 2>&1" >> $@
 	echo "" >> $@
@@ -455,14 +708,30 @@ Makefile:
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
-	echo "" >> $@
-	echo "" >> $@
 	$(foreach file_y,$(patsubst src/%,%,$(wildcard src/*.y)), \
 	  $(foreach file_c,$(patsubst %.y,%.c,$(file_y)), \
-	      echo "src/$(file_c): src/$(file_y) " >> $@; \
-	      echo "	bison $(BISON_FLAGS) src/$(file_y) -o src/$(file_c) 2>&1" >> $@; \
-	      echo "	mv -f parser.c src/$(file_c) 2>&1 || true " >> $@; \
-	      echo "	mv -f $(file_c) src/$(file_c) 2>&1 || true" >> $@; \
+	    $(foreach file_noext,$(patsubst %.y,%,$(file_y)), \
+	      echo "#src/$(file_c): src/$(file_y) " >> $@; \
+	      echo "src/$(file_noext).tab.h src/$(file_noext).tab.c src/$(file_noext).code.c: src/$(file_y) " >> $@; \
+	      echo "#	bison $(BISON_FLAGS) src/$(file_y) -o src/$(file_c) 2>&1" >> $@; \
+	      echo "#	yacc $(BSD_YACC_FLAGS) -o src/$(file_c) src/$(file_y) 2>&1" >> $@; \
+	      echo "	yacc $(BSD_YACC_FLAGS) -b src/$(file_noext) src/$(file_y) 2>&1" >> $@; \
+	      echo "#	mv -f parser.c src/$(file_c) 2>&1 || true " >> $@; \
+	      echo "#	mv -f $(file_c) src/$(file_c) 2>&1 || true" >> $@; \
+	      echo "#	test -e src/$(file_c) 2>&1" >> $@; \
+	      echo "" >> $@; \
+	    ) \
+	  ) \
+	)
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	$(foreach file_l,$(patsubst src/%,%,$(wildcard src/*.l)), \
+	  $(foreach file_c,$(patsubst %.l,%.c,$(file_l)), \
+	      echo "src/$(file_c): src/$(file_l) " >> $@; \
+	      echo "	flex -Pyyanime -Cfa -p  -o src/$(file_c) src/$(file_l) 2>&1" >> $@; \
 	      echo "	test -e src/$(file_c) 2>&1" >> $@; \
 	      echo "" >> $@; \
 	    ) \
@@ -470,39 +739,94 @@ Makefile:
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
+#	$(foreach file_h,$(patsubst src/%,%,$(wildcard src/*.h)), \
+	  echo "src/$(file_h): $(patsubst %,src/%,$(shell cat src/$(file_h) | ./tools/bin/c-file-local-include-list)) " >> $@; \
+	  echo "	touch -m -c src/$(file_h) " >> $@; \
+	  echo "" >> $@; \
+	)
+	echo "" >> $@
+	echo "build_h: build $(patsubst src/%,build/%,$(wildcard src/*.h)) " >> $@; 
+	echo "" >> $@
+	$(foreach file_h,$(patsubst src/%,%,$(wildcard src/*.h)), \
+	  echo "build/$(file_h): src/$(file_h) " >> $@; \
+	  echo "	ln src/$(file_h) build/$(file_h) " >> $@; \
+	  echo "" >> $@; \
+	)
 	echo "" >> $@
 	echo "" >> $@
-ifeq ($(SEPARATE_ASM),no) 
-	$(foreach file_c,$(sort $(patsubst src/%,%,$(wildcard src/*.c)) $(patsubst src/%.y,%.c,$(wildcard src/*.y)) $(patsubst src/%.ct,%.c,$(wildcard src/*.ct))), \
+	echo "" >> $@
+	echo "build_ci: build $(patsubst src/%,build/%,$(wildcard src/*.ci)) " >> $@; 
+	echo "" >> $@
+	$(foreach file_ci,$(patsubst src/%,%,$(wildcard src/*.ci)), \
+	  echo "build/$(file_ci): src/$(file_ci) " >> $@; \
+	  echo "	ln src/$(file_ci) build/$(file_ci) " >> $@; \
+	  echo "" >> $@; \
+	)
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	$(foreach file_c,$(patsubst src/%,%,$(wildcard src/*.c)), \
+	  echo "build/$(file_c): src/$(file_c) " >> $@; \
+	  echo "	ln src/$(file_c) build/$(file_c) " >> $@; \
+	  echo "" >> $@; \
+	)
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+#	$(foreach file_ci,$(patsubst src/%,%,$(wildcard src/*.ci)), \
+	  echo "src/$(file_ci): $(patsubst %,src/%,$(shell cat src/$(file_ci) | ./tools/bin/c-file-local-include-list)) " >> $@; \
+	  echo "	touch -m -c src/$(file_ci) " >> $@; \
+	  echo "" >> $@; \
+	)
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "build_i: build $(patsubst src/%.c,build/%.i,$(wildcard src/*.c)) " >> $@; 
+	echo "" >> $@
+	$(foreach file_c,$(sort $(patsubst src/%,%,$(wildcard src/*.c)) $(patsubst src/%.y,%.tab.c,$(wildcard src/*.y)) $(patsubst src/%.y,%.code.c,$(wildcard src/*.y)) $(patsubst src/%.l,%.c,$(wildcard src/*.l)) $(patsubst src/%.ct,%.c,$(wildcard src/*.ct))), \
+	  $(foreach file_i,$(patsubst %.c,%.i,$(file_c)), \
+	  $(foreach file_h,$(patsubst %.c,%.h,$(file_c)), \
+	  $(foreach file_aux,$(patsubst %.c,%.aux,$(file_c)), \
+	      echo "build/$(file_i): build/$(file_c) $(patsubst src/%,build/%,$(wildcard src/lib*.ci)) $(patsubst %,build/%,$(shell cat src/$(file_c) | ./tools/bin/c-file-local-include-list)) " >> $@; \
+	      echo "	$(CC) $(CFLAGS) -E build/$(file_c) -o build/$(file_i)  2>&1" >> $@; \
+	      echo "" >> $@; \
+	    ) \
+	    ) \
+	  ) \
+	)
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "build_o: build $(patsubst src/%.c,build/%.o,$(wildcard src/*.c)) " >> $@; 
+	echo "" >> $@
+	$(foreach file_c,$(sort $(patsubst src/%,%,$(wildcard src/*.c)) $(patsubst src/%.y,%.tab.c,$(wildcard src/*.y)) $(patsubst src/%.y,%.code.c,$(wildcard src/*.y)) $(patsubst src/%.l,%.c,$(wildcard src/*.l)) $(patsubst src/%.ct,%.c,$(wildcard src/*.ct))), \
 	  $(foreach file_o,$(patsubst %.c,%.o,$(file_c)), \
-	    $(foreach file_aux,$(patsubst %.c,%.aux,$(file_c)), \
-	      echo "build/$(file_o): src/$(file_c) $(wildcard src/*.h)" >> $@; \
-	      echo "	$(CC) $(CFLAGS) -c src/$(file_c) -o build/$(file_o)  2>&1" >> $@; \
+	  $(foreach file_i,$(patsubst %.c,%.i,$(file_c)), \
+	  $(foreach file_h,$(patsubst %.c,%.h,$(file_c)), \
+	  $(foreach file_aux,$(patsubst %.c,%.aux,$(file_c)), \
+	      echo "build/$(file_o): build/$(file_c) $(patsubst src/%,build/%,$(wildcard src/lib*.ci)) $(patsubst %,build/%,$(shell cat src/$(file_c) | ./tools/bin/c-file-local-include-list)) " >> $@; \
+	      echo "	$(CC) $(CFLAGS) -c build/$(file_c) -o build/$(file_o)  2>&1" >> $@; \
 	      echo "" >> $@; \
-	      echo "" >> $@; \
+	    ) \
+	    ) \
 	    ) \
 	  ) \
 	)
+#	  $(foreach c_local_includes,$(shell cat src/$(file_c) | ./tools/bin/c-file-local-include-list), 
+#	      echo "build/$(file_o): src/$(file_c) $(patsubst %,src/%,$(c_local_includes)) " >> $@; 
+#	      echo "build/$(file_o): src/$(file_c) src/$(file_h) $(patsubst %,src/%.h,$(SRC_H))" >> $@; 
 #	      echo "	$(CC) $(CFLAGS) -c src/$(file_c) -o build/$(file_o) -aux-info build/$(file_aux) 2>&1" >> $@; 
-else
-	$(foreach file_c,$(sort $(patsubst src/%,%,$(wildcard src/*.c)) $(patsubst src/%.y,%.c,$(wildcard src/*.y)) $(patsubst src/%.ct,%.c,$(wildcard src/*.ct))), \
-	  $(foreach file_s,$(patsubst %.c,%.s,$(file_c)), \
-	  $(foreach file_o,$(patsubst %.c,%.o	,$(file_c)), \
-	    $(foreach file_aux,$(patsubst %.c,%.aux,$(file_c)), \
-	      echo "build/$(file_o): build/$(file_s) " >> $@; \
-	      echo "	$(ASM) -f elf64 -w -p gas -g dwarf2 -mamd64  build/$(file_s) -o build/$(file_o)  2>&1" >> $@; \
-	      echo "" >> $@; \
-	      echo "build/$(file_s): src/$(file_c) $(wildcard src/*.h)" >> $@; \
-	      echo "	$(CC) $(CFLAGS) -S src/$(file_c) -o build/$(file_s)  2>&1" >> $@; \
-	      echo "" >> $@; \
-	    ) \
-	  ) \
-	  ) \
-	)
-endif
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "build_so: build $(patsubst src/%.c,build/%.so,$(wildcard src/*.c)) " >> $@; 
 	echo "" >> $@
 	$(foreach file_noext,$(sort $(patsubst src/%.c,%,$(wildcard src/*.c)) $(patsubst src/%.y,%,$(wildcard src/*.y)) $(patsubst src/%.ct,%,$(wildcard src/*.ct))), \
 	  echo "build/$(file_noext).so: build/$(file_noext).o " >> $@; \
@@ -510,6 +834,8 @@ endif
 	  echo "" >> $@; \
 	  echo "" >> $@; \
 	)
+	echo "" >> $@
+	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@

@@ -49,8 +49,7 @@ CMusique * CMusique_make(const char * filename) {
 #if 1 
     {
       char filename_realpath[PATH_MAX]; 
-      realpath(filename, filename_realpath); 
-      messerr("REALPATH: %s" "\n", filename_realpath);
+      messerr("REALPATH: %s" "\n", realpath(filename, filename_realpath)); 
     }; 
 #endif 
   };
@@ -139,8 +138,7 @@ CSon * CSon_make(const char * filename) {
 #if 1 
     {
       char filename_realpath[PATH_MAX]; 
-      realpath(filename, filename_realpath); 
-      messerr("REALPATH: %s" "\n", filename_realpath);
+      messerr("REALPATH: %s" "\n", realpath(filename, filename_realpath));
     }; 
 #endif 
     messerr("SDL_mixer: %s" "\n", Mix_GetError()); 

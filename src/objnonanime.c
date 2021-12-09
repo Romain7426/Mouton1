@@ -2,7 +2,8 @@
 #include "objnonanime.h"
 //#include "nonanime/nonanime.hpp"
 //#include "nonanime.h"
-#include "nonanime/nonanime.h"
+//#include "nonanime/nonanime.h"
+#include <nonanime/nonanime.h>
 
 
 CObjNonAnime * CObjNonAnime__make_core(void) {
@@ -70,7 +71,8 @@ CObjNonAnime * CObjNonAnime__make(const char * filename) {
   } 
   else { 
     messerr("Erreur lors de la lecture du fichier de description l'objet non-anime: '%s' " "\n", filename); 
-    assert(false); 
+    //assert(false); 
+    return NULL; 
   }; 
   
   return this; 

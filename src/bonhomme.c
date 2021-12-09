@@ -2,7 +2,7 @@
 #include "bonhomme.h"
 #include "002_kernel.h"
 #include "map.h"
-#include "anime.h"
+#include <anime.h>
 #include "camera.h"
 #include <assert.h>
 
@@ -583,7 +583,8 @@ CBonhomme * CBonhomme__make(const char * filename) {
   }
   else {
     messerr("ANIME: Lecture avec erreur du fichier " ANIMESDIR "%s .\n", filename);
-    assert(false);
+    //assert(false);
+    return NULL; 
   };
   
   //fprintf(stderr, "Bonhomme: Constructeur: %s - pv = %d\n", filename, pv);
