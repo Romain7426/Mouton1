@@ -48,7 +48,7 @@ int main(const int argc, const char * argv[]) {
   // The primary use of the freopen() function is to change the file associated with a standard text stream (stderr, stdin, or stdout). 
   fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-  { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", stderr -> _bf); }; 
+  { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
 #if 1 
   freopen(stdout_log_filename, "wb", stdout); 
   char stdout_buffer[1 << 12]; 
@@ -60,7 +60,7 @@ int main(const int argc, const char * argv[]) {
 #endif 
   fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-  { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", stderr -> _bf); }; 
+  { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p - " __FILE__ " - %d \n", (const void *)stdout -> _bf._base, (int)__LINE__); }; 
   { const char __file__[] = "" __FILE__ ""; dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", (const void *)stdout -> _bf._base, (const char *)__file__, (int)__LINE__); }; 
   

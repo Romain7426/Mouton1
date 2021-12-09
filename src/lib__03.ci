@@ -3,7 +3,7 @@
 #define ARRAYLEN(s)  (sizeof(s)/sizeof(*s)) 
 #define ARRAY_SIZE    ARRAYLEN 
 //#define STRLEN(s)  (ARRAYLEN(s)-1) 
-// Beware of a string like "bob\0and\0mary", whose the preprocessor STRLEN will never behave like the compile-one (12 vs 3). 
+// Beware of a string like "bob\0and\0mary", with which the preprocessor STRLEN will never behave like the compile-one (12 vs 3). 
 // Therefore this one is kind of more accurate. 
 
 static char hexdigit(const int v) { 

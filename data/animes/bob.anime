@@ -16,13 +16,11 @@ gameplay {
  invincible := vrai;
  hostile := faux;
  
-
  action parler {
   affichage := "parler";
   icone := "";
   gestionnaire := { fichier := "script.pml"; procedure := "bob_parler"; } ;
  }
-
 
 
 }
@@ -90,11 +88,6 @@ graphique {
 
 
 
-Et tout ce qui se passe après, on s'en fout !!!!!!!
-
-
-
-!!
 
 
 

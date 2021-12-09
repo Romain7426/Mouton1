@@ -302,8 +302,153 @@ void CBonhomme__Life(CBonhomme * this) {
   
 }; 
 
+#if 1 
+int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * anime_datadir, const char * anime_filename) { 
+  anime_t anime_data[1]; 
+  int     anime_stdlog_d = -1; 
+  int     anime_file_d   = -1; 
+  goto label__start; 
 
-int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * dir, const char * filename) {
+  assert(false); 
+
+ label__error__exit_fail: { 
+    if (0 <= anime_stdlog_d) close(anime_stdlog_d); 
+    if (0 <= anime_file_d) close(anime_file_d); 
+    return -1; 
+  }; 
+  
+  assert(false); 
+
+label__start: {}; 
+  { 
+    char anime_fullpath[strlen(anime_datadir) + strlen(anime_filename) + 1];
+    strcat(strcpy(anime_fullpath, anime_datadir), anime_filename); 
+    dprintf(fileno(stdout), "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: INFO: " "Chargement d'un anime décrit par le fichier: %s" "\n", __func__, anime_fullpath); 
+    
+#define LOG_SUFF ".log"
+    char anime_log[strlen(LOGDIR) + strlen(anime_filename) + strlen(LOG_SUFF) + 1];
+    strcat(strcat(strcpy(anime_log, LOGDIR), anime_filename), LOG_SUFF);
+    dprintf(fileno(stdout), "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: INFO: " "Fichier log de l'analyse de ce fichier anime: %s" "\n", __func__, anime_log); 
+
+  label__anime_both_file_and_log__open: 
+    
+  label__anime_log__open: { 
+      anime_stdlog_d = -1; 
+      for (;;) { 
+	anime_stdlog_d = open(anime_log, O_WRONLY | O_CREAT | O_TRUNC, (mode_t)0666); 
+	if (0 <= anime_stdlog_d) break; 
+	messerr("ERREUR: Le fichier pour écrire le log de l'analyse de la description de l'objet animé n'a pas pu être ouvert: '%s'" "\n", anime_log); 
+	messerr("        Voulez-vous réessayer?" "\n"); 
+	{
+	  char c; 
+	  const int nb_read = read(stdin_d, &c, 1); 
+	  if (0 == nb_read) { continue; }; 
+	  if (c == 'n') { goto label__error__exit_fail; }; 
+	  continue; 
+	}; 
+	goto label__error__exit_fail; 
+      }; 
+    }; 
+    
+  label__anime_file__open: { 
+      anime_file_d = -1; 
+      for (;;) { 
+	anime_file_d = open(anime_fullpath, O_RDONLY); 
+	if (0 <= anime_file_d) break; 
+	messerr("ERREUR: Le fichier de description de l'objet animé n'a pas pu être ouvert: '%s'" "\n", anime_fullpath); 
+	messerr("        Voulez-vous réessayer?" "\n"); 
+	{
+	  char c; 
+	  const int nb_read = read(stdin_d, &c, 1); 
+	  if (0 == nb_read) { continue; }; 
+	  if (c == 'n') { goto label__error__exit_fail; }; 
+	  continue; 
+	}; 
+	goto label__error__exit_fail; 
+      }; 
+    }; 
+      
+    anime__make_r(anime_data, anime_stdlog_d); 
+
+    for(;;) { 
+      const int_anime_error_t anime_error_id = anime__fill_from_file(anime_data, anime_filename, anime_file_d, anime_stdlog_d); 
+      if (ANIME__OK == anime_error_id) break; 
+      if (0 < anime_error_id) { 
+	dprintf(fileno(stdout), "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: WARNING: %s: %s" "\n", __func__, anime_filename, int_anime_error__get_cstr(anime_error_id)); 
+	break; 
+      }; 
+      { 
+	messerr("ERREUR: Le fichier de description de l'objet animé n'a pas pu être lu et/ou analysé: '%s'" "\n", anime_fullpath); 
+	messerr("        ERROR_ID: %s" "\n", int_anime_error__get_cstr(anime_error_id)); 
+	messerr("        ERROR_DESC: %s" "\n", anime_data -> error_str); 
+	messerr("        Pour plus d'informations, veuillez vous reporter au compte-rendu rendant compte de cette tentative échouée: '%s'" "\n", anime_log); 
+	messerr("        Voulez-vous réessayer? (o/n)" "\n"); 
+	{
+	  char c; 
+	  for (;;) { 
+	    const ssize_t nb_read = read(stdin_d, &c, 1); 
+	    if (0 == nb_read) { continue; }; 
+	    if (-1 == nb_read) goto label__error__exit_fail; 
+	    break; 
+	  }; 
+	  if (c == 'n') { goto label__error__exit_fail; }; 
+	  close(anime_file_d); anime_file_d = -1; 
+	  close(anime_stdlog_d); anime_stdlog_d = -1; 
+	  goto label__anime_both_file_and_log__open; 
+	};
+	assert(false); 
+      }; 
+      assert(false); 
+    }; 
+    
+    // Success 
+    anime__print_d(anime_data, anime_stdlog_d); 
+ 
+    // Closing files. 
+    close(anime_file_d); anime_file_d = -1; 
+    close(anime_stdlog_d); anime_stdlog_d = -1; 
+  }; 
+  
+  this -> parent1.SetDimension(&this -> parent1, anime_data -> choc_longueur, anime_data -> choc_largeur, anime_data -> choc_hauteur); 
+  this -> parent1.masse = anime_data -> masse / 240.0f; 
+  if (NULL == this -> parent1.filename) this -> parent1.filename = strcopy(anime_filename);
+  this -> parent1.pvmax       = anime_data -> vie; 
+  this -> parent1.Hostile_huh = anime_data -> hostile; 
+  
+  if (NULL == this -> filename) this -> filename = strcopy(anime_filename);
+  
+  { 
+    CObjActionnable * this_action = this -> parent1.actions; 
+    for (int i = 0; i < anime_data -> actions_nb; i++) {
+      this_action -> AjouterAction(this_action, anime_data -> actions_array_affichage[i], anime_data -> actions_array_icone[i], anime_data -> actions_array_gestionnaire_fichier[i], anime_data -> actions_array_gestionnaire_proc[i]); 
+    }; 
+  }; 
+
+  { 
+    CPantin * this_pantin = &this -> pantin; 
+    for (int racine_i = 0; racine_i < anime_data -> racines_nb; racine_i++) { 
+      const char  * qui      = anime_data -> racines_qui[racine_i]; 
+      const float   x        = anime_data -> racines_x[racine_i]; 
+      const float   y        = anime_data -> racines_y[racine_i]; 
+      const float   z        = anime_data -> racines_z[racine_i]; 
+      const float   angle_y  = anime_data -> racines_angle_y[racine_i]; 
+      const int     membre_i = anime__membres_lookup(anime_data, qui); 
+      if (0 > membre_i) { 
+	messerr(__FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__FUNCTION__) ":" "Impossible de trouver le membre nommé '%s'" "\n", qui); 
+	continue; 
+      }; 
+      const char  * image       = anime_data -> membres_image[membre_i]; 
+      const float   largeur     = anime_data -> membres_largeur[membre_i]; 
+      const float   hauteur     = anime_data -> membres_hauteur[membre_i]; 
+      const float   angle_y_max = anime_data -> membres_angle_max_y[membre_i]; 
+      this_pantin -> AjouterMembre(this_pantin, image, x, y, z, largeur, hauteur, angle_y_max); 
+    }; 
+  };
+  
+  return 0; 
+}; 
+#else 
+int CBonhomme__ReadDescriptionFile_old001(CBonhomme * this, const char * dir, const char * filename) { 
   anime_t         * anime_data  =  NULL; 
   CObjActionnable * this_action =  this -> parent1.actions; 
   CPantin         * this_pantin = &this -> pantin; 
@@ -368,6 +513,7 @@ int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * dir, const cha
   
   return 0; 
 }; 
+#endif 
 
 CBonhomme * CBonhomme__make(const char * filename) {
   //fprintf(stderr, "Bonhomme: Constructeur: %s - pv = %d\n", filename, pv);

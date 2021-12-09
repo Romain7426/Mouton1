@@ -18,16 +18,10 @@ typedef bool_t bool;
 
 int main(void) {
   int c;
-
-
+  
+  
   // la grande boucle
-  do {
-
-    // d'abord on recherche un caractère newline
-    do {
-      c = getchar();
-      if (c == EOF) return 0;
-    } while (c != '\n');
+  for (;;) {
     
     // on skippe les espaces
     do {
@@ -37,7 +31,7 @@ int main(void) {
     
     // si le caractère suivant n'est pas un #, on boucle
     if (c != '#')
-      continue;
+      goto skip_until_end_of_line; 
 
     // on skippe les espaces
     do {
@@ -46,14 +40,14 @@ int main(void) {
     } while (SPACE_HUH(c));
     
     // le mot suivant doit être "include"
-    if (c != 'i') continue;
-    c = getchar(); if (c != 'n') continue;
-    c = getchar(); if (c != 'c') continue;
-    c = getchar(); if (c != 'l') continue;
-    c = getchar(); if (c != 'u') continue;
-    c = getchar(); if (c != 'd') continue;
-    c = getchar(); if (c != 'e') continue;
-
+    if (c != 'i') goto skip_until_end_of_line;
+    c = getchar(); if (c != 'n') goto skip_until_end_of_line;
+    c = getchar(); if (c != 'c') goto skip_until_end_of_line;
+    c = getchar(); if (c != 'l') goto skip_until_end_of_line;
+    c = getchar(); if (c != 'u') goto skip_until_end_of_line;
+    c = getchar(); if (c != 'd') goto skip_until_end_of_line;
+    c = getchar(); if (c != 'e') goto skip_until_end_of_line;
+    
     // on skippe les espaces
     do {
       c = getchar();
@@ -61,23 +55,30 @@ int main(void) {
     } while (SPACE_HUH(c));
     
     // le caractère suivant doit être un "
-    if (c != '"') continue;
+    if (c != '"') goto skip_until_end_of_line;
 
     // on print tant que pas EOF || '"'
-    do {
+    for (;;) {
       c = getchar();
       if (c == '"') break;
       if (c == EOF) return -1;
       putchar(c);
-    } while (true);
-
+    }; 
+    
     // on put un newline
     putchar('\n');
-
-  } while (true);
+    
+skip_until_end_of_line: 
+    while (c != '\n') { 
+      c = getchar(); 
+      if (c == EOF) return 0; 
+    }; 
+    continue; 
+    
+  }; 
   
-
+  
   assert(false);
   return -1;
-}
+}; 
 

@@ -154,15 +154,19 @@ bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLu
 
   SDL_Surface * texture = NULL;
   
-  // On charge du bitmap en mémoire graâce la SDL. 
+  // On charge le bitmap en mémoire grâce à la SDL. 
   texture = IMG_Load(fichier_image);
   if (texture == NULL) {
-    messerr("Impossible de charger le fichier image '%s'\n", fichier_image);
+    messerr("Impossible de charger le fichier image '%s'." "\n", fichier_image); 
 #if 1 
     {
       char filename_realpath[PATH_MAX]; 
-      realpath(fichier_image, filename_realpath); 
-      messerr("REALPATH: %s" "\n", filename_realpath);
+      if (NULL == realpath(fichier_image, filename_realpath)) { 
+	messerr("REALPATH: %s" "\n", "File does not exist"); 
+      } 
+      else { 
+	messerr("REALPATH: %s" "\n", filename_realpath); 
+      }; 
     }; 
 #endif 
 #if 1 
