@@ -1,0 +1,4 @@
+lldb
+
+
+process handle SIGUSR1 -s false
