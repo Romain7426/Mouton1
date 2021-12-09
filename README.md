@@ -32,6 +32,65 @@ Authors:
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description languages <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
   
+
+## Compiling & Installing 
+
+<pre>
+$ echo "clang" > ./CC        # Or your favorite compiler. 
+$ sh ./configure.sh          # First generate tools, and then the Makefile. 
+$ make 
+$ make install 
+</pre>
+ 
+Customizations 
+ - [Compiler](https://en.wikipedia.org/wiki/Compiler) — The default used [compiler](https://en.wikipedia.org/wiki/Compiler) is 'cc'. In order to use your favorite [compiler](https://en.wikipedia.org/wiki/Compiler), you have to specify it in the file ['./CC'](CC). 
+    - $ echo "cc" > ./CC 
+    - $ echo "clang" > ./CC 
+    - $ echo "/usr/local/bin/x86_64-unknown-openbsd7.0-gcc-11.2.0" > ./CC 
+    - $ echo "pcc -L /usr/lib " > ./CC 
+    - $ echo "tcc" > ./CC 
+ - Installation directory — The default installation directory is './destroot'. To use your favorite location, please edit the generated [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile), or even edit the generating ['./Makefile-gen.mkf'](Makefile-gen.mkf). (Another way is to symbolic-link the wanted destination as './destroot'; or to copy files from './destroot' to the wanted location). 
+ - No other customization is available. (However, you can still edit the file ['./Makefile-gen.mkf'](Makefile-gen.mkf) as much as you like.) 
+ 
+Configuration architecture 
+ - Configuration is not based on [GNU Autohell](https://en.wikipedia.org/wiki/Autohell). 
+ - Instead, we devised something home-made. We based it is on [GNU Make](https://en.wikipedia.org/wiki/GNU_make). Why [GNU Make](https://en.wikipedia.org/wiki/GNU_make)? Because [GNU Make](https://en.wikipedia.org/wiki/GNU_make) language is way simpler & friendlier than [shell](https://en.wikipedia.org/wiki/Bourne_shell) language. 
+ - Our idea is to generate a standard [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile), predictable & boring (example: [Makefile](Makefile)), so that it could be read by any exotic version of [Make](https://en.wikipedia.org/wiki/Make_(software)). Such a [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile) is way more readable, debuggable, understandable, and prevent the [Make](https://en.wikipedia.org/wiki/Make_(software)) software to take «smart» initiatives (by infering who knows which esoteric rule). (On top of that, theoretically speaking, such a [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile) would be distributable — however, it is not so due to each [compiler](https://en.wikipedia.org/wiki/Compiler) personality, and each [OS](https://en.wikipedia.org/wiki/Operating_system) personality, etc., which has therefore to be beforehand detected.) 
+ - To generate this boring [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile), we use the file ['./Makefile-gen.mkf'](Makefile-gen.mkf), which is, as earlier explained, a [GNU Make](https://en.wikipedia.org/wiki/GNU_make) script. 
+ - This script, ['./Makefile-gen.mkf'](Makefile-gen.mkf), requires external tools which are located in the sub-directory ['./tools'](tools). Thus, before running the script ['./Makefile-gen.mkf'](Makefile-gen.mkf), these have to be first generated. This is achieved by the [shell](https://en.wikipedia.org/wiki/Bourne_shell) script named ['./tools-compile.sh'](tools-compile.sh). (Theoretically, all these tools should compile & run issuelessly: «sh ./tools-compile.sh».) 
+ - And that's all folks! All that is automagically dealt by the [shell](https://en.wikipedia.org/wiki/Bourne_shell) script named ['./configure.sh'](configure.sh). 
+ 
+Complaints 
+ - For maximum compatibility, [shell](https://en.wikipedia.org/wiki/Bourne_shell) scripts should be run in using 'sh':
+    - $ sh ./configure.sh
+    - $ sh ./tools-compile.sh 
+ - If the script named ['./configure.sh'](configure.sh) complains about not finding [GNU Make](https://en.wikipedia.org/wiki/GNU_make), please help it in editing the file ['./configure.sh'](configure.sh) and tell it where to find [GNU Make](https://en.wikipedia.org/wiki/GNU_make) on your system. 
+ - The source code is compliant with [C99](https://en.wikipedia.org/wiki/C99); therefore, a [C99](https://en.wikipedia.org/wiki/C99)-compatible [compiler](https://en.wikipedia.org/wiki/Compiler) is required. 
+ - For any other complaints, well, from here & now, I do not know. 
+ 
+Tested [compilers](https://en.wikipedia.org/wiki/Compiler): 
+ - [clang](https://en.wikipedia.org/wiki/Clang): 2m (lib) and 3m (exe) 
+ - [gcc11](https://en.wikipedia.org/wiki/GNU_Compiler_Collection): 28m (lib) and 5m (exe) 
+ - [tcc](https://en.wikipedia.org/wiki/Tiny_C_Compiler): FAILS: Does not compile as of now 
+ - [pcc](https://en.wikipedia.org/wiki/Portable_C_Compiler): FAILS: Cannot compile («identifier exceeds C99 5.2.4.1») 
+ - Others? 
+
+Tested [operating systems](https://en.wikipedia.org/wiki/Operating_system): 
+ - [OpenBSD](https://en.wikipedia.org/wiki/OpenBSD) 
+ - Other [BSD](https://en.wikipedia.org/wiki/Berkeley_Software_Distribution) should work flawlessly. 
+ - Should be working on [MacOSX](https://en.wikipedia.org/wiki/MacOS). 
+ - [Unix](https://en.wikipedia.org/wiki/Unix)-compatible systems should work. 
+ - For [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows), we do not know, we do not have that system. Supposedly, the software should be able to work using [Cygwin](https://en.wikipedia.org/wiki/Cygwin), [MinGW](https://en.wikipedia.org/wiki/MinGW), etc. 
+ 
+Dependencies: 
+ - A [C99](https://en.wikipedia.org/wiki/C99)-[compiler](https://en.wikipedia.org/wiki/Compiler). 
+ - [GNU Make](https://en.wikipedia.org/wiki/GNU_make). 
+ 
+Nota bene: 
+ - If compiling tools is too long, it can be skipped, and the [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile) could be directly generated: <br>
+    $ gmake -r -R -S -j 1 --warn-undefined-variables -f ./Makefile-gen.mkf  
+
+
    
 ## [Intellectual Property](https://en.wikipedia.org/wiki/Intellectual_property) 
  
