@@ -61,15 +61,53 @@ ifeq ($(CC_WORKS_HUH),0)
 else 
   CC_WORKS_HUH := no
 endif 
-
 $(info CC_WORKS_HUH: $(CC_WORKS_HUH))
-
 ifeq ($(CC_WORKS_HUH),no) 
    $(info --> Specified compiler failed to compile a test trivial program.)
    $(info -->   Seems like your compiler does not work.) 
    $(error ABORTING)
 endif 
 
+CC_HAS_F_STACK_SHUFFLE_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -fstack-shuffle - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_F_STACK_SHUFFLE_HUH),0) 
+  CC_HAS_F_STACK_SHUFFLE_HUH := yes
+else 
+  CC_HAS_F_STACK_SHUFFLE_HUH := no
+endif 
+$(info CC_HAS_STACK_SHUFFLE_HUH: $(CC_HAS_F_STACK_SHUFFLE_HUH))
+
+CC_HAS_M_SAVE_ARGS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -msave-args - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_M_SAVE_ARGS_HUH),0) 
+  CC_HAS_M_SAVE_ARGS_HUH := yes
+else 
+  CC_HAS_M_SAVE_ARGS_HUH := no
+endif 
+$(info CC_HAS_M_SAVE_ARGS_HUH: $(CC_HAS_M_SAVE_ARGS_HUH))
+
+# Actually, we do not want to use «-fstack-protector-all» as it does not work with VLAs and ALLOCAs. 
+CC_HAS_F_STACK_PROTECTOR_ALL_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_F_STACK_PROTECTOR_ALL_HUH),0) 
+  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := yes
+else 
+  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := no
+endif 
+$(info CC_HAS_F_STACK_PROTECTOR_ALL_HUH: $(CC_HAS_F_STACK_PROTECTOR_ALL_HUH))
+
+CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := $(shell mkdir -p tmp && echo "int main(int argc, char * argv[]) { char tmp[argc]; return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_vla.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_vla.exe ; echo $$?)
+ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH),0) 
+  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := yes
+else 
+  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := no
+endif 
+$(info CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH))
+
+CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := $(shell mkdir -p tmp && echo "#include <stdlib.h> \n int main(int argc, char * argv[]) { char * tmp = alloca(argc); return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_alloca.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_alloca.exe ; echo $$?)
+ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH),0) 
+  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := yes
+else 
+  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := no
+endif 
+$(info CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH))
 
 
 CC_NAME      := $(shell mkdir -p tmp && $(CC) ./tools/src/compiler-detect.c -o tmp/compiler-detect.exe && ./tmp/compiler-detect.exe) 
@@ -448,7 +486,7 @@ CC_FLAGS0 := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -O0  -D 
 CC_FLAGS_F := -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -fstack-check  -fverbose-asm -ffreestanding -feliminate-unused-debug-types 
 CC_FLAGS_F_NO := -fno-exceptions -fno-omit-frame-pointer  -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions 
 # unknown: -fno-early-inlining -fno-gcse-lm -fno-move-loop-invariants -fno-peephole  -fno-sched-interblock -fno-sched-spec -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-tree-loop-optimize -fno-tree-vect-loop-version -fno-tree-loop-im -fno-tree-loop-ivcanon 
-CC_FLAGS_W := -Wall -W -Wextra  -Werror -Wfatal-errors  -Werror-implicit-function-declaration -Wparentheses -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type -Wstrict-prototypes -Wpacked -Wcast-qual -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas
+CC_FLAGS_W := -Wall -W -Wextra  -Werror -Werror=vla -Wfatal-errors  -Werror-implicit-function-declaration -Wparentheses -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type -Wstrict-prototypes -Wpacked -Wcast-qual -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas
 CC_FLAGS_W_NO := -Wno-cast-align -Wno-system-headers  -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function -Wno-switch-default -Wno-format-nonliteral 
 # unknown: -gstabs+3 
 
@@ -464,13 +502,17 @@ GCC_FLAGS := -fPIC -g3  -fno-early-inlining -fno-gcse-lm -fno-move-loop-invarian
 #PCC: -g: does not work: «SHF_MERGE section size must be a multiple of sh_entsize» 
 PCC_FLAGS := -fpic #-g #-fpic 
 TCC_FLAGS := -g -bt100 #-b #-fpic #-g #-fpic 
+OPENBSD_GCC_FLAGS := -fstack-shuffle -msave-args -fstack-protector-all 
 
 CC_FLAGS_SPEC := 
 CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),clang)),$(CLANG_FLAGS),) 
 CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),gcc)),$(GCC_FLAGS),) 
 CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),pcc)),$(PCC_FLAGS),) 
 CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_FLAGS),) 
-
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_FLAGS),) 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_HAS_F_STACK_SHUFFLE_HUH),yes)),-fstack-shuffle,) 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_HAS_M_SAVE_ARGS_HUH),yes)),-msave-args,) 
+#CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_HAS_F_STACK_PROTECTOR_ALL_HUH),yes)),-fstack-protector-all,) 
 
 CC_FLAGS := $(CC_FLAGS0) $(CC_FLAGS_F) $(CC_FLAGS_W) $(CC_FLAGS_SPEC) $(CC_FLAGS_F_NO) $(CC_FLAGS_W_NO) 
 
@@ -627,7 +669,7 @@ Makefile:
 	echo "" > $@
 #	echo "default: Makefile build run $(BIN)" >> $@
 #	echo "default: Makefile build $(LIB) $(BIN) run " >> $@
-	echo "default: Makefile build build_h build_ci build_i build_o build_so $(LIB) $(LIB_SO) $(BIN) run " >> $@
+	echo "default: Makefile build build_h build_ci build_c build_i build_o build_so $(LIB) $(LIB_SO) $(BIN) run " >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
@@ -764,6 +806,8 @@ Makefile:
 	)
 	echo "" >> $@
 	echo "" >> $@
+	echo "" >> $@
+	echo "build_c: build $(patsubst src/%,build/%,$(wildcard src/*.c)) " >> $@; 
 	echo "" >> $@
 	$(foreach file_c,$(patsubst src/%,%,$(wildcard src/*.c)), \
 	  echo "build/$(file_c): src/$(file_c) " >> $@; \
