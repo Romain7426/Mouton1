@@ -1,3 +1,7 @@
+CC
+Makefile
+build.sh
+.gdb_history
 *~
 *.log
 *.output
