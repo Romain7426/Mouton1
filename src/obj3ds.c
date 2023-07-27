@@ -315,7 +315,12 @@ C3DS * C3DS__make(const char * filename) {
   
   this -> filename = strcopy(filename); 
   
-  char realfile[strlen(T3DSDIR) + strlen(filename) + 1]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char realfile[strlen(T3DSDIR) + strlen(filename) + 1]; 
+  enum { realfile__bytesize = 1<<10 }; 
+  const size_t realfile__cstrlen = strlen(T3DSDIR) + strlen(filename); 
+  assert(realfile__bytesize > realfile__cstrlen); 
+  char realfile[realfile__bytesize]; 
   strcat(strcpy(realfile, T3DSDIR), filename); 
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 

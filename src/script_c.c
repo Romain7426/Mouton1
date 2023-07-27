@@ -263,21 +263,33 @@ static int script_c__lib1__afficher_message(script_c_env_t * this, api_contexte_
 
   int int_argc; 
   READ_ARG(int,int_argc); 
-  int int_argv[int_argc]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //int int_argv[int_argc]; 
+  enum { int_argv__unitsize = 127 }; 
+  assert(int_argv__unitsize >= int_argc); 
+  int int_argv[int_argv__unitsize]; 
   for (int i = 0; i < int_argc; i++) { 
     READ_ARG(int,int_argv[i]); 
   }; 
 
   int ptr_argc; 
   READ_ARG(int,ptr_argc); 
-  void * ptr_argv[ptr_argc]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //void * ptr_argv[ptr_argc]; 
+  enum { ptr_argv__unitsize = 127 }; 
+  assert(ptr_argv__unitsize >= ptr_argc); 
+  void * ptr_argv[ptr_argv__unitsize]; 
   for (int i = 0; i < ptr_argc; i++) { 
     READ_ARG(void *,ptr_argv[i]); 
   }; 
 
   int cptr_argc; 
   READ_ARG(int,cptr_argc); 
-  const void * cptr_argv[cptr_argc]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //const void * cptr_argv[cptr_argc]; 
+  enum { cptr_argv__unitsize = 127 }; 
+  assert(cptr_argv__unitsize >= cptr_argc); 
+  const void * cptr_argv[cptr_argv__unitsize]; 
   for (int i = 0; i < cptr_argc; i++) { 
     READ_ARG(void *,cptr_argv[i]); 
   }; 
@@ -353,21 +365,33 @@ static int script_c__lib1__menu(script_c_env_t * this, api_contexte_t * api_cont
 
   int int_argc; 
   READ_ARG(int,int_argc); 
-  int int_argv[int_argc]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //int int_argv[int_argc]; 
+  enum { int_argv__unitsize = 127 }; 
+  assert(int_argv__unitsize >= int_argc); 
+  int int_argv[int_argv__unitsize]; 
   for (int i = 0; i < int_argc; i++) { 
     READ_ARG(int,int_argv[i]); 
   }; 
 
   int ptr_argc; 
   READ_ARG(int,ptr_argc); 
-  void * ptr_argv[ptr_argc]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //void * ptr_argv[ptr_argc]; 
+  enum { ptr_argv__unitsize = 127 }; 
+  assert(ptr_argv__unitsize >= ptr_argc); 
+  void * ptr_argv[ptr_argv__unitsize]; 
   for (int i = 0; i < ptr_argc; i++) { 
     READ_ARG(void *,ptr_argv[i]); 
   }; 
 
   int cptr_argc; 
   READ_ARG(int,cptr_argc); 
-  const void * cptr_argv[cptr_argc]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //const void * cptr_argv[cptr_argc]; 
+  enum { cptr_argv__unitsize = 127 }; 
+  assert(cptr_argv__unitsize >= cptr_argc); 
+  const void * cptr_argv[cptr_argv__unitsize]; 
   for (int i = 0; i < cptr_argc; i++) { 
     READ_ARG(void *,cptr_argv[i]); 
   }; 

@@ -261,7 +261,12 @@ bool_t biglib_rm_recursive_delete_all_files_in_dir(const char * path, const int 
     if (strequal(result -> d_name, "..")) continue;
     if (verbose_level >= 1) printf("rm -f %s/%s\n", path, result -> d_name);
 
-    char file_with_path[strlen(path) + 1 + strlen(result -> d_name) + 1];
+    // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+    //char file_with_path[strlen(path) + 1 + strlen(result -> d_name) + 1];
+    const size_t file_with_path__strlen = strlen(path) + 1 + strlen(result -> d_name); 
+    enum { file_with_path__unitsize = (1 << 10) }; 
+    assert(file_with_path__unitsize > file_with_path__strlen);
+    char file_with_path[file_with_path__unitsize];
     strcpy(file_with_path, path);
     strcat(file_with_path, "/");
     strcat(file_with_path, result -> d_name);

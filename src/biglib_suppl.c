@@ -120,7 +120,11 @@ void put_int_fdes_old(const int n_given, const int fdes) {
   } while (n > 0);
   
   // Then, allocate the space to reverse.
-  char buf[len+1];
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char buf[len+1];
+  enum { buf_bytesize = 127 }; 
+  char buf[buf_bytesize];
+  assert(buf_bytesize > len); 
   buf[len] = '\0';
   // Then we reset n.
   n = n_given;
@@ -171,7 +175,11 @@ void put_int_fdes(const int n_given, const int fdes) {
   } while (n != 0);
   
   // Then, allocate the space to reverse.
-  char buf[len+1];
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char buf[len+1];
+  enum { buf_bytesize = 127 }; 
+  char buf[buf_bytesize];
+  assert(buf_bytesize > len); 
   buf[len] = '\0';
   // Then we reset n.
   n = n_given;
@@ -222,7 +230,11 @@ void put_uint64_fdes(const uint64_t n_given, const int fdes) {
   } while (n > 0);
 
   // Then, allocate the space to reverse.
-  char buf[len+1];
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char buf[len+1];
+  enum { buf_bytesize = 127 }; 
+  char buf[buf_bytesize];
+  assert(buf_bytesize > len); 
   buf[len] = '\0';
   // Then we reset n.
   n = n_given;

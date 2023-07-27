@@ -93,6 +93,14 @@ else
 endif 
 $(info CC_HAS_F_STACK_PROTECTOR_ALL_HUH: $(CC_HAS_F_STACK_PROTECTOR_ALL_HUH))
 
+CC_HAS_F_STACK_PROTECTOR_NO_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -fno-stack-protector - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_F_STACK_PROTECTOR_NO_HUH),0) 
+  CC_HAS_F_STACK_PROTECTOR_NO_HUH := yes
+else 
+  CC_HAS_F_STACK_PROTECTOR_NO_HUH := no
+endif 
+$(info CC_HAS_F_STACK_PROTECTOR_NO_HUH: $(CC_HAS_F_STACK_PROTECTOR_NO_HUH))
+
 CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := $(shell mkdir -p tmp && echo "int main(int argc, char * argv[]) { char tmp[argc]; return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_vla.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_vla.exe ; echo $$?)
 ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH),0) 
   CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := yes
@@ -513,6 +521,8 @@ CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_F
 CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_HAS_F_STACK_SHUFFLE_HUH),yes)),-fstack-shuffle,) 
 CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_HAS_M_SAVE_ARGS_HUH),yes)),-msave-args,) 
 #CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_HAS_F_STACK_PROTECTOR_ALL_HUH),yes)),-fstack-protector-all,) 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_HAS_F_STACK_PROTECTOR_NO_HUH),yes)),-fno-stack-protector,) 
+CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) -Wno-vla
 
 CC_FLAGS := $(CC_FLAGS0) $(CC_FLAGS_F) $(CC_FLAGS_W) $(CC_FLAGS_SPEC) $(CC_FLAGS_F_NO) $(CC_FLAGS_W_NO) 
 

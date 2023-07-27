@@ -154,7 +154,9 @@ int game_events__handlers__push_script(game_events_env_t * this, const int evt_t
 }; 
 
  
-int game_events__handlers__push(game_events_env_t * this, const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]) { 
+// For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+//int game_events__handlers__push(game_events_env_t * this, const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]) { 
+int game_events__handlers__push(game_events_env_t * this, const int evt_type, const int handler_type, const int int_argc, const int int_argv[], const int ptr_argc, void * ptr_argv[], const int cptr_argc, const void * cptr_argv[]) { 
   if (( evt_type < 0) || ( evt_type >= GAME_EVENTS__COUNT                    )) return -1; 
   if (( int_argc < 0) || ( int_argc >= GAME_EVENTS_ENV__HANDLER__INTARG_SIZE )) return -2; 
   if (( ptr_argc < 0) || ( ptr_argc >= GAME_EVENTS_ENV__HANDLER__PTRARG_SIZE )) return -3; 
@@ -215,9 +217,9 @@ int game_events__stack__print_d(const int fd, const game_events_env_t * this) {
 static int game_events__process__standard__heros_mort(api_contexte_t * api_contexte); 
 
 int game_events__process(game_events_env_t * this, api_contexte_t * api_contexte) { 
-  messlog(" >>> this = %p - api_contexte = %p" "\n", this, api_contexte); 
+  //messlog(" >>> this = %p - api_contexte = %p" "\n", this, api_contexte); 
   if (this -> stack_nb <= 0) { 
-    messlog(" <<< No events on stack (this -> stack_nb = %d) - leaving " "\n", this -> stack_nb); 
+    //messlog(" <<< No events on stack (this -> stack_nb = %d) - leaving " "\n", this -> stack_nb); 
     return 1; 
   }; 
   

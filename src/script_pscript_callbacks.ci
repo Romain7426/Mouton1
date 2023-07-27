@@ -106,21 +106,33 @@ static int CPascal__method_callback__CBonhomme_setposition(void * callback_data,
   
   const int arg1_type = pscript_type__get__float(this -> pscript_env -> type_env); 
   const int arg1_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg1_type); 
-  char arg1_value[arg1_sizeof]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char arg1_value[arg1_sizeof]; 
+  enum { arg1_value__bytesize = 127 }; 
+  assert(arg1_value__bytesize >= arg1_sizeof); 
+  char arg1_value[arg1_value__bytesize]; 
   //allright_huh = CPascal__cast_arg(1, arg1_type, arg1_sizeof, arg1_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
   allright_huh = CPascal__cast_arg(1, arg1_type, arg1_sizeof, arg1_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
   const float arg1 = *(float *) arg1_value; 
   
   const int arg2_type = pscript_type__get__float(this -> pscript_env -> type_env); 
   const int arg2_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg2_type); 
-  char arg2_value[arg2_sizeof]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char arg2_value[arg2_sizeof]; 
+  enum { arg2_value__bytesize = 127 }; 
+  assert(arg2_value__bytesize >= arg2_sizeof); 
+  char arg2_value[arg2_value__bytesize]; 
   //allright_huh = CPascal__cast_arg(2, arg2_type, arg2_sizeof, arg2_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
   allright_huh = CPascal__cast_arg(2, arg2_type, arg2_sizeof, arg2_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
   const float arg2 = *(float *) arg2_value; 
   
   const int arg3_type = pscript_type__get__integer(this -> pscript_env -> type_env); 
   const int arg3_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, arg3_type); 
-  char arg3_value[arg3_sizeof]; 
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char arg3_value[arg3_sizeof]; 
+  enum { arg3_value__bytesize = 127 }; 
+  assert(arg3_value__bytesize >= arg3_sizeof); 
+  char arg3_value[arg3_value__bytesize]; 
   //allright_huh = CPascal__cast_arg(3, arg3_type, arg3_sizeof, arg3_value, callback_data, argc, argv_core_type, bool_nb, bool_stack, integer_nb, integer_stack, float_nb, float_stack, char_nb, char_stack, string_nb, string_stack, pointer_nb, pointer_type, pointer_stack, proxy_nb, proxy_type, proxy_stack, array_nb, array_type, array_offset, array_mem_size, array_mem, record_nb, record_type, record_offset, record_mem_size, record_mem, udf_nb, udf_type, udf_offset, udf_mem_size, udf_mem); 
   allright_huh = CPascal__cast_arg(3, arg3_type, arg3_sizeof, arg3_value, callback_data, arg_nb, arg_type, arg_sizeof, arg_offset, arg_mem_size, arg_mem, retval_type, retval_allocated_size, retval_value); 
   const int arg3_raw = *(int *) arg3_value; 

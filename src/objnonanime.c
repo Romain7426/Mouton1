@@ -63,6 +63,7 @@ CObjNonAnime * CObjNonAnime__make(const char * filename) {
   
   int ret;
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
+  fflush(NULL); 
   ret = this -> ReadDescriptionFile(this, NONANIMESDIR, filename);
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
 
@@ -144,10 +145,20 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
   CObjActionnable * this_action =  this -> parent.actions; 
   
   { 
-    char nonanime_fullpath[strlen(dir) + strlen(filename) + 1]; 
+    // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+    //char nonanime_fullpath[strlen(dir) + strlen(filename) + 1]; 
+    enum { nonanime_fullpath__bytesize = 1 << 10 }; 
+    const size_t nonanime_fullpath__cstrlen = strlen(dir) + strlen(filename); 
+    assert(nonanime_fullpath__bytesize > nonanime_fullpath__cstrlen); 
+    char nonanime_fullpath[nonanime_fullpath__bytesize]; 
     strcat(strcpy(nonanime_fullpath, dir), filename); 
 #define LOG_SUFF ".log" 
-    char nonanime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1]; 
+    // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+    //char nonanime_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1]; 
+    enum { nonanime_log__bytesize = 1 << 10 }; 
+    const size_t nonanime_log__cstrlen = strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF); 
+    assert(nonanime_log__bytesize > nonanime_log__cstrlen); 
+    char nonanime_log[nonanime_log__bytesize]; 
     strcat(strcat(strcpy(nonanime_log, LOGDIR), filename), LOG_SUFF); 
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
     nonanime_data = nonanime_make_from_file(nonanime_fullpath, nonanime_log); 
@@ -169,8 +180,11 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   if (NULL == this -> filename) this -> filename = strcopy(filename); 
   
-  for (int i = 0; i < nonanime_data -> actions_nb; i++) {
+  fflush(NULL); 
+  for (int i = 0; i < nonanime_data -> actions_nb; i++) { 
+#if 1 
     this_action -> AjouterAction(this_action, nonanime_data -> actions_array_affichage[i], nonanime_data -> actions_array_icone[i], nonanime_data -> actions_array_gestionnaire_fichier[i], nonanime_data -> actions_array_gestionnaire_proc[i]); 
+#endif 
   };  
   
   

@@ -253,7 +253,9 @@ int Script_Start(const char * script_file_name, const char * script_function_nam
 
 
 //int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc], Kernel_Script_Modal_t modal_mode) { 
-int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]) { 
+// For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+//int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]) { 
+int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[], const int ptr_argc, void * ptr_argv[], const int cptr_argc, const void * cptr_argv[]) { 
   //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " script_file_name = '%s', script_function_name = '%s', int_argc = %d, int_argv = %p, ptr_argc = %d, ptr_argv = %p, cptr_argc = %d, cptr_argv = %p" "\n", __func__, script_file_name, script_function_name, int_argc, int_argv, ptr_argc, ptr_argv, cptr_argc, cptr_argv); 
   
   if (script_function_name == NULL || *script_function_name == '\0') { return -2; }; 

@@ -213,7 +213,11 @@ int Game_Init(api_contexte_t * api_contexte) {
 
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
 
+  printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Vaisseau = CObjNonAnime__make(\"vaisseau.nonanime\"); --- ENTER ---" "\n", __func__); 
+  fflush(NULL); 
   Vaisseau = CObjNonAnime__make("vaisseau.nonanime");
+  printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Vaisseau = CObjNonAnime__make(\"vaisseau.nonanime\"); --- EXIT ---" "\n", __func__); 
+  fflush(NULL); 
   
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
 
@@ -222,16 +226,21 @@ int Game_Init(api_contexte_t * api_contexte) {
   // Inventory 
   printf("Création de l'inventaire\n");
   Menu_InventaireArmes = CMenu_make();
+  fflush(NULL); 
   //Menu_InventaireArmes = new CMiniMenu(100,300,200);
   Menu_InventaireArmes -> parent.NomSousMenu[0] = strcopy("Armes");
   Menu_InventaireArmes -> parent.NomSousMenu[1] = strcopy("Objets");
   Menu_InventaireArmes -> parent.NomSousMenu[2] = strcopy("Magies");
+  fflush(NULL); 
   SCRIPT_RecevoirUneArme("menu/epee"); 
   SCRIPT_RecevoirUneArme("menu/arc"); 
+  fflush(NULL); 
   
   // Hero 
   printf("Création du héros\n"); 
+  fflush(NULL); 
   Hero = CBonhomme__make("./heros.anime"); 
+  fflush(NULL); 
   printf("Héros créé. Son pointeur est %p\n", Hero); 
   //Hero -> SetPVMax(1/*3*7*/); 
   //Hero -> parent1.SetPVMax(&Hero -> parent1, 4*7, /*set_pv_as_well_huh*/true); 
@@ -300,7 +309,9 @@ int Game_Events_Raise(const int evt_type) {
   return retval; 
 }; 
 
-int Game_EventsHandlers__push(const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]) { 
+// For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+//int Game_EventsHandlers__push(const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]) { 
+int Game_EventsHandlers__push(const int evt_type, const int handler_type, const int int_argc, const int int_argv[], const int ptr_argc, void * ptr_argv[], const int cptr_argc, const void * cptr_argv[]) { 
   const int retval = game_events__handlers__push(game_events_env, evt_type, handler_type, int_argc, int_argv, ptr_argc, ptr_argv, cptr_argc, cptr_argv); 
   return retval; 
 }; 

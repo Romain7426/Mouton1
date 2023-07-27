@@ -13,20 +13,25 @@ typedef int64_t off_t;
 
 typedef unsigned int uint_t;
 
-typedef char    int24_packed_t[3];
-typedef int32_t int24_unpacked_t;
+typedef signed char      int24_packed_t[3];
+typedef int32_t          int24_unpacked_t;
+typedef int24_unpacked_t int24_t;
+
+typedef unsigned char     uint24_packed_t[3];
+typedef uint32_t          uint24_unpacked_t;
+typedef uint24_unpacked_t uint24_t;
 
 #ifdef ENDIAN_BIG 
-#define INT24_PACKED_ASSIGN_UNPACKED(a,v) { char * p = (a); const int24_unpacked_t u = (v); const char * q = (const char *)&u; q++; *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
+#define INT24_PACKED_ASSIGN_UNPACKED(a,v) { signed char * p = (a); const int24_unpacked_t u = (v); const signed char * q = (const signed char *)&u; q++; *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
 #error 
 #else 
-#define INT24_PACKED_ASSIGN_UNPACKED(a,v) { char * p = (a); const int24_unpacked_t u = (v); const char * q = (const char *)&u; *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
-#define INT24_PACKED_READ(a,v) { v = 0; char * p = (char *)&v; const char * q = (a); *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
-#define INT24_PACKED_WRITE(a,v) { const char * INT24_PACKED_WRITE_p = (const char *)&v; char * q = (char *)(a); *q = *INT24_PACKED_WRITE_p; INT24_PACKED_WRITE_p++; q++; *q = *INT24_PACKED_WRITE_p; INT24_PACKED_WRITE_p++; q++; *q = *INT24_PACKED_WRITE_p; } 
+#define INT24_PACKED_ASSIGN_UNPACKED(a,v) { signed char * p = (a); const int24_unpacked_t u = (v); const signed char * q = (const signed char *)&u; *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
+#define INT24_PACKED_READ(a,v) { v = 0; signed char * p = (signed char *)&v; const signed char * q = (a); *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
+#define INT24_PACKED_WRITE(a,v) { const signed char * INT24_PACKED_WRITE_p = (const signed char *)&v; signed char * q = (signed char *)(a); *q = *INT24_PACKED_WRITE_p; INT24_PACKED_WRITE_p++; q++; *q = *INT24_PACKED_WRITE_p; INT24_PACKED_WRITE_p++; q++; *q = *INT24_PACKED_WRITE_p; } 
 #define UINT24_PACKED_READ(a,v) { v = 0; unsigned char * p = (unsigned char *)&v; const unsigned char * q = (a); *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
 #define UINT24_PACKED_WRITE(a,v) { const unsigned char * INT24_PACKED_WRITE_p = (const unsigned char *)&v; unsigned char * q = (unsigned char *)(a); *q = *INT24_PACKED_WRITE_p; INT24_PACKED_WRITE_p++; q++; *q = *INT24_PACKED_WRITE_p; INT24_PACKED_WRITE_p++; q++; *q = *INT24_PACKED_WRITE_p; } 
 #endif 
-#define INT24_PACKED_ASSIGN_PACKED(a1,a2) { char * p = (a1); const char * q = (a2); *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
+#define INT24_PACKED_ASSIGN_PACKED(a1,a2) { signed char * p = (a1); const signed char * q = (a2); *p = *q; p++; q++; *p = *q; p++; q++; *p = *q; } 
 
 #ifndef STRINGIFY
 #define STRINGIFY(s) STRINGIFY_AUX(s)
@@ -130,6 +135,9 @@ enum { INT8_MIN   =  (~INT8_MAX) };
 #ifndef INT16_MIN
 enum { INT16_MIN  = (~INT16_MAX) }; 
 #endif 
+#ifndef INT24_MIN
+enum { INT24_MIN  = (~INT24_MAX) }; 
+#endif 
 #ifndef INT32_MIN
 enum { INT32_MIN  = (~INT32_MAX) }; 
 #endif 
@@ -140,7 +148,7 @@ enum { INT64_MIN  = (~INT64_MAX) };
 enum { INT_MIN    =   (~INT_MAX) }; 
 #endif 
 
-
+#if 0 
 #ifdef	_STDIO_H_
 #ifdef stderr 
 static FILE * stderr_FILE = stderr; 
@@ -153,6 +161,7 @@ static FILE * stdin_FILE = stdin;
 #ifdef stdout 
 static FILE * stdout_FILE = stdout; 
 //#undef stdout 
+#endif 
 #endif 
 #endif 
 
@@ -187,15 +196,17 @@ enum { O_NONBLOCK = 0x0004 };
 enum { O_APPEND   = 0x0008 }; 
 enum { O_TRUNC    = 0x0400 }; 
 
+#ifndef __TINYC__ 
+
 #define	O_SHLOCK	0x0010		/* open with shared file lock */
 #define	O_EXLOCK	0x0020		/* open with exclusive file lock */
 #define	O_ASYNC		0x0040		/* signal pgrp when data ready */
 #define	O_FSYNC		O_SYNC		/* source compatibility: do not use */
-#define O_NOFOLLOW  0x0100      /* don't follow symlinks */
+#define O_NOFOLLOW  	0x0100		/* don't follow symlinks */
 #define	O_CREAT		0x0200		/* create if nonexistant */
 #define	O_EXCL		0x0800		/* error if already exists */
 
-#define AT_FDCWD	-2
+#define AT_FDCWD		-2
 #define AT_EACCESS		0x0010	/* Use effective ids in access check */
 #define AT_SYMLINK_NOFOLLOW	0x0020	/* Act on the symlink itself not the target */
 #define AT_SYMLINK_FOLLOW	0x0040	/* Act on target of symlink */
@@ -271,6 +282,8 @@ enum { O_TRUNC    = 0x0400 };
 #define	LOCK_EX		0x02		/* exclusive file lock */
 #define	LOCK_NB		0x04		/* don't block when locking */
 #define	LOCK_UN		0x08		/* unlock file */
+
+#endif /* __TINYC__ */ 
 
 enum { SEEK_SET = 0 }; 
 enum { SEEK_CUR = 1 }; 
@@ -353,6 +366,9 @@ enum { EBADF = 9 };
 enum { false = (0 != 0) }; 
 enum { true = (0 == 0) }; 
 enum { undecided_boolean = 1+MAX(BOOL_ABS(false),BOOL_ABS(true)) }; 
+#define false false
+#define true true
+#define undecided_boolean undecided_boolean
 #endif
 
 static void assert_compile__check_boolean_all_different(void) {
@@ -373,7 +389,7 @@ static void assert_compile__check_boolean_all_different(void) {
 
 
 
-extern void assert(int); 
+//extern void assert(int); 
 extern char * strcpy(char *restrict dst, const char *restrict src);
 //extern char * strncpy(char *restrict dst, const char *restrict src, size_t n);
 extern size_t strlcpy(char * restrict dst, const char * restrict src, size_t size); // Src must be a true c-string (id est null terminated). 
@@ -438,10 +454,12 @@ void assert(int test) {
 }; 
 #endif 
 
+#ifndef assert 
 #define assert(b) {if (!(b)) { dputs(stderr_d, __FUNCTION__); abort(); };};
 //#define assert_message(b,m) {if (!(b)) { dputs(stderr, __FUNCTION__ ": "); dputs(stderr, STRINGIFY(__LINE__) ": "); dputs(stderr, m); dputs(stderr, "\n"); abort(); };};
 //#define assert_message(b,m) {if (!(b)) { dputs(stderr, __FUNCTION__ ": "); dputs(stderr, m); dputs(stderr, "\n"); abort(); };};
 //#define assert_message(b,m) {if (!(b)) { dputs(stderr, __FUNCTION__); dputs(stderr, m); dputs(stderr, "\n"); abort(); };};
+#endif 
 #define assert_message(b,m) {if (!(b)) { dputs(stderr_d, __FILE__); dputs(stderr_d, ": <"); dputs(stderr_d, __FUNCTION__); dputs(stderr_d, ">: "); dputs(stderr_d, STRINGIFY(__LINE__)); dputs(stderr_d, ": "); dputs(stderr_d, m); dputs(stderr_d, "\n"); abort(); };};
 
 #define ASSERT_DEBUG_STOP assert 

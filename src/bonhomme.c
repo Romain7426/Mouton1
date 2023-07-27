@@ -321,14 +321,25 @@ int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * anime_datadir,
 
 label__start: {}; 
   { 
-    char anime_fullpath[strlen(anime_datadir) + strlen(anime_filename) + 1];
+    // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+    //char anime_fullpath[strlen(anime_datadir) + strlen(anime_filename) + 1];
+    enum { anime_fullpath__bytesize = (1 << 10) }; 
+    const size_t anime_fullpath__cstrlen = strlen(anime_datadir) + strlen(anime_filename); 
+    assert(anime_fullpath__bytesize > anime_fullpath__cstrlen); 
+    char anime_fullpath[anime_fullpath__bytesize]; 
     strcat(strcpy(anime_fullpath, anime_datadir), anime_filename); 
     dprintf(fileno(stdout), "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: INFO: " "Chargement d'un anime décrit par le fichier: %s" "\n", __func__, anime_fullpath); 
     
 #define LOG_SUFF ".log"
-    char anime_log[strlen(LOGDIR) + strlen(anime_filename) + strlen(LOG_SUFF) + 1];
+    // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+    //char anime_log[strlen(LOGDIR) + strlen(anime_filename) + strlen(LOG_SUFF) + 1];
+    enum { anime_log__bytesize = (1 << 10) }; 
+    const size_t anime_log__cstrlen = strlen(LOGDIR) + strlen(anime_filename) + strlen(LOG_SUFF); 
+    assert(anime_log__bytesize > anime_log__cstrlen); 
+    char anime_log[anime_log__bytesize];
     strcat(strcat(strcpy(anime_log, LOGDIR), anime_filename), LOG_SUFF);
     dprintf(fileno(stdout), "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: INFO: " "Fichier log de l'analyse de ce fichier anime: %s" "\n", __func__, anime_log); 
+    fflush(NULL); 
 
   label__anime_both_file_and_log__open: 
     
@@ -368,7 +379,9 @@ label__start: {};
       }; 
     }; 
       
+    fflush(NULL); 
     anime__make_r(anime_data, anime_stdlog_d); 
+    fflush(NULL); 
 
     for(;;) { 
       const int_anime_error_t anime_error_id = anime__fill_from_file(anime_data, anime_filename, anime_file_d, anime_stdlog_d); 
@@ -402,7 +415,9 @@ label__start: {};
     }; 
     
     // Success 
+    fflush(NULL); 
     anime__print_d(anime_data, anime_stdlog_d); 
+    fflush(NULL); 
  
     // Closing files. 
     close(anime_file_d); anime_file_d = -1; 

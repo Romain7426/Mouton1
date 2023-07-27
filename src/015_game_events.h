@@ -62,7 +62,9 @@ extern void                game_events_env__print_d (const int fd, const game_ev
 extern int  game_events__handlers__count  (              const game_events_env_t * this, const int evt_type); 
 extern int  game_events__handlers__empty  (                    game_events_env_t * this, const int evt_type); 
 extern int  game_events__handlers__print_d(const int fd, const game_events_env_t * this, const int evt_type); 
-extern int  game_events__handlers__push   (                    game_events_env_t * this, const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]); 
+// For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+//extern int  game_events__handlers__push   (                    game_events_env_t * this, const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]); 
+extern int  game_events__handlers__push   (                    game_events_env_t * this, const int evt_type, const int handler_type, const int int_argc, const int int_argv[], const int ptr_argc, void * ptr_argv[], const int cptr_argc, const void * cptr_argv[]); 
 extern int  game_events__handlers__push0  (                    game_events_env_t * this, const int evt_type, const int handler_type); 
 extern int  game_events__handlers__push_script(                game_events_env_t * this, const int evt_type, const char * script_file, const char * script_name); 
 

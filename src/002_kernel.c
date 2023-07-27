@@ -193,7 +193,9 @@ static void Kernel_Script_C__ctfun(void) {
 #endif 
 
 #if 1 
-int Kernel_Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc], Kernel_Script_Modal_t modal_mode) { 
+// For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+//int Kernel_Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc], Kernel_Script_Modal_t modal_mode) { 
+int Kernel_Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[], const int ptr_argc, void * ptr_argv[], const int cptr_argc, const void * cptr_argv[], Kernel_Script_Modal_t modal_mode) { 
   //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " script_file_name = '%s', script_function_name = '%s', int_argc = %d, int_argv = %p, ptr_argc = %d, ptr_argv = %p, cptr_argc = %d, cptr_argv = %p, modal_mode = %d" "\n", __func__, script_file_name, script_function_name, int_argc, int_argv, ptr_argc, ptr_argv, cptr_argc, cptr_argv, modal_mode); 
   
   if (cooperative_thread__busy_huh(cooperative_thread_env, cooperative_thread__script__processing_system__c)) { return -3; }; 
@@ -667,7 +669,7 @@ int Kernel_Run(void) {
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "\n", __func__); 
   
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-
+  
   //retval = Game_Init(); if (retval < 0) { return retval; }; 
   
   //fflush(NULL); 
@@ -776,8 +778,8 @@ int Kernel_Run(void) {
 int Kernel_Init(void) {
   int retval = 0; 
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " ">>>" "\n", __func__); 
-
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+  fflush(NULL); 
 
   cooperative_thread_env = cooperative_thread_env__make(); 
   cooperative_thread__supervisor                         = cooperative_thread__push(cooperative_thread_env); 
@@ -817,22 +819,29 @@ int Kernel_Init(void) {
   init_audio(); 
   
   //opengl__stuffs(); 
+  fflush(NULL); 
   cooperative_thread__set_fun(cooperative_thread_env, cooperative_thread__opengl, opengl__stuffs); 
+  fflush(NULL); 
   cooperative_thread__kernel_switch_to_thread(cooperative_thread_env, cooperative_thread__opengl); 
   
+  fflush(NULL); 
   supervisor_mode_huh = false; 
   supervisor_env = supervisor_env__make(); if (supervisor_env == NULL) { return -1; }; 
   
+  fflush(NULL); 
   api_contexte__make_r(&api_contexte); 
+  fflush(NULL); 
   api_contexte.Kernel_Script_Modal_ref = &Kernel_Script_Modal; 
   
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
+  fflush(NULL); 
   retval = Game_Init(&api_contexte); if (retval < 0) { return retval; }; 
 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
 #if 1 
+  fflush(NULL); 
   retval = Script_Init(&api_contexte); if (retval < 0) { return retval; }; 
 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
@@ -858,6 +867,7 @@ int Kernel_Init(void) {
 #endif 
 
 #else 
+  fflush(NULL); 
   script = CScriptLauncher_make("script.pml", "debut"); 
   assert(script != NULL); 
   script -> init_step(script); 
@@ -870,8 +880,9 @@ int Kernel_Init(void) {
   printf("==============================================================================" "\n");
   printf("==============================================================================" "\n");
   printf("==============================================================================" "\n");
+  fflush(NULL); 
   
-  return 0; // RL: Nothing to say. 
+  return 0; 
 }; 
 
 

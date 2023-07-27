@@ -31,7 +31,10 @@ static char * int4_string_in_the_buffer(const int n_given, const int buffer_size
   const int size_computed = i;
   assert(size_computed <= buffer_size);
   
-  char temp[size_computed];
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char temp[size_computed];
+  enum { temp_sizeof = INT_SIZEOF__TO__STRING_SIZEOF(sizeof(n_given)) }; 
+  char temp[temp_sizeof]; // Works. 
   strcpy(temp, buffer);
   if (n_given < 0) buffer[0] = '-';
   for (int j = ((n_given < 0) ? 1 : 0); j < size_computed-1; j++)
@@ -92,7 +95,11 @@ static char * int_string_hex_2_int_string_dec__buffer(const char * n_given, cons
   assert(n_given != NULL);
   const int n_given_len = strlen(n_given);
   const int start = (n_given_len >= 2 && (n_given[1] == 'x' || n_given[1] == 'X')) ? 2 : 0;
-  int hex_figures[n_given_len];
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //int hex_figures[n_given_len];
+  enum { hex_figures_sizeof = INT_SIZEOF__TO__STRING_SIZEOF(sizeof(n_given)) }; 
+  char hex_figures[hex_figures_sizeof]; // Works. 
+
   bzero(hex_figures, n_given_len * sizeof(int));
   for (int i = start; i < n_given_len; i++) {
     if (n_given[i] >= '0' && n_given[i] <= '9') { hex_figures[i] = n_given[i] - '0'; continue; }
@@ -102,10 +109,14 @@ static char * int_string_hex_2_int_string_dec__buffer(const char * n_given, cons
   }
   const int len = n_given_len - start;
 	  
-  int base_exp_n[2*len];
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //int base_exp_n[2*len];
+  enum { base_exp_n_sizeof = hex_figures_sizeof << 1 }; 
+  char base_exp_n[base_exp_n_sizeof]; // Works. 
   base_exp_n[0] = 1;
   int base_exp_n_len = 1;
-  int base_exp_n_by_figure[2*len];
+  //int base_exp_n_by_figure[2*len];
+  int base_exp_n_by_figure[base_exp_n_sizeof];
   int base_exp_n_by_figure_len = -1;
 	  
 

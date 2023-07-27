@@ -82,6 +82,15 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
   message("%s: " "logfile_name: %s" "\n", __func__, logfile_name); 
   const int stdlog_d = open(logfile_name, O_WRONLY | O_CREAT | O_TRUNC, (mode_t) 0666); 
   assert(stdlog_d >= 0); 
+#if 1 
+  {
+    const int status = fcntl(stdlog_d, F_GETFL, 0); 
+    printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " status of stdlog_d = %d ---" "\n", __func__, status); 
+    printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " O_SYNC of stdlog_d = %d ---" "\n", __func__, status & O_SYNC); 
+    fflush(NULL); 
+  }; 
+#endif 
+
   this -> stdlog__set__fdes(this, stdlog_d); 
   //this -> stderr__set__fdes(this, fileno(zeldaferror ? zeldaferror : stderr), true); 
   this -> stderr__set__fdes(this, fileno(stderr), true); 
@@ -107,8 +116,11 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
       dputs_array(stdlog_d, "TOTAL COMPUTED TOKENS : ", int_string__stack(pscript_token__get_count(this -> token_env)), "\n"); 
       pscript_string__print_stats      (stdlog_d, this -> string_env); 
       pscript_token__print_stats       (stdlog_d, this ->  token_env); 
+#if 0 
+      // As of 2023-07-27, these functions became very slow...???? 
       pscript_string__print_all_strings(stdlog_d, this -> string_env); 
       pscript_token__print_all_tokens  (stdlog_d, this ->  token_env); 
+#endif 
     }; 
       
     // RL: Checking whether parenthesis are well-balanced. 
@@ -119,9 +131,12 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
     allright_huh = pscript_parser__automaton(this -> parser_env, this -> token_env); 
     if (allright_huh < 0) { messerr("Something got wrong while parsing the file '%s': %s." "\n", input_file_name, int_string__stack(allright_huh)); break; }; 
     { 
+#if 0 
+      // As of 2023-07-27, these functions became very slow...???? 
       pscript_parser__print_stats (stdlog_d, this -> parser_env); 
       pscript_parser__print_all   (stdlog_d, this -> parser_env); 
       pscript_parser__print_pretty(stdlog_d, this -> string_env, this -> token_env, this -> parser_env); 
+#endif 
     }; 
     
     // RL: Filling up the symbols table, initializing data, and generating bytecode. 
@@ -141,13 +156,17 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
       mainproc_stack__print_all(stdlog_d, this -> mainproc_env, this -> string_env); 
       pscript_env__print_all   (stdlog_d, this ->          env, this -> string_env); 
 
+
       dputs_array(stdlog_d, "TOTAL COMPUTED BYTEDATA(BSS): "  , int_string__stack(pscript_mem__toplevel_compiletime__bss__used(this -> mem_env)), "\n"); 
       dputs_array(stdlog_d, "TOTAL COMPUTED BYTEDATA(ZSS): "  , int_string__stack(pscript_mem__toplevel_compiletime__zss__used(this -> mem_env)), "\n"); 
       dputs_array(stdlog_d, "TOTAL COMPUTED BYTEDATA(ISS): "  , int_string__stack(pscript_mem__toplevel_compiletime__iss__used(this -> mem_env)), "\n"); 
       // RL: TODO XXX FIXME: Missing bytedata printing. 
       
       dputs_array(stdlog_d, "TOTAL COMPUTED BYTECODES: " , int_string__stack(pscript_bytecode__get_count(this -> bytecode_env)), "\n"); 
+#if 0 
+      // As of 2023-07-27, these functions became very slow...???? 
       bytecode_stack__print_all(stdlog_d, this -> bytecode_env, this -> type_env); 
+#endif 
     };  
     
     allright_huh = true; 

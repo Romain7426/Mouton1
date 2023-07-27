@@ -276,7 +276,12 @@ void SCRIPT_RecevoirUneArme(const char * nom_arme) {
   printf("SCRIPT_RecevoirUneArme(%s)\n", nom_arme);
   //char * filename_icone;
   //filename_icone = (char *) malloc(sizeof(char) * (strlen(nom_arme) + 4 + 1));
-  char filename_icone[strlen(nom_arme) + 4 + 1];
+  // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+  //char filename_icone[strlen(nom_arme) + 4 + 1];
+  enum { filename_icone__bytesize = 1<<10 }; 
+  const size_t filename_icone__cstrlen = strlen(nom_arme) + 4; 
+  assert(filename_icone__bytesize > filename_icone__cstrlen); 
+  char filename_icone[filename_icone__bytesize];
   strcpy(filename_icone, nom_arme);
   strcat(filename_icone, ".png");
   

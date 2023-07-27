@@ -1279,10 +1279,20 @@ int CMap__ReadDescriptionFile(CMap * this, const int global_map_i, const int glo
   CSol    * this_parent = this -> Sol; 
   
   { 
-    char carte_fullpath[strlen(dir) + strlen(filename) + 1]; 
+    // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+    //char carte_fullpath[strlen(dir) + strlen(filename) + 1]; 
+    enum { carte_fullpath__bytesize = 1 << 10 }; 
+    const size_t carte_fullpath__cstrlen = strlen(dir) + strlen(filename); 
+    assert(carte_fullpath__bytesize > carte_fullpath__cstrlen); 
+    char carte_fullpath[carte_fullpath__bytesize]; 
     strcat(strcpy(carte_fullpath, dir), filename); 
 #define LOG_SUFF ".log" 
-    char carte_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1]; 
+    // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+    //char carte_log[strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF) + 1]; 
+    enum { carte_log__bytesize = 1 << 10 }; 
+    const size_t carte_log__cstrlen = strlen(LOGDIR) + strlen(filename) + strlen(LOG_SUFF); 
+    assert(carte_log__bytesize > carte_log__cstrlen); 
+    char carte_log[carte_log__bytesize]; 
     strcat(strcat(strcpy(carte_log, LOGDIR), filename), LOG_SUFF); 
     for(;;) { 
       carte_data = carte_make_from_file(carte_fullpath, carte_log); 

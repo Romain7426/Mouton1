@@ -27,7 +27,9 @@ extern int  Script_BusyHuh(void);
 
 extern int Script_Start(const char * script_file_name, const char * script_function_name); 
 //extern int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc], Kernel_Script_Modal_t modal_mode); 
-extern int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]); 
+// For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+//extern int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]); 
+extern int Script_Start_arg(const char * script_file_name, const char * script_function_name, const int int_argc, const int int_argv[], const int ptr_argc, void * ptr_argv[], const int cptr_argc, const void * cptr_argv[]); 
 extern int Script_Get_script_c_retval(void); 
 extern int Script_Run_script_c(api_contexte_t * api_contexte); 
 

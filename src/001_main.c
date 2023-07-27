@@ -37,7 +37,7 @@ int main(const int argc, const char * argv[]) {
   //     as we will need to write log files 
   //     and read data files. 
   change_to_root_dir(argv[0]);
-
+  
   // RL: LOG FILE 
   //     Redirecting 'stdout' to the log file. 
   // RL: The idea is that any errors should show up on 'stderr', so that we know that something 
@@ -83,7 +83,7 @@ int main(const int argc, const char * argv[]) {
   printf("☺☺☺☺☺☺" "\n"); 
   printf("Cela fait plaisir de vous voir." "\n"); 
   fprintf(stdout, "Démarrage du jeu!!!\n\n"); 
-  
+  fflush(NULL); 
   main_locale_set(); 
   main_rand_init(); 
   main_date_print(); 
@@ -97,14 +97,15 @@ int main(const int argc, const char * argv[]) {
 
   printf("<<< main" "\n"); 
   printf("===============================================================================" "\n"); 
-  do { 
-    retour = Kernel_Init(); if (retour < 0) { break; }; 
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+  fflush(NULL); 
+  for (;;) { 
+    retour = Kernel_Init(); fflush(NULL); if (retour < 0) { break; }; 
+    { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
     retour = Kernel_Run(); 
     Kernel_Dispose(); 
     break; 
-  } while (false); 
+  }; 
   printf("===============================================================================" "\n"); 
   printf(">>> main" "\n"); 
   

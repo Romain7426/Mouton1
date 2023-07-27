@@ -23,7 +23,9 @@ extern void Game_Dispose(void);
 extern bool show_choc_cube_huh; 
 
 extern void Game_EventsHandlers__reset(void); 
-extern int  Game_EventsHandlers__push (const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]); 
+// For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
+//extern int  Game_EventsHandlers__push (const int evt_type, const int handler_type, const int int_argc, const int int_argv[int_argc], const int ptr_argc, void * ptr_argv[ptr_argc], const int cptr_argc, const void * cptr_argv[ptr_argc]); 
+extern int  Game_EventsHandlers__push (const int evt_type, const int handler_type, const int int_argc, const int int_argv[], const int ptr_argc, void * ptr_argv[], const int cptr_argc, const void * cptr_argv[]); 
 extern int  Game_EventsHandlers__push0(const int evt_type, const int handler_type); 
 extern int  Game_EventsHandlers__push_script(const int evt_type, const char * script_file, const char * script_name); 
 
