@@ -559,9 +559,15 @@ MATH_LIB__LIBS_FLAGS := -lm
 TCC_LIBS := #-ltcc 
 
 LIBS_SPEC := 
-LIBS_SPEC := $(LIBS_SPEC) $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_LIBS),) 
+#LIBS_SPEC := $(LIBS_SPEC) $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_LIBS),) 
 
-LIBS := $(LIBS_SPEC) $(NONANIME_DESTROOT)/lib/nonanime.a $(ANIME_DESTROOT)/lib/anime.a $(CARTE_DESTROOT)/lib/carte.a $(PSCRIPT_DESTROOT)/lib/libpscript.a $(LIBSDLMIXER_LIBS)  $(LIBSDLIMAGE_LIBS) $(SDLCONFIG_LIBS) -L$(OPENGL_INC)/../lib -lGL -lGLU -lm 
+LIBS_CC := $(if $(strip $(filter $(CC_NAME),tcc)),$(TCC_LIBS),) 
+
+#LIBS := $(LIBS_SPEC) $(NONANIME_DESTROOT)/lib/nonanime.a $(ANIME_DESTROOT)/lib/anime.a $(CARTE_DESTROOT)/lib/carte.a $(PSCRIPT_DESTROOT)/lib/libpscript.a $(LIBSDLMIXER_LIBS)  $(LIBSDLIMAGE_LIBS) $(SDLCONFIG_LIBS) -L$(OPENGL_INC)/../lib -lGL -lGLU -lm 
+#LIBS := $(LIBS_SPEC) $(LIBSDLMIXER_LIBS)  $(LIBSDLIMAGE_LIBS) $(SDLCONFIG_LIBS) -L$(OPENGL_INC)/../lib -lGL -lGLU -lm 
+LIBS_EXT := $(LIBS_SPEC) $(LIBSDLMIXER_LIBS)  $(LIBSDLIMAGE_LIBS) $(SDLCONFIG_LIBS) -L$(OPENGL_INC)/../lib -lGL -lGLU -lm 
+
+
 
 PROG    := $(PROJECT_NAME)
 SRC_C   := $(patsubst src/%.c,%,$(wildcard src/*.c))
@@ -578,8 +584,8 @@ SRC_H   := $(filter-out liste,$(SRC_H))
 SRC_H   := $(filter-out main,$(SRC_H)) 
 OBJ     := $(patsubst %,build/%.o, $(SRC_C) $(SRC_Y) $(SRC_L))
 OBJ_SO  := $(patsubst %,build/%.so, $(SRC_C) $(SRC_Y) $(SRC_L))
-LIB     := build/$(PROG).a
-LIB_SO  := build/$(PROG).so
+BIN_LIB := build/$(PROG).a
+BIN_SO  := build/$(PROG).so
 BIN     := build/$(PROG).exe
 #BIN_STRIPPED := build/$(PROG)$(FLAVOR)_stripped.exe
 #BIN_STRIPPED := build/$(PROG)_stripped.exe
@@ -740,10 +746,12 @@ Makefile:
 	echo "" >> $@
 	echo "" >> $@
 #	echo "$(BIN): $(LIB) build/main.o " >> $@
-	echo "$(BIN): $(LIB)  " >> $@
+#	echo "$(BIN): $(LIB)  " >> $@
+	echo "$(BIN): $(BIN_LIB) build/anime.a build/nonanime.a build/carte.a build/pscript.a " >> $@
 #	echo "	$(CC) -o $(BIN) build/main.o $(LIB) $(LIBS) 2>&1" >> $@
 #	echo "	$(CC) -o $(BIN) build/main.o $(LIB) 2>&1" >> $@
-	echo "	$(CC)  -Wl,\"--dynamic-list=main\"  -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+#	echo "	$(CC)  -Wl,\"--dynamic-list=main\"  -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+	echo "	$(CC)  -Wl,\"--dynamic-list=main\"  -o $(BIN) $(BIN_LIB) build/anime.a build/nonanime.a build/carte.a build/pscript.a $(LIBS_EXT) $(LIBS_CC) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "$(LIB): $(OBJ)" >> $@
@@ -753,6 +761,28 @@ Makefile:
 	echo "" >> $@
 	echo "$(LIB_SO): $(OBJ) $(OBJ_SO)" >> $@
 	echo "	$(CC) -shared -o $(LIB_SO) $(OBJ) 2>&1" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "build/anime.a: $(ANIME_DESTROOT)/lib/anime.a " >> $@
+	echo "	cp -fp $(ANIME_DESTROOT)/lib/anime.a build/anime.a " >> $@
+	echo "" >> $@
+	echo "build/nonanime.a: $(NONANIME_DESTROOT)/lib/nonanime.a " >> $@
+	echo "	cp -fp $(NONANIME_DESTROOT)/lib/nonanime.a build/nonanime.a " >> $@
+	echo "" >> $@
+	echo "build/carte.a: $(CARTE_DESTROOT)/lib/carte.a " >> $@
+	echo "	cp -fp $(CARTE_DESTROOT)/lib/carte.a build/carte.a " >> $@
+	echo "" >> $@
+	echo "build/pscript.a: $(PSCRIPT_DESTROOT)/lib/libpscript.a " >> $@
+	echo "	cp -fp $(PSCRIPT_DESTROOT)/lib/libpscript.a build/pscript.a " >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
