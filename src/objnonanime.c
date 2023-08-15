@@ -142,7 +142,7 @@ void CObjNonAnime__SetAngleZ(CObjNonAnime * this, const float thetaZ) {
 int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, const char * filename) { 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   nonanime_t * nonanime_data = NULL; 
-  CObjActionnable * this_action =  this -> parent.actions; 
+  CObjActionnable * this_action = this -> parent.actions; 
   
   { 
     // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 

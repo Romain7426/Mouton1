@@ -7,15 +7,27 @@
 #include <sys/resource.h> 
 #include <dlfcn.h>
  
+#include <unistd.h> /* https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/unistd.h.html */ /* https://en.wikipedia.org/wiki/Unistd.h */ 
+
+#include "lib.ci"
+//#include "lib__llfixed.ci"
+
+#include <anime.h>
+#include "anime_database.h"
+
+
+
 // RL: This file contains all the system stuffs. 
 //     Anything here is not related to the program per se. 
 //     And is done only once. 
 
 
 static const char stdout_log_filename[] = LOGDIR "stdout.log"; 
+static       char stdout_log_buffer[1 << 12] = {}; 
 
 
-static void change_to_root_dir(const char * argv0); 
+static int  main__change_to_root_dir(const char * argv0); 
+static int  main__reassign_stdout_to_logfile(void); 
 static void main_proctitle_set(void); 
 static void main_locale_set(void); 
 static void main_rand_init(void); 
@@ -25,115 +37,176 @@ static void main_arch_print(void);
 static void main_args_print(const int argc, const char * argv[]); 
 static void main_win_print(void); 
 
+static const char *  argv0 = NULL; 
+static       int16_t argv0__bytesize = -1; 
 
 
-  
 
 int main(const int argc, const char * argv[]) {
-//int _SDL_main(int argc, char * argv[]) {
+  //int _SDL_main(int argc, char * argv[]) {
   int retour = -1;
   
-  // RL: This is the first thing to do, 
-  //     as we will need to write log files 
-  //     and read data files. 
-  change_to_root_dir(argv[0]);
-  
-  // RL: LOG FILE 
-  //     Redirecting 'stdout' to the log file. 
-  // RL: The idea is that any errors should show up on 'stderr', so that we know that something 
-  //     happened, but also on the log file to have context. 
-  //  --- man 3 freopen --- 
-  // The freopen() function opens the file whose name is the string pointed to by path. 
-  // The original stream (if it exists) is closed. 
-  // The primary use of the freopen() function is to change the file associated with a standard text stream (stderr, stdin, or stdout). 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-  { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
-#if 1 
-  if (-1 == access(LOGDIR, R_OK | W_OK | X_OK | F_OK)) { 
-#if 1 
-    if (-1 == mkdir(LOGDIR, (mode_t) 0777)) { 
-      assert(false); 
-    }; 
-#else 
-    static char logdir[] = LOGDIR; 
-    logdir[sizeof(LOGDIR)-1] = '\0'; 
-    //if (-1 == mkdir(LOGDIR ".", (mode_t) 0777)) { 
-    if (-1 == mkdir(logdir, (mode_t) 0777)) { 
-      assert(false); 
-    }; 
-#endif 
+  if (1 > argc) { 
+    write_string(STDERR_FILENO, "Does not make sense - ARGC is lower than 1: "); 
+    write_long_long_int(STDERR_FILENO, argc); 
+    write_eol(STDERR_FILENO); 
+    return 0; 
   }; 
-  { const FILE * retval = freopen(stdout_log_filename, "wb", stdout); assert(NULL != retval); }; 
-  char stdout_buffer[1 << 12]; 
-  //setvbuf(stdout, stdout_buffer, _IONBF, sizeof(stdout_buffer)); // RL: Unbuffered. 
-  //setvbuf(stdout, stdout_buffer, _IOLBF, sizeof(stdout_buffer)); // RL: Line buffered. 
-  //setvbuf(stdout, stdout_buffer, _IOFBF, sizeof(stdout_buffer)); // RL: Fully buffered. 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(stdout_buffer) = %d"   "\n", __func__, (int) sizeof(stdout_buffer)); 
-  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(stdout_buffer) = %d"   "\n", __func__, (int) sizeof(stdout_buffer)); 
-#endif 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-  { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p - " __FILE__ " - %d \n", (const void *)stdout -> _bf._base, (int)__LINE__); }; 
-  { const char __file__[] = "" __FILE__ ""; dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", (const void *)stdout -> _bf._base, (const char *)__file__, (int)__LINE__); }; 
-  
-  
-  // RL: Everything is UTF-8 unless specified otherwise. 
-  printf("☺☺☺☺☺☺" "\n"); 
-  printf("Cela fait plaisir de vous voir." "\n"); 
-  fprintf(stdout, "Démarrage du jeu!!!\n\n"); 
-  fflush(NULL); 
-  main_locale_set(); 
-  main_rand_init(); 
-  main_date_print(); 
-  main_gcc_print(); 
-  main_arch_print(); 
-  main_proctitle_set(); 
-  main_args_print(argc, argv); 
-  main_win_print(); 
+  argv0 = argv[0]; 
+  argv0__bytesize = 1 + strlen(argv0); 
+  goto label__body; 
 
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-
-  printf("<<< main" "\n"); 
-  printf("===============================================================================" "\n"); 
-  fflush(NULL); 
-  for (;;) { 
-    retour = Kernel_Init(); fflush(NULL); if (retour < 0) { break; }; 
-    { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-
-    retour = Kernel_Run(); 
-    Kernel_Dispose(); 
-    break; 
+ label__exit: { 
+    fflush(NULL); 
+    return 0; 
   }; 
-  printf("===============================================================================" "\n"); 
-  printf(">>> main" "\n"); 
+
+  label__error__cannot_move_to_root_dir: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I could not change the current directory to the one holding the program: '%s' " "\n", __func__, argv0); 
+    return -1; 
+  }; 
   
-  fprintf(stdout, "Fin du jeu!\n"); 
+  label__error__cannot_reassign_stdout_to_logfile: {
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Failed to reassign stdout to log file: '%s' " "\n", __func__, stdout_log_filename); 
+    return -2; 
+  }; 
   
-  fflush(NULL); 
   
-  return retour; 
+ label__body: { 
+    // RL: ROOT_PATH: First thing to be done (to write log files & read data files) 
+    if (0 != main__change_to_root_dir(argv0)) { goto label__error__cannot_move_to_root_dir; }; 
+  
+    // RL: LOG FILE: Reassigning stdout to log-file 
+    if (0 != main__reassign_stdout_to_logfile()) { goto label__error__cannot_reassign_stdout_to_logfile; }; 
+  
+    // RL: Everything is UTF-8 unless specified otherwise. 
+    printf("☺☺☺☺☺☺" "\n"); 
+    printf("Cela fait plaisir de vous voir." "\n"); 
+    fprintf(stdout, "Démarrage du jeu!!!\n\n"); 
+    
+    main_locale_set(); 
+    main_rand_init(); 
+    main_date_print(); 
+    main_gcc_print(); 
+    main_arch_print(); 
+    main_proctitle_set(); 
+    main_args_print(argc, argv); 
+    main_win_print(); 
+
+    if (true) { 
+      const char * anime_to_load[] = { "bob.anime", "heros.anime", "pere.anime", "brigitte.anime.ci", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "saintexupery.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
+      for (int i = 0; ; i++) { 
+	const char * anime_filename = anime_to_load[i]; 
+	if (NULL == anime_filename) break; 
+	const anime_t * one_anime; 
+	one_anime = anime_database__load__compile_time(anime_filename); 
+      }; 
+    }
+    else {
+      printf("<<< main" "\n"); 
+      printf("===============================================================================" "\n"); 
+      fflush(NULL); 
+      for (;;) { 
+	retour = Kernel_Init(); fflush(NULL); if (retour < 0) { break; }; 
+	{ dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+	
+      retour = Kernel_Run(); 
+      Kernel_Dispose(); 
+      break; 
+      }; 
+      printf("===============================================================================" "\n"); 
+      printf(">>> main" "\n"); 
+    }; 
+    
+    fprintf(stdout, "Fin du jeu!\n"); 
+    
+    goto label__exit; 
+  }; 
 }; 
 
 
 
 
 
-void change_to_root_dir(const char * argv0) {
-  char * path = strcopy(argv0);
-  char * program_name = strrchr(path, '/');
+int main__change_to_root_dir(const char * argv0) { 
+  enum { path_buffer_bytesize = 1 << 12 }; 
+  if (path_buffer_bytesize < argv0__bytesize) { return -1; }; 
 
-  assert(program_name != NULL);
-
+  char path[path_buffer_bytesize]; 
+  strlcpy(path, argv0, path_buffer_bytesize); 
+  
+  char * program_name = strrchr(path, '/'); 
+  
+  if (NULL == program_name) { 
+    // FIXME TODO XXX 
+    // It means that the software is in the PATH variable. 
+    return -2; 
+  }; 
+  
   *program_name = '\0';
 
-  assert(0 == chdir(path));
-
-  free(path);
-
-  //fprintf(stderr, "%s\n", getcwd(NULL, 0));
+  if (0 != chdir(path)) { return -3; }; 
+  
+  return 0; 
 };
+
+
+int main__reassign_stdout_to_logfile(void) { 
+  goto label__body; 
+
+ label__error__cannot_create_logdir: {
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I could not create LOGDIR: '%s' " "\n", __func__, LOGDIR); 
+    return -1; 
+  }; 
+  
+ label__error__cannot_reopen_stdout: {
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Reopening stdout to log file failed: '%s' " "\n", __func__, stdout_log_filename); 
+    return -2; 
+  }; 
+  
+  // RL: LOG FILE 
+ label__body: { 
+    //     Redirecting 'stdout' to the log file. 
+    // RL: The idea is that any errors should show up on 'stderr', so that we know that something 
+    //     happened, but also on the log file to have context. 
+    //  --- man 3 freopen --- 
+    // The freopen() function opens the file whose name is the string pointed to by path. 
+    // The original stream (if it exists) is closed. 
+    // The primary use of the freopen() function is to change the file associated with a standard text stream (stderr, stdin, or stdout). 
+#if 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout [ 'FILE *' before being reopened to the log file ] = %p " "\n", __func__, stdout); 
+#endif 
+#if 0 
+    { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+    { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
+#endif 
+    // RL: First, creating LOGDIG (if needed) 
+    if (-1 == access(LOGDIR, R_OK | W_OK | X_OK | F_OK)) { 
+      if (-1 == mkdir(LOGDIR, (mode_t) 0777)) { 
+	goto label__error__cannot_create_logdir; 
+      }; 
+    }; 
+    // RL: Second, reopening 
+    if (NULL == freopen(stdout_log_filename, "wb", stdout)) goto label__error__cannot_reopen_stdout; 
+    // RL: Third, assigning a buffer. 
+    //setvbuf(stdout, stdout_buffer, _IONBF, sizeof(stdout_buffer)); // RL: Unbuffered. 
+    //setvbuf(stdout, stdout_buffer, _IOLBF, sizeof(stdout_buffer)); // RL: Line buffered. 
+    //setvbuf(stdout, stdout_buffer, _IOFBF, sizeof(stdout_buffer)); // RL: Fully buffered. 
+    setvbuf(stdout, stdout_log_buffer, _IOLBF, sizeof(stdout_log_buffer)); // RL: Line buffered. 
+#if 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(stdout_buffer) = %d"   "\n", __func__, (int) sizeof(stdout_buffer)); 
+    fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(stdout_buffer) = %d"   "\n", __func__, (int) sizeof(stdout_buffer)); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
+    { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+    { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
+    { dprintf(fileno(stdout), "STDOUT BUFFER: %p - " __FILE__ " - %d \n", (const void *)stdout -> _bf._base, (int)__LINE__); }; 
+    { const char __file__[] = "" __FILE__ ""; dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", (const void *)stdout -> _bf._base, (const char *)__file__, (int)__LINE__); }; 
+#endif 
+
+    return 0; 
+  };
+}; 
+  
 
 
 

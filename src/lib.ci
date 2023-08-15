@@ -7,11 +7,15 @@ enum { false = (0 != 0) };
 #  define __bool_true_false_are_defined 1
 #endif 
 
+#ifndef ARRAY_SIZE
 #define ARRAY_SIZE(__some_array__) ((sizeof((__some_array__))) / (sizeof(*(__some_array__))))
+#endif 
 
 #define ASSERT_COMPILE(a) { int tab[((a) ? 1 : (-1))]; }; 
 
+#ifndef assert
 #define assert(__cond__) { if (!(__cond__)) { write(STDERR_FILENO, "assertion failed\n", 17); _exit(1); }; }; 
+#endif 
 
 #define  INT16_MAX__M   (0x0FFF) 
 enum {   INT16_MAX__E = (1   <<  0) + (1   <<  1) + (1   <<  2) + (1   <<  3) + (1   <<  4) + (1   <<  5) + (1   <<  6) + (1   <<  7) + 

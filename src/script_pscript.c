@@ -82,6 +82,8 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
   message("%s: " "logfile_name: %s" "\n", __func__, logfile_name); 
   const int stdlog_d = open(logfile_name, O_WRONLY | O_CREAT | O_TRUNC, (mode_t) 0666); 
   assert(stdlog_d >= 0); 
+  //char stdlog_buffer[1 << 12]; 
+  //setvbuf(stdlog_d, stdlog_buffer, _IOLBF, sizeof(stdlog_buffer)); // RL: Line buffered. 
 #if 1 
   {
     const int status = fcntl(stdlog_d, F_GETFL, 0); 
@@ -164,7 +166,8 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
       
       dputs_array(stdlog_d, "TOTAL COMPUTED BYTECODES: " , int_string__stack(pscript_bytecode__get_count(this -> bytecode_env)), "\n"); 
 #if 0 
-      // As of 2023-07-27, these functions became very slow...???? 
+      // RL: As of 2023-07-27, these functions became very slow...???? 
+      // RL: 2023-08-15: Yes, because it prints word by word - and it’s not buffered. 
       bytecode_stack__print_all(stdlog_d, this -> bytecode_env, this -> type_env); 
 #endif 
     };  

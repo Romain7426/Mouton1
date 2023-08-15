@@ -931,7 +931,140 @@ void Kernel_Dispose(void) {
 
 static void opengl__configure(const int width, const int height) {
   const float ratio = (float) width / (float) height;
+  
 
+  // https://dri.freedesktop.org/wiki/libGL/
+
+  //drmDevicePtr devices[MAX_DRM_DEVICES], device;
+  //int i, num_devices, fd = -1;
+  //num_devices = drmGetDevices2(0, devices, MAX_DRM_DEVICES);
+  //if (num_devices <= 0)
+  // ------------
+  //  'drmGetDevices2' is a function of the OS, in libdrm: 
+  //  nm /usr/X11R6/lib/libdrm.a | grep -i drmGetDevices2 
+  // -----------
+  // 'drmGetDevices2' is a function that lists all files found in the directory '/dev/dri/'. 
+  // Then for each item: 
+  //  - check the major and the minor of the device (is it a DRM? 87 on OpenBSD). 
+  //  - ensuite, il lui balance un ioctl pour avoir ses caractéristiques sur le bus PCI: drmIoctl(fd, DRM_IOCTL_GET_PCIINFO, &pinfo)  [ inteldrm0 at pci0 dev 2 function 0 "Intel HD Graphics 3000" rev 0x09 ] 
+  //  - and that’s it… 
+  // 
+  // drmIoctl(fd, DRM_IOCTL_VERSION, version) 
+  // drmIoctl(fd, DRM_IOCTL_GET_CAP, &cap);
+  // drmIoctl(fd, DRM_IOCTL_SET_CLIENT_CAP, &cap);
+  // drmIoctl(fd, DRM_IOCTL_GET_UNIQUE, &u) 
+  // drmIoctl(fd, DRM_IOCTL_SET_UNIQUE, &u)
+  // drmIoctl(fd, DRM_IOCTL_GET_MAGIC, &auth) 
+  // drmIoctl(fd, DRM_IOCTL_AUTH_MAGIC, &auth)
+  // drmIoctl(fd, DRM_IOCTL_ADD_MAP, &map) 
+  // drmIoctl(fd, DRM_IOCTL_RM_MAP, &map)
+  // drmIoctl(fd, DRM_IOCTL_ADD_BUFS, &request) 
+  // drmIoctl(fd, DRM_IOCTL_INFO_BUFS, &info)
+  // drmIoctl(fd, DRM_IOCTL_MARK_BUFS, &info.list[i]) 
+  // drmIoctl(fd, DRM_IOCTL_FREE_BUFS, &request)
+  // drmIoctl(fd, DRM_IOCTL_MAP_BUFS, &bufs)
+  // drmIoctl(fd, DRM_IOCTL_LOCK, &lock)
+  // drmIoctl(fd, DRM_IOCTL_UNLOCK, &lock)
+  // drmIoctl(fd, DRM_IOCTL_RES_CTX, &res) 
+  // drmIoctl(fd, DRM_IOCTL_SWITCH_CTX, &ctx)
+  // drmIoctl(fd, DRM_IOCTL_MOD_CTX, &ctx) 
+  // drmIoctl(fd, DRM_IOCTL_GET_CTX, &ctx) 
+  // drmIoctl(fd, DRM_IOCTL_RM_CTX, &ctx) 
+  // drmIoctl(fd, DRM_IOCTL_ADD_DRAW, &draw) 
+  // drmIoctl(fd, DRM_IOCTL_RM_DRAW, &draw) 
+  // drmIoctl(fd, DRM_IOCTL_UPDATE_DRAW, &update)
+  // drmIoctl(fd, DRM_IOCTL_CRTC_GET_SEQUENCE, &get_seq) 
+  // drmIoctl(fd, DRM_IOCTL_CRTC_QUEUE_SEQUENCE, &queue_seq) 
+  // drmIoctl(fd, DRM_IOCTL_CONTROL, &ctl)
+  // drmIoctl(fd, DRM_IOCTL_FINISH, &lock) 
+  // drmIoctl(fd, DRM_IOCTL_IRQ_BUSID, &p) 
+  // 
+  //  ioctl(fd, DRM_IOCTL_DMA, &dma )
+  //  ioctl(fd, DRM_IOCTL_WAIT_VBLANK, vbl)
+  // 
+  // tests/kms/libkms-test-framebuffer.c:    err = drmIoctl(device->fd, DRM_IOCTL_MODE_CREATE_DUMB, &args);
+  // tests/kms/libkms-test-framebuffer.c:    err = drmIoctl(device->fd, DRM_IOCTL_MODE_DESTROY_DUMB, &args);
+  // tests/kms/libkms-test-framebuffer.c:    err = drmIoctl(device->fd, DRM_IOCTL_MODE_MAP_DUMB, &args);
+  // 
+  // all defined in include/drm/drm.h
+  // 
+  // /usr/include/sys/ioccom.h:#define       _IOWR(g,n,t)    _IOC(IOC_INOUT, (g), (n), sizeof(t)) 
+  //  → Il s’agit de coder tout ça dans un entier: 
+  // #define _IOC(inout,group,num,len)      (inout  |  ((len & 0x1fff) << 16)  |  ((group) << 8)  |  (num)) 
+  //   - #define DRM_IOCTL_BASE                  'd'  => groupe 
+  //   - nr    => le numéro 
+  //   - type  => le type 
+  // 
+  // 
+  // Not told how it gets OpenGL procedures (likely somewhere in the MESA code). 
+  
+  
+  // the SAREA (the shared memory segment)  
+
+  
+  // The function ‘void_mesa_init_driver_functions(struct dd_function_table *driver)’ 
+  //  [ ./mesa-21.1.7/src/mesa/drivers/common/driverfuncs.c ] 
+  // initializes the GL-functions table with software ones. 
+  // Then each driver should override the selected GL-functions. 
+  // 
+  // The GL-functions table is defined at [ ./mesa-21.1.7/src/mesa/main/dd.h ] 
+  // 
+  // ‘struct GLvertexformat’ → Per-vertex functions.
+  // * These are the functions which can appear between glBegin and glEnd.
+  // * Depending on whether we're inside or outside a glBegin/End pair
+  // * and whether we're in immediate mode or building a display list, these
+  // * functions behave differently.  This structure allows us to switch
+  // * between those modes more easily.
+  // * (Generally, these pointers point to functions in the VBO module.) 
+  // 
+  
+  // /**
+  // * Device driver function table.
+  // * Core Mesa uses these function pointers to call into device drivers.
+  // * Most of these functions directly correspond to OpenGL state commands.
+  // * Core Mesa will call these functions after error checking has been done
+  // * so that the drivers don't have to worry about error testing.
+  // *
+  // * Vertex transformation/clipping/lighting is patched into the T&L module.
+  // * Rasterization functions are patched into the swrast module.
+  // * Note: when new functions are added here, the drivers/common/driverfuncs.c
+  // * file should be updated too!!!
+  // */
+  // struct dd_function_table { … }; 
+  // 
+  // «Most of these functions directly correspond to OpenGL state commands.» → It means that it does not do anything with the hardware, 
+  // it’s just some bits turned on or off in the structure ‘gl_context_t’. 
+
+  
+  // [ ./mesa-21.1.7/src/mesa/main/vtxfmt.c ]
+  // /**
+  //   * Copy the functions found in the GLvertexformat object into the
+  //   * dispatch table.
+  //   */
+  // static void install_vtxfmt(struct gl_context *ctx, struct _glapi_table *tab, const GLvertexformat *vfmt); 
+  // 
+  // «vtx» → vertex 
+  // «fmt» → format 
+  // SET_TexCoord1fv(tab, vfmt->TexCoord1fv); 
+  // 
+  // [ ../mesa-21.1.7/build/src/mesa/main/dispatch.h:static inline void SET_TexCoord1fv(struct _glapi_table *disp, void (GLAPIENTRYP fn)(const GLfloat *)) ] 
+  // 
+  // Mais on ne trouve toujours pas où est générée la fonction ‘glTexCoord’ (ou équivalent) 
+  // 
+  // struct _glapi_table *tab 
+
+
+
+  // If Mesa can’t use its hardware accelerated drivers it falls back on one of its software renderers. (e.g. Softpipe or LLVMpipe) // glGetString(GL_RENDERER  ) 
+  // Falling back to a software renderer might a right issue (ownership, access rights). 
+  // For instance, if I run it with root rights, I get a hardware renderer: 
+  //        OpenGL renderer string: Mesa Intel(R) HD Graphics 3000 (SNB GT2) 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL version   : %s" "\n", __func__, glGetString(GL_VERSION   )); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL vendor    : %s" "\n", __func__, glGetString(GL_VENDOR    )); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL renderer  : %s" "\n", __func__, glGetString(GL_RENDERER  )); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL extensions: %s" "\n", __func__, glGetString(GL_EXTENSIONS)); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL shading language version: %s" "\n", __func__, glGetString(GL_SHADING_LANGUAGE_VERSION)); 
+  
   //* Setup our viewport. */
   glViewport(0, 0, width, height);
 

@@ -52,6 +52,7 @@ typedef uint24_unpacked_t uint24_t;
 
 
 #define ASSERT_COMPILE(a) { int tab[((a) ? 1 : (-1))]; }; 
+#define ASSERT_COMPILE_TOPLEVEL(a) static int glue(tab,__LINE__)[((a) ? 1 : (-1))];  
 #if 0 
 // Does not work as the compiler complains about "That does not declare anything". 
 // The glue trick does not work as the __FILE__ macro returns a string, and not an ident. 
@@ -362,10 +363,14 @@ enum { EBADF = 9 };
 # define BOOL_ABS(a) (((a)>0)?(a):(-(a)))
 #endif 
 
-#ifndef false
+#ifndef __bool_true_false_are_defined /* https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/stdbool.h.html */ 
+enum { true  = (0 == 0) }; 
 enum { false = (0 != 0) }; 
-enum { true = (0 == 0) }; 
 enum { undecided_boolean = 1+MAX(BOOL_ABS(false),BOOL_ABS(true)) }; 
+#  define __bool_true_false_are_defined 1
+#endif 
+
+#ifndef false
 #define false false
 #define true true
 #define undecided_boolean undecided_boolean
