@@ -591,8 +591,12 @@ BIN     := build/$(PROG).exe
 #BIN_STRIPPED := build/$(PROG)_stripped.exe
 #FILES  := $(patsubst src/%.c,%, $(SRC))
 
+ANIME_FILES := $(patsubst data/animes/%,%,$(wildcard data/animes/*.anime))
+
 #$(info SRC_C: $(SRC_C))
 #$(info SRC_H: $(SRC_H))
+#$(error ANIME_FILES: $(ANIME_FILES))
+
 
 
 
@@ -666,11 +670,11 @@ build.sh:
 	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o  2>&1" >> $@; \
 	done;
 #	  echo "$(CC) $(CFLAGS) -c src/$$i.c -o build/$$i.o -aux-info build/$$i.aux 2>&1" >> $@; 
-	echo "ar -r -c $(LIB) $(OBJ) 2>&1" >> $@
-	echo "ranlib $(LIB) 2>&1" >> $@
+	echo "ar -r -c $(BIN_LIB) $(OBJ) 2>&1" >> $@
+	echo "ranlib $(BIN_LIB) 2>&1" >> $@
 #	echo "$(CC) -o $(BIN) $(LIBS) $(LIB) 2>&1" >> $@
 #	echo "$(CC) -o $(BIN) $(LIB) 2>&1" >> $@
-	echo "$(CC) -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
+	echo "$(CC) -o $(BIN) $(BIN_LIB) $(LIBS_EXT) 2>&1" >> $@
 	echo "" >> $@
 	echo "rm -f run" >> $@
 	echo "ln -s $(BIN) run" >> $@
@@ -685,7 +689,8 @@ Makefile:
 	echo "" > $@
 #	echo "default: Makefile build run $(BIN)" >> $@
 #	echo "default: Makefile build $(LIB) $(BIN) run " >> $@
-	echo "default: Makefile build build_h build_ci build_c build_i build_o build_so $(LIB) $(LIB_SO) $(BIN) run " >> $@
+#	echo "default: Makefile build build_h build_ci build_c build_i build_o build_so $(LIB) $(LIB_SO) $(BIN) run " >> $@
+	echo "default: Makefile build build_h build_ci build_c build_i build_anime build_o build_so $(BIN_LIB) $(BIN_SO) $(BIN) run " >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
@@ -747,20 +752,21 @@ Makefile:
 	echo "" >> $@
 #	echo "$(BIN): $(LIB) build/main.o " >> $@
 #	echo "$(BIN): $(LIB)  " >> $@
-	echo "$(BIN): $(BIN_LIB) build/anime.a build/nonanime.a build/carte.a build/pscript.a " >> $@
+	echo "$(BIN): $(BIN_LIB) build/anime.a build/nonanime.a build/carte.a build/pscript.a dynamic_list_of_functions_for_the_linker.txt " >> $@
 #	echo "	$(CC) -o $(BIN) build/main.o $(LIB) $(LIBS) 2>&1" >> $@
 #	echo "	$(CC) -o $(BIN) build/main.o $(LIB) 2>&1" >> $@
 #	echo "	$(CC)  -Wl,\"--dynamic-list=main\"  -o $(BIN) $(LIB) $(LIBS) 2>&1" >> $@
-	echo "	$(CC)  -Wl,\"--dynamic-list=main\"  -o $(BIN) $(BIN_LIB) build/anime.a build/nonanime.a build/carte.a build/pscript.a $(LIBS_EXT) $(LIBS_CC) 2>&1" >> $@
+	echo "	$(CC)  -Wl,\"--dynamic-list=dynamic_list_of_functions_for_the_linker.txt\"  -o $(BIN) $(BIN_LIB) build/anime.a build/nonanime.a build/carte.a build/pscript.a $(LIBS_EXT) $(LIBS_CC) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
-	echo "$(LIB): $(OBJ)" >> $@
-	echo "	ar -r -c $(LIB) $(OBJ) 2>&1" >> $@
-	echo "	ranlib $(LIB) 2>&1" >> $@
+	echo "$(BIN_LIB): $(OBJ)" >> $@
+	echo "	ar -r -c $(BIN_LIB) $(OBJ) 2>&1" >> $@
+	echo "	ranlib $(BIN_LIB) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
-	echo "$(LIB_SO): $(OBJ) $(OBJ_SO)" >> $@
-	echo "	$(CC) -shared -o $(LIB_SO) $(OBJ) 2>&1" >> $@
+	echo "$(BIN_SO): $(OBJ) $(OBJ_SO)" >> $@
+#	echo "	$(CC) -shared -o $(LIB_SO) $(OBJ) 2>&1" >> $@
+	echo "	$(CC) -shared -o $(BIN_SO) $(OBJ) 2>&1" >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@
@@ -852,6 +858,28 @@ Makefile:
 	$(foreach file_c,$(patsubst src/%,%,$(wildcard src/*.c)), \
 	  echo "build/$(file_c): src/$(file_c) " >> $@; \
 	  echo "	ln src/$(file_c) build/$(file_c) " >> $@; \
+	  echo "" >> $@; \
+	)
+	echo "" >> $@
+	echo "" >> $@
+	echo "" >> $@
+	echo "build_anime: build $(patsubst data/animes/%,build/%,$(wildcard data/animes/*.anime)) $(patsubst data/animes/%,build/%.ci,$(wildcard data/animes/*.anime)) $(patsubst data/animes/%,build/%.mtime,$(wildcard data/animes/*.anime)) " >> $@; 
+	echo "" >> $@
+	$(foreach file_a,$(patsubst data/animes/%,%,$(wildcard data/animes/*.anime)), \
+	  echo "build/$(file_a).ci: build/$(file_a) " >> $@; \
+	  echo "	cat build/$(file_a) | ./tools/bin/text2cstring > build/$(file_a).ci " >> $@; \
+	  echo "" >> $@; \
+	)
+	echo "" >> $@
+	$(foreach file_a,$(patsubst data/animes/%,%,$(wildcard data/animes/*.anime)), \
+	  echo "build/$(file_a): data/animes/$(file_a) " >> $@; \
+	  echo "	ln data/animes/$(file_a) build/$(file_a) " >> $@; \
+	  echo "" >> $@; \
+	)
+	echo "" >> $@
+	$(foreach file_a,$(patsubst data/animes/%,%,$(wildcard data/animes/*.anime)), \
+	  echo "build/$(file_a).mtime: build/$(file_a) " >> $@; \
+	  echo "	./tools/bin/file-mtime-get build/$(file_a) > build/$(file_a).mtime " >> $@; \
 	  echo "" >> $@; \
 	)
 	echo "" >> $@
