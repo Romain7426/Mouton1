@@ -23,6 +23,151 @@
 
 
 
+#if 0 
+
+static int stdlog_d = -1; 
+static int stdlog_pipe[2] = {-1, -1}; // RL: [0] is output (read end), [1] is input (write end) 
+static int stdlog_post_pipe_d = -1; 
+ 
+static void main__stdlog_init(void) { 
+  //stdlog_d = 2; return;
+  
+  //fprintf(stderr, "fcntl(3, F_GETFL) = %d" "\n", fcntl(3, F_GETFL)); 
+  //if (-1 != fcntl(3, F_GETFL) && errno == EBADF) { 
+  if (-1 != fcntl(3, F_GETFL)) { 
+    stdlog_d = 3; 
+  } 
+  else { 
+    //stdlog_d = open("/dev/tty", O_WRONLY);  
+    stdlog_d = open("/dev/null", O_WRONLY);  
+  }; 
+}; 
+
+static void (*former_handler)(int) = NULL; 
+static char handler_buffer[INT16_MAX]; 
+static int16_t handler_buffer_nb = 0; 
+static void handler_buffer_flush(void) { 
+  write(stdlog_post_pipe_d, handler_buffer, handler_buffer_nb); 
+  handler_buffer_nb = 0; 
+}; 
+static void handler(int sig) { 
+  // RL: Nous appelons write(2) qui génère des SIGIO. 
+  // Donc nous devons désactiver le mask, et réinstaller le former_handler. 
+  
+  sigset_t sigset[1]; 
+  sigemptyset(sigset);
+  sigaddset(sigset, SIGIO);
+  signal(SIGIO, former_handler); 
+  sigprocmask(SIG_UNBLOCK, sigset, NULL); 
+  goto label__body;
+
+  label__exit: { 
+    signal(SIGIO, handler); 
+    return; 
+  }; 
+  
+  label__body: { 
+#if 1 
+    //{ if (NULL == former_handler) { write(2, "former_handler is NULL\n", sizeof("former_handler is NULL\n")); } else { write(2, "former_handler is NOT NULL\n", sizeof("former_handler is NOT NULL\n"));}; }; 
+    //const ssize_t read_nb = read(stdlog_pipe[0], handler_buffer, sizeof(handler_buffer)); 
+    const ssize_t read_nb = read(stdlog_pipe[0], handler_buffer + handler_buffer_nb, sizeof(handler_buffer) - handler_buffer_nb); 
+    if (0 < read_nb) { 
+      handler_buffer_nb += read_nb; 
+      if (sizeof(handler_buffer) == handler_buffer_nb) { 
+	write(stdlog_post_pipe_d, handler_buffer, handler_buffer_nb); 
+	handler_buffer_nb = 0; 
+      }; 
+      //write(2, "SIGIO reçu\n", sizeof("SIGIO reçu\n")); 
+      //write(2, handler_buffer, read_nb); 
+      goto label__exit; 
+    }; 
+#endif 
+    if (NULL == former_handler) goto label__exit; 
+    former_handler(sig); 
+    goto label__exit; 
+  }; 
+}; 
+#endif 
+#if 0 
+static void main__stdlog_reopen(const char * filename) { 
+  if (NULL ==  filename) return; 
+  if ('\0' == *filename) return; 
+  int new_fd; 
+  if      (0 == strcasecmp("stdout", filename)) { new_fd = stdout_d; } 
+  else if (0 == strcasecmp("stderr", filename)) { new_fd = stderr_d; } 
+  else { 
+    if (0 == strcasecmp("stdnull", filename)) { filename = "/dev/null"; }; 
+    new_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600); 
+    if (new_fd < 0) return; 
+    fcntl(new_fd, F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    write(new_fd, "NEW_FD works!\n", sizeof("NEW_FD works!\n")); 
+  }; 
+  close(stdlog_d); 
+#if 1
+  if (-1 == pipe(stdlog_pipe)) { 
+    stdlog_pipe[0] = -1; 
+    stdlog_pipe[1] = -1; 
+    stdlog_d = new_fd; 
+  } 
+  else { 
+    stdlog_post_pipe_d = new_fd; 
+    former_handler = signal(SIGIO, handler); 
+#if 0 
+    assert(SIG_ERR != former_handler); 
+    signal(SIGIO, former_handler); 
+    signal(SIGIO, SIG_DFL); 
+    signal(SIGIO, SIG_IGN); 
+#endif 
+#if 0 
+#elif 0 
+    fcntl(stdlog_pipe[1], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[1], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+#elif 1 
+    fcntl(stdlog_pipe[0], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[0], F_SETFL, O_NONBLOCK); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC | O_NONBLOCK); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+#else 
+    fcntl(stdlog_pipe[0], F_SETOWN, 0); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[1], F_SETOWN, 0); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[0], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[1], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[1], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non.  
+    fcntl(stdlog_pipe[0], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+#endif 
+    for (int i = 0; i < 1; i++) { 
+      write(2, "0: ", sizeof("0: "));
+      write(stdlog_pipe[1], "++++++++++++++++", 16); 
+      fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
+      write(2, "1: ", sizeof("1: "));
+      write(stdlog_pipe[1], "++++++++++++++++", 16); 
+      write(stdlog_pipe[1], "++++++++++++++++", 16); 
+      write(stdlog_pipe[1], "++++++++++++++++", 16); 
+    }; 
+    write(new_fd, "Completed\n", sizeof("Completed\n")); 
+#if 1 
+    //dup2(stdlog_pipe[0], new_fd); 
+    //dup2(new_fd, stdlog_pipe[0]); 
+#else 
+    close(stdlog_pipe[0]); 
+    stdlog_pipe[0] = new_fd; 
+#endif
+    write(stdlog_pipe[1], "%%%%", 4);
+    stdlog_d = stdlog_pipe[1]; 
+    write(new_fd, "NEW_FD works BIS!\n", sizeof("NEW_FD works BIS!\n")); 
+    write(stdlog_d, "Pipe works!\n", sizeof("Pipe works!\n")); 
+    for (int i = 0; i < 1; i++) { 
+      write(stdlog_d, "+", 1);
+    }; 
+  };
+#else 
+  stdlog_d = new_fd; 
+#endif 
+}; 
+#endif 
+
 // RL: This file contains all the system stuffs. 
 //     Anything here is not related to the program per se. 
 //     And is done only once. 
