@@ -77,7 +77,7 @@ static int  main__move_to_progdir(const char * progdir);
 // RL: Par défaut, cette mémoire tampon du log («log buffer») est écrite par le kernel une fois à chaque passe de boucle. 
 // RL: A priori, toutes ces chaînes de caractères sont allouées dans la stack de la fonction 'main()' (donc aucune gestion mémoire). 
 // RL: Le tamponnage est implémenté en utilisant un pipe. 
-// RL: Problème — L’implémentation du tamponnage avec un pipe recourt à l’utilisation du signal SIGIO. (Pénible.) 
+// RL: Problème — L’implémentation du tamponnage avec un pipe recourt à l’utilisation du signal SIGIO. (Pénible. ☹) 
 static const char     main__stdout_log_default_subdir[] = LOGDIR; 
 static       char *   main__stdout_log_subdir = NULL; // RL: INVARIANT: The first char and the last char should *not* be the slash character '/' (as a subdir, it cannot be root — but it can be empty). 
 static const char     main__stdout_log_default_filename[] = "stdout.log"; // RL: INVARIANT: It should *not* hold any slash character '/'. 
@@ -106,9 +106,29 @@ static int  main__reassign_stdout_to_logfile_aux(const char * progdir, const cha
 
 
 
+// II. Stderr 
+// ---------- 
+// 
 // RL: Concernant stderr, cette sortie n’est pas tamponnée. 
-//     En revanche, on veut l’écrire sur le terminal et dans le fichier log. 
+//     En revanche, on veut l’écrire à la fois sur le terminal et dans le fichier log. 
 //     Il faut donc capturer cette écriture, et la dédoubler dans le fichier log. 
+enum {                main__stderr_buffer__bytesize = INT16_MAX }; 
+static       char     main__stderr_buffer[main__stderr_buffer__bytesize] = {}; 
+static       int16_t  main__stderr_buffer_nb = 0; 
+static       int      main__stderr_pipe[2] = {-1, -1}; // RL: [0] is output (read end), [1] is input (write end) 
+static       int      main__stderr_post_fd = -1; 
+static       void (*  main__stderr_pipe__SIGIO_former_handler)(int) = NULL; 
+
+extern void main__stderr_buffer__flush(void); 
+static void main__stderr_pipe__SIGIO_handler(int sig); 
+static int  main__stderr_pipe__open(void); 
+static int  main__stderr_pipe__open_aux(int * stderr_pipe, void (* handler)(int), void (* (*former_handler_r))(int)); 
+static void main__stderr_pipe__close(void); 
+static void main__stderr__dup_to_post(void); 
+static void main__stderr__dup_to_post_aux(int * stderr_post_fd_r); 
+static int  main__stderr__reassign_to_pipe(void); 
+static int  main__stderr__reassign_to_pipe_aux(const int pipe_write_fd); 
+
 
 
 
@@ -150,6 +170,7 @@ int main(const int argc, const char * argv[]) {
   goto label__body; 
 
  label__exit: { 
+    main__stdout_log_buffer__flush(); 
     fflush(NULL); 
     return 0; 
   }; 
@@ -162,6 +183,17 @@ int main(const int argc, const char * argv[]) {
  label__error__stdout_log__making_pipe_failed: { 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to make a pipe the stdout log buffer.' " "\n", __func__); 
     return -4; 
+  }; 
+  
+ label__error__stderr__making_pipe_failed: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to make a pipe for stderr.' " "\n", __func__); 
+    return -5; 
+  }; 
+  
+ label__error__stderr__reassigning_to_pipe_failed: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to reassign stderr to the pipe.' " "\n", __func__); 
+    main__stderr_pipe__close(); 
+    return -6; 
   }; 
   
 #if 0 
@@ -183,9 +215,9 @@ int main(const int argc, const char * argv[]) {
     // in order to read data and write logs. 
     for (;;) { 
       {
-	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "local_alloca__left: '%d' " "\n", __func__, (int) local_alloca__left); fflush(NULL); 
+	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "local_alloca__left: '%d' " "\n", __func__, (int) local_alloca__left);  
 	const int16_t used_size = main__break_argv0_into_progname_and_progdir(main_argv0, &main_argv0__progname, &main_argv0__progdir, local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
-	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__break_argv0_into_progname_and_progdir: '%d' " "\n", __func__, (int) used_size); fflush(NULL); 
+	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__break_argv0_into_progname_and_progdir: '%d' " "\n", __func__, (int) used_size);  
 	if (0 >  used_size) break; 
 	if (0 == used_size) break; // RL: ??? Does not make sense. 
 	local_alloca__used += used_size; 
@@ -211,11 +243,11 @@ int main(const int argc, const char * argv[]) {
       break; 
     }; 
   
-#if 1 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0: '%s' " "\n", __func__, main_argv0); fflush(NULL); 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0__progname: '%s' " "\n", __func__, main_argv0__progname); fflush(NULL); 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0__progdir: '%s' " "\n", __func__, main_argv0__progdir); fflush(NULL); 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "CWD: '%s' " "\n", __func__, getcwd(local_alloca__mem + local_alloca__used, local_alloca__left)); fflush(NULL); 
+#if 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0: '%s' " "\n", __func__, main_argv0);  
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0__progname: '%s' " "\n", __func__, main_argv0__progname);  
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0__progdir: '%s' " "\n", __func__, main_argv0__progdir);  
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "CWD: '%s' " "\n", __func__, getcwd(local_alloca__mem + local_alloca__used, local_alloca__left));  
 #endif 
     
     for (;;) { 
@@ -235,12 +267,31 @@ int main(const int argc, const char * argv[]) {
       local_alloca__left -= used_size; 
       break; 
     }; 
+
+    
+    // RL: STDERR: Reassigning stderr to pipe 
+    for (;;) { 
+      if (0 != main__stderr_pipe__open()) goto label__error__stderr__making_pipe_failed; 
+      main__stderr__dup_to_post(); 
+      if (0 != main__stderr__reassign_to_pipe()) goto label__error__stderr__reassigning_to_pipe_failed; 
+      break; 
+    };     
+    
     
     // RL: Everything is UTF-8 unless specified otherwise. 
     printf("☺☺☺☺☺☺" "\n"); 
     printf("Cela fait plaisir de vous voir." "\n"); 
     fprintf(stdout, "Démarrage du jeu!!!\n\n"); 
     main__stdout_log_buffer__flush(); 
+    
+#if 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0: '%s' " "\n", __func__, main_argv0);  
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0__progname: '%s' " "\n", __func__, main_argv0__progname);  
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0__progdir: '%s' " "\n", __func__, main_argv0__progdir);  
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "CWD: '%s' " "\n", __func__, getcwd(local_alloca__mem + local_alloca__used, local_alloca__left));  
+    main__stdout_log_buffer__flush(); 
+    exit(0); 
+#endif 
     
     main_locale_set(); 
     main_rand_init(); 
@@ -253,20 +304,21 @@ int main(const int argc, const char * argv[]) {
     main__stdout_log_buffer__flush(); 
 
     if (true) { 
-      const char * anime_to_load[] = { "bob.anime", "heros.anime", "pere.anime", "brigitte.anime.ci", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "saintexupery.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
+      const char * anime_to_load[] = { "saintexupery.anime", "pere.anime", "bob.anime", "heros.anime", "brigitte.anime.ci", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
       for (int i = 0; ; i++) { 
 	const char * anime_filename = anime_to_load[i]; 
 	if (NULL == anime_filename) break; 
 	const anime_t * one_anime; 
 	one_anime = anime_database__load__compile_time(anime_filename); 
+	main__stdout_log_buffer__flush(); 
       }; 
     }
     else {
       printf("<<< main" "\n"); 
       printf("===============================================================================" "\n"); 
-      fflush(NULL); 
+       
       for (;;) { 
-	retour = Kernel_Init(); fflush(NULL); if (retour < 0) { break; }; 
+	retour = Kernel_Init();  if (retour < 0) { break; }; 
 	{ dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 	
 	retour = Kernel_Run(); 
@@ -278,7 +330,9 @@ int main(const int argc, const char * argv[]) {
     }; 
     
     fprintf(stdout, "Fin du jeu!\n"); 
-    
+
+    main__stdout_log_buffer__flush(); 
+
     goto label__exit; 
   }; 
 }; 
@@ -350,8 +404,8 @@ int main__break_argv0_into_progname_and_progdir(const char * argv0, char * * pro
   
   const int16_t argv0_bytesize = 1 + strlen(argv0); 
   if (buffer_bytesize < 1 + argv0_bytesize) { 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "argv0_bytesize: '%d' " "\n", __func__, (int) argv0_bytesize); fflush(NULL); 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "buffer_bytesize: '%d' " "\n", __func__, (int) buffer_bytesize); fflush(NULL); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "argv0_bytesize: '%d' " "\n", __func__, (int) argv0_bytesize);  
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "buffer_bytesize: '%d' " "\n", __func__, (int) buffer_bytesize);  
     return -3; 
   }; 
   
@@ -408,8 +462,10 @@ int main__move_to_progdir(const char * progdir) {
 // II. STDOUT TO LOG 
 
 void main__stdout_log_buffer__flush(void) { 
+#if 0 
   fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__stdout_log_buffer_nb: '%d'" "\n", __func__, (int) main__stdout_log_buffer_nb); 
   fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__stdout_log_post_fd: '%d'" "\n", __func__, (int) main__stdout_log_post_fd); 
+#endif 
   if (0 >  main__stdout_log_post_fd) return; 
   //if (0 >  main__stdout_log_buffer_nb) { main__stdout_log_buffer_nb = 0; return; }; 
   if (0 == main__stdout_log_buffer_nb) return; 
@@ -537,9 +593,16 @@ void main__stdout_log__SIGIO_handler(int sig) {
     signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
     sigprocmask(SIG_UNBLOCK, sigset, NULL); 
   }; 
+#if 0 
+  int debug_fd = open("/dev/tty", O_WRONLY); 
+  char debug_buffer[1024]; 
+#endif 
   goto label__body;
 
   label__exit: { 
+#if 0 
+    close(debug_fd); 
+#endif 
     signal(SIGIO, main__stdout_log__SIGIO_handler); 
     return; 
   }; 
@@ -563,6 +626,14 @@ void main__stdout_log__SIGIO_handler(int sig) {
       main__stdout_log_buffer_nb = 0; 
     }; 
     const ssize_t read_nb = read(main__stdout_log_pipe[0], main__stdout_log_buffer + main__stdout_log_buffer_nb, main__stdout_log_buffer__bytesize - main__stdout_log_buffer_nb); 
+#if 0 
+    if (true) { 
+      write_long_long_int_into_buffer(debug_buffer, sizeof(debug_buffer), read_nb); 
+      write_string3(debug_fd, "[STDOUT HANDLER] ---> read_nb = ", debug_buffer, "\n"); 
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "read_nb: '%d'" "\n", __func__, (int) read_nb); 
+      if (0 < read_nb) write(debug_fd, main__stdout_log_buffer + main__stdout_log_buffer_nb, read_nb); 
+    }; 
+#endif 
     if (0 >= read_nb) goto label__pas_nous; 
     main__stdout_log_buffer_nb += read_nb; 
     // RL: On flush dès que le buffer est plein. 
@@ -665,7 +736,7 @@ int main__reassign_stdout_to_logfile(char * buffer, const int16_t buffer_bytesiz
 }; 
 
 int main__reassign_stdout_to_logfile_aux(const char * progdir, const char * log_subdir, const char * log_filename, const char * * log_filepathname_r, const int pipe_write_fd, int * opened_log_fd_r, char * buffer, const int16_t buffer_bytesize) { 
-  int16_t buffer_used; 
+  int16_t buffer_used = -1; 
   if (NULL == opened_log_fd_r) return -1; 
   if (0 > pipe_write_fd) return -2; 
   *opened_log_fd_r = -1; 
@@ -686,7 +757,8 @@ int main__reassign_stdout_to_logfile_aux(const char * progdir, const char * log_
     //*(&stdout) = fdopen(pipe_write_fd, "wb"); 
     //assert(NULL != stdout); 
     setvbuf(stdout, NULL, _IONBF, 0); 
-    dup2(fileno(stdout), pipe_write_fd); 
+    //dup2(fileno(stdout), pipe_write_fd); 
+    dup2(pipe_write_fd, fileno(stdout)); 
     *opened_log_fd_r = new_fd; 
 #else 
     if (NULL == freopen(path_to_null, "wb", stdout)) goto label__error__cannot_reopen_stdout_to_null; 
@@ -721,7 +793,8 @@ int main__reassign_stdout_to_logfile_aux(const char * progdir, const char * log_
     //stdout = fdopen(pipe_write_fd, "wb"); 
     //assert(NULL != stdout); 
     setvbuf(stdout, NULL, _IONBF, 0); 
-    dup2(fileno(stdout), pipe_write_fd); 
+    //dup2(fileno(stdout), pipe_write_fd); 
+    dup2(pipe_write_fd, fileno(stdout)); 
     *opened_log_fd_r = new_fd; 
 #else 
     if (NULL == freopen(path_to_fd9, "wb", stdout)) goto label__error__cannot_reopen_stdout; 
@@ -767,6 +840,198 @@ int main__reassign_stdout_to_logfile_aux(const char * progdir, const char * log_
     if (-1 != fcntl(9, F_GETFL)) goto label__reassign_to_fd9; 
     
     goto label__reassign_to_log_filepathname; 
+  }; 
+    
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================== 
+// III. STDERR TO LOG 
+
+void main__stderr_buffer__flush(void) { 
+#if 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__stderr_buffer_nb: '%d'" "\n", __func__, (int) main__stderr_buffer_nb); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__stderr_post_fd: '%d'" "\n", __func__, (int) main__stderr_post_fd); 
+#endif 
+  if (0 >  main__stderr_post_fd) return; 
+  //if (0 >  main__stderr_buffer_nb) { main__stderr_buffer_nb = 0; return; }; 
+  if (0 == main__stderr_buffer_nb) return; 
+  if (0 <= main__stderr_post_fd) write(main__stderr_post_fd, main__stderr_buffer, main__stderr_buffer_nb); 
+  main__stderr_buffer_nb = 0; 
+}; 
+
+int main__stderr_pipe__open(void) { 
+  return main__stderr_pipe__open_aux(main__stderr_pipe, &main__stderr_pipe__SIGIO_handler, &main__stderr_pipe__SIGIO_former_handler); 
+}; 
+
+void main__stderr_pipe__close(void) { 
+  close(main__stderr_pipe[0]); 
+  close(main__stderr_pipe[1]); 
+  main__stderr_pipe[0] = -1; 
+  main__stderr_pipe[1] = -1; 
+  signal(SIGIO, main__stderr_pipe__SIGIO_former_handler); 
+}; 
+
+int main__stderr_pipe__open_aux(int * stderr_pipe, void (* handler)(int), void (* (*former_handler_r))(int)) { 
+  if (NULL == former_handler_r) return -1; 
+  *former_handler_r = NULL; 
+  goto label__body; 
+  
+  label__error__making_pipe_failed: {
+    stderr_pipe[0] = -1; 
+    stderr_pipe[1] = -1; 
+    return -2; 
+  }; 
+  
+  label__error__installing_SIGIO_handler_failed: { 
+    close(stderr_pipe[0]); 
+    close(stderr_pipe[1]); 
+    stderr_pipe[0] = -1; 
+    stderr_pipe[1] = -1; 
+    return -3; 
+  }; 
+
+ label__body: { 
+    if (-1 == pipe(stderr_pipe)) goto label__error__making_pipe_failed; 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "pipe[0,1] =  [%d, %d] " "\n", __func__, (int) stderr_pipe[0], (int) stderr_pipe[1]); 
+    
+    void * former_handler = signal(SIGIO, handler); 
+    if (SIG_ERR == former_handler) goto label__error__installing_SIGIO_handler_failed; 
+    *former_handler_r = former_handler; 
+    
+    fcntl(stderr_pipe[0], F_SETOWN, getpid()); // RL: Qui recevra le signal SIGIO? 
+    fcntl(stderr_pipe[0], F_SETFL, O_ASYNC | O_NONBLOCK); // RL: Générer le signal SIGIO + Ne pas bloquer en cas de poll. 
+    
+    return 0; 
+  }; 
+}; 
+
+void main__stderr__dup_to_post(void) { 
+  return main__stderr__dup_to_post_aux(&main__stderr_post_fd); 
+}; 
+
+void main__stderr__dup_to_post_aux(int * stderr_post_fd_r) { 
+  *stderr_post_fd_r = dup(fileno(stderr)); // This call generates two SIGIO. 
+}; 
+
+
+void main__stderr_pipe__SIGIO_handler(int sig) { 
+  // RL: Dans cette routine, nous appelons write(2) qui génère des SIGIO. 
+  //     Donc nous devons désactiver le mask, et réinstaller le former_handler. 
+  // RL: Symétriquement, notre handler devra être réinstallé à la sortie. 
+  //     En revanche, le masque est remis automatiquement à chaque génération du signal SIGIO. 
+  { 
+    sigset_t sigset[1]; 
+    sigemptyset(sigset);
+    sigaddset(sigset, SIGIO);
+    signal(SIGIO, main__stderr_pipe__SIGIO_former_handler); 
+    sigprocmask(SIG_UNBLOCK, sigset, NULL); 
+  }; 
+#if 0 
+  int debug_fd = open("/dev/tty", O_WRONLY); 
+  char debug_buffer[1024]; 
+#endif 
+  goto label__body;
+
+  label__exit: { 
+#if 0 
+    close(debug_fd); 
+#endif 
+    signal(SIGIO, main__stderr_pipe__SIGIO_handler); 
+    return; 
+  }; 
+ 
+  label__pas_nous: {
+    if (NULL == main__stderr_pipe__SIGIO_former_handler) goto label__exit; 
+    main__stderr_pipe__SIGIO_former_handler(sig); 
+    goto label__exit; 
+  }; 
+  
+  label__body: { 
+    // RL: Ici, nous avons un problème: nous ne savons pas qui généra le signal. 
+    //     En particulier, était-ce le nôtre ou un autre? 
+    //     Donc il faut tester. 
+    //     Et pour tester, pas le choix, il faut faire un read(2). 
+    //     Et cette lecture doit être non bloquante, et donc le flag O_NONBLOCK doit avoir été allumé en amont. 
+    //     Sinon, on reste bloqué ici. 
+    // RL: Pour une raison quelconque, le buffer est peut-être déjà plein. 
+    if (main__stderr_buffer__bytesize == main__stderr_buffer_nb) { 
+      if (0 <= main__stderr_post_fd) write(main__stderr_post_fd, main__stderr_buffer, main__stderr_buffer_nb); 
+      main__stderr_buffer_nb = 0; 
+    }; 
+    const ssize_t read_nb = read(main__stderr_pipe[0], main__stderr_buffer + main__stderr_buffer_nb, main__stderr_buffer__bytesize - main__stderr_buffer_nb); 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "read_nb: '%d'" "\n", __func__, (int) read_nb); 
+#if 0 
+    if (false) { 
+      write_long_long_int_into_buffer(debug_buffer, sizeof(debug_buffer), read_nb); 
+      write_string3(debug_fd, "[STDERR HANDLER] ---> read_nb = ", debug_buffer, "\n"); 
+      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "read_nb: '%d'" "\n", __func__, (int) read_nb); 
+      if (0 < read_nb) write(debug_fd, main__stderr_buffer + main__stderr_buffer_nb, read_nb); 
+    }; 
+#endif 
+    if (0 >= read_nb) goto label__pas_nous; 
+    main__stderr_buffer_nb += read_nb; 
+    
+    // RL: On copie dans stdout-log. 
+    { int16_t qty_left = read_nb; for (;;) { 
+	if (0 == qty_left) break; 
+	if (main__stdout_log_buffer__bytesize == main__stdout_log_buffer_nb) { 
+	  if (0 <= main__stdout_log_post_fd) write(main__stdout_log_post_fd, main__stdout_log_buffer, main__stdout_log_buffer_nb); 
+	  main__stdout_log_buffer_nb = 0; 
+	}; 
+	const int16_t to_be_copied = MIN(main__stdout_log_buffer__bytesize - main__stdout_log_buffer_nb, qty_left); 
+	bcopy(main__stderr_buffer + main__stderr_buffer_nb - qty_left, main__stdout_log_buffer + main__stdout_log_buffer_nb, to_be_copied); 
+	main__stdout_log_buffer_nb += to_be_copied; 
+	qty_left -= to_be_copied; 
+	continue; 
+    }; }; 
+
+    // RL: On flush tout de suite: stderr is unbuffered. 
+    if (true) { 
+      if (0 <= main__stderr_post_fd) write(main__stderr_post_fd, main__stderr_buffer, main__stderr_buffer_nb); 
+      main__stderr_buffer_nb = 0; 
+    }; 
+    goto label__exit; 
+  }; 
+}; 
+
+
+int main__stderr__reassign_to_pipe(void) { 
+  return main__stderr__reassign_to_pipe_aux(main__stderr_pipe[1]); 
+}; 
+
+int main__stderr__reassign_to_pipe_aux(const int pipe_write_fd) { 
+  if (0 > pipe_write_fd) return -2; 
+  goto label__body; 
+  
+  label__body: { 
+    setvbuf(stderr, NULL, _IONBF, 0); 
+#if 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "pipe_write_fd =  %d " "\n", __func__, (int) pipe_write_fd); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "fileno(stderr) =  %d " "\n", __func__, (int) fileno(stderr)); 
+#endif 
+    //dup2(fileno(stderr), pipe_write_fd); // This call generates two SIGIO. 
+    dup2(pipe_write_fd, fileno(stderr)); // This call generates two SIGIO. 
+#if 0 
+    write_string(pipe_write_fd, "HELLO pipe_write_fd" "\n"); 
+    write_string(fileno(stderr), "HELLO fileno(stderr)" "\n"); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "pipe_write_fd =  %d " "\n", __func__, (int) pipe_write_fd); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "fileno(stderr) =  %d " "\n", __func__, (int) fileno(stderr)); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "pipe[0,1] =  [%d, %d] " "\n", __func__, (int) main__stderr_pipe[0], (int) main__stderr_pipe[1]); 
+#endif 
+    return 0; 
   }; 
     
 }; 
@@ -954,7 +1219,7 @@ void main_win_print(void) {
   { 
     char a; 
     //char u[MINSIGSTKSZ]; 
-    //fprintf(stderr, "sizeof(u): %d" "\n", (int) sizeof(u)); // RL: Good: 12288. 
+    //fprintf(stdout, "sizeof(u): %d" "\n", (int) sizeof(u)); // RL: Good: 12288. 
     stack_t oss[1]; 
     stack_t new[1]; 
     new -> ss_sp = &a; 
@@ -972,15 +1237,15 @@ void main_win_print(void) {
     char a; 
     struct rlimit rlp[1];
     getrlimit(RLIMIT_STACK, rlp); 
-    fprintf(stderr, "Taille actuelle de la stack: %d - Taille maximale de la stack: %d - &a = %p - sbrk(0) = %p " "\n", (int)rlp -> rlim_cur, (int)rlp -> rlim_max, &a, sbrk(0)); 
-    fprintf(stderr, "etext = %p - edata = %p - end = %p  " "\n", etext, edata, end); 
+    fprintf(stdout, "Taille actuelle de la stack: %d - Taille maximale de la stack: %d - &a = %p - sbrk(0) = %p " "\n", (int)rlp -> rlim_cur, (int)rlp -> rlim_max, &a, sbrk(0)); 
+    fprintf(stdout, "etext = %p - edata = %p - end = %p  " "\n", etext, edata, end); 
 
   }; 
   { 
     char a; 
     struct rusage rusage[1]; 
     getrusage(RUSAGE_SELF, rusage); 
-    fprintf(stderr, "rusage -> ru_isrss = %d" "\n", (int) rusage -> ru_isrss); 
+    fprintf(stdout, "rusage -> ru_isrss = %d" "\n", (int) rusage -> ru_isrss); 
   };   
 #endif 
   { 
@@ -994,26 +1259,26 @@ void main_win_print(void) {
   {
     void * a = NULL; 
     a = dlopen(/*const char *path*/"../build/timer.so", /*int mode*/RTLD_NOW | RTLD_LOCAL); 
-    fprintf(stderr, "dlopen = %p  " "\n", a); 
-    fprintf(stderr, "dlerror = %s  " "\n", dlerror()); 
+    fprintf(stdout, "dlopen = %p  " "\n", a); 
+    fprintf(stdout, "dlerror = %s  " "\n", dlerror()); 
 
     Dl_info info[1]; 
     if (!dladdr(a, info)) { 
-      fprintf(stderr, "dladdr: nothing found: %s  " "\n", dlerror()); 
+      fprintf(stdout, "dladdr: nothing found: %s  " "\n", dlerror()); 
     } 
     else { 
-      fprintf(stderr, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
+      fprintf(stdout, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
     }; 
     
     void * fun = dlsym(a, "timer_hello"); 
-    fprintf(stderr, "dlsym = %p  " "\n", fun); 
-    fprintf(stderr, "dlerror = %s  " "\n", dlerror()); 
+    fprintf(stdout, "dlsym = %p  " "\n", fun); 
+    fprintf(stdout, "dlerror = %s  " "\n", dlerror()); 
 
     if (!dladdr(fun, info)) { 
-      fprintf(stderr, "dladdr: nothing found: %s  " "\n", dlerror()); 
+      fprintf(stdout, "dladdr: nothing found: %s  " "\n", dlerror()); 
     } 
     else { 
-      fprintf(stderr, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
+      fprintf(stdout, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
     }; 
     
     if (fun != NULL) { 

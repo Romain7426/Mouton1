@@ -2,6 +2,29 @@
 #define MESSAGES_H
 
 
+#if 1
+
+#define messlog(...) { 							\
+    const char   __file__[]   = "" __FILE__ "";				\
+    const char * __function__ = __func__;				\
+    const int    __line__     = __LINE__;				\
+    { fprintf(stdout, "{" __FILE__ ": " BIGLIB_STRING(__LINE__) ":<%s>}: ", __func__); fprintf(stdout, __VA_ARGS__); }; \
+  }; 
+
+#define messerr(...) {							\
+    { fprintf(stderr , "ERREUR: {" __FILE__ ": " BIGLIB_STRING(__LINE__) ":<%s>}: ", __func__); fprintf(stderr , __VA_ARGS__); }; \
+  }; 
+
+
+#define message messlog 
+
+//extern void message__init(void);
+//extern void message__dispose(void);
+
+
+
+#else 
+
 #ifdef __GNUC__
 #define MESSAGE_FORMAT_ATTRIBUT __attribute__ ((format (printf, 1, 2)))
 #else
@@ -41,6 +64,9 @@ extern FILE * zeldaferror;
   //putc('\n', yycarteout); 
 
 
+
+
+
 #define messlog message
 
 //extern void vmessage(const char * mess, va_list args);
@@ -48,5 +74,7 @@ extern FILE * zeldaferror;
 
 extern void message__init(void);
 extern void message__dispose(void);
+
+#endif 
 
 #endif /* MESSAGES_H */
