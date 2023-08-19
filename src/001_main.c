@@ -9,11 +9,21 @@
  
 #include <unistd.h> /* https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/unistd.h.html */ /* https://en.wikipedia.org/wiki/Unistd.h */ 
 
+#if 0 
 // RL: GDB detection 
+// RL: Il faudrait être en mesure de détecter la présence de GDB, 
+//     car GDB ouvre des descripteurs supplémentaires. 
+// RL: En l’état, la tactique consisterait à demander au kernel de 
+//     s’auto-débugger, ce que le kernel refuserait si le programme 
+//     était déjà en débuggage par GDB. 
+//     Problème: Comment annuler son auto-débuggage une fois le test réalisé? 
+//     C'est un problème car le programme répond différemment (on ne plus faire kill -9 par exemple). 
+//     Je n’ai pas réussi à faire fonctionner PT_DETACH (encore des arcanes de complexité… ☹). 
 #include <sys/types.h>
 #include <sys/ptrace.h>
 //int ptrace(int request, pid_t pid, caddr_t addr, int data);
 // RL: This should be in a child? 
+#endif 
 
 #include "lib.ci"
 //#include "lib__llfixed.ci"
@@ -23,166 +33,86 @@
 
 
 
-#if 0 
-
-static int stdlog_d = -1; 
-static int stdlog_pipe[2] = {-1, -1}; // RL: [0] is output (read end), [1] is input (write end) 
-static int stdlog_post_pipe_d = -1; 
- 
-static void main__stdlog_init(void) { 
-  //stdlog_d = 2; return;
-  
-  //fprintf(stderr, "fcntl(3, F_GETFL) = %d" "\n", fcntl(3, F_GETFL)); 
-  //if (-1 != fcntl(3, F_GETFL) && errno == EBADF) { 
-  if (-1 != fcntl(3, F_GETFL)) { 
-    stdlog_d = 3; 
-  } 
-  else { 
-    //stdlog_d = open("/dev/tty", O_WRONLY);  
-    stdlog_d = open("/dev/null", O_WRONLY);  
-  }; 
-}; 
-
-static void (*former_handler)(int) = NULL; 
-static char handler_buffer[INT16_MAX]; 
-static int16_t handler_buffer_nb = 0; 
-static void handler_buffer_flush(void) { 
-  write(stdlog_post_pipe_d, handler_buffer, handler_buffer_nb); 
-  handler_buffer_nb = 0; 
-}; 
-static void handler(int sig) { 
-  // RL: Nous appelons write(2) qui génère des SIGIO. 
-  // Donc nous devons désactiver le mask, et réinstaller le former_handler. 
-  
-  sigset_t sigset[1]; 
-  sigemptyset(sigset);
-  sigaddset(sigset, SIGIO);
-  signal(SIGIO, former_handler); 
-  sigprocmask(SIG_UNBLOCK, sigset, NULL); 
-  goto label__body;
-
-  label__exit: { 
-    signal(SIGIO, handler); 
-    return; 
-  }; 
-  
-  label__body: { 
-#if 1 
-    //{ if (NULL == former_handler) { write(2, "former_handler is NULL\n", sizeof("former_handler is NULL\n")); } else { write(2, "former_handler is NOT NULL\n", sizeof("former_handler is NOT NULL\n"));}; }; 
-    //const ssize_t read_nb = read(stdlog_pipe[0], handler_buffer, sizeof(handler_buffer)); 
-    const ssize_t read_nb = read(stdlog_pipe[0], handler_buffer + handler_buffer_nb, sizeof(handler_buffer) - handler_buffer_nb); 
-    if (0 < read_nb) { 
-      handler_buffer_nb += read_nb; 
-      if (sizeof(handler_buffer) == handler_buffer_nb) { 
-	write(stdlog_post_pipe_d, handler_buffer, handler_buffer_nb); 
-	handler_buffer_nb = 0; 
-      }; 
-      //write(2, "SIGIO reçu\n", sizeof("SIGIO reçu\n")); 
-      //write(2, handler_buffer, read_nb); 
-      goto label__exit; 
-    }; 
-#endif 
-    if (NULL == former_handler) goto label__exit; 
-    former_handler(sig); 
-    goto label__exit; 
-  }; 
-}; 
-#endif 
-#if 0 
-static void main__stdlog_reopen(const char * filename) { 
-  if (NULL ==  filename) return; 
-  if ('\0' == *filename) return; 
-  int new_fd; 
-  if      (0 == strcasecmp("stdout", filename)) { new_fd = stdout_d; } 
-  else if (0 == strcasecmp("stderr", filename)) { new_fd = stderr_d; } 
-  else { 
-    if (0 == strcasecmp("stdnull", filename)) { filename = "/dev/null"; }; 
-    new_fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600); 
-    if (new_fd < 0) return; 
-    fcntl(new_fd, F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    write(new_fd, "NEW_FD works!\n", sizeof("NEW_FD works!\n")); 
-  }; 
-  close(stdlog_d); 
-#if 1
-  if (-1 == pipe(stdlog_pipe)) { 
-    stdlog_pipe[0] = -1; 
-    stdlog_pipe[1] = -1; 
-    stdlog_d = new_fd; 
-  } 
-  else { 
-    stdlog_post_pipe_d = new_fd; 
-    former_handler = signal(SIGIO, handler); 
-#if 0 
-    assert(SIG_ERR != former_handler); 
-    signal(SIGIO, former_handler); 
-    signal(SIGIO, SIG_DFL); 
-    signal(SIGIO, SIG_IGN); 
-#endif 
-#if 0 
-#elif 0 
-    fcntl(stdlog_pipe[1], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[1], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-#elif 1 
-    fcntl(stdlog_pipe[0], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[0], F_SETFL, O_NONBLOCK); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC | O_NONBLOCK); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-#else 
-    fcntl(stdlog_pipe[0], F_SETOWN, 0); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[1], F_SETOWN, 0); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[0], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[1], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[1], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non.  
-    fcntl(stdlog_pipe[0], F_SETOWN, getpid()); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-    fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-#endif 
-    for (int i = 0; i < 1; i++) { 
-      write(2, "0: ", sizeof("0: "));
-      write(stdlog_pipe[1], "++++++++++++++++", 16); 
-      fcntl(stdlog_pipe[0], F_SETFL, O_ASYNC); // RL: J’avais espoir que cette commande ajoute un buffer… Mais non. 
-      write(2, "1: ", sizeof("1: "));
-      write(stdlog_pipe[1], "++++++++++++++++", 16); 
-      write(stdlog_pipe[1], "++++++++++++++++", 16); 
-      write(stdlog_pipe[1], "++++++++++++++++", 16); 
-    }; 
-    write(new_fd, "Completed\n", sizeof("Completed\n")); 
-#if 1 
-    //dup2(stdlog_pipe[0], new_fd); 
-    //dup2(new_fd, stdlog_pipe[0]); 
-#else 
-    close(stdlog_pipe[0]); 
-    stdlog_pipe[0] = new_fd; 
-#endif
-    write(stdlog_pipe[1], "%%%%", 4);
-    stdlog_d = stdlog_pipe[1]; 
-    write(new_fd, "NEW_FD works BIS!\n", sizeof("NEW_FD works BIS!\n")); 
-    write(stdlog_d, "Pipe works!\n", sizeof("Pipe works!\n")); 
-    for (int i = 0; i < 1; i++) { 
-      write(stdlog_d, "+", 1);
-    }; 
-  };
-#else 
-  stdlog_d = new_fd; 
-#endif 
-}; 
-#endif 
 
 // RL: This file contains all the system stuffs. 
 //     Anything here is not related to the program per se. 
 //     And is done only once. 
 
-
-static const char stdout_log_subdir[]   = LOGDIR; 
-static const char stdout_log_filename[] = "stdout.log"; 
-static       char stdout_log_buffer[1 << 12] = {}; 
-static       int    main__stdlog_d = -1; 
-static const char * main__stdlog_filename = NULL; 
+// RL: Étapes de main: 
+//      1. Se déplacer vers le bon répertoire. 
+//      2. Réassigner stdout. 
+//      3. Réassigner stderr. 
+//      4. Kernel (init, run, free) 
+//      5. Vider tous les buffers, et tout fermer. 
+//      6. Bye! 
+// 
+// RL: Le vrai programme est dans Kernel. 
+ 
+ 
+// I. Le répertoire 
+// ---------------- 
+// 
+// RL: Tout d’abord, le programme se déplace vers le répertoire contenant les données (à lire) et les logs (à écrire). 
+// RL: A priori, toutes ces chaînes de caractères sont allouées dans la stack de la fonction 'main()' (donc aucune gestion mémoire). 
+const char *  main_argv0 = NULL; 
+      int16_t main_argv0__bytesize = -1; 
+      char *  main_argv0__progname = NULL; // RL: INVARIANT: It should *not* hold any slash character '/'. 
+      int16_t main_argv0__progname__bytesize = -1; 
+      char *  main_argv0__progdir  = NULL; // RL: INVARIANT: The last char should *not* be the slash character '/' (unless it is root). 
+      int16_t main_argv0__progdir__bytesize  = -1; 
 
 static int  main__break_argv0_into_progname_and_progdir(const char * argv0, char * * progname_r, char * * progdir_r, char * buffer, const int16_t buffer_bytesize); 
+extern char **environ; 
 static int  main__look_for_progdir_in_env_path(const char * argv0, char * * progdir_r, char * buffer, const int16_t buffer_bytesize); 
 static int  main__move_to_progdir(const char * progdir); 
-static int  main__reassign_stdout_to_logfile(const char * progdir, const char * log_subdir, const char * log_filename, char * buffer, const int16_t buffer_bytesize); 
+ 
+ 
+// II. Stdout 
+// ---------- 
+// 
+// RL: Ensuite, on réassigne stdout vers un fichier log. 
+//     Sur le terminal, ne s’affichent que les éventuelles erreurs. 
+//     Car, dans le fichier log, afin de comprendre les erreurs, nous écrivons généreusement. 
+// RL: Du fait de cette écriture généreuse, l’écriture dans le fichier log doit se faire à travers une mémoire tampon (un «buffer»). 
+// RL: Par défaut, cette mémoire tampon du log («log buffer») est écrite par le kernel une fois à chaque passe de boucle. 
+// RL: A priori, toutes ces chaînes de caractères sont allouées dans la stack de la fonction 'main()' (donc aucune gestion mémoire). 
+// RL: Le tamponnage est implémenté en utilisant un pipe. 
+// RL: Problème — L’implémentation du tamponnage avec un pipe recourt à l’utilisation du signal SIGIO. (Pénible.) 
+static const char     main__stdout_log_default_subdir[] = LOGDIR; 
+static       char *   main__stdout_log_subdir = NULL; // RL: INVARIANT: The first char and the last char should *not* be the slash character '/' (as a subdir, it cannot be root — but it can be empty). 
+static const char     main__stdout_log_default_filename[] = "stdout.log"; // RL: INVARIANT: It should *not* hold any slash character '/'. 
+static const char *   main__stdout_log_filepathname = NULL; // RL: Le nom et le chemin du fichier ouvert. 
+enum {                main__stdout_log_buffer__bytesize = INT16_MAX }; 
+static       char     main__stdout_log_buffer[main__stdout_log_buffer__bytesize] = {}; 
+static       int16_t  main__stdout_log_buffer_nb = 0; 
+static       int      main__stdout_log_pipe[2] = {-1, -1}; // RL: [0] is output (read end), [1] is input (write end) 
+static       int      main__stdout_log_post_fd = -1; 
+static       void (*  main__stdout_log__SIGIO_former_handler)(int) = NULL; 
+
+static int  main__subdir__clean_up(const char * default_subdir, char * * cleanup_subdir_r, char * buffer, const int16_t buffer_bytesize); 
+extern void main__stdout_log_buffer__flush(void); 
+static void main__stdout_log__SIGIO_handler(int sig); 
+static int  main__stdout_log_pipe__open(void); 
+static int  main__stdout_log_pipe__open_aux(int * stdout_log_pipe, void (* handler)(int), void (* (*former_handler_r))(int)); 
+static void main__stdout_log_pipe__close(void); 
+static int  main__make_subdir_and_build_filepathname(char * buffer, const int16_t buffer_bytesize); 
+static int  main__make_subdir_and_build_filepathname_aux(const char * progdir, const char * log_subdir, const char * log_filename, const char * * log_filepathname_r, char * buffer, const int16_t buffer_bytesize); 
+static int  main__reassign_stdout_to_logfile(char * buffer, const int16_t buffer_bytesize); 
+static int  main__reassign_stdout_to_logfile_aux(const char * progdir, const char * log_subdir, const char * log_filename, const char * * log_filepathname_r, const int pipe_write_fd, int * opened_log_fd_r, char * buffer, const int16_t buffer_bytesize); 
+
+
+
+
+
+
+
+// RL: Concernant stderr, cette sortie n’est pas tamponnée. 
+//     En revanche, on veut l’écrire sur le terminal et dans le fichier log. 
+//     Il faut donc capturer cette écriture, et la dédoubler dans le fichier log. 
+
+
+
+// RL: Divers 
 static void main_proctitle_set(void); 
 static void main_locale_set(void); 
 static void main_rand_init(void); 
@@ -192,14 +122,6 @@ static void main_arch_print(void);
 static void main_args_print(const int argc, const char * argv[]); 
 static void main_win_print(void); 
 
-const char *  main_argv0 = NULL; 
-      int16_t main_argv0__bytesize = -1; 
-      char *  main_argv0__progname = NULL; // RL: INVARIANT: It should not hold any slash character '/'. 
-      int16_t main_argv0__progname__bytesize = -1; 
-      char *  main_argv0__progdir  = NULL; // RL: INVARIANT: The last char should be the slash character '/', unless it is root. 
-      int16_t main_argv0__progdir__bytesize  = -1; 
-
-extern char **environ; 
 
 #define LOCAL_ALLOCA__DECLARE(LOCAL_ALLOCA_SIZEOF)			\
   enum { LOCAL_ALLOCA__BYTESIZE = (LOCAL_ALLOCA_SIZEOF) }; char local_alloca__mem[LOCAL_ALLOCA__BYTESIZE]; uint16_t local_alloca__left = LOCAL_ALLOCA__BYTESIZE; uint16_t local_alloca__used = 0; uint16_t local_alloca__requested; 
@@ -207,9 +129,14 @@ extern char **environ;
 #define LOCAL_ALLOCA(REQUESTED_SIZEOF)					\
   (local_alloca__requested = (REQUESTED_SIZEOF), ((local_alloca__requested > local_alloca__left) ? NULL : (local_alloca__left -= local_alloca__requested, local_alloca__used += local_alloca__requested,  local_alloca__mem + local_alloca__used - local_alloca__requested))) 
 
+
+
+// =========================================================================== 
+// 0. MAIN 
+
 int main(const int argc, const char * argv[]) {
   //int _SDL_main(int argc, char * argv[]) {
-  LOCAL_ALLOCA__DECLARE(INT16_MAX); 
+  LOCAL_ALLOCA__DECLARE(UINT16_MAX); 
   int retour = -1;
   
   if (1 > argc) { 
@@ -227,6 +154,16 @@ int main(const int argc, const char * argv[]) {
     return 0; 
   }; 
 
+  label__error__upcleaning_log_subdir_failed: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to clean up the log subdir.' " "\n", __func__); 
+    return -3; 
+  }; 
+  
+ label__error__stdout_log__making_pipe_failed: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to make a pipe the stdout log buffer.' " "\n", __func__); 
+    return -4; 
+  }; 
+  
 #if 0 
   label__error__cannot_move_to_root_dir: { 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I could not change the current directory to the one holding the program: '%s' " "\n", __func__, main_argv0); 
@@ -234,7 +171,7 @@ int main(const int argc, const char * argv[]) {
   }; 
   
   label__error__cannot_reassign_stdout_to_logfile: {
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Failed to reassign stdout to log file: '%s' " "\n", __func__, stdout_log_filename); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Failed to reassign stdout to log file: '%s' " "\n", __func__, main__stdout_log_default_filename); 
     return -2; 
   }; 
 #endif 
@@ -247,7 +184,7 @@ int main(const int argc, const char * argv[]) {
     for (;;) { 
       {
 	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "local_alloca__left: '%d' " "\n", __func__, (int) local_alloca__left); fflush(NULL); 
-	const int16_t used_size = main__break_argv0_into_progname_and_progdir(main_argv0, &main_argv0__progname, &main_argv0__progdir, local_alloca__mem + local_alloca__used, local_alloca__left); 
+	const int16_t used_size = main__break_argv0_into_progname_and_progdir(main_argv0, &main_argv0__progname, &main_argv0__progdir, local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
 	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__break_argv0_into_progname_and_progdir: '%d' " "\n", __func__, (int) used_size); fflush(NULL); 
 	if (0 >  used_size) break; 
 	if (0 == used_size) break; // RL: ??? Does not make sense. 
@@ -256,7 +193,7 @@ int main(const int argc, const char * argv[]) {
       }; 
       
       if (NULL == main_argv0__progdir) { 
-	const int16_t used_size = main__look_for_progdir_in_env_path(main_argv0, &main_argv0__progdir, local_alloca__mem + local_alloca__used, local_alloca__left); 
+	const int16_t used_size = main__look_for_progdir_in_env_path(main_argv0, &main_argv0__progdir, local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
 	if (0 >  used_size) break; 
 	if (0 == used_size) break; 
 	local_alloca__used += used_size; 
@@ -281,9 +218,18 @@ int main(const int argc, const char * argv[]) {
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "CWD: '%s' " "\n", __func__, getcwd(local_alloca__mem + local_alloca__used, local_alloca__left)); fflush(NULL); 
 #endif 
     
+    for (;;) { 
+      const int16_t used_size = main__subdir__clean_up(main__stdout_log_default_subdir, &main__stdout_log_subdir, local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
+      if (0 >= used_size) goto label__error__upcleaning_log_subdir_failed; 
+      local_alloca__used += used_size; 
+      local_alloca__left -= used_size; 
+      break; 
+    }; 
+
     // RL: LOG FILE: Reassigning stdout to log-file 
     for (;;) { 
-      const int16_t used_size = main__reassign_stdout_to_logfile(main_argv0__progdir, stdout_log_subdir, stdout_log_filename, local_alloca__mem + local_alloca__used, local_alloca__left); 
+      if (0 != main__stdout_log_pipe__open()) goto label__error__stdout_log__making_pipe_failed; 
+      const int16_t used_size = main__reassign_stdout_to_logfile(local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
       if (0 > used_size) break; 
       local_alloca__used += used_size; 
       local_alloca__left -= used_size; 
@@ -294,6 +240,7 @@ int main(const int argc, const char * argv[]) {
     printf("☺☺☺☺☺☺" "\n"); 
     printf("Cela fait plaisir de vous voir." "\n"); 
     fprintf(stdout, "Démarrage du jeu!!!\n\n"); 
+    main__stdout_log_buffer__flush(); 
     
     main_locale_set(); 
     main_rand_init(); 
@@ -303,6 +250,7 @@ int main(const int argc, const char * argv[]) {
     main_proctitle_set(); 
     main_args_print(argc, argv); 
     main_win_print(); 
+    main__stdout_log_buffer__flush(); 
 
     if (true) { 
       const char * anime_to_load[] = { "bob.anime", "heros.anime", "pere.anime", "brigitte.anime.ci", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "saintexupery.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
@@ -321,9 +269,9 @@ int main(const int argc, const char * argv[]) {
 	retour = Kernel_Init(); fflush(NULL); if (retour < 0) { break; }; 
 	{ dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 	
-      retour = Kernel_Run(); 
-      Kernel_Dispose(); 
-      break; 
+	retour = Kernel_Run(); 
+	Kernel_Dispose(); 
+	break; 
       }; 
       printf("===============================================================================" "\n"); 
       printf(">>> main" "\n"); 
@@ -337,6 +285,10 @@ int main(const int argc, const char * argv[]) {
 
 
 
+
+
+// =========================================================================== 
+// I. PROGDIR FROM ARGV0 
 
 int main__look_for_progdir_in_env_path(const char * argv0, char * * progdir_r, char * buffer, const int16_t buffer_bytesize) { 
   *progdir_r = NULL; 
@@ -442,140 +394,220 @@ int main__break_argv0_into_progname_and_progdir(const char * argv0, char * * pro
 }; 
 
 
-static int main__move_to_progdir(const char * progdir) { 
+int main__move_to_progdir(const char * progdir) { 
   if (NULL ==  progdir) return -1; 
   if ('\0' == *progdir) return -2; 
   if (0 != chdir(progdir)) return -3; 
   return 0; 
 };
 
-#if 0
-static int main__change_to_root_dir(const char * argv0) { 
-  enum { path_buffer_bytesize = 1 << 12 }; 
-  if (path_buffer_bytesize < main_argv0__bytesize) { return -1; }; 
 
-  char path[path_buffer_bytesize]; 
-  strlcpy(path, argv0, path_buffer_bytesize); 
+
+
+// =========================================================================== 
+// II. STDOUT TO LOG 
+
+void main__stdout_log_buffer__flush(void) { 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__stdout_log_buffer_nb: '%d'" "\n", __func__, (int) main__stdout_log_buffer_nb); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main__stdout_log_post_fd: '%d'" "\n", __func__, (int) main__stdout_log_post_fd); 
+  if (0 >  main__stdout_log_post_fd) return; 
+  //if (0 >  main__stdout_log_buffer_nb) { main__stdout_log_buffer_nb = 0; return; }; 
+  if (0 == main__stdout_log_buffer_nb) return; 
+  if (0 <= main__stdout_log_post_fd) write(main__stdout_log_post_fd, main__stdout_log_buffer, main__stdout_log_buffer_nb); 
+  main__stdout_log_buffer_nb = 0; 
+}; 
+
+int main__subdir__clean_up(const char * default_subdir, char * * cleanup_subdir_r, char * buffer, const int16_t buffer_bytesize) { 
+  if (NULL == cleanup_subdir_r) return -3; 
+  if (0    >= buffer_bytesize ) return -4; 
+  int16_t requested_bytesize = -1; 
+  goto label__body; 
+
+ label__error__buffer_too_small: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Buffer too small - Requested VS Available: %d VS %d" "\n", __func__, (int) requested_bytesize, (int) buffer_bytesize); 
+    return -5; 
+  }; 
   
-  char * program_name = strrchr(path, '/'); 
+ label__subdir_is_empty: { 
+    requested_bytesize = 1; 
+    if (requested_bytesize > buffer_bytesize) goto label__error__buffer_too_small; 
+    *buffer = '\0'; 
+    *cleanup_subdir_r = buffer; 
+    return requested_bytesize; 
+  }; 
   
-  if (NULL == program_name) { 
-    // FIXME TODO XXX 
-    // It means that the software is in the PATH variable. 
+ label__subdir_is_root: { 
+    // RL: Si le subdir est '/', il est alors interpreté comme le même répertoire. 
+    goto label__subdir_is_empty; 
+  }; 
+  
+ label__body: { 
+    if (NULL ==  default_subdir  ) goto label__subdir_is_empty; 
+    if ('\0' == *default_subdir  ) goto label__subdir_is_empty; 
+    
+    const int16_t default_subdir__bytesize = 1 + strlen(default_subdir); 
+    
+    // RL: Counting starting slashes. 
+    const char * p = default_subdir; 
+    for (;;) { if ('/' != *p) break; p++; }; 
+    if ('\0' == *p) goto label__subdir_is_root; 
+    const int16_t starting_slash_nb = p - default_subdir; 
+    
+    // RL: Counting trailing slashes. 
+    const char * last_char = default_subdir + default_subdir__bytesize - 1 - 1; 
+    p = last_char; 
+    for (;;) { if ('/' != *p) break; p--; }; 
+    const int16_t trailing_slash_nb = last_char - p; 
+    //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "trailing_slash_nb: '%d'" "\n", __func__, (int) trailing_slash_nb); 
+    
+    requested_bytesize = default_subdir__bytesize - starting_slash_nb - trailing_slash_nb; 
+    if (requested_bytesize > buffer_bytesize) goto label__error__buffer_too_small; 
+    bcopy(default_subdir + starting_slash_nb, buffer, requested_bytesize); 
+    *(buffer + requested_bytesize - 1) = '\0'; 
+    
+    *cleanup_subdir_r = buffer; 
+
+#if 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "default_subdir: '%s'" "\n", __func__, default_subdir); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "cleanup_subdir: '%s'" "\n", __func__, *cleanup_subdir_r); 
+#endif 
+
+    return requested_bytesize; 
+  }; 
+}; 
+
+
+
+
+int main__stdout_log_pipe__open(void) { 
+  return main__stdout_log_pipe__open_aux(main__stdout_log_pipe, &main__stdout_log__SIGIO_handler, &main__stdout_log__SIGIO_former_handler); 
+}; 
+
+void main__stdout_log_pipe__close(void) { 
+  close(main__stdout_log_pipe[0]); 
+  close(main__stdout_log_pipe[1]); 
+  main__stdout_log_pipe[0] = -1; 
+  main__stdout_log_pipe[1] = -1; 
+  signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
+}; 
+
+int main__stdout_log_pipe__open_aux(int * stdout_log_pipe, void (* handler)(int), void (* (*former_handler_r))(int)) { 
+  if (NULL == former_handler_r) return -1; 
+  *former_handler_r = NULL; 
+  goto label__body; 
+  
+  label__error__making_pipe_failed: {
+    stdout_log_pipe[0] = -1; 
+    stdout_log_pipe[1] = -1; 
     return -2; 
   }; 
   
-  *program_name = '\0';
+  label__error__installing_SIGIO_handler_failed: { 
+    close(stdout_log_pipe[0]); 
+    close(stdout_log_pipe[1]); 
+    stdout_log_pipe[0] = -1; 
+    stdout_log_pipe[1] = -1; 
+    return -3; 
+  }; 
 
-  if (0 != chdir(path)) { return -3; }; 
-  
-  return 0; 
-};
-#endif 
-
-
-#if 0 
-{
-#if 0 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout [ 'FILE *' before being reopened to the log file ] = %p " "\n", __func__, stdout); 
-#endif 
-#if 0 
-    { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-    { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
-#endif 
+ label__body: { 
+    if (-1 == pipe(stdout_log_pipe)) goto label__error__making_pipe_failed; 
+    
+    void * former_handler = signal(SIGIO, handler); 
+    if (SIG_ERR == former_handler) goto label__error__installing_SIGIO_handler_failed; 
+    *former_handler_r = former_handler; 
+    
+    fcntl(stdout_log_pipe[0], F_SETOWN, getpid()); // RL: Qui recevra le signal SIGIO? 
+    fcntl(stdout_log_pipe[0], F_SETFL, O_ASYNC | O_NONBLOCK); // RL: Générer le signal SIGIO + Ne pas bloquer en cas de poll. 
+    
+    return 0; 
+  }; 
 }; 
-    // RL: Second, reopening 
-    //  --- man 3 freopen --- 
-    // The freopen() function opens the file whose name is the string pointed to by path. 
-    // The original stream (if it exists) is closed. 
-    // The primary use of the freopen() function is to change the file associated with a standard text stream (stderr, stdin, or stdout). 
-    if (NULL == freopen(stdout_log_filename, "wb", stdout)) goto label__error__cannot_reopen_stdout; 
-    // RL: Third, assigning a buffer. 
-    //setvbuf(stdout, stdout_buffer, _IONBF, sizeof(stdout_buffer)); // RL: Unbuffered. 
-    //setvbuf(stdout, stdout_buffer, _IOLBF, sizeof(stdout_buffer)); // RL: Line buffered. 
-    //setvbuf(stdout, stdout_buffer, _IOFBF, sizeof(stdout_buffer)); // RL: Fully buffered. 
-    setvbuf(stdout, stdout_log_buffer, _IOLBF, sizeof(stdout_log_buffer)); // RL: Line buffered. 
-#if 0 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(stdout_buffer) = %d"   "\n", __func__, (int) sizeof(stdout_buffer)); 
-    fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(stdout_buffer) = %d"   "\n", __func__, (int) sizeof(stdout_buffer)); 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " stdout = %p " "\n", __func__, stdout); 
-    { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-    { dprintf(fileno(stdout), "STDERR BUFFER: %p\n", &stderr -> _bf); }; 
-    { dprintf(fileno(stdout), "STDOUT BUFFER: %p - " __FILE__ " - %d \n", (const void *)stdout -> _bf._base, (int)__LINE__); }; 
-    { const char __file__[] = "" __FILE__ ""; dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", (const void *)stdout -> _bf._base, (const char *)__file__, (int)__LINE__); }; 
-#endif 
-#endif 
 
-int main__reassign_stdout_to_logfile(const char * progdir, const char * log_subdir_given, const char * log_filename, char * buffer, const int16_t buffer_bytesize) { 
-  //     Redirect 'stdout' to the log file. 
-  // RL: The idea is that any errors should show up on 'stderr', so that we know that something 
-  //     happened, but also in the log file to have context. 
-  const char * log_filepathname = NULL; 
-  int16_t needed_bytesize = 0; 
-  int16_t buffer_used = 0; 
+
+void main__stdout_log__SIGIO_handler(int sig) { 
+  // RL: Dans cette routine, nous appelons write(2) qui génère des SIGIO. 
+  //     Donc nous devons désactiver le mask, et réinstaller le former_handler. 
+  // RL: Symétriquement, notre handler devra être réinstallé à la sortie. 
+  //     En revanche, le masque est remis automatiquement à chaque génération du signal SIGIO. 
+  { 
+    sigset_t sigset[1]; 
+    sigemptyset(sigset);
+    sigaddset(sigset, SIGIO);
+    signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
+    sigprocmask(SIG_UNBLOCK, sigset, NULL); 
+  }; 
+  goto label__body;
+
+  label__exit: { 
+    signal(SIGIO, main__stdout_log__SIGIO_handler); 
+    return; 
+  }; 
+ 
+  label__pas_nous: {
+    if (NULL == main__stdout_log__SIGIO_former_handler) goto label__exit; 
+    main__stdout_log__SIGIO_former_handler(sig); 
+    goto label__exit; 
+  }; 
+  
+  label__body: { 
+    // RL: Ici, nous avons un problème: nous ne savons pas qui généra le signal. 
+    //     En particulier, était-ce le nôtre ou un autre? 
+    //     Donc il faut tester. 
+    //     Et pour tester, pas le choix, il faut faire un read(2). 
+    //     Et cette lecture doit être non bloquante, et donc le flag O_NONBLOCK doit avoir été allumé en amont. 
+    //     Sinon, on reste bloqué ici. 
+    // RL: Pour une raison quelconque, le buffer est peut-être déjà plein. 
+    if (main__stdout_log_buffer__bytesize == main__stdout_log_buffer_nb) { 
+      if (0 <= main__stdout_log_post_fd) write(main__stdout_log_post_fd, main__stdout_log_buffer, main__stdout_log_buffer_nb); 
+      main__stdout_log_buffer_nb = 0; 
+    }; 
+    const ssize_t read_nb = read(main__stdout_log_pipe[0], main__stdout_log_buffer + main__stdout_log_buffer_nb, main__stdout_log_buffer__bytesize - main__stdout_log_buffer_nb); 
+    if (0 >= read_nb) goto label__pas_nous; 
+    main__stdout_log_buffer_nb += read_nb; 
+    // RL: On flush dès que le buffer est plein. 
+    if (main__stdout_log_buffer__bytesize == main__stdout_log_buffer_nb) { 
+      if (0 <= main__stdout_log_post_fd) write(main__stdout_log_post_fd, main__stdout_log_buffer, main__stdout_log_buffer_nb); 
+      main__stdout_log_buffer_nb = 0; 
+    }; 
+    goto label__exit; 
+  }; 
+}; 
+
+
+
+static int main__make_subdir_and_build_filepathname(char * buffer, const int16_t buffer_bytesize) { 
+  return main__make_subdir_and_build_filepathname_aux(main_argv0__progdir, main__stdout_log_subdir, main__stdout_log_default_filename, &main__stdout_log_filepathname, buffer, buffer_bytesize); 
+}; 
+
+static int main__make_subdir_and_build_filepathname_aux(const char * progdir, const char * log_subdir, const char * log_filename, const char * * log_filepathname_r, char * buffer, const int16_t buffer_bytesize) { 
+  int16_t needed_bytesize = -1; 
+  if (NULL == log_filepathname_r) return -1; 
   goto label__body; 
 
- label__error__cannot_reopen_stdout_to_null: {
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Reopening stdout to null failed: NA - so I close it" "\n", __func__); 
-    main__stdlog_d = -1; 
-    return -1; 
- }; 
+  label__progdir_is_empty: {
+    // RL: Dans ce cas, par hypothèse, on considère que rien ne doit être fait. 
+    *log_filepathname_r = NULL; 
+    return 0; 
+  }; 
+  
+  label__filename_is_empty: {
+    // RL: Dans ce cas, par hypothèse, on considère que rien ne doit être fait. 
+    *log_filepathname_r = NULL; 
+    return 0; 
+  }; 
 
-  label__reassign_to_null: { 
-    const char path_to_null[] = "/dev/null"; 
-    if (NULL == freopen(path_to_null, "wb", stdout)) goto label__error__cannot_reopen_stdout_to_null; 
-    main__stdlog_filename = path_to_null; 
-    setvbuf(stdout, stdout_log_buffer, _IOLBF, sizeof(stdout_log_buffer)); // RL: Line buffered. 
-    main__stdlog_d = fileno(stdout); 
-    return buffer_used; 
+ label__error__buffer_too_small: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Buffer too small - Requested VS Available: %d VS %d" "\n", __func__, (int) needed_bytesize, (int) buffer_bytesize); 
+    return -2; 
   }; 
   
  label__error__cannot_create_logdir: {
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I could not create LOGDIR: '%s' - so I assign log to /dev/null" "\n", __func__, LOGDIR); 
-    goto label__reassign_to_null; 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I could not create log_subdir: '%s'" "\n", __func__, buffer); 
+    return -3; 
   }; 
   
- label__error__cannot_reopen_stdout: {
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Reopening stdout to log file failed: '%s' - so I assign log to /dev/null" "\n", __func__, log_filename); 
-    goto label__reassign_to_null; 
-  }; 
-
- label__error__log_filename_is_empty: { 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "The log_filename is empty: 'NULL' - so I assign log to /dev/null" "\n", __func__); 
-    goto label__reassign_to_null; 
-  }; 
-  
- label__error__buffer_too_small: { 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Buffer too small - Requested VS Available: %d VS %d - so I assign log to /dev/null" "\n", __func__, (int) needed_bytesize, (int) buffer_bytesize); 
-    goto label__reassign_to_null; 
-  }; 
-  
- label__error__local_stack_too_small: { 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Local stack too small - Requested VS Available: NA VS NA - so I assign log to /dev/null" "\n", __func__); 
-    goto label__reassign_to_null; 
-  }; 
-  
-
-  label__reassign_to_log_filepathname: { 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "log_filepathname: '%s'" "\n", __func__, log_filepathname); 
-    if (NULL == freopen(log_filepathname, "wb", stdout)) goto label__error__cannot_reopen_stdout; 
-    main__stdlog_filename = log_filepathname; 
-    setvbuf(stdout, stdout_log_buffer, _IOLBF, sizeof(stdout_log_buffer)); // RL: Line buffered. 
-    main__stdlog_d = fileno(stdout); 
-    return buffer_used; 
-  }; 
-
-  label__reassign_to_fd3: { 
-    const char path_to_fd3[] = "/dev/fd/3"; 
-    if (NULL == freopen(path_to_fd3, "wb", stdout)) goto label__error__cannot_reopen_stdout; 
-    main__stdlog_filename = path_to_fd3; 
-    setvbuf(stdout, stdout_log_buffer, _IOLBF, sizeof(stdout_log_buffer)); // RL: Line buffered. 
-    assert(3 == fileno(stdout)); 
-    main__stdlog_d = 3; 
-    return buffer_used; 
-  }; 
-  
-  label__no_log_subdir_provided: { 
+ label__subdir_is_empty: {
     const int16_t progdir_bytesize = 1 + strlen(progdir); 
     const int16_t log_filename_bytesize = 1 + strlen(log_filename); 
     needed_bytesize = progdir_bytesize - 1 + 1 + log_filename_bytesize; 
@@ -583,93 +615,177 @@ int main__reassign_stdout_to_logfile(const char * progdir, const char * log_subd
     bcopy(progdir, buffer, progdir_bytesize); 
     *(buffer + progdir_bytesize - 1) = '/'; 
     bcopy(log_filename, buffer + progdir_bytesize, log_filename_bytesize); 
-    log_filepathname = buffer; 
-    buffer_used = needed_bytesize; 
-    goto label__reassign_to_log_filepathname; 
+    *log_filepathname_r = buffer; 
+    return needed_bytesize; 
   }; 
-  
- label__progdir_not_null: { 
-    if (NULL ==  log_filename) goto label__error__log_filename_is_empty; 
-    if ('\0' == *log_filename) goto label__error__log_filename_is_empty; 
-    
-    if ((NULL == log_subdir_given) || ('\0' == *log_subdir_given)) goto label__no_log_subdir_provided; 
-    
-    const int16_t log_subdir_given__bytesize = 1 + strlen(log_subdir_given); 
-    char log_subdir_b[1 << 11]; 
-    if ((int16_t)sizeof(log_subdir_b) < log_subdir_given__bytesize) goto label__error__local_stack_too_small; 
 
-    char * log_subdir= log_subdir_b;
-    bcopy(log_subdir_given, log_subdir, log_subdir_given__bytesize); 
+  label__subdir_is_not_empty: {
+    const int16_t progdir_bytesize = 1 + strlen(progdir); 
+    const int16_t log_filename_bytesize = 1 + strlen(log_filename); 
+    const int16_t log_subdir_bytesize = 1 + strlen(log_subdir); 
     
-    // RL: Remove starting slashes. 
-    for (;;) { 
-      if ('/' != *log_subdir) break; 
-      log_subdir++; 
-      continue; 
+    needed_bytesize = progdir_bytesize - 1 + 1 + log_subdir_bytesize - 1 + 1 + log_filename_bytesize; 
+    if (needed_bytesize > buffer_bytesize) goto label__error__buffer_too_small; 
+    
+    bcopy(progdir, buffer, progdir_bytesize); 
+    *(buffer + progdir_bytesize - 1) = '/'; 
+    bcopy(log_subdir, buffer + progdir_bytesize, log_subdir_bytesize); 
+    
+    // RL: Does the subdir exist? 
+    if (-1 == access(buffer, R_OK | W_OK | X_OK | F_OK)) { 
+      // RL: No? Then let’s make it. 
+      if (-1 == mkdir(buffer, (mode_t) 0777)) goto label__error__cannot_create_logdir; 
     }; 
-    if ('\0' == *log_subdir) goto label__no_log_subdir_provided; 
     
-    // RL: Remove trailing slashes. 
-    char * log_subdir_e = log_subdir; 
-    for (;;) { log_subdir_e++; if ('\0' == *log_subdir_e) break; }; 
-    for (;;) { log_subdir_e--; if ( '/' != *log_subdir_e) break; }; 
-    log_subdir_e++;
-    *log_subdir_e = '\0'; 
-    
-    {
-      const int16_t progdir_bytesize = 1 + strlen(progdir); 
-      const int16_t log_filename_bytesize = 1 + strlen(log_filename); 
-      const int16_t log_subdir_bytesize = 1 + strlen(log_subdir); 
-      
-      // RL: Does the subdir exist? 
-      if (-1 == access(LOGDIR, R_OK | W_OK | X_OK | F_OK)) { 
-	// RL: No, let’s make it. 
-	if (-1 == mkdir(LOGDIR, (mode_t) 0777)) goto label__error__cannot_create_logdir; 
-      }; 
-      
-      // RL: Concat 
-      needed_bytesize = progdir_bytesize - 1 + 1 + log_subdir_bytesize - 1 + 1 + log_filename_bytesize; 
-      if (needed_bytesize > buffer_bytesize) goto label__error__buffer_too_small; 
-      bcopy(progdir, buffer, progdir_bytesize); 
-      *(buffer + progdir_bytesize - 1) = '/'; 
-      bcopy(log_subdir, buffer + progdir_bytesize, log_subdir_bytesize); 
-      *(buffer + progdir_bytesize + log_subdir_bytesize - 1) = '/'; 
-      bcopy(log_filename, buffer + progdir_bytesize + log_subdir_bytesize, log_filename_bytesize); 
-      log_filepathname = buffer; 
-      buffer_used = needed_bytesize; 
-      goto label__reassign_to_log_filepathname; 
-    }; 
+    *(buffer + progdir_bytesize + log_subdir_bytesize - 1) = '/'; 
+    bcopy(log_filename, buffer + progdir_bytesize + log_subdir_bytesize, log_filename_bytesize); 
+    *log_filepathname_r = buffer; 
+    return needed_bytesize; 
+  }; 
 
-  };
   
- label__body: { 
-#if 1 
-    const int are_we_in_gdb_huh = true; 
-#else 
-    // This method works, but the program cannot be killed anylonger. 
-    const int are_we_in_gdb_huh = -1 == ptrace(PT_TRACE_ME, 0, NULL, 0); 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "are_we_gdb_huh: '%s'" "\n", __func__, are_we_in_gdb_huh ? "TRUE" : "FALSE"); 
-    //if (!are_we_in_gdb_huh) 
-    { 
-      // RL: Very important. Otherwise, cannot be killed anylonger, as we are self-debugging… ☹ 
-      ptrace(PT_DETACH, 0, NULL, 0); 
-      ptrace(PT_DETACH, getpid(), NULL, 0); 
-      ptrace(PT_DETACH, 0, NULL, 0); 
-      ptrace(PT_DETACH, getpid(), NULL, 0); 
-    }; 
-#endif 
-    // RL: First, if descriptor 3 is opened, then redirecting to it. 
-    if (!are_we_in_gdb_huh) { 
-      // RL: We have to check whether we are in GDB, as GDB opens 3, 4, and 5. 
-      if (-1 != fcntl(3, F_GETFL)) goto label__reassign_to_fd3; 
-    }; 
-    if (NULL != main_argv0__progdir) goto label__progdir_not_null; 
-    goto label__reassign_to_null; 
+ label__body: {
+    if (NULL ==  progdir) goto label__progdir_is_empty; 
+    if ('\0' == *progdir) goto label__progdir_is_empty; 
+
+    if (NULL ==  log_filename) goto label__filename_is_empty; 
+    if ('\0' == *log_filename) goto label__filename_is_empty; 
+
+    if (NULL ==  log_subdir) goto label__subdir_is_empty; 
+    if ('\0' == *log_subdir) goto label__subdir_is_empty; 
+    
+    goto label__subdir_is_not_empty; 
   }; 
   
 }; 
 
+int main__reassign_stdout_to_logfile(char * buffer, const int16_t buffer_bytesize) { 
+  const int16_t buffer_used = main__reassign_stdout_to_logfile_aux(main_argv0__progdir, main__stdout_log_subdir, main__stdout_log_default_filename, &main__stdout_log_filepathname, main__stdout_log_pipe[1], &main__stdout_log_post_fd, buffer, buffer_bytesize); 
+  return buffer_used; 
+}; 
 
+int main__reassign_stdout_to_logfile_aux(const char * progdir, const char * log_subdir, const char * log_filename, const char * * log_filepathname_r, const int pipe_write_fd, int * opened_log_fd_r, char * buffer, const int16_t buffer_bytesize) { 
+  int16_t buffer_used; 
+  if (NULL == opened_log_fd_r) return -1; 
+  if (0 > pipe_write_fd) return -2; 
+  *opened_log_fd_r = -1; 
+  goto label__body; 
+  
+ label__error__cannot_reopen_stdout_to_null: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Reopening stdout to null failed: NA - so I close it" "\n", __func__); 
+    main__stdout_log_post_fd = -1; 
+    return -1; 
+  }; 
+  
+ label__reassign_to_null: { 
+    const char path_to_null[] = "/dev/null"; 
+    *log_filepathname_r = path_to_null; buffer_used = 0; 
+#if 1 
+    const int new_fd = open(*log_filepathname_r, O_WRONLY | O_CREAT | O_TRUNC, (mode_t) 0666); 
+    if (-1 == new_fd) goto label__error__cannot_reopen_stdout_to_null; 
+    //*(&stdout) = fdopen(pipe_write_fd, "wb"); 
+    //assert(NULL != stdout); 
+    setvbuf(stdout, NULL, _IONBF, 0); 
+    dup2(fileno(stdout), pipe_write_fd); 
+    *opened_log_fd_r = new_fd; 
+#else 
+    if (NULL == freopen(path_to_null, "wb", stdout)) goto label__error__cannot_reopen_stdout_to_null; 
+    setvbuf(stdout, main__stdout_log_buffer, _IOFBF, sizeof(main__stdout_log_buffer)); 
+    main__stdout_log_post_fd = fileno(stdout); 
+#endif 
+    return buffer_used; 
+  }; 
+  
+ label__error__cannot_open_log_filepathname: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Could not open file (errno = %d): %s - so I assign log to /dev/null" "\n", __func__, (int) errno, *log_filepathname_r); 
+    goto label__reassign_to_null; 
+  }; 
+  
+  label__filepathname_failed: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Building and making filepathname failed: %s - so I assign log to /dev/null" "\n", __func__, (int) buffer_used); 
+    goto label__reassign_to_null; 
+  }; 
+  
+  label__filepathname_returned_zero: { 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Building and making filepathname returned zero - so I assign log to /dev/null" "\n", __func__); 
+    goto label__reassign_to_null; 
+  }; 
+  
+  label__reassign_to_fd9: { 
+    const char path_to_fd9[] = "/dev/fd/9"; 
+    *log_filepathname_r = path_to_fd9; buffer_used = 0; 
+#if 1 
+    const int new_fd = 9; //open(*log_filepathname_r, O_WRONLY | O_CREAT | O_TRUNC, (mode_t) 0666); 
+    //if (-1 == new_fd) goto label__error__cannot_open_log_filepathname; 
+    //fclose(stdout); 
+    //stdout = fdopen(pipe_write_fd, "wb"); 
+    //assert(NULL != stdout); 
+    setvbuf(stdout, NULL, _IONBF, 0); 
+    dup2(fileno(stdout), pipe_write_fd); 
+    *opened_log_fd_r = new_fd; 
+#else 
+    if (NULL == freopen(path_to_fd9, "wb", stdout)) goto label__error__cannot_reopen_stdout; 
+    setvbuf(stdout, main__stdout_log_buffer, _IOFBF, sizeof(main__stdout_log_buffer)); 
+    assert(9 == fileno(stdout)); 
+    *opened_log_fd_r = fileno(stdout); 
+#endif 
+    return buffer_used; 
+  }; 
+  
+ label__reassign_to_log_filepathname: { 
+#if 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "progdir: '%s'" "\n", __func__, progdir); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "log_subdir: '%s'" "\n", __func__, log_subdir); 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "log_filename: '%s'" "\n", __func__, log_filename); 
+#endif 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "log_filepathname: '%s'" "\n", __func__, *log_filepathname_r); 
+#if 1 
+    const int new_fd = open(*log_filepathname_r, O_WRONLY | O_CREAT | O_TRUNC, (mode_t) 0666); 
+    if (-1 == new_fd) goto label__error__cannot_open_log_filepathname; 
+    //fclose(stdout); 
+    //stdout = fdopen(pipe_write_fd, "wb"); 
+    //assert(NULL != stdout); 
+    setvbuf(stdout, NULL, _IONBF, 0); 
+    //dup2(fileno(stdout), pipe_write_fd); 
+    dup2(pipe_write_fd, fileno(stdout)); 
+    *opened_log_fd_r = new_fd; 
+#else 
+    if (NULL == freopen(log_filepathname, "wb", stdout)) goto label__error__cannot_reopen_stdout; 
+    setvbuf(stdout, main__stdout_log_buffer, _IOFBF, sizeof(main__stdout_log_buffer)); 
+    *opened_log_fd_r = fileno(stdout); 
+#endif 
+    return buffer_used; 
+  }; 
+
+  label__body: { 
+    buffer_used = main__make_subdir_and_build_filepathname_aux(progdir, log_subdir, log_filename, log_filepathname_r, buffer, buffer_bytesize); 
+    if (0 >  buffer_used) goto label__filepathname_failed; 
+    if (0 == buffer_used) goto label__filepathname_returned_zero; 
+    
+    // RL: Si le fd a été ouvert par l’utilisateur, alors on écrit dedans. 
+    // RL: '9' et pas '3' car GDB utilise fd3… 
+    if (-1 != fcntl(9, F_GETFL)) goto label__reassign_to_fd9; 
+    
+    goto label__reassign_to_log_filepathname; 
+  }; 
+    
+}; 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================================================================== 
+// DIVERS 
 
 
 void main_proctitle_set(void) { 

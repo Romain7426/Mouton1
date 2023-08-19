@@ -450,7 +450,17 @@ label__start: {};
   label__anime_log__open: { 
       anime_stdlog_d = -1; 
       for (;;) { 
+#if 1 
+	static char anime_stdlog_buffer[INT16_MAX] = {}; 
+	FILE * anime_stdlog_stream = fopen(anime_log, "wb"); 
+	if (NULL != anime_stdlog_stream) { 
+	  anime_stdlog_d = fileno(anime_stdlog_stream); 
+	  setvbuf(anime_stdlog_stream, anime_stdlog_buffer, _IOFBF, sizeof(anime_stdlog_buffer)); 
+	}; 
+	// RL: TODO FIXME XXX: The FILE* stream is not closed. 
+#else 
 	anime_stdlog_d = open(anime_log, O_WRONLY | O_CREAT | O_TRUNC, (mode_t)0666); 
+#endif 
 	if (0 <= anime_stdlog_d) break; 
 	messerr("ERREUR: Le fichier pour écrire le log de l'analyse de la description de l'objet animé n'a pas pu être ouvert: '%s'" "\n", anime_log); 
 	messerr("        Voulez-vous réessayer?" "\n"); 
@@ -566,7 +576,17 @@ static int anime_database__ParseDescriptionBuffer(const char * anime_filename, c
   label__anime_log__open: { 
       anime_stdlog_d = -1; 
       for (;;) { 
+#if 1 
+	static char anime_stdlog_buffer[INT16_MAX] = {}; 
+	FILE * anime_stdlog_stream = fopen(anime_log, "wb"); 
+	if (NULL != anime_stdlog_stream) { 
+	  anime_stdlog_d = fileno(anime_stdlog_stream); 
+	  setvbuf(anime_stdlog_stream, anime_stdlog_buffer, _IOFBF, sizeof(anime_stdlog_buffer)); 
+	}; 
+	// RL: TODO FIXME XXX: The FILE* stream is not closed. 	
+#else 
 	anime_stdlog_d = open(anime_log, O_WRONLY | O_CREAT | O_TRUNC, (mode_t)0666); 
+#endif 
 	if (0 <= anime_stdlog_d) break; 
 	messerr("ERREUR: Le fichier pour écrire le log de l'analyse de la description de l'objet animé n'a pas pu être ouvert: '%s'" "\n", anime_log); 
 	messerr("        Voulez-vous réessayer?" "\n"); 

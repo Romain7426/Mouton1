@@ -149,6 +149,11 @@ enum { INT64_MIN  = (~INT64_MAX) };
 enum { INT_MIN    =   (~INT_MAX) }; 
 #endif 
 
+#ifndef SATURATED_CAST_TO_INT16
+#define SATURATED_CAST_TO_INT16(a) ((((int)(a)) >= INT16_MAX) ? ((int16_t) INT16_MAX) : ((((int)(a)) <= INT16_MIN) ? ((int16_t) INT16_MIN) : ((int16_t) ((int)(a))))) 
+#endif 
+
+
 #if 0 
 #ifdef	_STDIO_H_
 #ifdef stderr 
