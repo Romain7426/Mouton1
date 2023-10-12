@@ -3,7 +3,15 @@
 #include "text.h"
 #include "map.h"
 
+struct CAffichageMainPierre {
+  CTexture * main;
+  CTexture * pierre;
 
+  void (* Render)(const struct CAffichageMainPierre * this, const float y, const float FacteurCompression); //const CMap * Map);
+};    
+
+const int8_t CAffichageMainPierre_bytesize_actual = sizeof(struct CAffichageMainPierre); 
+ASSERT_COMPILE_TOPLEVEL(CAffichageMainPierre_bytesize >= CAffichageMainPierre_bytesize_actual); 
 
 
 static CAffichageMainPierre * CAffichageMainPierre_set_attributs(CAffichageMainPierre * this) {

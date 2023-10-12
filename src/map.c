@@ -8,6 +8,155 @@
 #include "evenement.h"
 #include <carte.h>
 
+// RL: A 'CMap' is a big array containing all the items on the ground (and in the sky?) - it's a local world: 
+//      * Fixed objects 
+//      * NPCs 
+//      * teleportation areas 
+//      * anything 
+// 
+//     There's really nothing related to OpenGL here. In the spirit, it's a big array. 
+// 
+// RL: Inside we have two main structures: 
+//      * 'Voisinages', which contains all the objects. 
+//      * 'ZonesTeleportation', which contains the gates. 
+//      * And that's it! 
+// 
+
+//#define VOISINAGE_IS_TAB
+enum { VOISINAGE_X_SIZE =   63 }; 
+enum { VOISINAGE_Y_SIZE =   63 }; 
+enum { VOISINAGE_SIZE   =   63 }; 
+enum { DicoObjets_SIZE  = 2048 }; 
+enum { ZonesTeleportation_SIZE = 32 }; 
+struct CMap { 
+  char * NomCarte; 
+  
+  // RL: lattice-coordinates are the game-level designers coordinates. 
+  //     3DS, villages, objects, animes, everything, is in lattice-coordinate. 
+  // RL: For computation purposes, there are two other coordinate systems: (i) map, (ii) manifold. 
+  //      (ii) Manifold-coordinates should never be seen by any user whatsoever, they should never be used ever in the game. 
+  //           They are only used when rendering, when all the objects are actually mapped onto the riemannian manifold. 
+  //           They should be absolutely transparent, never directly manipulated, and invisible to any user or developer (manifold-developers excepted, obviously). 
+  //       (i) Map-coordinates should never be used by any gameplay developer. 
+  //           However, when mapping to the ground and to the manifold, the ground and the manifold are agnostic about the lattice coordinates. 
+  //           Before giving them any coordinates, the lattice coordinates should be normalized. 
+  //           So map-coordinates are used as a uniform communication between different coordinate systems. 
+  //           They are normalized coordinates. 
+  //           The idea is that the lattice coordinates (0,lattice_height) are the map coordinates (0, over_spanning_h). 
+  //     In any case, if one does not know which one to use, it means that he wants the lattice-coordinate system. 
+  // RL: NB: The physical engine & newton engine is also in lattice coordinates. 
+  
+  uint8_t lattice_width ; // RL: In vertices, not in cells. 
+  uint8_t lattice_height; // RL: In vertices, not in cells. 
+  
+  uint8_t over_spanning_w; // RL: If this local map is bigger than a simple map. In this case, it spans over 'over_spanning_w' in width. 
+  uint8_t over_spanning_h; // RL: If this local map is bigger than a simple map. In this case, it spans over 'over_spanning_h' in height. 
+  
+  uint8_t global_map_i; // RL: In the global map of the world, this map is #'global_map_i' on the  width-axis. 
+  uint8_t global_map_j; // RL: In the global map of the world, this map is #'global_map_j' on the height-axis. 
+  // RL: 'global_map_i' & 'global_map_j' are only used when rendering, when mapping data onto the manifold (by definition, the position on the manifold is not agnostic). 
+  //     They should be ignored anywhere else. 
+  
+  // RL: Scale factors to change lattice coordinates to map coordinates (map coordinates are the normalized ones). 
+  float lattice_to_map_scale_factor__x; // RL: Computed 
+  float lattice_to_map_scale_factor__y; // RL: Computed 
+  float lattice_to_map_scale_factor__z; // RL: Computed 
+  // RL: NB: z-coordinate needs to be rescaled as well:  
+  //           All objects z-dimensions are proportional to their x-dimensions & y-dimensions. 
+  //           So, when mapping to map-coordinates, the z-dimensions need to be rescaled as well. 
+  //           For instance, if 'lattice_width' & 'lattice_height' are both doubled, then the x-dimensions and the 
+  //           y-dimensions would be divided by two; but, if not rescaled, z-dimensions would not be so, meaning 
+  //           that objects would look twice as high. 
+  //           Therefore, z-dimensions need to be rescaled as well. 
+  
+  
+
+  // RL: Ground 
+  CSol * Sol; 
+  
+  
+  // RL: Objects (scenery & animated) in the maps 
+  // RL: TODO XXX FIXME: Management is bad. 
+  // RL: Supposedly, there is a neighborhood management. 
+  CPhysicalObj * Voisinages_array[VOISINAGE_X_SIZE][VOISINAGE_Y_SIZE][VOISINAGE_SIZE]; 
+  // RL: This is for looking up map-objects by names. 
+  CPhysicalObj * objets_array     [DicoObjets_SIZE]; 
+  char *         objets_noms_array[DicoObjets_SIZE]; 
+  int16_t        objets_nb; 
+  
+  
+  
+  // RL: Gateways between maps. 
+  CZoneTeleportation * ZonesTeleportation_array[ZonesTeleportation_SIZE]; 
+  int ZonesTeleportation_nb; 
+  
+  
+  // Ça c pour la gestion des eveneents. 
+  //evenements_t evt_carte; 
+  //struct tab_evt_bool (* tab_evt_carte)(struct CMap * this);
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  // *** METHODS *** 
+  
+  void (* delete)(CMap * this);
+  const char * (* GetNomCarte)(const struct CMap * this);
+
+  //void (* Life)(struct CMap * this, const int i1, const int j1, const int i2, const int j2, const bool EnVaisseau); 
+  //void (* Life)(const CMap * this, const int target_map_i, const int target_map_j, const float target_lattice_x, const float target_lattice_y, const bool EnVaisseau, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y); 
+  void (* Life)(CMap * this, const bool EnVaisseau); 
+  //void (* Render)(const struct CMap * this, const riemann_t * our_manifold, const int i1, const int j1, const int i2, const int j2, const bool EnVaisseau); 
+  //void (* Render)(const CMap * this, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_map_x, const float target_map_y, const bool EnVaisseau); 
+  void (* Render)(const CMap * this, const CCamera * Camera, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_lattice_x, const float target_lattice_y, const bool EnVaisseau); 
+  //void (* Render)(const CMap * this, const int target_map_i, const int target_map_j, const float target_lattice_x, const float target_lattice_y, const bool EnVaisseau, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y); 
+  
+  
+  float (* GETZ0_vXY )(const CMap * this, const float lattice_x, const float lattice_y); 
+  float (* GETZ0_vP3D)(const CMap * this, const TPoint3D lattice_pos); 
+  
+  float (* GET_ZEau)(const CMap * this); 
+  
+  void           (* AjouterObjet           )(struct CMap * this, CPhysicalObj * o); 
+  void           (* AjouterObjet_nom       )(struct CMap * this, const char * nom, CPhysicalObj * o); 
+  CPhysicalObj * (* RetrouverObjetViaSonNom)(struct CMap * this, const char * nom); 
+  
+  const CZoneTeleportation * (* VaTonBouger             )(const CMap * this, const CPhysicalObj * aHero);
+  void                       (* AjouterZoneTeleportation)(      CMap * this, const TPoint3D position, const TPoint3D dimension, const TDirection depart_direction, const char * destination_carte, const TPoint3D destination_position, const TDirection destination_direction);   
+  
+  void (* AjouterParticules)(struct CMap * this, TPoint3D p, const char * nom, const bool MoteurPhysiqueActif);
+  
+  void (* TraiterOrdresDeplacement)(struct CMap * this, struct CBonhomme * aHero, const bool MoteurPhysiqueActif);
+  
+  
+  
+  //void (* TesterPosition)(struct CMap * this, CPhysicalObj * o, const riemann_t * our_manifold, const bool MoteurPhysiqueActif);
+  //CPhysicalObj * (* TesterPositionHero)(struct CMap * this, struct CPhysicalObj * o, const riemann_t * our_manifold, const bool MoteurPhysiqueActif);
+  
+}; 
+
+const int32_t CMap_bytesize_actual = sizeof(struct CMap); 
+ASSERT_COMPILE_TOPLEVEL(CMap_bytesize >= CMap_bytesize_actual); 
+
+
+
+float          CMap__lattice_to_map_scale_factor__x(const CMap * this) { return this -> lattice_to_map_scale_factor__x; };  
+float          CMap__lattice_to_map_scale_factor__y(const CMap * this) { return this -> lattice_to_map_scale_factor__y; };  
+float          CMap__lattice_to_map_scale_factor__z(const CMap * this) { return this -> lattice_to_map_scale_factor__z; };  
+uint8_t        CMap__lattice_width(const CMap * this) { return this -> lattice_width; };  
+uint8_t        CMap__lattice_height(const CMap * this) { return this -> lattice_height; };  
+const CSol *   CMap__Sol(const CMap * this) { return this -> Sol; };  
+      CSol *   CMap__Sol_mutable(CMap * this) { return this -> Sol; };  
+uint8_t        CMap__global_map_i(const CMap * this) { return this -> global_map_i; };  
+uint8_t        CMap__global_map_j(const CMap * this) { return this -> global_map_j; };  
+
+
+
 TDirection DirectionAleatoire(void) {
   //return (TDirection) (rand() % 4);
   return (TDirection) (arc4random_uniform(4));
@@ -89,7 +238,7 @@ enum { taille_case = 5 }; // RL: That's for neighborhood management.
 #define PARCOURS_ZONESTELEPORTATIONS                                    \
   for (CAccesseur<CZoneTeleportation> a = ZonesTeleportation.ObtenirAcces(); not(a.IsFin()); a.AllerSuivant())
  
-#else 
+#elif 0  
 
 #define PARCOURS_ZONESTELEPORTATIONS                                    \
   for (int izt = 0; izt < this -> ZonesTeleportation_nb; izt++) {	\
@@ -170,38 +319,6 @@ enum { taille_case = 5 }; // RL: That's for neighborhood management.
   if ((iii >= biz*1) && (iii < maxindvoisinages))                       \
   for (CAccesseur<CPhysicalObj> a = Voisinages[iii].Objets.ObtenirAcces(); !a.IsFin(); a.AllerSuivant())
 */
-
-
-
-
-
-// ***************************** CZoneTeleportation ***************************** 
-
-CZoneTeleportation * CZoneTeleportation_make(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction) { 
-  MALLOC_BZERO(CZoneTeleportation,this);
-  
-  this -> position = in_position;
-  this -> dimension = in_dimension;
-  this -> depart_direction = in_depart_direction;
-
-  this -> destination_carte = strcopy(in_destination_carte);
-  this -> destination_position = in_destination_position;
-  this -> destination_direction = in_destination_direction;
-
-  return this; 
-}; 
-
-void CZoneTeleportation_delete(CZoneTeleportation * this) {
-  free(this); 
-}; 
-
-CZoneTeleportation * CZoneTeleportation_copy(const CZoneTeleportation * zt_src) {
-  MALLOC_BZERO(CZoneTeleportation,this);
-  *this = *zt_src; 
-  this -> destination_carte = strcopy(zt_src -> destination_carte); 
-  return this; 
-}; 
-
 
 
 
@@ -367,7 +484,7 @@ const char * CMap__GetNomCarte(const CMap * this) {
 float CMap__GETZ0_vXY(const CMap * this, const float lattice_x, const float lattice_y) { 
   const float map_x = lattice_x * this -> lattice_to_map_scale_factor__x; // / this -> lattice_width;
   const float map_y = lattice_y * this -> lattice_to_map_scale_factor__y; // / this -> lattice_height; 
-  const float map_z = this -> Sol -> GET_MAP_Z(this -> Sol, map_x, map_y); 
+  const float map_z = CSol__GET_MAP_Z(this -> Sol, map_x, map_y); 
   const float lattice_z = map_z / this -> lattice_to_map_scale_factor__z; 
   return lattice_z; 
 }; 
@@ -377,7 +494,7 @@ float CMap__GETZ0_vP3D(const CMap * this, const TPoint3D lattice_pos) {
 }; 
 
 float CMap__GET_ZEau(const CMap * this) { 
-  return this -> Sol -> map_ZEau / this -> lattice_to_map_scale_factor__z; 
+  return CSol__map_ZEau(this -> Sol) / this -> lattice_to_map_scale_factor__z; 
 }; 
 
 
@@ -515,20 +632,11 @@ void CMap__AjouterZoneTeleportation(CMap * this, TPoint3D position, TPoint3D dim
 
 const CZoneTeleportation * CMap__VaTonBouger(const CMap * this, const CPhysicalObj * aHero) { 
   const TPoint3D p = aHero -> GetPosition(aHero);
-
-  PARCOURS_ZONESTELEPORTATIONS
-    {
-      if ((zt_parcours -> position.x <= p.x) &&
-          (zt_parcours -> position.y <= p.y) &&
-          (zt_parcours -> position.z <= p.z) &&
-          (p.x <= zt_parcours -> position.x + zt_parcours -> dimension.x) &&
-          (p.y <= zt_parcours -> position.y + zt_parcours -> dimension.y) &&
-          (p.z <= zt_parcours -> position.z + zt_parcours -> dimension.z) )
-        return zt_parcours; 
-
-    }
-  PARCOURS_ZONESTELEPORTATIONS_FIN;
-
+  for (int izt = 0; izt < this -> ZonesTeleportation_nb; izt++) { 
+    const CZoneTeleportation * zt_parcours = this -> ZonesTeleportation_array[izt]; 
+    const bool dedans_huh = CZoneTeleportation__dedans_huh(zt_parcours, p); 
+    if (dedans_huh) return zt_parcours; 
+  }; 
   return NULL;
 }; 
 
@@ -606,7 +714,7 @@ void CMap__AjouterParticules(CMap * this, const TPoint3D p, const char * nom, co
 
 
 void CMap__Life(CMap * this, const bool EnVaisseau) { 
-  this -> Sol -> Life(this -> Sol); 
+  CSol__Life(this -> Sol); 
   // RL: TODO XXX FIXME 
 
   // RL: Éclaboussures eau 
@@ -1206,7 +1314,8 @@ extern bool show_choc_cube_huh;
 void CMap__Render(const CMap * this, const CCamera * Camera, const riemann_t * our_manifold, const int nb_cells_displayed_x, const int nb_cells_displayed_y, const int target_map_i, const int target_map_j, const float target_lattice_x, const float target_lattice_y, const bool EnVaisseau) { 
   //this -> Sol -> Render(this -> Sol, our_manifold, nb_cells_displayed_x, nb_cells_displayed_y, target_map_i, target_map_j, target_lattice_x / (float) this -> lattice_width, target_lattice_y / (float) this -> lattice_height); 
   //this -> Sol -> Render(this -> Sol, our_manifold, target_map_i, target_map_j, target_lattice_x / ((float) this -> lattice_width), target_lattice_y / ((float) this -> lattice_height), ((float) nb_cells_displayed_x) / ((float) this -> lattice_width), ((float) nb_cells_displayed_y) / ((float) this -> lattice_height)); 
-  this -> Sol -> Render(this -> Sol, our_manifold, target_map_i, target_map_j, target_lattice_x * this -> lattice_to_map_scale_factor__x, target_lattice_y * this -> lattice_to_map_scale_factor__y, ((float) nb_cells_displayed_x) * this -> lattice_to_map_scale_factor__x, ((float) nb_cells_displayed_y) * this -> lattice_to_map_scale_factor__y); 
+  //this -> Sol -> Render(this -> Sol, our_manifold, target_map_i, target_map_j, target_lattice_x * this -> lattice_to_map_scale_factor__x, target_lattice_y * this -> lattice_to_map_scale_factor__y, ((float) nb_cells_displayed_x) * this -> lattice_to_map_scale_factor__x, ((float) nb_cells_displayed_y) * this -> lattice_to_map_scale_factor__y); 
+  CSol__Render(this -> Sol, our_manifold, target_map_i, target_map_j, target_lattice_x * this -> lattice_to_map_scale_factor__x, target_lattice_y * this -> lattice_to_map_scale_factor__y, ((float) nb_cells_displayed_x) * this -> lattice_to_map_scale_factor__x, ((float) nb_cells_displayed_y) * this -> lattice_to_map_scale_factor__y); 
   
  
 
@@ -1257,7 +1366,18 @@ void CMap__Render(const CMap * this, const CCamera * Camera, const riemann_t * o
   
   
   
-  { 
+  if (show_choc_cube_huh) { 
+#if 1 
+  for (int izt = 0; izt < this -> ZonesTeleportation_nb; izt++) { 
+    const CZoneTeleportation * zt_parcours = this -> ZonesTeleportation_array[izt]; 
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f); 
+    TPoint3D zt_position  = CZoneTeleportation__position(zt_parcours); 
+    TPoint3D zt_dimension = CZoneTeleportation__dimension(zt_parcours); 
+    our_manifold -> AfficherCube(our_manifold, /*map_i*/0, /*map_j*/0, 
+      zt_position.x  * this -> lattice_to_map_scale_factor__x, zt_position.y  * this -> lattice_to_map_scale_factor__y, zt_position.z  * this -> lattice_to_map_scale_factor__z, 
+      zt_dimension.x * this -> lattice_to_map_scale_factor__x, zt_dimension.y * this -> lattice_to_map_scale_factor__y, zt_dimension.z * this -> lattice_to_map_scale_factor__z); 
+  }; 
+#elif 0 
     //fprintf(stderr, "ZoneTeleportationBlit\n"); 
     //int i = 0; 
     PARCOURS_ZONESTELEPORTATIONS { 
@@ -1267,6 +1387,7 @@ void CMap__Render(const CMap * this, const CCamera * Camera, const riemann_t * o
 	our_manifold -> AfficherCube(our_manifold, /*map_i*/0, /*map_j*/0, zt_parcours -> position.x * this -> lattice_to_map_scale_factor__x, zt_parcours -> position.y * this -> lattice_to_map_scale_factor__y, zt_parcours -> position.z * this -> lattice_to_map_scale_factor__z, zt_parcours -> dimension.x * this -> lattice_to_map_scale_factor__x, zt_parcours -> dimension.y * this -> lattice_to_map_scale_factor__y, zt_parcours -> dimension.z * this -> lattice_to_map_scale_factor__z); 
       }; 
     } PARCOURS_ZONESTELEPORTATIONS_FIN; 
+#endif 
   }; 
   
 }; 
@@ -1365,7 +1486,8 @@ int CMap__ReadDescriptionFile(CMap * this, const int global_map_i, const int glo
   
   // *** GROUND *** 
   //this_parent -> ZEau = carte_data -> niveau_eau; 
-  this_parent -> map_ZEau = carte_data -> niveau_eau * this -> lattice_to_map_scale_factor__z; 
+  //this_parent -> map_ZEau = carte_data -> niveau_eau * this -> lattice_to_map_scale_factor__z; 
+  *CSol__map_ZEau_ref(this_parent) = carte_data -> niveau_eau * this -> lattice_to_map_scale_factor__z; 
   
   //message("Chargement en mémoire de %d textures pour le sol." "\n", carte_data -> texture_nb); 
   if (carte_data -> texture_nb >= NB_MAX_TEXTURESOL) { 
@@ -1374,10 +1496,12 @@ int CMap__ReadDescriptionFile(CMap * this, const int global_map_i, const int glo
   }; 
   for (int i = 0; i < carte_data -> texture_nb; i++) { 
     //message("Chargement en mémoire de la texture %3d (couleur associée = %09d - fichier image = \"%s\")." "\n", i, carte_data -> texture_indice[i], carte_data -> texture_image[i]); 
-    this_parent -> AjouterTextureSol(this_parent, carte_data -> texture_image[i], carte_data -> texture_indice[i]); 
+    //this_parent -> AjouterTextureSol(this_parent, carte_data -> texture_image[i], carte_data -> texture_indice[i]); 
+    CSol__AjouterTextureSol(this_parent, carte_data -> texture_image[i], carte_data -> texture_indice[i]); 
   }; 
   //this_parent -> init(this_parent, global_map_i, global_map_j, /*over_spanning_w*/1, /*over_spanning_h*/1, our_manifold, /*z_filename*/carte_data -> fichier_de_zone_de_niveau, /*texture_filename*/carte_data -> fichier_de_zone_de_texture); 
-  this_parent -> init(this_parent, global_map_i, global_map_j, /*over_spanning_w*/this -> over_spanning_w, /*over_spanning_h*/this -> over_spanning_h, this -> lattice_to_map_scale_factor__z, our_manifold, /*z_filename*/carte_data -> fichier_de_zone_de_niveau, /*texture_filename*/carte_data -> fichier_de_zone_de_texture); 
+  //this_parent -> init(this_parent, global_map_i, global_map_j, /*over_spanning_w*/this -> over_spanning_w, /*over_spanning_h*/this -> over_spanning_h, this -> lattice_to_map_scale_factor__z, our_manifold, /*z_filename*/carte_data -> fichier_de_zone_de_niveau, /*texture_filename*/carte_data -> fichier_de_zone_de_texture); 
+  CSol__init(this_parent, global_map_i, global_map_j, /*over_spanning_w*/this -> over_spanning_w, /*over_spanning_h*/this -> over_spanning_h, this -> lattice_to_map_scale_factor__z, our_manifold, /*z_filename*/carte_data -> fichier_de_zone_de_niveau, /*texture_filename*/carte_data -> fichier_de_zone_de_texture); 
   
   
 #if 1 

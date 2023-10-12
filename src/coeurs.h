@@ -6,37 +6,18 @@
  (animés et tout...)
  ******************************************************************************/
 
-#define nb_Etape_Animation 64
-
-
 struct CAffichageCoeur;
-//enum TCoeurTypeAnimation;
 
-
-enum TCoeurTypeAnimation {caONNEFAITRIEN, caECLATERGROSCOEUR, caPERDREGROSCOEUR, caPERDREPETITSCOEURS};
-TYPEDEF_TYPENAME_WITHOUT_ENUM(TCoeurTypeAnimation);
-
-
-
-struct CAffichageCoeur {
-  CTexture * texcoeur;
-  float temps;
-  int pv;
-  int iAnimation;
-  int nbpetitscoeursperdus;
-  
-  TCoeurTypeAnimation TypeAnimation;
-  bool JeSuisEnTrainDEtreAnimeDsl;
-    
-  /*il faut informer l'objet du nombre de pv du héros à chaque tour 
-    via un appel du genre : InformerNbPV(Hero->GetPV())*/
-  void (* InformerNbPV)(struct CAffichageCoeur * this, int inpv);  
-  
-  // affiche dans le coin supérieur gauche des coeurs
-  void (* Render)(const struct CAffichageCoeur * this);
-  
-  void (* Life)(struct CAffichageCoeur * this);
-};
+enum {              CAffichageCoeur_bytesize = 64 }; 
+extern const int8_t CAffichageCoeur_bytesize_actual; 
+static void CAffichageCoeur__check_and_assert(const int8_t debug_print_huh, const int stderr_d) { 
+  if (debug_print_huh) { 
+    //fprintf(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to clean up the log subdir.' " "\n", __func__); 
+    write_string4(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<", __func__, "()>}: ", "CAffichageCoeur_bytesize: "); write_long_long_int(stderr_d, CAffichageCoeur_bytesize); write_eol(stderr_d); 
+    write_string4(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<", __func__, "()>}: ", "CAffichageCoeur_bytesize_actual: "); write_long_long_int(stderr_d, CAffichageCoeur_bytesize_actual); write_eol(stderr_d); 
+  }; 
+  assert(CAffichageCoeur_bytesize >= CAffichageCoeur_bytesize_actual); 
+}; 
 
 extern CAffichageCoeur * CAffichageCoeur_make(void); 
 extern void CAffichageCoeur_delete(CAffichageCoeur * this); 
@@ -47,7 +28,7 @@ extern void CAffichageCoeur__Life(struct CAffichageCoeur * this);
 
 
 
-// TODO bad
+// RL: TODO FIXME XXX: Cette variable globale ne devrait pas être ici. 
 extern struct CAffichageCoeur * AffichageCoeur; 
 
 

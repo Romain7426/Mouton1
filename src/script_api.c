@@ -51,14 +51,14 @@ void api_contexte__delete(api_contexte_t * this) {
 void SCRIPT_AjouterObjetAnime(const char* qui, const char * filename) { 
   printf("SCRIPT_AjouterObjetAnime(%s, %s)\n", qui, filename); 
   CBonhomme * o = CBonhomme__make(filename); 
-  (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent1); 
+  CMap__AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent1); 
   Kernel_Script_YieldToKernel(); 
 }; 
 
 void SCRIPT_AjouterObjetNonAnime(const char* qui, const char* filename) {
   printf("SCRIPT_AjouterObjetNonAnime(%s, %s)\n", qui, filename);
   CObjNonAnime * o = CObjNonAnime__make(filename);
-  (*(api_contexte.Map)) -> AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent);     
+  CMap__AjouterObjet_nom((*(api_contexte.Map)), qui, &o -> parent);     
 };
 
 #if 1 
@@ -136,7 +136,7 @@ const char * SCRIPT_GetNomCarte(void) {
   if ((*(api_contexte.Map)) == NULL)
     return "";
   else
-    return (*(api_contexte.Map)) -> GetNomCarte((*(api_contexte.Map))); 
+    return CMap__GetNomCarte((*(api_contexte.Map))); 
 };
 
 
@@ -311,14 +311,14 @@ void SCRIPT_RecevoirUneArme(const char * nom_arme) {
   //free(filename_icone);
 }; 
 
-#if 1 
-void SCRIPT_ChangerDeCarte_vZT(const struct CZoneTeleportation ZoneTeleportation) { 
+#if 1
+void SCRIPT_ChangerDeCarte_vZT(const CZoneTeleportation * pzt) { 
   //CMoteurTeleportation * MoteurTeleportation = *(api_contexte.MoteurTeleportation_ref); 
   CMoteurTeleportation * MoteurTeleportation = api_contexte.MoteurTeleportation; 
-  message("SCRIPT_ChangerDeCarte(%s, ...)" "\n", ZoneTeleportation.destination_carte); 
+  message("SCRIPT_ChangerDeCarte(%s, ...)" "\n", CZoneTeleportation__destination_carte(pzt)); 
   //(*(api_contexte.TypeInstructionCourante)) = ticChangerDeCarte; 
-  MoteurTeleportation -> SetCouleurFondu     (MoteurTeleportation, 0); 
-  MoteurTeleportation -> DebuterTeleportation(MoteurTeleportation, ZoneTeleportation); 
+  CMoteurTeleportation__SetCouleurFondu     (MoteurTeleportation, 0); 
+  CMoteurTeleportation__DebuterTeleportation(MoteurTeleportation, pzt); 
   
 #if 0 
   fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " *(api_contexte.TypeInstructionPrecedente) = %d "   "\n", __func__, (api_contexte.TypeInstructionPrecedente)); 
@@ -327,7 +327,42 @@ void SCRIPT_ChangerDeCarte_vZT(const struct CZoneTeleportation ZoneTeleportation
   api_contexte.TypeInstructionPrecedente = *(api_contexte.TypeInstructionCourante); 
   (*(api_contexte.TypeInstructionCourante)) = ticChangerDeCarte; 
   Kernel_Script_YieldToKernel(); 
+};
+
+void SCRIPT_ChangerDeCarte_vXYZ(const char * nom_carte, const float x, const float y, const float z, const TDirection direction) { 
+  CZoneTeleportation * zt; 
+  TPoint3D nul; TPoint3D_assign__macro(nul, 0, 0, 0); 
+  TPoint3D destination_position; TPoint3D_assign__macro(destination_position, x, y, z); 
+  zt = CZoneTeleportation_make(/*position*/nul, /*dimension*/nul, /*depart_direction*/0, /*in_destination_carte*/nom_carte, destination_position, direction); 
+  SCRIPT_ChangerDeCarte_vZT(zt); 
 }; 
+
+void SCRIPT_ChangerDeCarte_vXY(const char * nom_carte, const float x, const float y, const TDirection direction) { 
+  SCRIPT_ChangerDeCarte_vXYZ(nom_carte, x, y, 0.0f, direction); 
+}; 
+
+
+
+
+
+
+#elif 0 
+void SCRIPT_ChangerDeCarte_vZT(const struct CZoneTeleportation ZoneTeleportation) { 
+  //CMoteurTeleportation * MoteurTeleportation = *(api_contexte.MoteurTeleportation_ref); 
+  CMoteurTeleportation * MoteurTeleportation = api_contexte.MoteurTeleportation; 
+  message("SCRIPT_ChangerDeCarte(%s, ...)" "\n", ZoneTeleportation.destination_carte); 
+  //(*(api_contexte.TypeInstructionCourante)) = ticChangerDeCarte; 
+  CMoteurTeleportation__SetCouleurFondu     (MoteurTeleportation, 0); 
+  CMoteurTeleportation__DebuterTeleportation(MoteurTeleportation, ZoneTeleportation); 
+  
+#if 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " *(api_contexte.TypeInstructionPrecedente) = %d "   "\n", __func__, (api_contexte.TypeInstructionPrecedente)); 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " *(api_contexte.TypeInstructionCourante) = %d "   "\n", __func__, *(api_contexte.TypeInstructionCourante)); 
+#endif 
+  api_contexte.TypeInstructionPrecedente = *(api_contexte.TypeInstructionCourante); 
+  (*(api_contexte.TypeInstructionCourante)) = ticChangerDeCarte; 
+  Kernel_Script_YieldToKernel(); 
+};
 
 void SCRIPT_ChangerDeCarte_vXYZ(const char * nom_carte, const float x, const float y, const float z, const TDirection direction) { 
   CZoneTeleportation zt; 
@@ -348,7 +383,7 @@ void SCRIPT_ChangerDeCarte_vXY(const char * nom_carte, const float x, const floa
 void SCRIPT_SetCouleurFondu(const int color) { 
   //CMoteurTeleportation * MoteurTeleportation = *(api_contexte.MoteurTeleportation_ref); 
   CMoteurTeleportation * MoteurTeleportation = api_contexte.MoteurTeleportation; 
-  MoteurTeleportation -> SetCouleurFondu(MoteurTeleportation, color);
+  CMoteurTeleportation__SetCouleurFondu(MoteurTeleportation, color);
 }; 
 
 void SCRIPT_fondu(void) { 
@@ -358,7 +393,7 @@ void SCRIPT_fondu(void) {
   // FS: /*pour faire un fondu, on fait comme si on faisait un changement de carte... mais... on reste au ^m endroit...cela se traduit par destination_carte == NULL*/ 
   CZoneTeleportation zt; 
   zt.destination_carte = NULL; 
-  MoteurTeleportation -> DebuterTeleportation(MoteurTeleportation, zt); 
+  CMoteurTeleportation__DebuterTeleportation(MoteurTeleportation, zt); 
 }; 
 
 #else 
@@ -426,7 +461,7 @@ CPhysicalObj * SCRIPT_RetrouverObjetViaSonNom(const char * qui) {
   if (0 == strcmp(qui, "heros")) 
     return &(*(api_contexte.Hero)) -> parent1;
   else           
-    return (*(api_contexte.Map)) -> RetrouverObjetViaSonNom((*(api_contexte.Map)), qui);
+    return CMap__RetrouverObjetViaSonNom((*(api_contexte.Map)), qui);
 }; 
 
 

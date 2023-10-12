@@ -2,8 +2,17 @@
 #define CPageTitre_H 
 
 struct CPageTitre; 
-enum TPageTitreAction; 
-TYPEDEF_TYPENAME_WITHOUT_ENUM(TPageTitreAction); 
+
+enum {              CPageTitre_bytesize = 96 }; 
+extern const int8_t CPageTitre_bytesize_actual; 
+static void CPageTitre__check_and_assert(const int8_t debug_print_huh, const int stderr_d) { 
+  if (debug_print_huh) { 
+    //fprintf(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to clean up the log subdir.' " "\n", __func__); 
+    write_string4(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<", __func__, "()>}: ", "CPageTitre_bytesize: "); write_long_long_int(stderr_d, CPageTitre_bytesize); write_eol(stderr_d); 
+    write_string4(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<", __func__, "()>}: ", "CPageTitre_bytesize_actual: "); write_long_long_int(stderr_d, CPageTitre_bytesize_actual); write_eol(stderr_d); 
+  }; 
+  assert(CPageTitre_bytesize >= CPageTitre_bytesize_actual); 
+}; 
 
 enum { 
   PageTitre_UserToldMe_NothingYet, 
@@ -13,39 +22,35 @@ enum {
   PageTitre_UserToldMe_LoadGame, 
 }; 
 
-
-// RL: Automaton states. 
-enum TPageTitreAction { 
-  ptDONE, // RL: Everything done. 
-  ptFADEIN, // RL: We get in. 
-  ptTITRE,  // RL: Cruise time. 
-  ptAUTEURS,  // RL: Displaying authors 
-  ptCOPYRIGHT,  // RL: Displaying copyright 
-  ptFADEOUT // RL: We get out. 
-}; 
-
-struct CPageTitre { 
-  TPageTitreAction Action; // RL: Actually, it's an automaton, and these are the three states of the automaton. 
-  //int Action; // RL: Actually, it's an automaton, and these are the three states of the automaton. 
-  CTexture * DessineMoiUnMouton; 
-  CTexture * Titre; 
-  int t; // RL: Which is? // RL: Ok, it's to control the displayed-sheep speed. 
-  int fade; 
-  float Ligne_Courante; 
-  CMiniMenu * MiniMenu; // RL: Main choice 
-  int the_user_told_me; 
-  int copyright_page; 
-  
-  void (* Render)(const struct CPageTitre * this); 
-  void (* Life)(struct CPageTitre * this); 
-  int  (* Input)(struct CPageTitre * this); 
-};
-
 extern CPageTitre * CPageTitre_make(void);
-extern void CPageTitre_delete(CPageTitre * this);
-extern void CPageTitre__Render(const CPageTitre * this);
-extern void CPageTitre__Life(CPageTitre * this);
-extern int  CPageTitre__Input(CPageTitre * this);
+extern void         CPageTitre_delete(CPageTitre * this);
+extern void         CPageTitre__Render(const CPageTitre * this);
+extern void         CPageTitre__Life(CPageTitre * this);
+extern int          CPageTitre__Input(CPageTitre * this);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -56,6 +61,21 @@ extern int  CPageTitre__Input(CPageTitre * this);
 static int a[sizeof(enum TPageTitreAction) == 4 ? 1 : -1] = { 0 }; // RL: This is true. So clang compiles it as an 'int', as it should. 
 
 #endif 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if 0 
 

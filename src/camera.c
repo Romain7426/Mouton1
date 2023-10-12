@@ -298,4 +298,23 @@ void CCamera__EffetPsychadelique(CCamera * this) {
 }; 
 
 
+float    * CCamera__angleXY(CCamera * this) { 
+  return &(this -> angleXY); 
+}; 
+
+float    * CCamera__angleZ(CCamera * this) { 
+  return &(this -> angleZ); 
+}; 
+
+float    * CCamera__lattice__dist           (CCamera * this) { 
+  return &(this -> lattice__dist); 
+}; 
+
+TPoint3D * CCamera__lattice__target_position(CCamera * this) { 
+  return &(this -> lattice__target_position); 
+}; 
+
+TPoint3D * CCamera__map__target_position    (CCamera * this) { 
+  return &(this -> map__target_position); 
+}; 
 

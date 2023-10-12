@@ -341,6 +341,9 @@ typedef struct CAffichageCoeur CAffichageCoeur;
 struct CMap; 
 typedef struct CMap CMap; 
 
+struct CSol; 
+typedef struct CSol CSol; 
+
 struct CEvenement; 
 typedef struct CEvenement CEvenement; 
 
@@ -433,6 +436,9 @@ typedef struct CObjNonAnime CObjNonAnime;
 struct api_contexte_t; 
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(api_contexte_t);
 
+struct CZoneTeleportation; 
+typedef struct CZoneTeleportation CZoneTeleportation; 
+ 
 struct CMoteurTeleportation; 
 typedef struct CMoteurTeleportation CMoteurTeleportation; 
  
@@ -445,6 +451,13 @@ typedef struct COrdresDeplacement COrdresDeplacement;
 struct C3DS;
 typedef struct C3DS C3DS; 
 
+
+static int write_eol(const int file_des); 
+static int write_long_long_int(const int file_des, long long int n); 
+static int write_string(const int file_des, const char * cstr); 
+static int write_string2(const int file_des, const char * cstr1, const char * cstr2); 
+static int write_string3(const int file_des, const char * cstr1, const char * cstr2, const char * cstr3); 
+static int write_string4(const int file_des, const char * cstr1, const char * cstr2, const char * cstr3, const char * cstr4); 
 
 #include "001_main.h"
 #include "vectors.h" // pour pouvoir utiliser des vecteurs 2D et 3D
@@ -492,6 +505,8 @@ typedef struct C3DS C3DS;
 #include "script_api.h"
 #include "script_pscript.h"
 
+
+#include "lib.ci"
 
 
 #endif /* GLOBAL_H */

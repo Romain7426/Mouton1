@@ -26,7 +26,7 @@
 // RL: This should be in a child? 
 #endif 
 
-#include "lib.ci"
+//#include "lib.ci"
 //#include "lib__llfixed.ci"
 
 #include <anime.h>
@@ -213,7 +213,7 @@ int main(const int argc, const char * argv[]) {
   
 
   label__check_and_assert: { 
-    check_and_assert(); 
+    check_and_assert(/*debug_print_huh*/true, /*stderr_d*/STDERR_FILENO); 
     goto label__body; 
   }; 
   

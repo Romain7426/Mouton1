@@ -135,6 +135,13 @@ void CTexture__GLTextureCourante(const CTexture * this) {
   };  
 };
 
+float  CTexture__taillex(CTexture * this) { 
+  return (this -> taillex); 
+}; 
+
+float  CTexture__tailley(CTexture * this) { 
+  return (this -> tailley); 
+}; 
 
 
 

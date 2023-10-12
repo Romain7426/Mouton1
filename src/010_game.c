@@ -38,7 +38,9 @@ static CMusique       * Musique              = NULL;
 static CObjNonAnime   * Vaisseau             = NULL; 
 static CMenuEntreeNom * MenuEntreeNom        = NULL; 
 //static CMoteurTeleportation MoteurTeleportation;
-static CMoteurTeleportation MoteurTeleportation[1];
+//static CMoteurTeleportation MoteurTeleportation[1];
+static char CMoteurTeleportation_bytes[CMoteurTeleportation_bytesize] = {}; 
+static CMoteurTeleportation * MoteurTeleportation = (CMoteurTeleportation *)CMoteurTeleportation_bytes; 
 //static CCamera Camera[1] = {};
 static CCamera * Camera = NULL;
 
@@ -613,7 +615,7 @@ int Game_ProcessInputs(const int current_mj) {
     }; 
     
     if (ModeJeu == mjTITRE) {
-      const int next = PageTitre -> Input(PageTitre); 
+      const int next = CPageTitre__Input(PageTitre); 
       if (PageTitre_UserToldMe_NothingYet == next) { 
 	break; 
       } 
@@ -665,7 +667,7 @@ int Game_ProcessInputs(const int current_mj) {
 	ModeJeu = mjCARTE; 
 #endif 
 	//TypeInstructionCourante = Script_Automaton_Idle; 
-	if (Map != NULL) { Map -> delete(Map); }; 
+	if (Map != NULL) { CMap__delete(Map); }; 
 #if 0 
 	Map = CMap__make("niveau1_0.carte", /*map_i*/0, /*map_j*/0, our_manifold, /*EnVaisseau*/false); 
 	Hero -> parent1.SetPosition_vXY(&Hero -> parent1, 6.0f, 6.0f, mpABSOLU, Map); 
@@ -690,7 +692,7 @@ int Game_ProcessInputs(const int current_mj) {
 	Hero -> parent1.SetPosition_vXY(&Hero -> parent1, 10.0f, 10.0f, mpABSOLU, Map); 
 #endif 	
 	//Camera -> lattice__target_position.z = Map -> GETZ0_vP3D(Map, Camera -> lattice__target_position); 
-	CCamera__lattice__target_position(Camera) -> z = Map -> GETZ0_vP3D(Map, *CCamera__lattice__target_position(Camera)); 
+	CCamera__lattice__target_position(Camera) -> z = CMap__GETZ0_vP3D(Map, *CCamera__lattice__target_position(Camera)); 
 	//TypeInstructionCourante = Script_Automaton_Idle; 
 	break; 
       } 
@@ -873,8 +875,8 @@ void Game_Life_Aerotheiere(CMap * Map, CBonhomme * Hero, CObjNonAnime * Vaisseau
 #else 
   // on gère le temps 
   Temps += marche_compression; 
-  Map -> Sol -> SetTemps(Map -> Sol, Temps); 
-  Map -> Sol -> SetTemps(Map -> Sol, Temps); 
+  CMap__Sol -> SetTemps(Map -> Sol, Temps); 
+  CMap__Sol -> SetTemps(Map -> Sol, Temps); 
 #endif 
   
   
@@ -950,8 +952,8 @@ void Game_Life_Map(CMap * Map, CBonhomme * Hero) {
   Hero -> Life(Hero); 
   
   // *** affichage des coeurs *** 
-  AffichageCoeur -> InformerNbPV(AffichageCoeur, Hero -> parent1.GetPV(&Hero -> parent1)); 
-  AffichageCoeur -> Life(AffichageCoeur); 
+  CAffichageCoeur__InformerNbPV(AffichageCoeur, Hero -> parent1.GetPV(&Hero -> parent1)); 
+  CAffichageCoeur__Life(AffichageCoeur); 
 }; 
 
 
@@ -960,7 +962,7 @@ int Game_Life_TeleportationStartHuh(const int current_mj) {
   
   int ModeJeu = current_mj; 
   // vérifie si l'on va changer de carte… 
-  const CZoneTeleportation * pzt = Map -> VaTonBouger(Map, &Hero -> parent1); 
+  const CZoneTeleportation * pzt = CMap__VaTonBouger(Map, &Hero -> parent1); 
   if (pzt) { 
     //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " last_time = %s "  "\n", __func__, bool_string(last_time)); 
     if (last_time) { return ModeJeu; }; 
@@ -987,13 +989,14 @@ int Game_Life_TeleportationStartHuh(const int current_mj) {
     
     //if (EnVaisseau || (Hero -> GetDirection(Hero) == pzt -> depart_direction)) { 
     if (choix == 2) { 
-      if (not(MoteurTeleportation -> IsTeleportationEnCours(MoteurTeleportation))) { 
-	CZoneTeleportation zt = *pzt; 
+      if (not(CMoteurTeleportation__IsTeleportationEnCours(MoteurTeleportation))) { 
+	//CZoneTeleportation zt = *pzt; 
 	printf("On arrive sur une zone de téléportation:\n"); 
-	printf("Direction du héros %i, de la zone %i\n", Hero -> GetDirection(Hero), pzt -> depart_direction); 
-	printf("   position: (%f, %f, %f)\n", zt.position.x, zt.position.y, zt.position.z); 
+	printf("Direction du héros %i, de la zone %i\n", Hero -> GetDirection(Hero), CZoneTeleportation__depart_direction(pzt)); 
+	//printf("   position: (%f, %f, %f)\n", zt.position.x, zt.position.y, zt.position.z); 
+	printf("   position: (%f, %f, %f)\n", CZoneTeleportation__position(pzt).x, CZoneTeleportation__position(pzt).y, CZoneTeleportation__position(pzt).z); 
 	ModeJeu = mjTELEPORTATION; 
-	SCRIPT_ChangerDeCarte_vZT(zt); 
+	SCRIPT_ChangerDeCarte_vZT(pzt); 
       }; 
     }; 
     last_time = true; 
@@ -1017,14 +1020,15 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
     
     
     if (ModeJeu == mjTITRE) {
-      PageTitre -> Life(PageTitre); 
+      CPageTitre__Life(PageTitre); 
       break; 
     }; 
     
     
     if (ModeJeu == mjOEIL) { 
       Game_Life_Map(Map, Hero); 
-      CCamera__CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+      //CCamera__CalcCamera(Camera, Hero, CMap__lattice_to_map_scale_factor__x(Map), CMap__lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+      CCamera__CalcCamera(Camera, Hero, CMap__lattice_to_map_scale_factor__x(Map), CMap__lattice_to_map_scale_factor__y(Map), CMap__lattice_to_map_scale_factor__z(Map), our_manifold); 
       break; 
     }; 
 
@@ -1036,18 +1040,18 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 	CPhysicalObj * Hero_o = &Hero -> parent1; 
 	
 	if (animate_but_do_not_aliven_huh) { 
-	  Map -> TraiterOrdresDeplacement(Map, Hero, MoteurPhysiqueActif); 
+	  CMap__TraiterOrdresDeplacement(Map, Hero, MoteurPhysiqueActif); 
 
 	  CPhysicalObj__NewtonEngine__Frottements_apply(Hero_o); 
 	  CPhysicalObj__NewtonEngine__OneStepFoward__NoValidationYet(Hero_o); 
 	  CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(Hero_o, Map); 
 	  CMap__Life_NewtonEngine_Objects(Map, /*EnVaisseau*/EnVaisseau); 
-	  CPhysicalObj__ValiderPosition(Hero_o, Map -> GET_ZEau(Map)); 
+	  CPhysicalObj__ValiderPosition(Hero_o, CMap__GET_ZEau(Map)); 
 	  CMap__Life_Objects_ValiderPosition(Map, /*EnVaisseau*/EnVaisseau); 
 
 	  CMap__Life_GamePlay(Map, animate_but_do_not_aliven_huh, /*EnVaisseau*/EnVaisseau); 
 
-	  CCamera__CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+	  CCamera__CalcCamera(Camera, Hero, CMap__lattice_to_map_scale_factor__x(Map), CMap__lattice_to_map_scale_factor__y(Map), CMap__lattice_to_map_scale_factor__z(Map), our_manifold); 
 	} 
 	else { 
 	our_manifold -> Life(our_manifold); 
@@ -1081,7 +1085,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 	    const bool hero_got_a_hostile_encounter_huh = CMap__ChocEngine_HeroGotHostileEncounterHuh_one(Map, Hero_o); 
 	    if (hero_got_a_hostile_encounter_huh) { 
 	      Hero_o -> PerdrePV(Hero_o, 1); 
-	      AffichageCoeur -> InformerNbPV(AffichageCoeur, Hero_o -> GetPV(Hero_o)); 
+	      CAffichageCoeur__InformerNbPV(AffichageCoeur, Hero_o -> GetPV(Hero_o)); 
 	      //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Hero_o -> GetPV(Hero_o) = %d "  "\n", __func__, Hero_o -> GetPV(Hero_o)); 
 	      Hero -> DevenirInvisible(Hero, 50); //200); 
 	    }; 
@@ -1090,7 +1094,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 	}; 
 	
 	if (particule != NULL) { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Coordonnées de la particule %p : (%f, %f, %f) "  "\n", __func__, particule, particule -> parent1.p.x, particule -> parent1.p.y, particule -> parent1.p.z); }; 
-	CPhysicalObj__ValiderPosition(Hero_o, Map -> GET_ZEau(Map)); 
+	CPhysicalObj__ValiderPosition(Hero_o, CMap__GET_ZEau(Map)); 
 	if (particule != NULL) { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Coordonnées de la particule %p : (%f, %f, %f) "  "\n", __func__, particule, particule -> parent1.p.x, particule -> parent1.p.y, particule -> parent1.p.z); }; 
 	CMap__Life_Objects_ValiderPosition(Map, /*EnVaisseau*/EnVaisseau); 
 	
@@ -1105,13 +1109,13 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 #endif 
 #endif 
 	
-	Map -> TraiterOrdresDeplacement(Map, Hero, MoteurPhysiqueActif); 
+	CMap__TraiterOrdresDeplacement(Map, Hero, MoteurPhysiqueActif); 
 	
 	ModeJeu = Game_Life_TeleportationStartHuh(ModeJeu); 
 	
 	// *** affichage des coeurs *** 
-	AffichageCoeur -> InformerNbPV(AffichageCoeur, Hero -> parent1.GetPV(&Hero -> parent1)); 
-	AffichageCoeur -> Life(AffichageCoeur); 
+	CAffichageCoeur__InformerNbPV(AffichageCoeur, Hero -> parent1.GetPV(&Hero -> parent1)); 
+	CAffichageCoeur__Life(AffichageCoeur); 
       }; 
       
 #if 0 
@@ -1138,7 +1142,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
       }; 
 
       
-      CCamera__CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+      CCamera__CalcCamera(Camera, Hero, CMap__lattice_to_map_scale_factor__x(Map), CMap__lattice_to_map_scale_factor__y(Map), CMap__lattice_to_map_scale_factor__z(Map), our_manifold); 
       };
       
       break; 
@@ -1154,7 +1158,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 
     if (ModeJeu == mjTELEPORTATION) { 
       bool teleportation_terminee_huh = false; 
-      MoteurTeleportation -> Life(MoteurTeleportation, &Map, &EnVaisseau, &Hero, &teleportation_terminee_huh); 
+      CMoteurTeleportation__Life(MoteurTeleportation, &Map, &EnVaisseau, &Hero, &teleportation_terminee_huh); 
       if (teleportation_terminee_huh) { 
 	//fprintf(stderr, "TELEPORTATION_TERMINEE_HUH\n"); 
 	ModeJeu = EnVaisseau ? mjAEROTHEIERE : mjCARTE; 
@@ -1205,7 +1209,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 
 static void Game_Blit_Sky(const CMap * Map, const float heros_y) { 
 #if 1 
-  const float f = 1.5f * our_manifold -> temps__get_sunshine_intensity_at_y(our_manifold, /*map_y*/0, heros_y / Map -> lattice_height); 
+  const float f = 1.5f * our_manifold -> temps__get_sunshine_intensity_at_y(our_manifold, /*map_y*/0, heros_y / CMap__lattice_height(Map)); 
 #else 
   const float f = Map -> Sol -> IndiceTemps(Map -> Sol, heros_y); 
 #endif 
@@ -1239,7 +1243,15 @@ void Game_Blit_Map(const CMap * Map, const CBonhomme * Hero, const CObjNonAnime 
       const int nb_cells_displayed_y = nb_cases_afficheesYdevant + nb_cases_afficheesYfond; 
       //Map -> Sol -> RenderEau(Map -> Sol, (int) heros_x-nb_cases_afficheesX, (int) heros_y-nb_cases_afficheesYdevant, (int) heros_x+nb_cases_afficheesX, (int) heros_y+nb_cases_afficheesYfond); 
       //Map -> Sol -> RenderEau(Map -> Sol, our_manifold, nb_cases_afficheesX << 1, nb_cases_afficheesYdevant + nb_cases_afficheesYfond, /*target_map_i*/0, /*target_map_j*/0, heros_x / (float) Map -> lattice_width, heros_y / (float) Map -> lattice_height); 
-	Map -> Sol -> RenderEau(Map -> Sol, our_manifold, /*target_map_i*/Map -> global_map_i, /*target_map_j*/Map -> global_map_j, /*target_map_x*/heros_x / ((float) Map -> lattice_width), /*target_map_y*/heros_y / ((float) Map -> lattice_height), /*target_map_dx*/((float) nb_cells_displayed_x) / ((float) Map -> lattice_width), /*target_map_dy*/((float) nb_cells_displayed_y) / ((float) Map -> lattice_height)); 
+      //CMap__Sol(Map) -> RenderEau(CMap__Sol(Map), our_manifold, /*target_map_i*/Map -> global_map_i, /*target_map_j*/Map -> global_map_j, /*target_map_x*/heros_x / ((float) Map -> lattice_width), /*target_map_y*/heros_y / ((float) Map -> lattice_height), /*target_map_dx*/((float) nb_cells_displayed_x) / ((float) Map -> lattice_width), /*target_map_dy*/((float) nb_cells_displayed_y) / ((float) Map -> lattice_height)); 
+      const float lattice_width  = CMap__lattice_width(Map); 
+      const float lattice_height = CMap__lattice_height(Map); 
+      const int global_map_i = CMap__global_map_i(Map); 
+      const int global_map_j = CMap__global_map_j(Map); 
+      CSol__RenderEau(CMap__Sol(Map), our_manifold, 
+        /*target_map_i*/global_map_i,                                              /*target_map_j*/global_map_j, 
+        /*target_map_x*/heros_x / ((float) lattice_width),                         /*target_map_y*/heros_y / ((float) lattice_height), 
+        /*target_map_dx*/((float) nb_cells_displayed_x) / ((float) lattice_width), /*target_map_dy*/((float) nb_cells_displayed_y) / ((float) lattice_height)); 
       
       if (!EnVaisseau) { 
 	//Map -> Sol -> Render(Map -> Sol, (int) heros_x-nb_cases_afficheesX, (int) heros_y-nb_cases_afficheesYdevant, (int) heros_x+nb_cases_afficheesX, (int) heros_y+nb_cases_afficheesYfond); 
@@ -1248,29 +1260,33 @@ void Game_Blit_Map(const CMap * Map, const CBonhomme * Hero, const CObjNonAnime 
 
 	
 	//Map -> Render(Map, (int) i-nb_cases_afficheesX, (int) j-nb_cases_afficheesYdevant, (int) i+nb_cases_afficheesX, (int) j+nb_cases_afficheesYfond, EnVaisseau); 
-	Map -> Render(Map, Camera, our_manifold, nb_cases_afficheesX << 1, nb_cases_afficheesYdevant + nb_cases_afficheesYfond, /*target_map_i*/0, /*target_map_j*/0, /*target_lattice_x*/heros_x, /*target_lattice_y*/heros_y, EnVaisseau); 
+	//Map -> Render(Map, Camera, our_manifold, nb_cases_afficheesX << 1, nb_cases_afficheesYdevant + nb_cases_afficheesYfond, /*target_map_i*/0, /*target_map_j*/0, /*target_lattice_x*/heros_x, /*target_lattice_y*/heros_y, EnVaisseau); 
+	CMap__Render(Map, Camera, our_manifold, nb_cases_afficheesX << 1, nb_cases_afficheesYdevant + nb_cases_afficheesYfond, /*target_map_i*/0, /*target_map_j*/0, /*target_lattice_x*/heros_x, /*target_lattice_y*/heros_y, EnVaisseau); 
 	
 	
 	//Hero -> Render(Hero, Map -> lattice_width, Map -> lattice_height, our_manifold, Camera); 
-	Hero -> Render(Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold, Camera); 
+	//Hero -> Render(Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold, Camera); 
+	Hero -> Render(Hero, CMap__lattice_to_map_scale_factor__x(Map), CMap__lattice_to_map_scale_factor__y(Map), CMap__lattice_to_map_scale_factor__z(Map), our_manifold, Camera); 
 	
 	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " Hero.map_z = %f "  "\n", __func__, Hero -> parent1.GetPosition_z(&Hero -> parent1) * Map -> lattice_to_map_scale_factor__z); 
 	
       } 
       else { // _en vaisseau_ 
 	//Map -> Render(Map, our_manifold, 0, 0, 1000, 1000, EnVaisseau); 
-	Map -> Render(Map, Camera, our_manifold, /*nb_cells_displayed_x*/1000, /*nb_cells_displayed_y*/1000, /*target_map_i*/0, /*target_map_j*/0, /*target_map_x*/0.5, /*target_map_y*/0.5, EnVaisseau); 
+	//Map -> Render(Map, Camera, our_manifold, /*nb_cells_displayed_x*/1000, /*nb_cells_displayed_y*/1000, /*target_map_i*/0, /*target_map_j*/0, /*target_map_x*/0.5, /*target_map_y*/0.5, EnVaisseau); 
+	CMap__Render(Map, Camera, our_manifold, /*nb_cells_displayed_x*/1000, /*nb_cells_displayed_y*/1000, /*target_map_i*/0, /*target_map_j*/0, /*target_map_x*/0.5, /*target_map_y*/0.5, EnVaisseau); 
 	//Vaisseau -> Render(Vaisseau, Map -> lattice_width, Map -> lattice_height, our_manifold); 
-	Vaisseau -> Render(Vaisseau, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+	//Vaisseau -> Render(Vaisseau, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+	Vaisseau -> Render(Vaisseau, CMap__lattice_to_map_scale_factor__x(Map), CMap__lattice_to_map_scale_factor__y(Map), CMap__lattice_to_map_scale_factor__z(Map), our_manifold); 
       }; // end de else de «if (Envaisseau)» 
       
       
       // *** affichage des coeurs *** 
-      AffichageCoeur -> Render(AffichageCoeur); 
+      CAffichageCoeur__Render(AffichageCoeur); 
       
       // *** affichage de la main *** 
-      const float FacteurCompression = our_manifold -> FacteurCompression(our_manifold, /*map_j*/0, heros_y * Map -> lattice_to_map_scale_factor__y); 
-      AffichageMainPierre -> Render(AffichageMainPierre, heros_y, FacteurCompression); //Map); 
+      const float FacteurCompression = our_manifold -> FacteurCompression(our_manifold, /*map_j*/0, heros_y * CMap__lattice_to_map_scale_factor__y(Map)); 
+      CAffichageMainPierre__Render(AffichageMainPierre, heros_y, FacteurCompression); //Map); 
       
     }; // end de «if (Map != NULL)»
 }; 
@@ -1319,7 +1335,7 @@ void Game_Blit(void) {
     
 
     if (ModeJeu == mjTITRE) {
-      PageTitre -> Render(PageTitre); 
+      CPageTitre__Render(PageTitre); 
       break; 
     };
     
@@ -1464,7 +1480,8 @@ void Game_Blit(void) {
       const float target_map_x = CCamera__map__target_position(Camera) -> x; // / (float) Map -> lattice_width; 
       const float target_map_y = CCamera__map__target_position(Camera) -> y; // / (float) Map -> lattice_height; 
 #endif 
-      Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, /*global_map_i*/0, /*global_map_j*/0, target_map_x, target_map_y, /*target_map_dx*/4.0f, /*target_map_dy*/4.0f); 
+      //Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, /*global_map_i*/0, /*global_map_j*/0, target_map_x, target_map_y, /*target_map_dx*/4.0f, /*target_map_dy*/4.0f); 
+      CSol__Render__pre_computations(CMap__Sol_mutable(Map), our_manifold, /*global_map_i*/0, /*global_map_j*/0, target_map_x, target_map_y, /*target_map_dx*/4.0f, /*target_map_dy*/4.0f); 
 #if 1 
       Game_Blit_Map(Map, Hero, Vaisseau); 
 #elif 1 
@@ -1490,12 +1507,13 @@ void Game_Blit(void) {
       const TPoint3D pp = Hero -> parent1.GetPosition(&Hero -> parent1); 
       const float heros_x = pp.x; 
       const float heros_y = pp.y; 
-      const float target_map_x = heros_x / (float) Map -> lattice_width; 
-      const float target_map_y = heros_y / (float) Map -> lattice_height; 
+      const float target_map_x = heros_x / (float) CMap__lattice_width(Map); 
+      const float target_map_y = heros_y / (float) CMap__lattice_height(Map); 
       //Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, nb_cases_afficheesX << 1, nb_cases_afficheesYdevant + nb_cases_afficheesYfond, /*target_map_i*/0, /*target_map_j*/0, /*target_map_x*/heros_x / (float) Map -> lattice_width, /*target_map_y*/heros_y / (float) Map -> lattice_height); 
       //Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, 64, 64, /*target_map_i*/0, /*target_map_j*/0, /*target_map_x*/heros_x, /*target_map_y*/heros_y); 
       //Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, nb_cases_afficheesX << 1, nb_cases_afficheesYdevant + nb_cases_afficheesYfond, /*target_map_i*/0, /*target_map_j*/0, /*target_map_x*/target_map_x, /*target_map_y*/target_map_y); 
-      Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, /*global_map_i*/0, /*global_map_j*/0, target_map_x, target_map_y, /*target_map_dx*/1.0f, /*target_map_dy*/1.0f); 
+      //Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, /*global_map_i*/0, /*global_map_j*/0, target_map_x, target_map_y, /*target_map_dx*/1.0f, /*target_map_dy*/1.0f); 
+      CSol__Render__pre_computations(CMap__Sol_mutable(Map), our_manifold, /*global_map_i*/0, /*global_map_j*/0, target_map_x, target_map_y, /*target_map_dx*/1.0f, /*target_map_dy*/1.0f); 
       
       Game_Blit_Map(Map, Hero, Vaisseau); 
       
@@ -1517,7 +1535,7 @@ void Game_Blit(void) {
     
     if (ModeJeu == mjTELEPORTATION) { 
       Game_Blit_Map(Map, Hero, Vaisseau); 
-      MoteurTeleportation -> Render(MoteurTeleportation, &Map, &EnVaisseau, &Hero, our_manifold); 
+      CMoteurTeleportation__Render(MoteurTeleportation, &Map, &EnVaisseau, &Hero, our_manifold); 
       break; 
     }; 
     

@@ -10,13 +10,118 @@
 
 
 
+// ***************************** CZoneTeleportation ***************************** 
+
+struct CZoneTeleportation { 
+  TPoint3D   position; 
+  TPoint3D   dimension; 
+  TDirection depart_direction; // RL: That terrible thing should be removed. 
+  char *     destination_carte; 
+  TPoint3D   destination_position; 
+  TDirection destination_direction; 
+}; 
+
+const int8_t CZoneTeleportation_bytesize_actual = sizeof(struct CZoneTeleportation); 
+ASSERT_COMPILE_TOPLEVEL(CZoneTeleportation_bytesize >= CZoneTeleportation_bytesize_actual); 
+
+CZoneTeleportation * CZoneTeleportation_make(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction) { 
+  MALLOC_BZERO(CZoneTeleportation,this);
+  
+  this -> position = in_position;
+  this -> dimension = in_dimension;
+  this -> depart_direction = in_depart_direction;
+
+  this -> destination_carte = strcopy(in_destination_carte);
+  this -> destination_position = in_destination_position;
+  this -> destination_direction = in_destination_direction;
+
+  return this; 
+}; 
+
+void CZoneTeleportation_delete(CZoneTeleportation * this) {
+  free(this); 
+}; 
+
+CZoneTeleportation * CZoneTeleportation_copy(const CZoneTeleportation * zt_src) {
+  MALLOC_BZERO(CZoneTeleportation,this);
+  *this = *zt_src; 
+  this -> destination_carte = strcopy(zt_src -> destination_carte); 
+  return this; 
+}; 
+
+bool CZoneTeleportation__dedans_huh(const CZoneTeleportation * this, const TPoint3D p) { 
+  return ((this -> position.x <= p.x) &&
+          (this -> position.y <= p.y) &&
+          (this -> position.z <= p.z) &&
+          (p.x <= this -> position.x + this -> dimension.x) &&
+          (p.y <= this -> position.y + this -> dimension.y) &&
+          (p.z <= this -> position.z + this -> dimension.z) ); 
+}; 
+
+const char *         CZoneTeleportation__destination_carte(const CZoneTeleportation * this) { 
+  return this -> destination_carte; 
+}; 
+TDirection     CZoneTeleportation__depart_direction (const CZoneTeleportation * this) { 
+  return this -> depart_direction; 
+}; 
+TPoint3D       CZoneTeleportation__position         (const CZoneTeleportation * this) { 
+  return this -> position; 
+}; 
+TPoint3D       CZoneTeleportation__dimension        (const CZoneTeleportation * this) {
+  return this -> dimension; 
+}; 
+
+
+
+
 
 
 /**********************
   moteur de téléportation
 ***************************************************/
 
-#define NB_ANIM2_TELEPORTATION 32
+enum { NB_ANIM2_TELEPORTATION = 32 }; 
+
+
+
+struct CMoteurTeleportation {
+  CZoneTeleportation * zt;
+  int anim;
+  float r, v, b;
+            
+  void (* DebuterTeleportation)(struct CMoteurTeleportation * this, const CZoneTeleportation * in_zt);
+  // on commence une téléportation
+  
+  bool (* IsTeleportationEnCours)(const struct CMoteurTeleportation * this);
+  // précise si le jeu est en train de réaliser une téléportation
+  
+  void (* SetCouleurFondu)(struct CMoteurTeleportation * this, int in_couleur);
+  
+  //void (* Life)(struct CMoteurTeleportation * this, struct CMap * &Map, bool &EnVaisseau, struct CBonhomme * &Hero, bool &SCRIPT_SystemeRendMainAuScript);
+  void (* Life)(struct CMoteurTeleportation * this, struct CMap * * Map_ptr, bool * EnVaisseau_ptr, struct CBonhomme * * Hero_ptr, bool * SCRIPT_SystemeRendMainAuScript_ptr);
+
+  //void (* Render)(const struct CMoteurTeleportation * this, struct CMap * &Map, bool &EnVaisseau, struct CBonhomme * &Hero);
+  void (* Render)(const struct CMoteurTeleportation * this, struct CMap * * Map_ptr, bool * EnVaisseau_ptr, struct CBonhomme * * Hero_ptr, const riemann_t * our_manifold);
+  /*si le jeu ne fait pas de téléportation, ==> ne fait rien
+    sinon, avance dans la téléportation
+    (dessine le fondu... à placer en fin de RaiseRender())
+    charge la nouvelle carte
+    puis fondu inverse
+  */
+  
+  CMoteurTeleportation * (* make)(void);
+  CMoteurTeleportation * (* make_content)(CMoteurTeleportation * this);
+  void (* delete)(CMoteurTeleportation * this);
+  void (* delete_content)(CMoteurTeleportation * this);
+};
+
+const int8_t CMoteurTeleportation_bytesize_actual = sizeof(struct CMoteurTeleportation); 
+ASSERT_COMPILE_TOPLEVEL(CMoteurTeleportation_bytesize >= CMoteurTeleportation_bytesize_actual); 
+
+
+
+
+
 
 
 CMoteurTeleportation * CMoteurTeleportation__make_content(CMoteurTeleportation * this) { 
@@ -59,8 +164,8 @@ void CMoteurTeleportation__delete(CMoteurTeleportation * this) {
   free(this);
 }; 
 
-void CMoteurTeleportation__DebuterTeleportation(CMoteurTeleportation * this, CZoneTeleportation in_zt) {
-  this -> zt   = CZoneTeleportation_copy(&in_zt); 
+void CMoteurTeleportation__DebuterTeleportation(CMoteurTeleportation * this, const CZoneTeleportation * in_zt) {
+  this -> zt   = CZoneTeleportation_copy(in_zt); 
   this -> anim = 2 * NB_ANIM2_TELEPORTATION; 
 };
 

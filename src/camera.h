@@ -9,7 +9,12 @@ typedef enum TZoomMethod TZoomMethod;
 
 enum {               CCamera_bytesize = 256 }; 
 extern const int16_t CCamera_bytesize_actual; 
-static void CCamera__check_and_assert(void) { 
+static void CCamera__check_and_assert(const int8_t debug_print_huh, const int stderr_d) { 
+  if (debug_print_huh) { 
+    //fprintf(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "I failed to clean up the log subdir.' " "\n", __func__); 
+    write_string4(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<", __func__, "()>}: ", "CCamera_bytesize: "); write_long_long_int(stderr_d, CCamera_bytesize); write_eol(stderr_d); 
+    write_string4(stderr_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<", __func__, "()>}: ", "CCamera_bytesize_actual: "); write_long_long_int(stderr_d, CCamera_bytesize_actual); write_eol(stderr_d); 
+  }; 
   assert(CCamera_bytesize >= CCamera_bytesize_actual); 
 }; 
 

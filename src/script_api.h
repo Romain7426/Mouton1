@@ -87,7 +87,7 @@ extern void SCRIPT_SupprimerObjet(const char * qui);
 
 //extern void SCRIPT_ChangerDeCarte(CZoneTeleportation zt);
 #if 1
-extern void SCRIPT_ChangerDeCarte_vZT(const struct CZoneTeleportation ZoneTeleportation);
+extern void SCRIPT_ChangerDeCarte_vZT(const CZoneTeleportation * zt);
 extern void SCRIPT_ChangerDeCarte_vXY(const char * nom_carte, const float x, const float y, const TDirection direction);
 extern void SCRIPT_ChangerDeCarte_vXYZ(const char * nom_carte, const float x, const float y, const float z, const TDirection direction);
 extern void SCRIPT_SetCouleurFondu(const int color);

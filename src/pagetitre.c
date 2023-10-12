@@ -3,6 +3,46 @@
 #include "copyright.h"
 
 
+enum TPageTitreAction; 
+TYPEDEF_TYPENAME_WITHOUT_ENUM(TPageTitreAction); 
+
+// RL: Automaton states. 
+enum TPageTitreAction { 
+  ptDONE, // RL: Everything done. 
+  ptFADEIN, // RL: We get in. 
+  ptTITRE,  // RL: Cruise time. 
+  ptAUTEURS,  // RL: Displaying authors 
+  ptCOPYRIGHT,  // RL: Displaying copyright 
+  ptFADEOUT // RL: We get out. 
+}; 
+
+struct CPageTitre { 
+  TPageTitreAction Action; // RL: Actually, it's an automaton, and these are the three states of the automaton. 
+  //int Action; // RL: Actually, it's an automaton, and these are the three states of the automaton. 
+  CTexture * DessineMoiUnMouton; 
+  CTexture * Titre; 
+  int t; // RL: Which is? // RL: Ok, it's to control the displayed-sheep speed. 
+  int fade; 
+  float Ligne_Courante; 
+  CMiniMenu * MiniMenu; // RL: Main choice 
+  int the_user_told_me; 
+  int copyright_page; 
+  
+  void (* Render)(const struct CPageTitre * this); 
+  void (* Life)(struct CPageTitre * this); 
+  int  (* Input)(struct CPageTitre * this); 
+};
+
+const int8_t CPageTitre_bytesize_actual = sizeof(struct CPageTitre); 
+ASSERT_COMPILE_TOPLEVEL(CPageTitre_bytesize >= CPageTitre_bytesize_actual); 
+
+
+
+
+
+
+
+
 
 enum { NB_ETAPE_FADING = 32 }; //64 }; 
 

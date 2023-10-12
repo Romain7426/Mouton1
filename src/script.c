@@ -141,7 +141,7 @@ static void Script__automaton(api_contexte_t * api_contexte) {
     CMoteurTeleportation * MoteurTeleportation = api_contexte -> MoteurTeleportation; 
     bool teleportation_terminee_huh = false; 
     //MoteurTeleportation -> Life(MoteurTeleportation, &Map, &EnVaisseau, &Hero, &teleportation_terminee_huh); 
-    MoteurTeleportation -> Life(MoteurTeleportation, api_contexte -> Map, api_contexte -> EnVaisseau_ref, api_contexte -> Hero, &teleportation_terminee_huh); 
+    CMoteurTeleportation__Life(MoteurTeleportation, api_contexte -> Map, api_contexte -> EnVaisseau_ref, api_contexte -> Hero, &teleportation_terminee_huh); 
     if (teleportation_terminee_huh) { 
       //fprintf(stderr, "TELEPORTATION_TERMINEE_HUH\n"); 
       //TypeInstructionCourante = ticInstructionScript; 
@@ -153,7 +153,7 @@ static void Script__automaton(api_contexte_t * api_contexte) {
       TypeInstructionCourante = api_contexte -> TypeInstructionPrecedente; 
     }; 
     //MoteurTeleportation -> Render(MoteurTeleportation, &Map, &EnVaisseau, &Hero, our_manifold); 
-    MoteurTeleportation -> Render(MoteurTeleportation, api_contexte -> Map, api_contexte -> EnVaisseau_ref, api_contexte -> Hero, *api_contexte -> our_manifold_ref); 
+    CMoteurTeleportation__Render(MoteurTeleportation, api_contexte -> Map, api_contexte -> EnVaisseau_ref, api_contexte -> Hero, *api_contexte -> our_manifold_ref); 
 #else 
     //fprintf(stderr, "--TELEPORTATION_TERMINEE_HUH\n"); 
     CMap__delete(Map); 

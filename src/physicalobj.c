@@ -72,7 +72,7 @@ void CPhysicalObj__SetPosition_vP3D(CPhysicalObj * this, const TPoint3D lattice_
   //printf("SetPosition sur %p : %f, %f, %f\n", this, pos.x, pos.y, pos.z);      
   //this -> p = this -> np = lattice_pos;
   this -> p  = lattice_pos; 
-  this -> z0 = Map -> GETZ0_vXY(Map, this -> p.x, this -> p.y); 
+  this -> z0 = CMap__GETZ0_vXY(Map, this -> p.x, this -> p.y); 
 }; 
 
 void CPhysicalObj__SetPosition_vXY(CPhysicalObj * this, const float lattice_x, const float lattice_y, const TMethodePlacement mp, const CMap * Map) {
@@ -86,7 +86,7 @@ void CPhysicalObj__SetPosition_vXY(CPhysicalObj * this, const float lattice_x, c
   }; 
   
 #if 1 
-  this -> z0  = Map -> GETZ0_vXY(Map, this -> p.x, this -> p.y); 
+  this -> z0  = CMap__GETZ0_vXY(Map, this -> p.x, this -> p.y); 
   this -> p.z = this -> z0; 
 #else 
   const float map_x = lattice_x / Map -> lattice_width ; 
@@ -99,7 +99,7 @@ void CPhysicalObj__SetPosition_vXYZ(CPhysicalObj * this, const float lattice_x, 
   this -> p.x = lattice_x; 
   this -> p.y = lattice_y; 
   this -> p.z = lattice_z; 
-  this -> z0  = Map -> GETZ0_vXY(Map, this -> p.x, this -> p.y); 
+  this -> z0  = CMap__GETZ0_vXY(Map, this -> p.x, this -> p.y); 
 }; 
 
 void CPhysicalObj__SetZ(CPhysicalObj * this, const float nz, const TMethodePlacement mp) { 
@@ -387,12 +387,12 @@ void CPhysicalObj__BordersAndGroundAndSlope__AdjustAndCorrectNP(CPhysicalObj * t
   // RL: Borders 
   if (this -> np.x <= 0) this -> np.x = 0; 
   if (this -> np.y <= 0) this -> np.y = 0; 
-  if (this -> np.x >= Map -> lattice_width ) this -> np.x = Map -> lattice_width ; 
-  if (this -> np.y >= Map -> lattice_height) this -> np.y = Map -> lattice_height; 
+  if (this -> np.x >= CMap__lattice_width (Map)) this -> np.x = CMap__lattice_width (Map); 
+  if (this -> np.y >= CMap__lattice_height(Map)) this -> np.y = CMap__lattice_height(Map); 
 
   // RL: Ground and Slope 
 #if 1 
-  const float lattice_z0__n = Map -> GETZ0_vXY(Map, this -> np.x, this -> np.y); 
+  const float lattice_z0__n = CMap__GETZ0_vXY(Map, this -> np.x, this -> np.y); 
 #else 
   const float map_x__n  = this -> np.x / Map -> lattice_width ; 
   const float map_y__n  = this -> np.y / Map -> lattice_height; 
