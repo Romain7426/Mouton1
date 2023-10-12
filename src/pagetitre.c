@@ -215,10 +215,10 @@ void CPageTitre__Render(const CPageTitre * this) {
     
     const float f = (float) this -> fade/NB_ETAPE_FADING; 
     glColor3f(f, f, f); 
-    this -> Titre -> GLTextureCourante(this -> Titre); 
+    CTexture__GLTextureCourante(this -> Titre); 
     BEGIN_BLIT_END(200,320,500,150,0.0f, 0.0f, 1.0f, 1.0f); 
     
-    this -> DessineMoiUnMouton -> GLTextureCourante(this -> DessineMoiUnMouton); 
+    CTexture__GLTextureCourante(this -> DessineMoiUnMouton); 
     //const float v = ((float) this -> t)/512.0f; 
     const float v = ((float) this -> t)/3072.0f; 
     //const float v = ((float) this -> t)/4096.0f; 

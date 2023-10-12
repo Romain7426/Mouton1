@@ -131,8 +131,8 @@ int CPantin__AjouterMembre(CPantin * this, const char * fichier_image,
   {
     //this -> Membre[i].resTexture = gestionTexture.prendre(fichier_image);
     this -> Membre[i].Texture  = CTexture_make(fichier_image); 
-    this -> Membre[i].taille_x = tx / this -> Membre[i].Texture -> taillex; 
-    this -> Membre[i].taille_y = ty / this -> Membre[i].Texture -> tailley; 
+    this -> Membre[i].taille_x = tx / CTexture__taillex(this -> Membre[i].Texture); 
+    this -> Membre[i].taille_y = ty / CTexture__tailley(this -> Membre[i].Texture); 
   }    
   //printf("arf\n"); 
   this -> Membre[i].px = px*OPENGL_PIXEL_FACTOR;
@@ -658,7 +658,7 @@ void CBonhomme__AfficherPantin(const CBonhomme * this, const CPantin * pantin, c
   for (int i = 0; i < pantin -> GetNbMembres(pantin); i++) { 
     //printf("Affichage du membre n° %i\n", i); 
     const float a = pantin -> Membre[i].angle; 
-    pantin -> Membre[i].Texture -> GLTextureCourante(pantin -> Membre[i].Texture);  
+    CTexture__GLTextureCourante(pantin -> Membre[i].Texture);  
     glPushMatrix(); { 
 #if 1 
       const TDirection direction_affichee = ConvertirDirectionAvecVue2(this -> Direction, Camera); 

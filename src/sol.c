@@ -573,7 +573,7 @@ void CSol__Render(const CSol * this, const riemann_t * our_manifold, const int g
 #endif 
     if (!(this -> TextureSol_used_huh[tex_i])) { continue; }; 
     
-    this -> TextureSol[tex_i] -> GLTextureCourante(this -> TextureSol[tex_i]); 
+    CTexture__GLTextureCourante(this -> TextureSol[tex_i]); 
     
     ///for (int vertex_i = vertex1_i; vertex_i <= vertex2_i; vertex_i++) { 
     for (int vertex_i = vertex1_i; vertex_i < vertex2_i; vertex_i++) { 

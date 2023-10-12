@@ -252,8 +252,8 @@ int Game_Init(api_contexte_t * api_contexte) {
   // Camera 
   //CCamera__make_aux(Camera); 
   Camera = CCamera__make(); 
-  Camera -> InitCamera(Camera); 
-  Camera -> SolidariserAuHeros(Camera); 
+  CCamera__InitCamera(Camera); 
+  CCamera__SolidariserAuHeros(Camera); 
   
   Map = NULL;   
 #if 0 
@@ -369,35 +369,41 @@ static int Game_ProcessInputs_Oeil(const int current_mj) {
 
     if (KEY_VUE_ANGLE_PLUS) { 
       //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "KEY_CAMERA_ANGLE_XY_PLUS: Camera -> angleXY = %f"  "\n", __func__, Camera -> angleXY); 
-      Camera -> angleXY += PI/32.0f; 
+      //Camera -> angleXY += PI/32.0f; 
+      *CCamera__angleXY(Camera) += PI/32.0f; 
       break; 
     }; 
       
     if (KEY_VUE_ANGLE_MOINS) {  
       //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "KEY_CAMERA_ANGLE_XY_PLUS: Camera -> angleXY = %f"  "\n", __func__, Camera -> angleXY); 
-      Camera -> angleXY -= PI/32.0f; 
+      //Camera -> angleXY -= PI/32.0f; 
+      *CCamera__angleXY(Camera) -= PI/32.0f; 
       break; 
     }; 
       
     if (KEY_CAMERA_DIST_PLUS) { 
-      Camera -> lattice__dist += 0.1f; 
+      //Camera -> lattice__dist += 0.1f; 
+      *CCamera__lattice__dist(Camera) += 0.1f; 
       break; 
     }; 
       
     if (KEY_CAMERA_DIST_MOINS) { 
-      Camera -> lattice__dist -= 0.1f; 
+      //Camera -> lattice__dist -= 0.1f; 
+      *CCamera__lattice__dist(Camera) -= 0.1f; 
       break; 
     }; 
 
     if (KEY_CAMERA_ANGLE_Z_PLUS) { 
       //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "KEY_CAMERA_ANGLE_Z_PLUS: Camera -> angleZ = %f"  "\n", __func__, Camera -> angleZ); 
-      Camera -> angleZ -= PI/32.0f; 
+      //Camera -> angleZ -= PI/32.0f; 
+      *CCamera__angleZ(Camera) -= PI/32.0f; 
       break; 
     }; 
       
     if (KEY_CAMERA_ANGLE_Z_MOINS) { 
       //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "KEY_CAMERA_ANGLE_Z_MOINS: Camera -> angleZ = %f"  "\n", __func__, Camera -> angleZ); 
-      Camera -> angleZ += PI/32.0f; 
+      //Camera -> angleZ += PI/32.0f; 
+      *CCamera__angleZ(Camera) += PI/32.0f; 
       break; 
     }; 
       
@@ -405,25 +411,29 @@ static int Game_ProcessInputs_Oeil(const int current_mj) {
       
     if (KEY_UP) { 
       //Hero -> Avancer(Hero, ConvertirDirectionAvecVue(DOS, Camera), our_manifold); 
-      Camera -> lattice__target_position.y += 0.5f ; 
+      //Camera -> lattice__target_position.y += 0.5f ; 
+      CCamera__lattice__target_position(Camera) -> y += 0.5f ; 
       break; 
     }; 
       
     if (KEY_DOWN) { 
       //Hero -> Avancer(Hero, ConvertirDirectionAvecVue(FACE, Camera), our_manifold); 
-      Camera -> lattice__target_position.y -= 0.5f ; 
+      //Camera -> lattice__target_position.y -= 0.5f ; 
+      CCamera__lattice__target_position(Camera) -> y -= 0.5f ; 
       break; 
     }; 
       
     if (KEY_LEFT) { 
       //Hero -> Avancer(Hero, ConvertirDirectionAvecVue(PROFIL_VERS_G, Camera), our_manifold); 
-      Camera -> lattice__target_position.x -= 0.5f ; 
+      //Camera -> lattice__target_position.x -= 0.5f ; 
+      CCamera__lattice__target_position(Camera) -> x -= 0.5f ; 
       break; 
     }; 
       
     if (KEY_RIGHT) { 
       //Hero -> Avancer(Hero, ConvertirDirectionAvecVue(PROFIL_VERS_D, Camera), our_manifold); 
-      Camera -> lattice__target_position.x += 0.5f ; 
+      //Camera -> lattice__target_position.x += 0.5f ; 
+      CCamera__lattice__target_position(Camera) -> x += 0.5f ; 
       break; 
     }; 
       
@@ -514,13 +524,21 @@ static int Game_ProcessInputs_HerosSurUneMap(const int current_mj) {
     }; 
 #endif 
 
-
+#if 0 
     if (KEY_VUE_ANGLE_PLUS      ) { Camera -> angleXY       += PI/32.0f; }; 
     if (KEY_VUE_ANGLE_MOINS     ) { Camera -> angleXY       -= PI/32.0f; }; 
     if (KEY_CAMERA_DIST_PLUS    ) { Camera -> lattice__dist +=     0.1f; }; 
     if (KEY_CAMERA_DIST_MOINS   ) { Camera -> lattice__dist -=     0.1f; }; 
     if (KEY_CAMERA_ANGLE_Z_PLUS ) { Camera -> angleZ        -= PI/32.0f; }; 
     if (KEY_CAMERA_ANGLE_Z_MOINS) { Camera -> angleZ        += PI/32.0f; }; 
+#else 
+    if (KEY_VUE_ANGLE_PLUS      ) { *CCamera__angleXY(Camera)       += PI/32.0f; }; 
+    if (KEY_VUE_ANGLE_MOINS     ) { *CCamera__angleXY(Camera)       -= PI/32.0f; }; 
+    if (KEY_CAMERA_DIST_PLUS    ) { *CCamera__lattice__dist(Camera) +=     0.1f; }; 
+    if (KEY_CAMERA_DIST_MOINS   ) { *CCamera__lattice__dist(Camera) -=     0.1f; }; 
+    if (KEY_CAMERA_ANGLE_Z_PLUS ) { *CCamera__angleZ(Camera)        -= PI/32.0f; }; 
+    if (KEY_CAMERA_ANGLE_Z_MOINS) { *CCamera__angleZ(Camera)        += PI/32.0f; }; 
+#endif 
     
     const bool slow_walk_huh = KeyBoard[SDLK_RSHIFT] || KeyBoard[SDLK_LSHIFT]; 
     
@@ -671,7 +689,8 @@ int Game_ProcessInputs(const int current_mj) {
 	Map = CMap__make("village.carte", /*map_i*/0, /*map_j*/0, our_manifold, /*EnVaisseau*/false); 
 	Hero -> parent1.SetPosition_vXY(&Hero -> parent1, 10.0f, 10.0f, mpABSOLU, Map); 
 #endif 	
-	Camera -> lattice__target_position.z = Map -> GETZ0_vP3D(Map, Camera -> lattice__target_position); 
+	//Camera -> lattice__target_position.z = Map -> GETZ0_vP3D(Map, Camera -> lattice__target_position); 
+	CCamera__lattice__target_position(Camera) -> z = Map -> GETZ0_vP3D(Map, *CCamera__lattice__target_position(Camera)); 
 	//TypeInstructionCourante = Script_Automaton_Idle; 
 	break; 
       } 
@@ -1005,7 +1024,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
     
     if (ModeJeu == mjOEIL) { 
       Game_Life_Map(Map, Hero); 
-      Camera -> CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+      CCamera__CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
       break; 
     }; 
 
@@ -1028,7 +1047,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 
 	  CMap__Life_GamePlay(Map, animate_but_do_not_aliven_huh, /*EnVaisseau*/EnVaisseau); 
 
-	  Camera -> CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+	  CCamera__CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
 	} 
 	else { 
 	our_manifold -> Life(our_manifold); 
@@ -1119,7 +1138,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
       }; 
 
       
-      Camera -> CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
+      CCamera__CalcCamera(Camera, Hero, Map -> lattice_to_map_scale_factor__x, Map -> lattice_to_map_scale_factor__y, Map -> lattice_to_map_scale_factor__z, our_manifold); 
       };
       
       break; 
@@ -1214,7 +1233,7 @@ void Game_Blit_Map(const CMap * Map, const CBonhomme * Hero, const CObjNonAnime 
       
       // !! Bien - laisser cette instruction en premier sinon rien ne s'affiche… ??? 
       // RL: Theoritically, it places the camera - where the user looks from. 
-      Camera -> Blit(Camera, our_manifold); 
+      CCamera__Blit(Camera, our_manifold); 
       
       const int nb_cells_displayed_x = nb_cases_afficheesX << 1; 
       const int nb_cells_displayed_y = nb_cases_afficheesYdevant + nb_cases_afficheesYfond; 
@@ -1438,8 +1457,13 @@ void Game_Blit(void) {
     }; 
     
     if (ModeJeu == mjOEIL) { 
+#if 0 
       const float target_map_x = Camera -> map__target_position.x; // / (float) Map -> lattice_width; 
       const float target_map_y = Camera -> map__target_position.y; // / (float) Map -> lattice_height; 
+#else 
+      const float target_map_x = CCamera__map__target_position(Camera) -> x; // / (float) Map -> lattice_width; 
+      const float target_map_y = CCamera__map__target_position(Camera) -> y; // / (float) Map -> lattice_height; 
+#endif 
       Map -> Sol -> Render__pre_computations(Map -> Sol, our_manifold, /*global_map_i*/0, /*global_map_j*/0, target_map_x, target_map_y, /*target_map_dx*/4.0f, /*target_map_dy*/4.0f); 
 #if 1 
       Game_Blit_Map(Map, Hero, Vaisseau); 

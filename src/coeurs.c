@@ -100,7 +100,7 @@ void CAffichageCoeur__Render(const CAffichageCoeur * this) {
   
   glEnable2D(); {
     
-    texcoeur -> GLTextureCourante(texcoeur);
+    CTexture__GLTextureCourante(texcoeur);
     
     glDisable(GL_LIGHTING);
     

@@ -37,14 +37,14 @@ void CAffichageMainPierre__Render(const CAffichageMainPierre * this, const float
   glEnable2D(); {
     //const float d = Map -> parent.FacteurCompression(&Map -> parent, y);  
     const float d = FacteurCompression; 
-    this -> pierre -> GLTextureCourante(this -> pierre);
+    CTexture__GLTextureCourante(this -> pierre);
     glBegin(GL_QUADS); {
       BLIT(MAIN_PIERRE_X+PIERRE_X-(d*TAILLE_PIERRE_X/4.0f),
            MAIN_PIERRE_Y+PIERRE_Y-(d*TAILLE_PIERRE_Y/3.0f),
            TAILLE_PIERRE_X+(d*TAILLE_PIERRE_X/2.0f),(d * TAILLE_PIERRE_Y),0,0,1,1);     
     } glEnd();
     
-    this -> main -> GLTextureCourante(this -> main);
+    CTexture__GLTextureCourante(this -> main);
     glDisable(GL_LIGHTING);
     glBegin(GL_QUADS); {
       BLIT(MAIN_PIERRE_X,MAIN_PIERRE_Y,128,128,0,0,1,1); 

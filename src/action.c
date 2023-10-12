@@ -233,15 +233,16 @@ void CActionsMenu__Render(const CActionsMenu * this) {
       
       if (Items[i][j].texture != NULL) {
 	glEnable(GL_TEXTURE_2D);
-	Items[i][j].texture -> GLTextureCourante(Items[i][j].texture);
+	//Items[i][j].texture -> GLTextureCourante(Items[i][j].texture);
+	CTexture__GLTextureCourante(Items[i][j].texture);
 	
 	BEGIN_BLIT_END(xx, yy, 32,32, 0.0f, 0.0f, 1.0f, 1.0f);
       } 
       else {
 	switch(j) {
-	case 0: texAction1 -> GLTextureCourante(texAction1);  break;       
-	case 1: texAction2 -> GLTextureCourante(texAction2);  break;      
-	case 2: texAction3 -> GLTextureCourante(texAction3);  break;      
+	case 0: CTexture__GLTextureCourante(texAction1);  break;       
+	case 1: CTexture__GLTextureCourante(texAction2);  break;      
+	case 2: CTexture__GLTextureCourante(texAction3);  break;      
 	default: assert(false);
 	}; 
 	BEGIN_BLIT_END(xx, yy, 32,32, 0.0f, 0.0f, 1.0f, 1.0f);

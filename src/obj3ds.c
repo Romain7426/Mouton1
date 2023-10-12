@@ -194,7 +194,7 @@ void C3DS__RenderGL(const C3DS * this) {
       glEnable(GL_TEXTURE_2D);
       
       // Bind the texture map to the object by it's materialID
-      this -> g_Texture[pObject -> materialID] -> GLTextureCourante(this -> g_Texture[pObject -> materialID]);
+      CTexture__GLTextureCourante(this -> g_Texture[pObject -> materialID]);
       // glBindTexture(GL_TEXTURE_2D, g_Texture[pObject->materialID]);
       
     } else {

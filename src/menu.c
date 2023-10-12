@@ -389,7 +389,7 @@ void CMenu__Render(const CMenu * this) {
       }
       else {
         glEnable(GL_TEXTURE_2D);
-        parent -> Items[i][j].texture -> GLTextureCourante(parent -> Items[i][j].texture);
+        CTexture__GLTextureCourante(parent -> Items[i][j].texture);
       };       
       const float theta = (float) parent -> anim_theta[i] / nb_pas_theta;        
       const float cj = cosf(2*PI*(j-theta)/num_item_max);
@@ -509,12 +509,12 @@ void CMiniMenu__Render(const CMiniMenu * this) {
       Text -> print1(Text, this -> X+40, yy, 1000, 1000, item_nom);
       if (parent -> Items[column_i][j].texture != NULL) {
         glEnable(GL_TEXTURE_2D);
-        parent -> Items[column_i][j].texture -> GLTextureCourante(parent -> Items[column_i][j].texture);
+        CTexture__GLTextureCourante(parent -> Items[column_i][j].texture);
         BEGIN_BLIT_END(this -> X, yy, 32, 32, 0.0f, 0.0f, 1.0f, 1.0f);
       };
     };
     
-    this -> Curseur -> GLTextureCourante(this -> Curseur);
+    CTexture__GLTextureCourante(this -> Curseur);
     const float theta = (float) parent -> anim_theta[column_i] / nb_pas_theta;
     BEGIN_BLIT_END(this -> X-16, this -> Y - (int) (theta*NB_PIXEL_HAUTEUR_LIGNE)+8, 16,16, 0.0f, 0.0f, 1.0f, 1.0f);
     

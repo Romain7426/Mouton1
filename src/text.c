@@ -190,7 +190,7 @@ float CText__print2(CText * this, float l, const int nblignes, const int nbcarac
     // on décale également avec l (pour commencer à écrire à la ligne l 
     
     glEnable(GL_TEXTURE_2D);
-    this -> tex -> GLTextureCourante(this -> tex);
+    CTexture__GLTextureCourante(this -> tex);
     glDisable(GL_LIGHTING);
     glBegin(GL_QUADS); {
     
@@ -445,7 +445,7 @@ enum { MSGTXTDECAL_X = 32 };
     /*}*/
 
 
-    this -> texfond -> GLTextureCourante(this -> texfond);
+    CTexture__GLTextureCourante(this -> texfond);
     
     glBegin(GL_QUADS); {
       BLIT(MSGTXT_X,MSGTXT_Y,MSGTXT_W,MSGTXT_H,0,0,1,1); 

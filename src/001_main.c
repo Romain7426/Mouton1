@@ -1,7 +1,8 @@
 #include "global.h"
 #include "001_main.h"
 #include "002_kernel.h"
-//#include "son.h" 
+#include "006_check_and_assert.h"
+//#include "son.h"
 //#include "keys.h"
 //#include "timer.h"
 #include <sys/resource.h> 
@@ -154,20 +155,22 @@ static void main_win_print(void);
 // =========================================================================== 
 // 0. MAIN 
 
-int main(const int argc, const char * argv[]) {
-  //int _SDL_main(int argc, char * argv[]) {
+int main(const int argc, const char * argv[]) { 
   LOCAL_ALLOCA__DECLARE(UINT16_MAX); 
   int retour = -1;
   
-  if (1 > argc) { 
-    write_string(STDERR_FILENO, "Does not make sense - ARGC is lower than 1: "); 
-    write_long_long_int(STDERR_FILENO, argc); 
-    write_eol(STDERR_FILENO); 
-    return 0; 
+ label__start: {
+    //int _SDL_main(int argc, char * argv[]) {
+    if (1 > argc) { 
+      write_string(STDERR_FILENO, "Does not make sense - ARGC is lower than 1: "); 
+      write_long_long_int(STDERR_FILENO, argc); 
+      write_eol(STDERR_FILENO); 
+      return 0; 
+    }; 
+    main_argv0 = argv[0]; 
+    main_argv0__bytesize = 1 + strlen(main_argv0); 
+    goto label__check_and_assert; 
   }; 
-  main_argv0 = argv[0]; 
-  main_argv0__bytesize = 1 + strlen(main_argv0); 
-  goto label__body; 
 
  label__exit: { 
     main__stdout_log_buffer__flush(); 
@@ -208,6 +211,11 @@ int main(const int argc, const char * argv[]) {
   }; 
 #endif 
   
+
+  label__check_and_assert: { 
+    check_and_assert(); 
+    goto label__body; 
+  }; 
   
  label__body: { 
     // RL: First thing to do: 

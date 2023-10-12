@@ -168,37 +168,56 @@ void SCRIPT_Camera_SetPosition(const float x, const float y, const float z, cons
   //Camera.pos = ((mp == mpRELATIF) ? Camera.pos : Point3D_make(0.0f, 0.0f, 0.0f))  +  Point3D_make(x, y, z); 
 
   if (mp == mpRELATIF) { 
-    TPoint3D_add_self_expanded__macro((*(api_contexte.Camera_ref)) -> lattice__target_position, x, y, z); 
+    //TPoint3D_add_self_expanded__macro((*(api_contexte.Camera_ref)) -> lattice__target_position, x, y, z); 
+    TPoint3D_add_self_expanded__macro(*CCamera__lattice__target_position((*(api_contexte.Camera_ref))), x, y, z); 
   } 
   else { 
-    TPoint3D_assign__macro((*(api_contexte.Camera_ref)) -> lattice__target_position, x, y, z); 
+    //TPoint3D_assign__macro((*(api_contexte.Camera_ref)) -> lattice__target_position, x, y, z); 
+    TPoint3D_assign__macro(*CCamera__lattice__target_position((*(api_contexte.Camera_ref))), x, y, z); 
   }; 
 }; 
 
 void SCRIPT_Camera_Init(void) { 
-  CCamera * Camera = *(api_contexte.Camera_ref); Camera -> InitCamera(Camera); 
+  CCamera * Camera = *(api_contexte.Camera_ref); CCamera__InitCamera(Camera); 
   Kernel_Script_YieldToKernel(); 
 }; 
 
 void SCRIPT_Camera_SolidariserAuHeros(void) { 
-  CCamera * Camera = *(api_contexte.Camera_ref); Camera -> SolidariserAuHeros(Camera); 
+  CCamera * Camera = *(api_contexte.Camera_ref); CCamera__SolidariserAuHeros(Camera); 
 }; 
 
 void SCRIPT_Camera_DeSolidariser(void) { 
-  CCamera * Camera = *(api_contexte.Camera_ref); Camera -> DeSolidariser(Camera); 
+  CCamera * Camera = *(api_contexte.Camera_ref); CCamera__DeSolidariser(Camera); 
 }; 
 
 void SCRIPT_Camera_Baisser(void) { 
   CCamera * Camera = *(api_contexte.Camera_ref); 
-  Camera -> angleZ += PI/32.0f; 
+  //Camera -> angleZ += PI/32.0f; 
+  *CCamera__angleZ(Camera) += PI/32.0f; 
   Kernel_Script_YieldToKernel(); 
 }; 
 
 
 void SCRIPT_Camera_Rotate(const float degree_angle_x, const float degree_angle_y, const float degree_angle_z, const TMethodePlacement mp) {
+#if 0 
   (*(api_contexte.Camera_ref)) -> angleXY = ((mp == mpRELATIF) ? (*(api_contexte.Camera_ref)) -> angleXY : 0.0f) + PI * degree_angle_x / 180.0f;
   //Camera -> angleHB = ((mp == mpRELATIF) ? Camera -> angleHB : 0.0f) + PI * degree_angle_y / 180.0f;
   (*(api_contexte.Camera_ref)) -> angleZ = ((mp == mpRELATIF) ? (*(api_contexte.Camera_ref)) -> angleZ : 0.0f) + PI * degree_angle_y / 180.0f;
+#else 
+  { 
+    CCamera * Camera = *(api_contexte.Camera_ref); 
+    const float radian_angle_x = PI * degree_angle_x / 180.0f; 
+    const float radian_angle_y = PI * degree_angle_y / 180.0f; 
+    if (mp == mpRELATIF) { 
+      *CCamera__angleXY(Camera) += radian_angle_x; 
+      *CCamera__angleZ (Camera) += radian_angle_y; 
+    }
+    else { 
+      *CCamera__angleXY(Camera) = radian_angle_x; 
+      *CCamera__angleZ (Camera) = radian_angle_y; 
+    }; 
+  }; 
+#endif 
 };
 
 
@@ -207,8 +226,8 @@ void SCRIPT_Camera_Zoom(const float zoom_factor) {
   zoom = 2.0f : on agrandit par 2, la caméra est deux fois plus près
   du point quel regarde */
   //(*(api_contexte.Camera_ref)) -> SetDist((*(api_contexte.Camera_ref)), lattice__dist_defaut / zoom); 
-  (*(api_contexte.Camera_ref)) -> Zoom((*(api_contexte.Camera_ref)), TZoomMethod_Absolu, zoom_factor); 
-  
+  //(*(api_contexte.Camera_ref)) -> Zoom((*(api_contexte.Camera_ref)), TZoomMethod_Absolu, zoom_factor); 
+  CCamera__Zoom((*(api_contexte.Camera_ref)), TZoomMethod_Absolu, zoom_factor); 
   Kernel_Script_YieldToKernel(); 
 }; 
 

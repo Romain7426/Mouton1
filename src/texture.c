@@ -1,16 +1,33 @@
 #include "global.h"
 #include "texture.h"
 
+struct CTexture {
+  GLuint tex_ind; // indice de la texture dans OpenGL 
+  int dico_ind; // indice interne 
+  
+  bool erreur;
+  
+  // Taille en pixels de la texture. 
+  float taillex; 
+  float tailley; 
+        
+  // Pour dire à OpenGL que cette texture est la texture courante. 
+  void (* GLTextureCourante)(const CTexture * this);
+}; 
+ 
+const int8_t CTexture_bytesize_actual = sizeof(struct CTexture); 
+ASSERT_COMPILE_TOPLEVEL(CTexture_bytesize >= CTexture_bytesize_actual); 
+
 static bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLuint * glindice_ref, float * taillex_ref, float * tailley_ref); 
 
-enum { texture_dico_size = 512 }; 
-static char * texture_dico_filename[texture_dico_size] = {}; 
-static CTexture * texture_dico_texture[texture_dico_size] = {}; 
-static int texture_dico_usersnb[texture_dico_size] = {}; 
-static int texture_dico_nb = 0; 
+enum {            texture_dico_size = 512 }; 
+static char *     texture_dico_filename[texture_dico_size] = {}; 
+static CTexture * texture_dico_texture [texture_dico_size] = {}; 
+static int8_t     texture_dico_usersnb [texture_dico_size] = {}; 
+static int16_t    texture_dico_nb = 0; 
 
 
-static int texture_dico_push(const char * filename, CTexture * texture_non_copiee) {
+static int16_t texture_dico_push(const char * filename, CTexture * texture_non_copiee) {
   assert(texture_dico_nb < texture_dico_size); 
   texture_dico_filename[texture_dico_nb] = strcopy(filename); 
   texture_dico_texture[texture_dico_nb] = texture_non_copiee; 
@@ -19,29 +36,25 @@ static int texture_dico_push(const char * filename, CTexture * texture_non_copie
   return texture_dico_nb-1; 
 }; 
 
-static int texture_dico_lookup(const char * filename) {
+static int16_t texture_dico_lookup(const char * filename) {
   char * * p = texture_dico_filename; 
-  for (int i = 0; i < texture_dico_nb; i++) {
+  for (int16_t i = 0; i < texture_dico_nb; i++) {
     if (0 == strcmp(*p, filename)) return i; 
     p++; 
   };
   return -1;
 }; 
 
-static CTexture * texture_dico_get(const int i) {
+static CTexture * texture_dico_get(const int16_t i) {
   texture_dico_usersnb[i] ++; 
   return texture_dico_texture[i];
 }; 
 
-static void texture_dico_release(const int i) {
+static void texture_dico_release(const int16_t i) {
   texture_dico_usersnb[i] --; 
 }; 
 
-
-
-
-
-bool tester_extension(const char * fichier_image, const char * extension) {
+static bool tester_extension(const char * fichier_image, const char * extension) {
   char ext[3] = {0, 0, 0};
   int i = 0;   
 
@@ -62,7 +75,7 @@ CTexture * CTexture_copy(const CTexture * src) {
   // NA 
   return this; 
 #else
-  return texture_dico_get(src -> internal_ind); 
+  return texture_dico_get(src -> dico_ind); 
 #endif 
 }; 
 
@@ -80,7 +93,7 @@ CTexture * CTexture_make_and_push(const char * fichier_image) {
 
   this -> erreur = !alright_huh; 
   
-  this -> internal_ind = texture_dico_push(fichier_image, this); 
+  this -> dico_ind = texture_dico_push(fichier_image, this); 
   
   return this; 
 };
@@ -88,14 +101,14 @@ CTexture * CTexture_make_and_push(const char * fichier_image) {
 CTexture * CTexture_make(const char * fichier_image) {
   //printf("Chargement de la texture '%s'...\n", fichier_image);
 
-  const int internal_ind = texture_dico_lookup(fichier_image); 
-  if (internal_ind >= 0) { return texture_dico_get(internal_ind); }; 
+  const int16_t dico_ind = texture_dico_lookup(fichier_image); 
+  if (dico_ind >= 0) { return texture_dico_get(dico_ind); }; 
 
   return CTexture_make_and_push(fichier_image); 
 }; 
 
 void CTexture_delete(CTexture * this) {
-  texture_dico_release(this -> internal_ind); 
+  texture_dico_release(this -> dico_ind); 
 };
 
 void CTexture_delete_hard(CTexture * this) {

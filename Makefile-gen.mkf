@@ -101,7 +101,7 @@ else
 endif 
 $(info CC_HAS_F_STACK_PROTECTOR_NO_HUH: $(CC_HAS_F_STACK_PROTECTOR_NO_HUH))
 
-CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := $(shell mkdir -p tmp && echo "int main(int argc, char * argv[]) { char tmp[argc]; return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_vla.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_vla.exe ; echo $$?)
+CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := $(shell mkdir -p tmp && echo "int main(int argc, char * argv[]) { char local[1 << 14]; char tmp[argc]; return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_vla.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_vla.exe ; echo $$?)
 ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH),0) 
   CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := yes
 else 
@@ -109,7 +109,7 @@ else
 endif 
 $(info CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH))
 
-CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := $(shell mkdir -p tmp && echo "#include <stdlib.h> \n int main(int argc, char * argv[]) { char * tmp = alloca(argc); return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_alloca.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_alloca.exe ; echo $$?)
+CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := $(shell mkdir -p tmp && echo "#include <stdlib.h> \n int main(int argc, char * argv[]) { char local[1 << 14]; char * tmp = alloca(argc); return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_alloca.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_alloca.exe ; echo $$?)
 ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH),0) 
   CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := yes
 else 
@@ -837,7 +837,7 @@ Makefile:
 	echo "" >> $@
 	$(foreach file_h,$(patsubst src/%,%,$(wildcard src/*.h)), \
 	  echo "build/$(file_h): src/$(file_h) " >> $@; \
-	  echo "	ln src/$(file_h) build/$(file_h) " >> $@; \
+	  echo "	ln -f src/$(file_h) build/$(file_h) " >> $@; \
 	  echo "" >> $@; \
 	)
 	echo "" >> $@
@@ -847,7 +847,7 @@ Makefile:
 	echo "" >> $@
 	$(foreach file_ci,$(patsubst src/%,%,$(wildcard src/*.ci)), \
 	  echo "build/$(file_ci): src/$(file_ci) " >> $@; \
-	  echo "	ln src/$(file_ci) build/$(file_ci) " >> $@; \
+	  echo "	ln -f src/$(file_ci) build/$(file_ci) " >> $@; \
 	  echo "" >> $@; \
 	)
 	echo "" >> $@
@@ -857,7 +857,7 @@ Makefile:
 	echo "" >> $@
 	$(foreach file_c,$(patsubst src/%,%,$(wildcard src/*.c)), \
 	  echo "build/$(file_c): src/$(file_c) " >> $@; \
-	  echo "	ln src/$(file_c) build/$(file_c) " >> $@; \
+	  echo "	ln -f src/$(file_c) build/$(file_c) " >> $@; \
 	  echo "" >> $@; \
 	)
 	echo "" >> $@
@@ -873,7 +873,7 @@ Makefile:
 	echo "" >> $@
 	$(foreach file_a,$(patsubst data/animes/%,%,$(wildcard data/animes/*.anime)), \
 	  echo "build/$(file_a): data/animes/$(file_a) " >> $@; \
-	  echo "	ln data/animes/$(file_a) build/$(file_a) " >> $@; \
+	  echo "	ln -f data/animes/$(file_a) build/$(file_a) " >> $@; \
 	  echo "" >> $@; \
 	)
 	echo "" >> $@

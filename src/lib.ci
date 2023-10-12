@@ -4,7 +4,10 @@
 #ifndef __bool_true_false_are_defined /* https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/stdbool.h.html */ 
 enum { true  = (0 == 0) }; 
 enum { false = (0 != 0) }; 
-#  define __bool_true_false_are_defined 1
+enum { undecided_boolean = 1+MAX(BOOL_ABS(false),BOOL_ABS(true)) }; 
+#define false false
+#define true true
+#define undecided_boolean undecided_boolean
 #endif 
 
 #ifndef ARRAY_SIZE
