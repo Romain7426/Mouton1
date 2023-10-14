@@ -1,4 +1,9 @@
 #include "global.h"
+
+#define BUFFERED_OUTSTREAM__H 
+#include "lib__07__buffered_outstream.ci"
+#undef BUFFERED_OUTSTREAM__H 
+
 #include "001_main.h"
 #include "002_kernel.h"
 #include "006_check_and_assert.h"
@@ -317,7 +322,22 @@ int main(const int argc, const char * argv[]) {
 	const char * anime_filename = anime_to_load[i]; 
 	if (NULL == anime_filename) break; 
 	const anime_t * one_anime; 
-	one_anime = anime_database__load__compile_time(anime_filename); 
+	//one_anime = anime_database__load__compile_time(anime_filename); 
+	one_anime = anime_database__get(anime_filename); 
+	main__stdout_log_buffer__flush(); 
+      }; 
+    }; 
+
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "SECOND_PASS:  " "\n", __func__);  
+    
+    if (true) { 
+      const char * anime_to_load[] = { "saintexupery.anime", "pere.anime", "bob.anime", "heros.anime", "brigitte.anime.ci", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
+      for (int i = 0; ; i++) { 
+	const char * anime_filename = anime_to_load[i]; 
+	if (NULL == anime_filename) break; 
+	const anime_t * one_anime; 
+	//one_anime = anime_database__load__compile_time(anime_filename); 
+	one_anime = anime_database__get(anime_filename); 
 	main__stdout_log_buffer__flush(); 
       }; 
     }
@@ -1316,4 +1336,10 @@ void main_win_print(void) {
 
 
 };
+
+#define BUFFERED_OUTSTREAM__C 
+#define BUFFERED_OUTSTREAM__MAX 8 
+#include "lib__07__buffered_outstream.ci"
+#undef BUFFERED_OUTSTREAM__MAX
+#undef BUFFERED_OUTSTREAM__C 
 

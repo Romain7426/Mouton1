@@ -126,6 +126,7 @@
 #include "lib__05__error_state.ci"
 #include "lib__06__exception.ci"
 
+
 #define MALLOC_THIS(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); 
 #define BZERO_THIS(this) bzero(this, sizeof(*this)); 
 #define MALLOC_BZERO(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); bzero(this, sizeof(*this)); 

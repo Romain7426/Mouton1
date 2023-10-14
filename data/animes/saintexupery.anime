@@ -13,14 +13,14 @@ physique {
 
 gameplay {
  points de vie := 9999;
- invinsible := vrai;
+ invincible := vrai;
  hostile := vrai;
  
- /* action parler {
-  affichage := "parler";
-  icone := "";
-  gestionnaire := { fichier := "script.pml"; procedure := "saintexupery_parler"; } ;
- } */
+// /* action parler {
+//  affichage := "parler";
+//  icone := "";
+//  gestionnaire := { fichier := "script.pml"; procedure := "saintexupery_parler"; } ;
+// } */
 
 
 }

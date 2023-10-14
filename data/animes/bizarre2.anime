@@ -13,7 +13,7 @@ physique {
 
 gameplay {
  points de vie := 9999;
- invinsible := vrai;
+ invincible := vrai;
  hostile := vrai;
  
 
@@ -88,15 +88,4 @@ graphique {
 
 
 }
-
-
-
-Et tout ce qui se passe après, on s'en fout !!!!!!!
-
-
-
-!!
-
-
-
 
