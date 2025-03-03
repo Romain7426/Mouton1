@@ -15,7 +15,8 @@ mkdir -p tools/bin
 
 
 #echo "CC = "${CC}
-CC=$(cat CC)
+#CC=$(cat CC)
+CC=$(cat CC | head -1)
 #echo ${CC} 
 #exit 0; 
 
@@ -44,7 +45,7 @@ for file_path_i in `ls tools/src/*.c`; do
 #  echo $file_path_i
 #  echo $file_i
 #  echo $file_i_wo_ext
-  ${CC} ${CC_OPTS} tools/src/$file_i_wo_ext.c -o tools/build/$file_i_wo_ext.exe
+  ${CC} ${CC_OPTS} -D CC="${CC}" tools/src/$file_i_wo_ext.c -o tools/build/$file_i_wo_ext.exe
   rm -f tools/bin/$file_i_wo_ext 
   ln -s ../build/$file_i_wo_ext.exe tools/bin/$file_i_wo_ext 
 done; 

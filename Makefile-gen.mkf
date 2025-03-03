@@ -44,84 +44,34 @@ DATETIME_UTC := $(shell TZ="UTC" date "+%Z[%z] %Y_%m_%d-%Hh%Mm%Ss %A")
 # ***************************************************************************** 
 # COMPILER & SYSTEM 
 
-#CC           := $(if $(strip $(CC)),$(if $(strip $(filter $(CC),cc)),$(shell which cc),$(CC)),$(shell which cc))
-#$(info $(origin CC)) # returns "undefined" or something else 
-ifdef CC
-#$(info CC is defined)
-CC           := $(if $(strip $(filter $(CC),cc)),$(shell which cc),$(CC))
-else
-#$(info CC is undefined)
-CC           := $(if $(strip $(wildcard CC)),$(shell cat CC),$(shell which cc))
+# RL: GMake fournit automatiquement une variable CC, même si il n’y en a nul part. 
+# RL: Il faut donc ignorer cette variable, et ne considérer que l’environnement. 
+#$(info $(origin CC)) # returns "default" "undefined" or something else 
+
+# RL: 1. CC dans l’environnement. 
+# RL: 2. CC dans le fichier. 
+# RL: 3. CC par défault
+# Else, cc. 
+CC_ENV     := $(strip $(shell env | grep "^CC=" | head -1 | cut -f 2 -d "="))
+CC_FILE    := $(strip $(if $(strip $(wildcard CC)),$(shell cat CC | head -1),))
+CC_DEFAULT := $(strip $(shell which cc))
+#$(info CC_ENV     = "$(CC_ENV)")
+#$(info CC_FILE    = "$(CC_FILE)")
+#$(info CC_DEFAULT = "$(CC_DEFAULT)")
+CC         :=
+CC    	   := $(if $(CC),$(CC),$(CC_ENV))
+CC    	   := $(if $(CC),$(CC),$(CC_FILE))
+CC         := $(if $(CC),$(CC),$(CC_DEFAULT))
+#$(info CC = "$(CC)") 
+
+CC           := $(strip $(CC))
+CC_TOOLS     := $(strip $(shell ./tools/bin/tools-compiled-with-cc_name))
+ifneq ("$(CC)","$(CC_TOOLS)")
+  $(error CC [$(CC)] et CC_TOOLS [$(CC_TOOLS)] sont distincts. Il faut recompiler les outils avec le même compilateur. ) 
 endif
-$(info CC          : $(CC))
-
-CC_WORKS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_WORKS_HUH),0) 
-  CC_WORKS_HUH := yes
-else 
-  CC_WORKS_HUH := no
-endif 
-$(info CC_WORKS_HUH: $(CC_WORKS_HUH))
-ifeq ($(CC_WORKS_HUH),no) 
-   $(info --> Specified compiler failed to compile a test trivial program.)
-   $(info -->   Seems like your compiler does not work.) 
-   $(error ABORTING)
-endif 
-
-CC_HAS_F_STACK_SHUFFLE_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -fstack-shuffle - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_F_STACK_SHUFFLE_HUH),0) 
-  CC_HAS_F_STACK_SHUFFLE_HUH := yes
-else 
-  CC_HAS_F_STACK_SHUFFLE_HUH := no
-endif 
-$(info CC_HAS_STACK_SHUFFLE_HUH: $(CC_HAS_F_STACK_SHUFFLE_HUH))
-
-CC_HAS_M_SAVE_ARGS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -msave-args - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_M_SAVE_ARGS_HUH),0) 
-  CC_HAS_M_SAVE_ARGS_HUH := yes
-else 
-  CC_HAS_M_SAVE_ARGS_HUH := no
-endif 
-$(info CC_HAS_M_SAVE_ARGS_HUH: $(CC_HAS_M_SAVE_ARGS_HUH))
-
-# Actually, we do not want to use «-fstack-protector-all» as it does not work with VLAs and ALLOCAs. 
-CC_HAS_F_STACK_PROTECTOR_ALL_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_F_STACK_PROTECTOR_ALL_HUH),0) 
-  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := yes
-else 
-  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := no
-endif 
-$(info CC_HAS_F_STACK_PROTECTOR_ALL_HUH: $(CC_HAS_F_STACK_PROTECTOR_ALL_HUH))
-
-CC_HAS_F_STACK_PROTECTOR_NO_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | cc -x c -std=c99 -O0 -fno-stack-protector - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_F_STACK_PROTECTOR_NO_HUH),0) 
-  CC_HAS_F_STACK_PROTECTOR_NO_HUH := yes
-else 
-  CC_HAS_F_STACK_PROTECTOR_NO_HUH := no
-endif 
-$(info CC_HAS_F_STACK_PROTECTOR_NO_HUH: $(CC_HAS_F_STACK_PROTECTOR_NO_HUH))
-
-CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := $(shell mkdir -p tmp && echo "int main(int argc, char * argv[]) { char local[1 << 14]; char tmp[argc]; return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_vla.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_vla.exe ; echo $$?)
-ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH),0) 
-  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := yes
-else 
-  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := no
-endif 
-$(info CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH))
-
-CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := $(shell mkdir -p tmp && echo "#include <stdlib.h> \n int main(int argc, char * argv[]) { char local[1 << 14]; char * tmp = alloca(argc); return 0; }; " | cc -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_alloca.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_alloca.exe ; echo $$?)
-ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH),0) 
-  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := yes
-else 
-  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := no
-endif 
-$(info CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH))
-
-
-CC_NAME      := $(shell mkdir -p tmp && $(CC) ./tools/src/compiler-detect.c -o tmp/compiler-detect.exe && ./tmp/compiler-detect.exe) 
+CC_NAME      := $(shell ./tools/bin/compiler-detect)
 UNAME        := $(shell uname)
-#ENDIAN       := $(shell ./tools/bin/endianness-detect)
-ENDIAN       := $(shell mkdir -p tmp && $(CC) ./tools/src/endianness-detect.c -o tmp/endianness-detect.exe && ./tmp/endianness-detect.exe) 
+ENDIANNESS   := $(shell ./tools/bin/endianness-detect)
 ARCH         := $(shell arch)
 MACHINE      := $(shell machine)
 HARDWARE     := $(shell uname -m)
@@ -142,24 +92,22 @@ endif
 HW_IDX := $(shell tools/bin/list-match $(HARDWARE) $(HW_LIST) $(HARDWARE))
 #INTSIZE := $(word $(HW_IDX), $(INTSIZE_LIST) unknown_intsize)
 
-#INTSIZE := $(shell tools/bin/intsize)
-#PTRSIZE := $(shell tools/bin/ptrsize)
-
-INTSIZE  := $(shell mkdir -p tmp && $(CC) ./tools/src/intsize.c -o tmp/intsize.exe && ./tmp/intsize.exe) 
-PTRSIZE  := $(shell mkdir -p tmp && $(CC) ./tools/src/ptrsize.c -o tmp/ptrsize.exe && ./tmp/ptrsize.exe) 
-CHARSIZE        := $(shell mkdir -p tmp && $(CC) ./tools/src/charsize.c        -o tmp/charsize.exe        && ./tmp/charsize.exe       ) 
-SHORTINTSIZE    := $(shell mkdir -p tmp && $(CC) ./tools/src/shortintsize.c    -o tmp/shortintsize.exe    && ./tmp/shortintsize.exe   ) 
-LONGINTSIZE     := $(shell mkdir -p tmp && $(CC) ./tools/src/longintsize.c     -o tmp/longintsize.exe     && ./tmp/longintsize.exe    ) 
-LONGLONGINTSIZE := $(shell mkdir -p tmp && $(CC) ./tools/src/longlongintsize.c -o tmp/longlongintsize.exe && ./tmp/longlongintsize.exe) 
-ENUMSIZE        := $(shell mkdir -p tmp && $(CC) ./tools/src/enumsize.c        -o tmp/enumsize.exe        && ./tmp/enumsize.exe       ) 
-FLOATSIZE       := $(shell mkdir -p tmp && $(CC) ./tools/src/floatsize.c       -o tmp/floatsize.exe       && ./tmp/floatsize.exe      ) 
-DOUBLESIZE      := $(shell mkdir -p tmp && $(CC) ./tools/src/doublesize.c      -o tmp/doublesize.exe      && ./tmp/doublesize.exe     ) 
-LONGDOUBLESIZE  := $(shell mkdir -p tmp && $(CC) ./tools/src/longdoublesize.c  -o tmp/longdoublesize.exe  && ./tmp/longdoublesize.exe ) 
-
+INTSIZE          := $(shell ./tools/bin/intsize)
+PTRSIZE          := $(shell ./tools/bin/ptrsize)
+CHARSIZE         := $(shell ./tools/bin/charsize)
+SHORTINTSIZE     := $(shell ./tools/bin/shortintsize)
+LONGINTSIZE      := $(shell ./tools/bin/longintsize)
+LONGLONGINTSIZE  := $(shell ./tools/bin/longlongintsize)
+ENUMSIZE         := $(shell ./tools/bin/enumsize)
+FLOATSIZE        := $(shell ./tools/bin/floatsize)
+DOUBLESIZE       := $(shell ./tools/bin/doublesize)
+LONGDOUBLESIZE   := $(shell ./tools/bin/longdoublesize)
+PIPEBUFFERSIZE   := $(shell ./tools/bin/pipe-get-buffer-bytesize)
+DEFAULTSTACKSIZE := $(shell ./tools/bin/default-stack-size)
 
 #$(info DATETIME_UTC  : $(DATETIME_UTC)) 
 #$(info PROJECT_NAME: $(PROJECT_NAME)) 
-#$(info CC          : $(CC))
+$(info CC          : $(CC))
 $(info CC_NAME     : $(CC_NAME))
 #$(info OS          : $(OS))
 #$(info UNAME       : $(UNAME))
@@ -168,7 +116,7 @@ $(info INTSIZE     : $(INTSIZE))
 $(info PTRSIZE     : $(PTRSIZE))
 $(info ENUMSIZE    : $(ENUMSIZE)) 
 ifeq "a" "b"
-$(info ENDIANNESS  : $(ENDIAN))
+$(info ENDIANNESS     : $(ENDIAN)         )
 $(info CHARSIZE       : $(CHARSIZE)       ) 
 $(info SHORTINTSIZE   : $(SHORTINTSIZE)   ) 
 $(info LONGINTSIZE    : $(LONGINTSIZE)    ) 
@@ -176,7 +124,92 @@ $(info LONGLONGINTSIZE: $(LONGLONGINTSIZE))
 $(info FLOATSIZE      : $(FLOATSIZE)      ) 
 $(info DOUBLESIZE     : $(DOUBLESIZE)     ) 
 $(info LONGDOUBLESIZE : $(LONGDOUBLESIZE) ) 
+$(info DEFAULTSTACKSIZE : $(DEFAULTSTACKSIZE) ) 
 endif 
+
+
+CC_CONFIG:=
+CC_CONFIG:=$(CC_CONFIG) -D ENDIANNESS="$(ENDIANNESS)"
+CC_CONFIG:=$(CC_CONFIG) -D PIPEBUFFERSIZE="$(PIPEBUFFERSIZE)"
+CC_CONFIG:=$(CC_CONFIG) -D FLOATBYTESIZE="$(FLOATSIZE)"
+CC_CONFIG:=$(CC_CONFIG) -D DEFAULTSTACKSIZE="$(DEFAULTSTACKSIZE)"
+ifeq ($(CC_NAME),pcc)
+CC_CONFIG:=$(CC_CONFIG) -D COMPILER_PCC
+endif
+
+
+CC_WORKS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_WORKS_HUH),0) 
+  CC_WORKS_HUH := yes
+else 
+  CC_WORKS_HUH := no
+endif 
+$(info CC_WORKS_HUH: $(CC_WORKS_HUH))
+ifeq ($(CC_WORKS_HUH),no) 
+   $(info --> Specified compiler failed to compile a test trivial program.)
+   $(info -->   Seems like your compiler does not work.) 
+   $(error ABORTING)
+endif 
+
+CC_HAS_F_STACK_SHUFFLE_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-shuffle - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_F_STACK_SHUFFLE_HUH),0) 
+  CC_HAS_F_STACK_SHUFFLE_HUH := yes
+else 
+  CC_HAS_F_STACK_SHUFFLE_HUH := no
+endif 
+$(info CC_HAS_STACK_SHUFFLE_HUH: $(CC_HAS_F_STACK_SHUFFLE_HUH))
+
+CC_HAS_M_SAVE_ARGS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -msave-args - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_M_SAVE_ARGS_HUH),0) 
+  CC_HAS_M_SAVE_ARGS_HUH := yes
+else 
+  CC_HAS_M_SAVE_ARGS_HUH := no
+endif 
+$(info CC_HAS_M_SAVE_ARGS_HUH: $(CC_HAS_M_SAVE_ARGS_HUH))
+
+# Actually, we do not want to use «-fstack-protector-all» as it does not work with VLAs and ALLOCAs. 
+CC_HAS_F_STACK_PROTECTOR_ALL_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-protector-all - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_F_STACK_PROTECTOR_ALL_HUH),0) 
+  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := yes
+else 
+  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := no
+endif 
+$(info CC_HAS_F_STACK_PROTECTOR_ALL_HUH: $(CC_HAS_F_STACK_PROTECTOR_ALL_HUH))
+
+CC_HAS_F_STACK_PROTECTOR_NO_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -fno-stack-protector - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(CC_HAS_F_STACK_PROTECTOR_NO_HUH),0) 
+  CC_HAS_F_STACK_PROTECTOR_NO_HUH := yes
+else 
+  CC_HAS_F_STACK_PROTECTOR_NO_HUH := no
+endif 
+$(info CC_HAS_F_STACK_PROTECTOR_NO_HUH: $(CC_HAS_F_STACK_PROTECTOR_NO_HUH))
+
+CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := $(shell mkdir -p tmp && echo "int main(int argc, char * argv[]) { char local[1 << 14]; char tmp[argc]; return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_vla.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_vla.exe ; echo $$?)
+ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH),0) 
+  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := yes
+else 
+  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := no
+endif 
+$(info CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH))
+
+CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := $(shell mkdir -p tmp && echo "#include <stdlib.h> \n int main(int argc, char * argv[]) { char local[1 << 14]; char * tmp = alloca(argc); return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_alloca.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_alloca.exe ; echo $$?)
+ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH),0) 
+  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := yes
+else 
+  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := no
+endif 
+$(info CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH))
+
+
+STDLIB_PROVIDES_ARC4RANDOM_HUH := $(shell echo "#include <stdlib.h>\nint main(int argc, char * argv[]) { return arc4random(); }; " | $(CC) -x c -std=c99 -O0 - -o - > /dev/null 2>&1 ; echo $$?)
+ifeq ($(STDLIB_PROVIDES_ARC4RANDOM_HUH),0) 
+  STDLIB_PROVIDES_ARC4RANDOM_HUH := yes
+  CC_CONFIG:=$(CC_CONFIG) -D STDLIB_PROVIDES_ARC4RANDOM
+else 
+  STDLIB_PROVIDES_ARC4RANDOM_HUH := no
+endif 
+$(info STDLIB_PROVIDES_ARC4RANDOM_HUH: $(STDLIB_PROVIDES_ARC4RANDOM_HUH))
+
 
 YASM_HUH  := $(shell yasm  --version > /dev/null 2>&1 ; echo $$?)
 GAS_HUH   := $(shell gas   --version > /dev/null 2>&1 ; echo $$?)
@@ -483,7 +516,7 @@ $(info PSCRIPT_DESTROOT : $(PSCRIPT_DESTROOT))
 # ***************************************************************************** 
 # MAKEFILE GENERATION 
 
-CC_FLAGS0 := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -O0  -D SRCFILE_UTF8  
+CC_FLAGS0 := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -O0  -D SRCFILE_UTF8   $(CC_CONFIG) 
 
 #       -aux-info filename
 #           Output to the given filename prototyped declarations for all functions declared and/or defined in a translation
@@ -491,11 +524,11 @@ CC_FLAGS0 := -std=c99 -D_THREAD_SAFE -D_REENTRANT -D __DEBUG__ -D DEBUG -O0  -D 
 
 
 # -pedantic -pedantic-errors 
-CC_FLAGS_F := -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -fstack-check  -fverbose-asm -ffreestanding -feliminate-unused-debug-types 
+CC_FLAGS_F := -fmessage-length=0 -fdiagnostics-show-location=once -fdiagnostics-show-option -fstack-check  -fverbose-asm -ffreestanding -feliminate-unused-debug-types -fjump-tables -fmerge-all-constants -fshort-enums -ftrapv -fvisibility=hidden 
 CC_FLAGS_F_NO := -fno-exceptions -fno-omit-frame-pointer  -fno-builtin -fno-builtin-printf -fno-builtin-abs -fno-builtin-strcpy -fno-builtin-strcat -fno-builtin-strlen -fno-builtin-bzero -fno-builtin-memset -fno-builtin-memcpy -fno-builtin-assert -fno-builtin-tolower -fno-builtin-toupper -fno-builtin-log -fno-builtin-alloca -fno-common -fno-exceptions -fno-non-call-exceptions -fno-asynchronous-unwind-tables -fno-inline -fno-inline-functions -fno-inline-functions 
 # unknown: -fno-early-inlining -fno-gcse-lm -fno-move-loop-invariants -fno-peephole  -fno-sched-interblock -fno-sched-spec -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-tree-loop-optimize -fno-tree-vect-loop-version -fno-tree-loop-im -fno-tree-loop-ivcanon 
-CC_FLAGS_W := -Wall -W -Wextra  -Werror -Werror=vla -Wfatal-errors  -Werror-implicit-function-declaration -Wparentheses -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type -Wstrict-prototypes -Wpacked -Wcast-qual -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas
-CC_FLAGS_W_NO := -Wno-cast-align -Wno-system-headers  -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function -Wno-switch-default -Wno-format-nonliteral 
+CC_FLAGS_W := -Wall -W -Wextra  -Werror -Werror=vla -Wfatal-errors  -Werror-implicit-function-declaration -Wparentheses -Wimplicit -Wreturn-type -Wcomment -Wpointer-arith -Wchar-subscripts -Wimplicit-int -Werror-implicit-function-declaration -Wmain -Wmissing-braces -Wmultichar -Wsequence-point -Wreturn-type -Wstrict-prototypes -Wpacked -Wcast-qual -Winline -Wformat-nonliteral -Wwrite-strings -Wmissing-field-initializers -Wsign-compare  -Wformat-zero-length -Wswitch -Wswitch-enum -Wswitch-default -Wnested-externs -Wunknown-pragmas -Wpointer-sign 
+CC_FLAGS_W_NO := -Wno-missing-prototypes -Wno-cast-align -Wno-system-headers  -Wno-undef -Wno-redundant-decls -Wno-unused -Wno-unused-parameter -Wno-unused-function -Wno-switch-default -Wno-format-nonliteral $(if $(strip $(filter $(CC_NAME),gcc)),,-Wno-unused-command-line-argument) 
 # unknown: -gstabs+3 
 
 # -I /usr/X11R6/include  -I ./libs/SDL-1.2.15/destroot/include -I ./src/SDL_image -I ./src/SDL_mixer # -Wmissing-prototypes -Wmissing-declarations 
@@ -503,13 +536,13 @@ CC_FLAGS_W_NO := -Wno-cast-align -Wno-system-headers  -Wno-undef -Wno-redundant-
 # unsupported: -fpcc-struct-return -fno-ivopts -fno-inline-functions-called-once 
 # unused: -fno-eliminate-unused-debug-symbols 
 
-CLANG_FLAGS := -fPIC -gfull -W -Wextra -Wnewline-eof -Wno-unsequenced 
+CLANG_FLAGS := -fPIC -gfull -W -Wextra -Wnewline-eof -Wno-unsequenced -Wno-typedef-redefinition -Wno-uninitialized
 #GCC: -gstabs+3: does not work: «SHF_MERGE section size must be a multiple of sh_entsize» 
 #pragma GCC diagnostics disable "-Wtype-limits" 
 GCC_FLAGS := -fPIC -g3  -fno-early-inlining -fno-gcse-lm -fno-move-loop-invariants -fno-peephole  -fno-sched-interblock -fno-sched-spec -fno-split-ivs-in-unroller -fno-toplevel-reorder -fno-tree-loop-optimize -fno-tree-vect-loop-version -fno-tree-loop-im -fno-tree-loop-ivcanon  -fno-stack-check -Wno-error -Wno-enum-compare #-Wno-extra -Wno-sign-compare #-Werror=no-type-limits #-Wno-absolute-value #-Wno-type-limits #-Wframe-larger-than=76368 #-Wframe-larger-than=1844674407370955161 #-Wframe-larger-than=18446744073709551615 #-Wframe-larger-than=18446744073709551615UL #-Wframe-larger-than='18446744073709551615UL' #-Wframe-larger-than='SIZE_MAX' #-Wno-frame-larger-than # -Wno-stack-usage # -Wstack-usage=1844674407370955161
 #PCC: -g: does not work: «SHF_MERGE section size must be a multiple of sh_entsize» 
 PCC_FLAGS := -fpic #-g #-fpic 
-TCC_FLAGS := -g -bt100 #-b #-fpic #-g #-fpic 
+TCC_FLAGS := -g -bt100 -static -fsigned-char #-b #-fpic #-g #-fpic 
 OPENBSD_GCC_FLAGS := -fstack-shuffle -msave-args -fstack-protector-all 
 
 CC_FLAGS_SPEC := 
