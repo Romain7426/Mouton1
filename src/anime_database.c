@@ -162,7 +162,7 @@ static const time_t anime_database_at_compile_time__mtime[ANIME_DATABASE_AT_COMP
 0
 };
 
-int8_t anime_database_at_compile_time__lookup_by_filename(const char * filename_sought) { 
+static int8_t anime_database_at_compile_time__lookup_by_filename(const char * filename_sought) { 
   if (NULL ==  filename_sought) return -2; 
   if ('\0' == *filename_sought) return -3; 
   for (int i = 0; ; i++) { 
@@ -195,8 +195,10 @@ static int8_t       anime_database_at_runtime__nb = 0;
 static void anime_database_at_runtime__anime_data__init(void) { 
   if (anime_database_at_runtime__init_huh) return;
   for (int8_t i = 0; i < ANIME_DATABASE_AT_RUNTIME__MAX; i++) {
-    anime_database_at_runtime__data[i] = (anime_t *)(anime_database_at_runtime__data_buffer + i*ANIME_BYTESIZE);
+    anime_database_at_runtime__data    [i] = (anime_t *)(anime_database_at_runtime__data_buffer + i*ANIME_BYTESIZE);
+    anime_database_at_runtime__data_huh[i] = false;
   }; 
+  anime_database_at_runtime__init_huh = true;
 };
 
 
@@ -497,7 +499,9 @@ const anime_t * anime_database__get(const char * filename) {
     if (0 <= id_at_r) goto label__id_found; 
 
     id_at_r = anime_database_at_runtime__filename__push_no_lookup(filename); 
+#if 0
     if (0 <= id_at_r) goto label__id_found; 
+#endif 
     
     goto label__error__could_not_push_filename; 
   };  

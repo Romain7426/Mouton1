@@ -42,8 +42,8 @@
 
 // RL: Étapes de main: 
 //      1. Se déplacer vers le bon répertoire. 
-//      2. Réassigner stdout. 
-//      3. Réassigner stderr. 
+//      2. Dupliquer stdout vers stdlog.
+//      3. Dupliquer stderr vers stdlog.
 //      4. Kernel (init, run, free) 
 //      5. Vider tous les buffers, et tout fermer. 
 //      6. Bye! 
@@ -166,7 +166,7 @@ int main(const int argc, const char * argv[]) {
     }; 
     main_argv0 = argv[0]; 
     main_argv0__bytesize = 1 + strlen(main_argv0); 
-    goto label__check_and_assert; 
+    goto label__body; 
   }; 
 
  label__exit: { 
@@ -208,6 +208,12 @@ int main(const int argc, const char * argv[]) {
   }; 
 #endif 
   
+  label__check_and_assert: { 
+    int_buffered_outstream__error__check_and_assert(); 
+    int_buffer_to_fd__error__check_and_assert();
+    check_and_assert(/*debug_print_huh*/true, /*stderr_d*/STDERR_FILENO); 
+    goto label__check_and_assert__return; 
+  }; 
 
   label__change_to_program_dir: {
     for (;;) { 
@@ -249,14 +255,33 @@ int main(const int argc, const char * argv[]) {
     goto label__change_to_program_dir__return; 
   };
 
-  label__check_and_assert: { 
-    int_buffered_outstream__error__check_and_assert(); 
-    int_buffer_to_fd__error__check_and_assert();
-    check_and_assert(/*debug_print_huh*/true, /*stderr_d*/STDERR_FILENO); 
-    goto label__body; 
-  }; 
+  label__duplicating_stdout_to_stdlog: {
+      for (;;) { 
+	if (0 != main__stdout_log_pipe__open()) goto label__error__stdout_log__making_pipe_failed; 
+	const int16_t used_size = main__reassign_stdout_to_logfile(local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
+	if (0 > used_size) break; 
+	local_alloca__used += used_size; 
+	local_alloca__left -= used_size; 
+	break; 
+      }; 
+      goto label__duplicating_stdout_to_stdlog__return;
+    };
+
+
+  label__duplicating_stderr_to_stdlog: {
+    for (;;) { 
+      if (0 != main__stderr_pipe__open()) goto label__error__stderr__making_pipe_failed; 
+      main__stderr__dup_to_post(); 
+      if (0 != main__stderr__reassign_to_pipe()) goto label__error__stderr__reassigning_to_pipe_failed; 
+      break; 
+    };     
+    goto label__duplicating_stderr_to_stdlog__return;
+  };
+
   
  label__body: { 
+    goto label__check_and_assert; label__check_and_assert__return: {}; 
+    
     // RL: First thing to do: 
     // Change current-working-directory to the directory containing the program («mouton-dir»), 
     // in order to read data and write logs. 
@@ -270,24 +295,9 @@ int main(const int argc, const char * argv[]) {
       break; 
     }; 
 
-    // RL: LOG FILE: Reassigning stdout to log-file 
-    for (;;) { 
-      if (0 != main__stdout_log_pipe__open()) goto label__error__stdout_log__making_pipe_failed; 
-      const int16_t used_size = main__reassign_stdout_to_logfile(local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
-      if (0 > used_size) break; 
-      local_alloca__used += used_size; 
-      local_alloca__left -= used_size; 
-      break; 
-    }; 
-
+    goto label__duplicating_stdout_to_stdlog; label__duplicating_stdout_to_stdlog__return: {}; 
     
-    // RL: STDERR: Reassigning stderr to pipe 
-    for (;;) { 
-      if (0 != main__stderr_pipe__open()) goto label__error__stderr__making_pipe_failed; 
-      main__stderr__dup_to_post(); 
-      if (0 != main__stderr__reassign_to_pipe()) goto label__error__stderr__reassigning_to_pipe_failed; 
-      break; 
-    };     
+    goto label__duplicating_stderr_to_stdlog; label__duplicating_stderr_to_stdlog__return: {}; 
     
     
     // RL: Everything is UTF-8 unless specified otherwise. 
