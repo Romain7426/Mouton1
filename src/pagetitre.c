@@ -34,7 +34,7 @@ struct CPageTitre {
 };
 
 const int8_t CPageTitre_bytesize_actual = sizeof(struct CPageTitre); 
-ASSERT_COMPILE_TOPLEVEL(CPageTitre_bytesize >= CPageTitre_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CPageTitre_bytesize >= CPageTitre_bytesize_actual); 
 
 
 

@@ -75,6 +75,7 @@ CPascal * CPascal__make_empty(void) {
 #define LOGFILE_EXTENSION ".out" 
 #if 1 
 static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filename) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   int allright_huh; 
   const int logfile_len = ARRAY_SIZE(LOGDIR) + strlen(filename) + ARRAY_SIZE(LOGFILE_EXTENSION); 
   char logfile_name[logfile_len + 1]; 
@@ -96,7 +97,7 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
   this -> stdlog__set__fdes(this, stdlog_d); 
   //this -> stderr__set__fdes(this, fileno(zeldaferror ? zeldaferror : stderr), true); 
   this -> stderr__set__fdes(this, fileno(stderr), true); 
-  this -> stdout__set__fdes(this, stdout_d); 
+  this -> stdout__set__fdes(this, STDOUT_FILENO); 
   const int input_file_len = ARRAY_SIZE(PASCALDIR) + strlen(filename); 
   char input_file_name[input_file_len + 1]; 
   strcat(strcpy(input_file_name, PASCALDIR), filename); 
@@ -188,7 +189,7 @@ static int CPascal__read_file_no_init__aux(pscript_t * this, const char * filena
   assert(fdes_log >= 0); 
   this -> stdlog__set__fdes(this, fdes_log); 
   this -> stderr__set__fdes(this, fileno(zeldaferror), true); 
-  this -> stdout__set__fdes(this, stdout_d); 
+  this -> stdout__set__fdes(this, STDOUT_FILENO); 
   const int input_file_len = ARRAY_SIZE(PASCALDIR) + strlen(filename); 
   char input_file_name[input_file_len + 1]; 
   strcat(strcpy(input_file_name, PASCALDIR), filename); 

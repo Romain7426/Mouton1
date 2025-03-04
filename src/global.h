@@ -33,7 +33,7 @@
 #include <math.h>     // cosf, ..., int signbit(real-floating x); , isnormal(neither zero, subnormal, infinite, nor NaN)., int isnan(real-floating x); , int isinf(real-floating x); int isfinite(real-floating x); 
 #include <ctype.h>    // tolower, toupper
 #include <assert.h>  // dépend de la valeur de la macro NDEBUG 
-#include <complex.h>  // types «complex», «double complex», «long double complex», «float complex» 
+//#include <complex.h>  // types «complex», «double complex», «long double complex», «float complex» 
 #include <ctype.h> 
 #include <errno.h> 
 #include <float.h> // limits 
@@ -121,11 +121,30 @@
 #endif //_WIN32
 
 
-#include "lib__02__header.ci" 
+#include "lib__02__header.ci"
+#include "lib__10__local_alloca.ci"
 #include "lib__03.ci"
 #include "lib__04__string_stack.ci"
 #include "lib__05__error_state.ci"
 #include "lib__06__exception.ci"
+
+#define BUFFERED_OUTSTREAM__H 
+#define EXTERN extern
+#define BUFFERED_OUTSTREAM__PREFIX zmouton1__
+#include "lib__07__buffered_outstream.ci"
+#undef  EXTERN
+#undef  BUFFERED_OUTSTREAM__H 
+
+#include "lib__08__cstring.ci"
+#include "lib__09__write_string.ci"
+#include "lib__10__local_alloca.ci"
+
+#define BUFFER_TO_FD__H 
+#define EXTERN extern
+#define BUFFER_TO_FD__PREFIX zmouton1__
+#include "lib__11__buffer_to_fd.ci"
+#undef  EXTERN
+#undef  BUFFER_TO_FD__H 
 
 
 #define MALLOC_THIS(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); 
@@ -457,12 +476,14 @@ struct C3DS;
 typedef struct C3DS C3DS; 
 
 
+#if 0
 static int write_eol(const int file_des); 
 static int write_long_long_int(const int file_des, long long int n); 
 static int write_string(const int file_des, const char * cstr); 
 static int write_string2(const int file_des, const char * cstr1, const char * cstr2); 
 static int write_string3(const int file_des, const char * cstr1, const char * cstr2, const char * cstr3); 
 static int write_string4(const int file_des, const char * cstr1, const char * cstr2, const char * cstr3, const char * cstr4); 
+#endif 
 
 #include "001_main.h"
 #include "vectors.h" // pour pouvoir utiliser des vecteurs 2D et 3D
@@ -511,7 +532,7 @@ static int write_string4(const int file_des, const char * cstr1, const char * cs
 #include "script_pscript.h"
 
 
-#include "lib.ci"
+//#include "lib.ci"
 
 
 #endif /* GLOBAL_H */

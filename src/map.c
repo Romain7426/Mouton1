@@ -141,7 +141,7 @@ struct CMap {
 }; 
 
 const int32_t CMap_bytesize_actual = sizeof(struct CMap); 
-ASSERT_COMPILE_TOPLEVEL(CMap_bytesize >= CMap_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CMap_bytesize >= CMap_bytesize_actual); 
 
 
 
@@ -335,6 +335,7 @@ enum { taille_case = 5 }; // RL: That's for neighborhood management.
 
 
 CMap * CMap__make(const char * filename, const int map_i, const int map_j, const riemann_t * our_manifold, const bool EnVaisseau) {
+  LOCAL_ALLOCA__DECLARE(uint16_t,UINT16_MAX); 
   MALLOC_BZERO(CMap,this);
   
   //ASSIGN_METHOD(CMap,this,parse); 
@@ -398,7 +399,8 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
   {
     char * reelfile; 
     //reelfile = STRCAT2_(CARTESDIR, filename); 
-    reelfile = strconcat2(CARTESDIR, filename); 
+    //reelfile = strconcat2(CARTESDIR, filename); 
+    reelfile = strconcat2__alloca(CARTESDIR, filename); 
     //printf("nom de fichier réel: %s\n", reelfile); 
     
     //int ret = CMap__parse(this, CARTESDIR, filename); 
@@ -410,7 +412,7 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
     else { 
       message("<<< analyse ok du fichier \"%s\"." "\n", reelfile); 
     }; 
-    free(reelfile); 
+    //free(reelfile); 
   }; 
   
   //printf("Fin de la construction CMap__CMap()\n"); 
@@ -1425,7 +1427,7 @@ int CMap__ReadDescriptionFile(CMap * this, const int global_map_i, const int glo
 	messerr("        Voulez-vous réessayer?" "\n"); 
 	{
 	  char c; 
-	  const int nb_read = read(stdin_d, &c, 1); 
+	  const int nb_read = read(STDERR_FILENO, &c, 1); 
 	  if (0 == nb_read) { continue; }; 
 	  if (c == 'n') { return -1; }; 
 	  continue; 

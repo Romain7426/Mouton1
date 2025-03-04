@@ -1,9 +1,5 @@
 #include "global.h"
 
-#define BUFFERED_OUTSTREAM__H 
-#include "lib__07__buffered_outstream.ci"
-#undef BUFFERED_OUTSTREAM__H 
-
 #include "001_main.h"
 #include "002_kernel.h"
 #include "006_check_and_assert.h"
@@ -149,11 +145,6 @@ static void main_args_print(const int argc, const char * argv[]);
 static void main_win_print(void); 
 
 
-#define LOCAL_ALLOCA__DECLARE(LOCAL_ALLOCA_SIZEOF)			\
-  enum { LOCAL_ALLOCA__BYTESIZE = (LOCAL_ALLOCA_SIZEOF) }; char local_alloca__mem[LOCAL_ALLOCA__BYTESIZE]; uint16_t local_alloca__left = LOCAL_ALLOCA__BYTESIZE; uint16_t local_alloca__used = 0; uint16_t local_alloca__requested; 
-
-#define LOCAL_ALLOCA(REQUESTED_SIZEOF)					\
-  (local_alloca__requested = (REQUESTED_SIZEOF), ((local_alloca__requested > local_alloca__left) ? NULL : (local_alloca__left -= local_alloca__requested, local_alloca__used += local_alloca__requested,  local_alloca__mem + local_alloca__used - local_alloca__requested))) 
 
 
 
@@ -161,7 +152,7 @@ static void main_win_print(void);
 // 0. MAIN 
 
 int main(const int argc, const char * argv[]) { 
-  LOCAL_ALLOCA__DECLARE(UINT16_MAX); 
+  LOCAL_ALLOCA__DECLARE(uint16_t,UINT16_MAX); 
   int retour = -1;
   
  label__start: {
@@ -1175,7 +1166,9 @@ void main_arch_print(void) {
 void main_gcc_print(void) { 
 #ifdef __GNUC__ 
   printf("Compilé avec GCC %s.%s.%s" "\n", STRING(__GNUC__) , STRING(__GNUC_MINOR__), STRING(__GNUC_PATCHLEVEL__)); 
+#ifdef __VERSION__
   printf("GCC version: %s" "\n", __VERSION__); 
+#endif
 #else 
   printf("Not compiled with a gcc-compatible compiler (__GNUC__ was not defined)." "\n"); 
 #endif 
@@ -1337,9 +1330,19 @@ void main_win_print(void) {
 
 };
 
+
 #define BUFFERED_OUTSTREAM__C 
 #define BUFFERED_OUTSTREAM__MAX 8 
+#define EXTERN extern
 #include "lib__07__buffered_outstream.ci"
-#undef BUFFERED_OUTSTREAM__MAX
-#undef BUFFERED_OUTSTREAM__C 
+#undef  EXTERN
+#undef  BUFFERED_OUTSTREAM__MAX
+#undef  BUFFERED_OUTSTREAM__C 
 
+#define BUFFER_TO_FD__C 
+#define BUFFER_TO_FD__MAX 8 
+#define EXTERN extern
+#include "lib__11__buffer_to_fd.ci"
+#undef  EXTERN
+#undef  BUFFER_TO_FD__MAX 
+#undef  BUFFER_TO_FD__C 

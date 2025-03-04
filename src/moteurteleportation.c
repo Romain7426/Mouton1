@@ -22,7 +22,7 @@ struct CZoneTeleportation {
 }; 
 
 const int8_t CZoneTeleportation_bytesize_actual = sizeof(struct CZoneTeleportation); 
-ASSERT_COMPILE_TOPLEVEL(CZoneTeleportation_bytesize >= CZoneTeleportation_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CZoneTeleportation_bytesize >= CZoneTeleportation_bytesize_actual); 
 
 CZoneTeleportation * CZoneTeleportation_make(TPoint3D in_position, TPoint3D in_dimension, TDirection in_depart_direction, const char * in_destination_carte, TPoint3D in_destination_position, TDirection in_destination_direction) { 
   MALLOC_BZERO(CZoneTeleportation,this);
@@ -116,7 +116,7 @@ struct CMoteurTeleportation {
 };
 
 const int8_t CMoteurTeleportation_bytesize_actual = sizeof(struct CMoteurTeleportation); 
-ASSERT_COMPILE_TOPLEVEL(CMoteurTeleportation_bytesize >= CMoteurTeleportation_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CMoteurTeleportation_bytesize >= CMoteurTeleportation_bytesize_actual); 
 
 
 

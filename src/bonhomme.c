@@ -304,9 +304,11 @@ void CBonhomme__Life(CBonhomme * this) {
 
 #if 1 
 int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * anime_datadir, const char * anime_filename) { 
-  anime_t anime_data[1]; 
-  int     anime_stdlog_d = -1; 
-  int     anime_file_d   = -1; 
+  //anime_t anime_data[1]; 
+  char      anime_data_buffer[ANIME_BYTESIZE];
+  anime_t * anime_data = (anime_t *)anime_data_buffer;
+  int       anime_stdlog_d = -1; 
+  int       anime_file_d   = -1; 
   goto label__start; 
 
   assert(false); 
@@ -352,7 +354,7 @@ label__start: {};
 	messerr("        Voulez-vous réessayer?" "\n"); 
 	{
 	  char c; 
-	  const int nb_read = read(stdin_d, &c, 1); 
+	  const int nb_read = read(STDIN_FILENO, &c, 1); 
 	  if (0 == nb_read) { continue; }; 
 	  if (c == 'n') { goto label__error__exit_fail; }; 
 	  continue; 
@@ -370,7 +372,7 @@ label__start: {};
 	messerr("        Voulez-vous réessayer?" "\n"); 
 	{
 	  char c; 
-	  const int nb_read = read(stdin_d, &c, 1); 
+	  const int nb_read = read(STDIN_FILENO, &c, 1); 
 	  if (0 == nb_read) { continue; }; 
 	  if (c == 'n') { goto label__error__exit_fail; }; 
 	  continue; 
@@ -384,7 +386,7 @@ label__start: {};
     fflush(NULL); 
 
     for(;;) { 
-      const int_anime_error_t anime_error_id = anime__fill_from_file(anime_data, anime_filename, anime_file_d, anime_stdlog_d); 
+      const int_anime_error_t anime_error_id = anime__fill_from_file(anime_data, anime_filename, anime_stdlog_d); 
       if (ANIME__OK == anime_error_id) break; 
       if (0 < anime_error_id) { 
 	dprintf(fileno(stdout), "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: WARNING: %s: %s" "\n", __func__, anime_filename, int_anime_error__get_cstr(anime_error_id)); 
@@ -393,13 +395,13 @@ label__start: {};
       { 
 	messerr("ERREUR: Le fichier de description de l'objet animé n'a pas pu être lu et/ou analysé: '%s'" "\n", anime_fullpath); 
 	messerr("        ERROR_ID: %s" "\n", int_anime_error__get_cstr(anime_error_id)); 
-	messerr("        ERROR_DESC: %s" "\n", anime_data -> error_str); 
+	messerr("        ERROR_DESC: %s" "\n", anime__error_cstr_get(anime_data)); 
 	messerr("        Pour plus d'informations, veuillez vous reporter au compte-rendu rendant compte de cette tentative échouée: '%s'" "\n", anime_log); 
 	messerr("        Voulez-vous réessayer? (o/n)" "\n"); 
 	{
 	  char c; 
 	  for (;;) { 
-	    const ssize_t nb_read = read(stdin_d, &c, 1); 
+	    const ssize_t nb_read = read(STDIN_FILENO, &c, 1); 
 	    if (0 == nb_read) { continue; }; 
 	    if (-1 == nb_read) goto label__error__exit_fail; 
 	    break; 
@@ -424,38 +426,38 @@ label__start: {};
     close(anime_stdlog_d); anime_stdlog_d = -1; 
   }; 
   
-  this -> parent1.SetDimension(&this -> parent1, anime_data -> choc_longueur, anime_data -> choc_largeur, anime_data -> choc_hauteur); 
-  this -> parent1.masse = anime_data -> masse / 240.0f; 
+  this -> parent1.SetDimension(&this -> parent1, anime__choc_longueur__get(anime_data), anime__choc_largeur__get(anime_data), anime__choc_hauteur__get(anime_data)); 
+  this -> parent1.masse = anime__masse__get(anime_data) / 240.0f; 
   if (NULL == this -> parent1.filename) this -> parent1.filename = strcopy(anime_filename);
-  this -> parent1.pvmax       = anime_data -> vie; 
-  this -> parent1.Hostile_huh = anime_data -> hostile; 
+  this -> parent1.pvmax       = anime__hostile__get(anime_data);
+  this -> parent1.Hostile_huh = anime__vie__get(anime_data);
   
   if (NULL == this -> filename) this -> filename = strcopy(anime_filename);
   
   { 
     CObjActionnable * this_action = this -> parent1.actions; 
-    for (int i = 0; i < anime_data -> actions_nb; i++) {
-      this_action -> AjouterAction(this_action, anime_data -> actions_array_affichage[i], anime_data -> actions_array_icone[i], anime_data -> actions_array_gestionnaire_fichier[i], anime_data -> actions_array_gestionnaire_proc[i]); 
+    for (int i = 0; i < anime__actions_nb__get(anime_data); i++) {
+      this_action -> AjouterAction(this_action, anime__actions_affichage__get(anime_data,i), anime__actions_icone__get(anime_data,i), anime__actions_gestionnaire_fichier__get(anime_data,i), anime__actions_gestionnaire_proc__get(anime_data,i)); 
     }; 
   }; 
 
   { 
     CPantin * this_pantin = &this -> pantin; 
-    for (int racine_i = 0; racine_i < anime_data -> racines_nb; racine_i++) { 
-      const char  * qui      = anime_data -> racines_qui[racine_i]; 
-      const float   x        = anime_data -> racines_x[racine_i]; 
-      const float   y        = anime_data -> racines_y[racine_i]; 
-      const float   z        = anime_data -> racines_z[racine_i]; 
-      const float   angle_y  = anime_data -> racines_angle_y[racine_i]; 
+    for (int racine_i = 0; racine_i < anime__racines_nb__get(anime_data); racine_i++) { 
+      const char  * qui      = anime__racines_qui__get(anime_data,racine_i);
+      const float   x        = anime__racines_x__get(anime_data,racine_i);
+      const float   y        = anime__racines_y__get(anime_data,racine_i);
+      const float   z        = anime__racines_z__get(anime_data,racine_i);
+      const float   angle_y  = anime__racines_angle_y__get(anime_data,racine_i);
       const int     membre_i = anime__membres_lookup(anime_data, qui); 
       if (0 > membre_i) { 
 	messerr(__FILE__ ": " BIGLIB_STRING(__LINE__) ": " BIGLIB_STRING(__FUNCTION__) ":" "Impossible de trouver le membre nommé '%s'" "\n", qui); 
 	continue; 
       }; 
-      const char  * image       = anime_data -> membres_image[membre_i]; 
-      const float   largeur     = anime_data -> membres_largeur[membre_i]; 
-      const float   hauteur     = anime_data -> membres_hauteur[membre_i]; 
-      const float   angle_y_max = anime_data -> membres_angle_max_y[membre_i]; 
+      const char  * image       = anime__membres_image__get(anime_data,membre_i); 
+      const float   largeur     = anime__membres_largeur__get(anime_data,membre_i); 
+      const float   hauteur     = anime__membres_hauteur__get(anime_data,membre_i); 
+      const float   angle_y_max = anime__membres_angle_max_y__get(anime_data,membre_i); 
       this_pantin -> AjouterMembre(this_pantin, image, x, y, z, largeur, hauteur, angle_y_max); 
     }; 
   };
@@ -484,7 +486,7 @@ int CBonhomme__ReadDescriptionFile_old001(CBonhomme * this, const char * dir, co
 	messerr("        Voulez-vous réessayer?" "\n"); 
 	{
 	  char c; 
-	  const int nb_read = read(stdin_d, &c, 1); 
+	  const int nb_read = read(STDIN_FILENO, &c, 1); 
 	  if (0 == nb_read) { continue; }; 
 	  if (c == 'n') { return -1; }; 
 	  continue; 

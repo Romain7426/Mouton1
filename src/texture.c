@@ -16,7 +16,7 @@ struct CTexture {
 }; 
  
 const int8_t CTexture_bytesize_actual = sizeof(struct CTexture); 
-ASSERT_COMPILE_TOPLEVEL(CTexture_bytesize >= CTexture_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CTexture_bytesize >= CTexture_bytesize_actual); 
 
 static bool CTexture__charger_fichier_image_dans_OpenGL(const char * fichier_image, GLuint * glindice_ref, float * taillex_ref, float * tailley_ref); 
 

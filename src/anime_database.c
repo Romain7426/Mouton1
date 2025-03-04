@@ -3,10 +3,6 @@
 #include "anime_database.h"
 #include <time.h>
 
-#define BUFFERED_OUTSTREAM__H 
-#include "lib__07__buffered_outstream.ci"
-#undef BUFFERED_OUTSTREAM__H 
-
 enum { ANIME_DATABASE_AT_COMPILE_TIME__MAX = 32 }; 
 
 static const char * anime_database_at_compile_time__filename[ANIME_DATABASE_AT_COMPILE_TIME__MAX] = { 
@@ -189,12 +185,23 @@ enum { ANIME_DATABASE_AT_RUNTIME__MAX = 32 };
 static const char * anime_database_at_runtime__filename   [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
 static const char * anime_database_at_runtime__filecontent[ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
 static time_t       anime_database_at_runtime__mtime      [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
-static anime_t      anime_database_at_runtime__data       [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
+//static anime_t      anime_database_at_runtime__data       [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
+static char         anime_database_at_runtime__data_buffer[ANIME_BYTESIZE]       [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
+static anime_t *    anime_database_at_runtime__data       [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
+static bool_t       anime_database_at_runtime__init_huh = false; 
 static int8_t       anime_database_at_runtime__data_huh   [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
 static int8_t       anime_database_at_runtime__nb = 0; 
 
+static void anime_database_at_runtime__anime_data__init(void) { 
+  if (anime_database_at_runtime__init_huh) return;
+  for (int8_t i = 0; i < ANIME_DATABASE_AT_RUNTIME__MAX; i++) {
+    anime_database_at_runtime__data[i] = (anime_t *)(anime_database_at_runtime__data_buffer + i*ANIME_BYTESIZE);
+  }; 
+};
+
+
 enum { anime_database_at_runtime__filename_buffer_bytesize = 1 << 10 }; 
-ASSERT_COMPILE_TOPLEVEL(anime_database_at_runtime__filename_buffer_bytesize > 0); 
+ASSERT_COMPILE__TOPLEVEL(anime_database_at_runtime__filename_buffer_bytesize > 0); 
 static char    anime_database_at_runtime__filename_buffer[anime_database_at_runtime__filename_buffer_bytesize]; 
 static int16_t anime_database_at_runtime__filename_buffer_nb = 0; 
 
@@ -270,7 +277,7 @@ int8_t anime_database_at_runtime__filename__push_no_lookup(const char * filename
 
 
 enum { anime_database_at_runtime__filecontent_buffer_bytesize = 1 << 16 }; 
-ASSERT_COMPILE_TOPLEVEL(anime_database_at_runtime__filecontent_buffer_bytesize > 0); 
+ASSERT_COMPILE__TOPLEVEL(anime_database_at_runtime__filecontent_buffer_bytesize > 0); 
 static char    anime_database_at_runtime__filecontent_buffer[anime_database_at_runtime__filecontent_buffer_bytesize]; 
 static int32_t anime_database_at_runtime__filecontent_buffer_nb = 0; 
 
@@ -412,9 +419,9 @@ static int anime_database__parse_from_buffer(const char * anime_filename, const 
       assert(0 > anime_error_id); { 
 	messerr("ERREUR: Le fichier de description de l'objet animé n'a pas pu être lu et/ou analysé: '%s'" "\n", anime_filename); 
 	messerr("        ERROR_ID: %s" "\n", int_anime_error__get_cstr(anime_error_id)); 
-	messerr("        ERROR_DESC: %s" "\n", anime_data -> error_str); 
+	messerr("        ERROR_DESC: %s" "\n", anime__error_cstr_get(anime_data)); 
 	messerr("        Pour plus d'informations, veuillez vous reporter au compte-rendu rendant compte de cette tentative échouée: '%s'" "\n", anime_stdlog); 
-	buffered_outstream__close(anime_stdlog_d); 
+	buffered_outstream__close(anime_stdlog_d,/*flush_huh*/true); 
 	close(anime_stdlog_write_fd); 
 	goto label__error__exit_fail; 
       }; 
@@ -425,7 +432,7 @@ static int anime_database__parse_from_buffer(const char * anime_filename, const 
     anime__print_d(anime_data, anime_stdlog_d); 
     fflush(NULL); 
     
-    buffered_outstream__close(anime_stdlog_d); 
+    buffered_outstream__close(anime_stdlog_d,/*flush_huh*/true); 
     close(anime_stdlog_write_fd); 
     
     goto label__exit_success; 
@@ -454,6 +461,7 @@ static time_t anime_database__mtime_disk(const char * filename) {
 
 
 const anime_t * anime_database__get(const char * filename) { 
+  anime_database_at_runtime__anime_data__init();
   int8_t  id_at_c; 
   int16_t id_at_r; 
   time_t disk_mtime;
@@ -550,14 +558,14 @@ const anime_t * anime_database__get(const char * filename) {
   
  label__got_fresh_content: { 
     if (anime_database_at_runtime__data_huh[id_at_r]) goto label__got_data; 
-    const int parse_error = anime_database__parse_from_buffer(filename, anime_database_at_runtime__filecontent[id_at_r], strlen(anime_database_at_runtime__filecontent[id_at_r]), &anime_database_at_runtime__data[id_at_r]); 
+    const int parse_error = anime_database__parse_from_buffer(filename, anime_database_at_runtime__filecontent[id_at_r], strlen(anime_database_at_runtime__filecontent[id_at_r]), anime_database_at_runtime__data[id_at_r]); 
     anime_database_at_runtime__data_huh[id_at_r] = (0 == parse_error); 
     if (anime_database_at_runtime__data_huh[id_at_r]) goto label__got_data; 
     goto label__error__could_not_parse_anime_data_file; 
   }; 
   
  label__got_data: { 
-    return &(anime_database_at_runtime__data[id_at_r]); 
+    return anime_database_at_runtime__data[id_at_r]; 
   };   
   
 }; 

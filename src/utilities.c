@@ -138,16 +138,16 @@ static inline char * factorize_oem(const unsigned char tab[], const char * str);
 char * factorize_oem(const unsigned char tab[], const char * str_) {
   if (str_ == NULL) { return NULL; }; 
   
-  const unsigned char * str = str_;     
-  const size_t len = strlen(str); 
+  const size_t len = strlen(str_); 
+  const unsigned char * str = (const unsigned char *)str_;
   unsigned char * temp = (unsigned char *) malloc(sizeof(unsigned char) * (len+1));
-
+  
   for (size_t i = 0; i < len; i++) {
     temp[i] = tab[str[i]];
   }; 
   temp[len] = '\0';
 
-  return temp;
+  return (char *)temp;
 };
 
 char * ansi2oem(const char * str) {

@@ -31,7 +31,7 @@ static const char * CPascal__method_callback__CType__get_qui__arg_i(void * callb
   const char * udf_value; 
   if (PSCRIPT_TYPE__PROXY == arg_core_type0) {
     const int udf_mem_offset = *(const int_pscript_mem_t *) (arg_mem + arg_offset[arg_i]); 
-    udf_value = pscript_mem__get_pointer(this -> pscript_env -> mem_env, udf_mem_offset); 
+    udf_value = (const char *)pscript_mem__get_pointer(this -> pscript_env -> mem_env, udf_mem_offset); 
   }
   else if (PSCRIPT_TYPE__USER == arg_core_type0) {
     udf_value = arg_mem + arg_offset[arg_i]; 
@@ -1100,7 +1100,7 @@ int CPascal__ffiproc_callback__Readln__async_reverse_callback__push_return_value
     const int    cast_target_type   = arg1_subtype; 
     const int    cast_target_sizeof = pscript_type__sizeof(this -> pscript_env -> type_env, cast_target_type); 
     //char         cast_target_value[cast_target_sizeof]; 
-    char *       cast_target_value = pscript_mem__get_pointer_writable(this -> pscript_env -> mem_env, arg1_subtype_offset); 
+    char *       cast_target_value = (char *) pscript_mem__get_pointer_writable(this -> pscript_env -> mem_env, arg1_subtype_offset); 
     
     pscript_value__cast_generic(this -> pscript_env, cast_target_type, pscript_type__get__string(this -> pscript_env -> type_env), sizeof(readln_pstr), (const char *) &readln_pstr, cast_target_sizeof, cast_target_value); 
     
@@ -1122,6 +1122,7 @@ int CPascal__ffiproc_callback__Readln__async_reverse_callback__push_return_value
 
 
 int CPascal__ffiproc_callback__Menu__async_reverse_callback__push_return_value(CPascal * this, const int choice) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   const char * qui = "<global>"; 
   message("<%s>: " "ASync Reverse Callback on object '%s' - choice = '%s'" "\n", __func__, qui, int_string__stack(choice)); 
   const int retval_type = pscript_type__get__integer(this -> pscript_env -> type_env); 

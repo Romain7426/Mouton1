@@ -30,17 +30,17 @@ enum {    cooperative_thread_env__sizeof__compiler_const = sizeof(struct coopera
 const int cooperative_thread_env__sizeof                 = sizeof(struct cooperative_thread_env_t); 
 
 static void assert_compile__check_type_size_dksauhgsaky837643iduy(void) {
-  ASSERT_COMPILE_LOCAL(COOPERATIVE_THREAD__SIZE                    <  INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
-  ASSERT_COMPILE_LOCAL(COOPERATIVE_THREAD__TEMP_THREAD_DATA_SIZE   <  INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
-  ASSERT_COMPILE_LOCAL(COOPERATIVE_THREAD__GLOBAL_THREAD_DATA_SIZE <  INT16_MAX); // RL: So that 'INT16_MAX' is an invalid value. 
-  ASSERT_COMPILE_LOCAL(COOPERATIVE_THREAD__GLOBAL_THREAD_DATA_SIZE <= (COOPERATIVE_THREAD__SYSTEM_STACK__SIZE >> 1)); 
-  ASSERT_COMPILE_LOCAL(COOPERATIVE_THREAD__SYSTEM_STACK__SIZE      >= SIGSTKSZ); 
+  ASSERT_COMPILE__LOCAL(COOPERATIVE_THREAD__SIZE                    <  INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
+  ASSERT_COMPILE__LOCAL(COOPERATIVE_THREAD__TEMP_THREAD_DATA_SIZE   <  INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
+  ASSERT_COMPILE__LOCAL(COOPERATIVE_THREAD__GLOBAL_THREAD_DATA_SIZE <  INT16_MAX); // RL: So that 'INT16_MAX' is an invalid value. 
+  ASSERT_COMPILE__LOCAL(COOPERATIVE_THREAD__GLOBAL_THREAD_DATA_SIZE <= (COOPERATIVE_THREAD__SYSTEM_STACK__SIZE >> 1)); 
+  ASSERT_COMPILE__LOCAL(COOPERATIVE_THREAD__SYSTEM_STACK__SIZE      >= SIGSTKSZ); 
   cooperative_thread_env_t * this = NULL; 
-  ASSERT_COMPILE_LOCAL(sizeof(this -> nb            ) >= 1); 
-  ASSERT_COMPILE_LOCAL(sizeof(this -> data_temp_nb  ) >= 1); 
-  ASSERT_COMPILE_LOCAL(sizeof(this -> data_global_nb) >= 2); 
+  ASSERT_COMPILE__LOCAL(sizeof(this -> nb            ) >= 1); 
+  ASSERT_COMPILE__LOCAL(sizeof(this -> data_temp_nb  ) >= 1); 
+  ASSERT_COMPILE__LOCAL(sizeof(this -> data_global_nb) >= 2); 
 
-  //ASSERT_COMPILE_LOCAL(cooperative_thread_env__sizeof__compiler_const <= 32144); // RL: 32144 (31,4k) was the first size of that structure. 
+  //ASSERT_COMPILE__LOCAL(cooperative_thread_env__sizeof__compiler_const <= 32144); // RL: 32144 (31,4k) was the first size of that structure. 
 }; 
 
 cooperative_thread_env_t * cooperative_thread_env__make_r(cooperative_thread_env_t * this) { 

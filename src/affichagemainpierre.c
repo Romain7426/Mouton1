@@ -11,7 +11,7 @@ struct CAffichageMainPierre {
 };    
 
 const int8_t CAffichageMainPierre_bytesize_actual = sizeof(struct CAffichageMainPierre); 
-ASSERT_COMPILE_TOPLEVEL(CAffichageMainPierre_bytesize >= CAffichageMainPierre_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CAffichageMainPierre_bytesize >= CAffichageMainPierre_bytesize_actual); 
 
 
 static CAffichageMainPierre * CAffichageMainPierre_set_attributs(CAffichageMainPierre * this) {

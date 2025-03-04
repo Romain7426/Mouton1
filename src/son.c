@@ -61,10 +61,11 @@ CMusique * CMusique_make(const char * filename) {
 
 
 Mix_Music * try_to_load(const char * rep, const char * file_sans_ext, const char * ext) {
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   char * reelfile;
   Mix_Music * retour;
 
-  reelfile = strconcat3(rep, file_sans_ext, ext);
+  reelfile = strconcat3__alloca(rep, file_sans_ext, ext);
   
   retour = Mix_LoadMUS(reelfile);
   

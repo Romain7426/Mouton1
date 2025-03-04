@@ -20,7 +20,7 @@ enum {           game_events__cstr__array__size__compiler_const = ARRAY_SIZE(gam
 static const int game_events__cstr__array__size                 = game_events__cstr__array__size__compiler_const; 
 
 static void assert_compile__game_events_type__dsaljdhsa7643i2utgd(void) { 
-  ASSERT_COMPILE_LOCAL(game_events__cstr__array__size__compiler_const == GAME_EVENTS__COUNT + 1); 
+  ASSERT_COMPILE__LOCAL(game_events__cstr__array__size__compiler_const == GAME_EVENTS__COUNT + 1); 
 }; 
 
 const char * game_events__get_cstr(const int game_events) { 
@@ -45,7 +45,7 @@ enum {           game_handlers__cstr__array__size__compiler_const = ARRAY_SIZE(g
 static const int game_handlers__cstr__array__size                 = game_handlers__cstr__array__size__compiler_const; 
 
 static void assert_compile__game_handlers__dsaljdhsa7643i2utgd(void) { 
-  ASSERT_COMPILE_LOCAL(game_handlers__cstr__array__size__compiler_const == GAME_HANDLERS__COUNT + 1); 
+  ASSERT_COMPILE__LOCAL(game_handlers__cstr__array__size__compiler_const == GAME_HANDLERS__COUNT + 1); 
 }; 
 
 const char * game_handlers__get_cstr(const int game_handlers) { 

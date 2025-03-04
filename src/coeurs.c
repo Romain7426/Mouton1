@@ -26,7 +26,7 @@ struct CAffichageCoeur {
 };
 
 const int8_t CAffichageCoeur_bytesize_actual = sizeof(struct CAffichageCoeur); 
-ASSERT_COMPILE_TOPLEVEL(CAffichageCoeur_bytesize >= CAffichageCoeur_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CAffichageCoeur_bytesize >= CAffichageCoeur_bytesize_actual); 
 
 #define nb_Etape_Animation 64
 

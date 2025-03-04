@@ -582,6 +582,8 @@ static int Game_ProcessInputs_HerosSurUneMap(const int current_mj) {
 }; 
 
 int Game_ProcessInputs(const int current_mj) {
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
+  int retour = -1;
   //fprintf(stderr, "ModeJeu = %d\n", ModeJeu);
   int ModeJeu = current_mj; 
   CPhysicalObj * Hero_o = &Hero -> parent1; 
@@ -1009,6 +1011,7 @@ int Game_Life_TeleportationStartHuh(const int current_mj) {
 
 
 void Game_Life(const int animate_but_do_not_aliven_huh) {
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   //fprintf(stderr, "ModeJeu = %d\n", ModeJeu);
 
   do { 
@@ -1208,6 +1211,7 @@ void Game_Life(const int animate_but_do_not_aliven_huh) {
 
 
 static void Game_Blit_Sky(const CMap * Map, const float heros_y) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
 #if 1 
   const float f = 1.5f * our_manifold -> temps__get_sunshine_intensity_at_y(our_manifold, /*map_y*/0, heros_y / CMap__lattice_height(Map)); 
 #else 
@@ -1219,6 +1223,7 @@ static void Game_Blit_Sky(const CMap * Map, const float heros_y) {
 }; 
 
 void Game_Blit_Map(const CMap * Map, const CBonhomme * Hero, const CObjNonAnime * Vaisseau) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   //fprintf(stderr, "Map = %p\n", Map);
   if (Map == NULL) { return; }; 
   
@@ -1293,6 +1298,7 @@ void Game_Blit_Map(const CMap * Map, const CBonhomme * Hero, const CObjNonAnime 
 
 
 void Game_Blit(void) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
 #if 1 
   { 
     // RL: Après tests, ça permet au héros et aux ennemis de ne pas être sombres.

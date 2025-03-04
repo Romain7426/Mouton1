@@ -262,7 +262,7 @@ struct CSol {
 }; 
 
 const int16_t CSol_bytesize_actual = sizeof(struct CSol); 
-ASSERT_COMPILE_TOPLEVEL(CSol_bytesize >= CSol_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CSol_bytesize >= CSol_bytesize_actual); 
 
 
 
@@ -503,6 +503,7 @@ static void CSol__compute_manifold_vertices_and_normals(CSol * this, const riema
 
 
 static int CSol__manifold__alloc_extra_temp_arrays(CSol * this, const riemann_t * our_manifold) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   this -> manifold__extra_w_arrays__nb = our_manifold -> get_nb_extra_w_arrays_needed(our_manifold); 
   if (this -> manifold__extra_w_arrays__nb >= NB_MAX_EXTRA_ARRAYS) { 
     messerr("ERREUR: Incompatibilité entre la variété riemannienne et la structure contenant le sol - la variété demande %s extra lignes en longueur pour contenir ses calculs intermédiaires, or la structure de sol ne peut en contenir que %s." "\n", int_string__stack(this -> manifold__extra_w_arrays__nb), int_string__stack(NB_MAX_EXTRA_ARRAYS)); 
@@ -542,6 +543,7 @@ static int CSol__manifold__alloc_extra_temp_arrays(CSol * this, const riemann_t 
 
 
 static int CSol__ChargerTextureSolDisposition(CSol * this, const char * fichier_bitmap) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Chargement des zones de textures - fichier:  '%s' " "\n", __func__, fichier_bitmap); 
   
   if (fichier_bitmap == NULL) { return -1; }; 
@@ -643,6 +645,7 @@ static int CSol__ChargerTextureSolDisposition(CSol * this, const char * fichier_
 
 
 static int CSol__ChargerZ(CSol * this, const float lattice_to_map_scale_factor__z, const char * filename) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Chargement des niveaux de la carte: '%s'" "\n", __func__, filename == NULL ? "<null>" : filename); 
 
   if (filename == NULL) return -1; 

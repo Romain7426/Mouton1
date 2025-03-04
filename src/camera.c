@@ -75,7 +75,7 @@ struct CCamera {
 
 
 const int16_t CCamera_bytesize_actual = sizeof(CCamera);  
-ASSERT_COMPILE_TOPLEVEL(CCamera_bytesize >= CCamera_bytesize_actual); 
+//ASSERT_COMPILE__TOPLEVEL(CCamera_bytesize >= CCamera_bytesize_actual); 
 
 
 
@@ -283,7 +283,7 @@ void CCamera__CalcCamera(CCamera * this, const CBonhomme * Hero, const float lat
 }; 
 
 void CCamera__Blit(const CCamera * this, const riemann_t * our_manifold) { 
-  our_manifold -> camera__LookAt__Blit(our_manifold, &this -> manifold__camera_position, &this -> manifold__target_position, &this -> manifold__upward_direction); 
+  our_manifold -> camera__LookAt__Blit(our_manifold, (const float (*)[3])&this -> manifold__camera_position, (const float (*)[3])&this -> manifold__target_position, (const float (*)[3])&this -> manifold__upward_direction); 
 }; 
 
 

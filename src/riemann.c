@@ -32,7 +32,7 @@ static const char * riemann_type__cstr_array[] = {
 }; 
 enum { riemann_type__cstr_array__size = ARRAY_SIZE(riemann_type__cstr_array) }; 
 static void assert_compile__dkushdsuf238s764asddf(void) {
-  ASSERT_COMPILE_LOCAL(riemann_type__cstr_array__size == RIEMANN_TYPE__COUNT + 1); 
+  ASSERT_COMPILE__LOCAL(riemann_type__cstr_array__size == RIEMANN_TYPE__COUNT + 1); 
 }; 
 extern const char * riemann_type__get_cstr(const int riemann_type) { 
   if (riemann_type < 0) return NULL; 
@@ -98,7 +98,7 @@ enum {    RIEMANN_DATA__NEEDED_SIZEOF = MAX(rieman_torus__sizeof__const,rieman_r
 const int riemann_data__needed_sizeof = RIEMANN_DATA__NEEDED_SIZEOF; 
 
 static void assert_compile__dsakhsda4387hd87(void) { 
-  ASSERT_COMPILE_LOCAL(RIEMANN_DATA__NEEDED_SIZEOF <= RIEMANN_DATA__ALLOCATED_SIZEOF); 
+  ASSERT_COMPILE__LOCAL(RIEMANN_DATA__NEEDED_SIZEOF <= RIEMANN_DATA__ALLOCATED_SIZEOF); 
 }; 
 
 

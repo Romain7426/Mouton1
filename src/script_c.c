@@ -25,13 +25,13 @@ enum {    script_c_env__sizeof__compiler_const = sizeof(struct script_c_env_t) }
 const int script_c_env__sizeof                 = sizeof(struct script_c_env_t); 
 
 static void assert_compile__check_type_size_gsa43ky837643iduy(void) {
-  ASSERT_COMPILE_LOCAL(SCRIPT_C__SIZE               < INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
-  ASSERT_COMPILE_LOCAL(SCRIPT_C__STRING_BUFFER_SIZE < INT16_MAX); // RL: So that 'INT16_MAX' is an invalid value. 
-  ASSERT_COMPILE_LOCAL(SCRIPT_C__TEMP_DATA_SIZE     < INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
+  ASSERT_COMPILE__LOCAL(SCRIPT_C__SIZE               < INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
+  ASSERT_COMPILE__LOCAL(SCRIPT_C__STRING_BUFFER_SIZE < INT16_MAX); // RL: So that 'INT16_MAX' is an invalid value. 
+  ASSERT_COMPILE__LOCAL(SCRIPT_C__TEMP_DATA_SIZE     < INT8_MAX ); // RL: So that 'INT8_MAX' is an invalid value. 
   script_c_env_t * this = NULL; 
-  ASSERT_COMPILE_LOCAL(sizeof(this -> nb              ) >= sizeof(int8_t )); 
-  ASSERT_COMPILE_LOCAL(sizeof(this -> string_buffer_nb) >= sizeof(int16_t)); 
-  ASSERT_COMPILE_LOCAL(sizeof(this -> data_temp_nb    ) >= sizeof(int8_t )); 
+  ASSERT_COMPILE__LOCAL(sizeof(this -> nb              ) >= sizeof(int8_t )); 
+  ASSERT_COMPILE__LOCAL(sizeof(this -> string_buffer_nb) >= sizeof(int16_t)); 
+  ASSERT_COMPILE__LOCAL(sizeof(this -> data_temp_nb    ) >= sizeof(int8_t )); 
 }; 
 
 
@@ -91,6 +91,7 @@ const char *   script_c__get_name(const script_c_env_t * this, const int script_
 }; 
 
 int_script_c_t script_c__lookup(const script_c_env_t * this, const char * script_c_name) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   if (script_c_name == NULL) { return -1; }; 
   const char * script_c_name__lower = cstring__tolower__stack(script_c_name); 
   for (int i = 0; i < this -> nb; i++) { 
@@ -112,6 +113,7 @@ static const char * script_c__strcopy(script_c_env_t * this, const char * cstr) 
 }; 
 
 static int_script_c_t script_c__push(script_c_env_t * this, const char * script_c_name, int (* script_c_fun)(script_c_env_t * this, api_contexte_t * api_contexte)) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   if (this -> nb >= SCRIPT_C__SIZE) { return -1; }; 
   const int index = this -> nb; 
   const char * script_c_name__lower = cstring__tolower__stack(script_c_name); 
@@ -476,6 +478,7 @@ static int script_c__lib1__brigitte_pastas(script_c_env_t * this, api_contexte_t
 
 
 static int script_c__lib1__prendre_clef(script_c_env_t * this, api_contexte_t * api_contexte) { 
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
   const char Perso[] = "Pourfendeur-de-dinotores"; 
   const char nom_boss[] = "Chouchou"; 
   
