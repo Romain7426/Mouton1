@@ -19,6 +19,9 @@ echo "GMAKE="\"${GMAKE}\"
 
 (${SHELL} ./tools-compile.sh ) || exit 1; 
 
+echo "Generating CONF"
+CC="${CC}" ${GMAKE} -r -R -S -j 1 --warn-undefined-variables -f ./Makefile-conf.mkf 
+
 echo "Generating Makefile"
 CC="${CC}" ${GMAKE} -r -R -S -j 1 --warn-undefined-variables -f ./Makefile-gen.mkf 
 

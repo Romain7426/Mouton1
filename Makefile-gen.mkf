@@ -138,100 +138,37 @@ CC_CONFIG:=$(CC_CONFIG) -D COMPILER_PCC
 endif
 
 
-CC_WORKS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_WORKS_HUH),0) 
-  CC_WORKS_HUH := yes
-else 
-  CC_WORKS_HUH := no
-endif 
-$(info CC_WORKS_HUH: $(CC_WORKS_HUH))
-ifeq ($(CC_WORKS_HUH),no) 
-   $(info --> Specified compiler failed to compile a test trivial program.)
-   $(info -->   Seems like your compiler does not work.) 
-   $(error ABORTING)
-endif 
+# ***************************************************************************** 
+# CONF
 
-CC_HAS_F_STACK_SHUFFLE_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-shuffle - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_F_STACK_SHUFFLE_HUH),0) 
-  CC_HAS_F_STACK_SHUFFLE_HUH := yes
-else 
-  CC_HAS_F_STACK_SHUFFLE_HUH := no
-endif 
-$(info CC_HAS_STACK_SHUFFLE_HUH: $(CC_HAS_F_STACK_SHUFFLE_HUH))
+CONF_EXISTS_HUH := $(strip $(shell if test -e CONF ; then echo "yes"; else echo "no"; fi; ))
+#$(info CONF_EXISTS_HUH: ${CONF_EXISTS_HUH})
 
-CC_HAS_M_SAVE_ARGS_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -msave-args - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_M_SAVE_ARGS_HUH),0) 
-  CC_HAS_M_SAVE_ARGS_HUH := yes
-else 
-  CC_HAS_M_SAVE_ARGS_HUH := no
-endif 
-$(info CC_HAS_M_SAVE_ARGS_HUH: $(CC_HAS_M_SAVE_ARGS_HUH))
+ifeq (${CONF_EXISTS_HUH},no)
+#$(info here)
+#OK_HUH := $(strip $(shell CC="${CC}" ${MAKE} -r -R -S -j 1 --warn-undefined-variables -f ./Makefile-conf.mkf ; if $$? ; then echo "yes"; else echo "no"; fi; ))
+#$(info OK_HUH: ${OK_HUH})
+$(error "Le fichier CONF n'existe pas. Pour le générer, il faut taper la cmmande: gmake -f ./Makefile-conf.mkf")
+endif
 
-# Actually, we do not want to use «-fstack-protector-all» as it does not work with VLAs and ALLOCAs. 
-CC_HAS_F_STACK_PROTECTOR_ALL_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-protector-all - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_F_STACK_PROTECTOR_ALL_HUH),0) 
-  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := yes
-else 
-  CC_HAS_F_STACK_PROTECTOR_ALL_HUH := no
-endif 
-$(info CC_HAS_F_STACK_PROTECTOR_ALL_HUH: $(CC_HAS_F_STACK_PROTECTOR_ALL_HUH))
+include CONF
 
-CC_HAS_F_STACK_PROTECTOR_NO_HUH := $(shell echo "int main(int argc, char * argv[]) { return 0; }; " | $(CC) -x c -std=c99 -O0 -fno-stack-protector - -o - > /dev/null 2>&1 ; echo $$?)
-ifeq ($(CC_HAS_F_STACK_PROTECTOR_NO_HUH),0) 
-  CC_HAS_F_STACK_PROTECTOR_NO_HUH := yes
-else 
-  CC_HAS_F_STACK_PROTECTOR_NO_HUH := no
-endif 
-$(info CC_HAS_F_STACK_PROTECTOR_NO_HUH: $(CC_HAS_F_STACK_PROTECTOR_NO_HUH))
+ifneq ("$(CC)","$(CC_CONF)")
+  $(error CC [$(CC)] et CC_CONF [$(CC_CONF)] sont distincts. Il faut relancer la configuration avec le même compilateur. ) 
+endif
 
-CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := $(shell mkdir -p tmp && echo "int main(int argc, char * argv[]) { char local[1 << 14]; char tmp[argc]; return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_vla.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_vla.exe ; echo $$?)
-ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH),0) 
-  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := yes
-else 
-  CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH := no
-endif 
-$(info CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_VLA_HUH))
-
-CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := $(shell mkdir -p tmp && echo "#include <stdlib.h> \n int main(int argc, char * argv[]) { char local[1 << 14]; char * tmp = alloca(argc); return 0; }; " | $(CC) -x c -std=c99 -O0 -fstack-protector-all - -o tmp/stack_protector_and_alloca.exe > /dev/null 2>&1 && ./tmp/stack_protector_and_alloca.exe ; echo $$?)
-ifeq ($(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH),0) 
-  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := yes
-else 
-  CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH := no
-endif 
-$(info CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH: $(CC_STACK_PROTECTOR_WORKS_WITH_ALLOCA_HUH))
-
-
-STDLIB_PROVIDES_ARC4RANDOM_HUH := $(shell echo "#include <stdlib.h>\nint main(int argc, char * argv[]) { return arc4random(); }; " | $(CC) -x c -std=c99 -O0 - -o - > /dev/null 2>&1 ; echo $$?)
 ifeq ($(STDLIB_PROVIDES_ARC4RANDOM_HUH),0) 
   STDLIB_PROVIDES_ARC4RANDOM_HUH := yes
   CC_CONFIG:=$(CC_CONFIG) -D STDLIB_PROVIDES_ARC4RANDOM
 else 
   STDLIB_PROVIDES_ARC4RANDOM_HUH := no
 endif 
-$(info STDLIB_PROVIDES_ARC4RANDOM_HUH: $(STDLIB_PROVIDES_ARC4RANDOM_HUH))
 
-
-YASM_HUH  := $(shell yasm  --version > /dev/null 2>&1 ; echo $$?)
-GAS_HUH   := $(shell gas   --version > /dev/null 2>&1 ; echo $$?)
-AS_HUH    := $(shell as    --version > /dev/null 2>&1 ; echo $$?)
-ifeq ($(YASM_HUH),0) 
-  YASM_HUH := yes
-else 
-  YASM_HUH := no
-endif
-ifeq ($(GAS_HUH),0) 
-  GAS_HUH := yes
-else 
-  GAS_HUH := no
-endif
-ifeq ($(AS_HUH),0) 
-  AS_HUH := yes
-else 
-  AS_HUH := no
-endif
+ifeq (0,1)
 $(info Has YASM?  $(YASM_HUH)) 
 $(info Has GAS?   $(GAS_HUH)) 
 $(info Has AS?    $(AS_HUH)) 
+endif
 
 ASM := yasm 
 
@@ -239,277 +176,6 @@ SEPARATE_ASM := yes
 SEPARATE_ASM := $(YASM_HUH)
 SEPARATE_ASM := no
 
-
-# *** OpenGL *** 
-OPENGL_INC := /usr/X11R6/include
-# "GL" sub-directory is used by regular OS. 
-# "OpenGL" sub-directory is used by MacOSX. 
-OPENGL_HAS_GL_HUH := $(shell test -e $(OPENGL_INC)/GL > /dev/null 2>&1 ; echo $$?)
-OPENGL_HAS_OPENGL_HUH := $(shell test -e $(OPENGL_INC)/OpenGL > /dev/null 2>&1 ; echo $$?)
-ifeq ($(OPENGL_HAS_GL_HUH),0) 
-  OPENGL_HAS_GL_HUH := yes
-else 
-  OPENGL_HAS_GL_HUH := no
-endif
-ifeq ($(OPENGL_HAS_OPENGL_HUH),0)
-  OPENGL_HAS_OPENGL_HUH := yes
-else
-  OPENGL_HAS_OPENGL_HUH := no
-endif
-#$(info OPENGL_HAS_GL_HUH: $(OPENGL_HAS_GL_HUH)) 
-#$(info OPENGL_HAS_OPENGL_HUH: $(OPENGL_HAS_OPENGL_HUH)) 
-ifeq ($(OPENGL_HAS_GL_HUH),yes) 
-  $(info OpenGL sub-dir: $(OPENGL_INC)/GL) 
-else ifeq ($(OPENGL_HAS_OPENGL_HUH),yes) 
-  $(info OpenGL sub-dir: $(OPENGL_INC)/OpenGL) 
-else
-   $(info --> I could not find where your OpenGL include files are located.)
-   $(info --> Please edit this file, look for the variable 'OPENGL_INC', and edit it to specify the OpenGL include files location.) 
-   $(error ABORTING)
-endif
-
-
-# *** LIBSDL *** 
-SDLCONFIG := sdl-config
-SDLCONFIG_HUH  := $(shell $(SDLCONFIG)   --version > /dev/null 2>&1 ; echo $$?)
-ifeq ($(SDLCONFIG_HUH),0) 
-  SDLCONFIG_HUH := yes
-else 
-  SDLCONFIG_HUH := no
-endif
-$(info Has SDL-CONFIG?  $(SDLCONFIG_HUH)) 
-ifeq ($(SDLCONFIG_HUH),no) 
-   $(info --> 'sdl-config' was not found.)
-   $(info -->   1. Is SDL installed? If not so, please see https://www.libsdl.org/) 
-   $(info -->   2. If SDL is installed but in some esoteric location, please edit this file, look for the variable 'SDLCONFIG', and edit it to specify 'sdl-config' location.) 
-   $(error ABORTING)
-endif
-
-SDLCONFIG_CFLAGS := $(shell $(SDLCONFIG) --cflags) 
-$(info SDLCONFIG_CFLAGS: $(SDLCONFIG_CFLAGS)) 
-
-SDLCONFIG_LIBS := $(shell $(SDLCONFIG) --libs) 
-$(info SDLCONFIG_LIBS  : $(SDLCONFIG_LIBS)) 
-
-
-# *** PKGCONFIG *** 
-PKGCONFIG := pkg-config
-PKGCONFIG_HUH  := $(shell $(PKGCONFIG)   --version > /dev/null 2>&1 ; echo $$?)
-ifeq ($(PKGCONFIG_HUH),0) 
-  PKGCONFIG_HUH := yes
-else 
-  PKGCONFIG_HUH := no
-endif
-$(info Has PKG-CONFIG?  $(PKGCONFIG_HUH)) 
-ifeq ($(PKGCONFIG_HUH),no) 
-   $(info --> 'pkg-config' was not found.)
-   $(info -->   1. Is pkg-config installed? If not so, please see https://www.freedesktop.org/wiki/Software/pkg-config/) 
-   $(info -->   2. If pkg-config is installed but in some esoteric location, please edit this file, look for the variable 'PKGCONFIG', and edit it to specify 'pkg-config' location.) 
-   $(error ABORTING)
-endif
-
-
-# *** LIBSDLIMAGE *** 
-LIBSDLIMAGE_EXISTS_HUH := $(shell $(PKGCONFIG) SDL_image --exists > /dev/null 2>&1 ; echo $$?)
-#$(info LIBSDLIMAGE_EXISTS_HUH: $(LIBSDLIMAGE_EXISTS_HUH)) 
-ifeq ($(strip $(LIBSDLIMAGE_EXISTS_HUH)),0) 
-  LIBSDLIMAGE_EXISTS_HUH := yes
-else 
-  LIBSDLIMAGE_EXISTS_HUH := no
-endif
-#$(info LIBSDLIMAGE_EXISTS_HUH: $(LIBSDLIMAGE_EXISTS_HUH)) 
-ifeq ($(LIBSDLIMAGE_EXISTS_HUH),no) 
-   $(info --> 'pkg-config' did not find 'SDL_image'.)
-   $(info -->   1. Is SDL_image installed? If not so, please see https://www.libsdl.org/projects/SDL_image/) 
-   $(info -->   2. If SDL_image is installed but in some esoteric location, please edit this file, look for variables 'LIBSDLIMAGE_EXISTS_HUH', 'LIBSDLIMAGE_CFLAGS', and 'LIBSDLIMAGE_LIBS', and specify them accordingly.) 
-   $(error ABORTING)
-endif
-
-LIBSDLIMAGE_CFLAGS := $(shell $(PKGCONFIG) SDL_image --cflags) 
-$(info LIBSDLIMAGE_CFLAGS: $(LIBSDLIMAGE_CFLAGS)) 
-
-LIBSDLIMAGE_LIBS := $(shell $(PKGCONFIG) SDL_image --libs) 
-$(info LIBSDLIMAGE_LIBS  : $(LIBSDLIMAGE_LIBS)) 
-
-
-
-# *** LIBSDLMIXER *** 
-LIBSDLMIXER_EXISTS_HUH := $(shell $(PKGCONFIG) SDL_mixer --exists > /dev/null 2>&1 ; echo $$?)
-#$(info LIBSDLMIXER_EXISTS_HUH: $(LIBSDLMIXER_EXISTS_HUH)) 
-ifeq ($(strip $(LIBSDLMIXER_EXISTS_HUH)),0) 
-  LIBSDLMIXER_EXISTS_HUH := yes
-else 
-  LIBSDLMIXER_EXISTS_HUH := no
-endif
-#$(info LIBSDLMIXER_EXISTS_HUH: $(LIBSDLMIXER_EXISTS_HUH)) 
-ifeq ($(LIBSDLMIXER_EXISTS_HUH),no) 
-   $(info --> 'pkg-config' did not find 'SDL_mixer'.)
-   $(info -->   1. Is SDL_mixer installed? If not so, please see https://www.libsdl.org/projects/SDL_mixer/) 
-   $(info -->   2. If SDL_mixer is installed but in some esoteric location, please edit this file, look for variables 'LIBSDLMIXER_EXISTS_HUH', 'LIBSDLMIXER_CFLAGS', and 'LIBSDLMIXER_LIBS', and specify them accordingly.) 
-   $(error ABORTING)
-endif
-
-LIBSDLMIXER_CFLAGS := $(shell $(PKGCONFIG) SDL_mixer --cflags) 
-$(info LIBSDLMIXER_CFLAGS: $(LIBSDLMIXER_CFLAGS)) 
-
-LIBSDLMIXER_LIBS := $(shell $(PKGCONFIG) SDL_mixer --libs) 
-$(info LIBSDLMIXER_LIBS  : $(LIBSDLMIXER_LIBS)) 
-
-
-
-# *** LIBPNG *** 
-LIBPNG_EXISTS_HUH := $(shell $(PKGCONFIG) libpng --exists > /dev/null 2>&1 ; echo $$?)
-#$(info LIBPNG_EXISTS_HUH: $(LIBPNG_EXISTS_HUH)) 
-ifeq ($(strip $(LIBPNG_EXISTS_HUH)),0) 
-  LIBPNG_EXISTS_HUH := yes
-else 
-  LIBPNG_EXISTS_HUH := no
-endif
-#$(info LIBPNG_EXISTS_HUH: $(LIBPNG_EXISTS_HUH)) 
-ifeq ($(LIBPNG_EXISTS_HUH),no) 
-   $(info --> 'pkg-config' did not find 'libpng'.)
-   $(info -->   1. Is libpng installed? If not so, please see http://www.libpng.org/pub/png/libpng.html) 
-   $(info -->   2. If libpng is installed but in some esoteric location, please edit this file, look for variables 'LIBPNG_EXISTS_HUH', 'LIBPNG_CFLAGS', and 'LIBPNG_LIBS', and specify them accordingly.) 
-   $(error ABORTING)
-endif
-
-LIBPNG_CFLAGS := $(shell $(PKGCONFIG) libpng --cflags) 
-$(info LIBPNG_CFLAGS: $(LIBPNG_CFLAGS)) 
-
-LIBPNG_LIBS := $(shell $(PKGCONFIG) libpng --libs) 
-$(info LIBPNG_LIBS  : $(LIBPNG_LIBS)) 
-
-
-# *** LIBJPEG *** 
-LIBJPEG_EXISTS_HUH := $(shell $(PKGCONFIG) libjpeg --exists > /dev/null 2>&1 ; echo $$?)
-#$(info LIBJPEG_EXISTS_HUH: $(LIBJPEG_EXISTS_HUH)) 
-ifeq ($(strip $(LIBJPEG_EXISTS_HUH)),0) 
-  LIBJPEG_EXISTS_HUH := yes
-else 
-  LIBJPEG_EXISTS_HUH := no
-endif
-#$(info LIBJPEG_EXISTS_HUH: $(LIBJPEG_EXISTS_HUH)) 
-ifeq ($(LIBJPEG_EXISTS_HUH),no) 
-   $(info --> 'pkg-config' did not find 'libjpeg'.)
-   $(info -->   1. Is libjpeg installed? If not so, please see XXX) 
-   $(info -->   2. If libjpeg is installed but in some esoteric location, please edit this file, look for variables 'LIBJPEG_EXISTS_HUH', 'LIBJPEG_CFLAGS', and 'LIBJPEG_LIBS', and specify them accordingly.) 
-   $(error ABORTING)
-endif
-
-LIBJPEG_CFLAGS := $(shell $(PKGCONFIG) libjpeg --cflags) 
-$(info LIBJPEG_CFLAGS: $(LIBJPEG_CFLAGS)) 
-
-LIBJPEG_LIBS := $(shell $(PKGCONFIG) libjpeg --libs) 
-$(info LIBJPEG_LIBS  : $(LIBJPEG_LIBS)) 
-
-
-# *** LIBVORBISFILE *** 
-LIBVORBISFILE_EXISTS_HUH := $(shell $(PKGCONFIG) vorbisfile --exists > /dev/null 2>&1 ; echo $$?)
-#$(info LIBVORBISFILE_EXISTS_HUH: $(LIBVORBISFILE_EXISTS_HUH)) 
-ifeq ($(strip $(LIBVORBISFILE_EXISTS_HUH)),0) 
-  LIBVORBISFILE_EXISTS_HUH := yes
-else 
-  LIBVORBISFILE_EXISTS_HUH := no
-endif
-#$(info LIBVORBISFILE_EXISTS_HUH: $(LIBVORBISFILE_EXISTS_HUH)) 
-ifeq ($(LIBVORBISFILE_EXISTS_HUH),no) 
-   $(info --> 'pkg-config' did not find 'libvorbisfile'.)
-   $(info -->   1. Is libvorbisfile installed? If not so, please see XXX) 
-   $(info -->   2. If libvorbisfile is installed but in some esoteric location, please edit this file, look for variables 'LIBVORBISFILE_EXISTS_HUH', 'LIBVORBISFILE_CFLAGS', and 'LIBVORBISFILE_LIBS', and specify them accordingly.) 
-   $(error ABORTING)
-endif
-
-LIBVORBISFILE_CFLAGS := $(shell $(PKGCONFIG) vorbisfile --cflags) 
-$(info LIBVORBISFILE_CFLAGS: $(LIBVORBISFILE_CFLAGS)) 
-
-LIBVORBISFILE_LIBS := $(shell $(PKGCONFIG) vorbisfile --libs) 
-$(info LIBVORBISFILE_LIBS  : $(LIBVORBISFILE_LIBS)) 
-
-
-# *** LIBVORBIS *** 
-LIBVORBIS_EXISTS_HUH := $(shell $(PKGCONFIG) vorbis --exists > /dev/null 2>&1 ; echo $$?)
-#$(info LIBVORBIS_EXISTS_HUH: $(LIBVORBIS_EXISTS_HUH)) 
-ifeq ($(strip $(LIBVORBIS_EXISTS_HUH)),0) 
-  LIBVORBIS_EXISTS_HUH := yes
-else 
-  LIBVORBIS_EXISTS_HUH := no
-endif
-#$(info LIBVORBIS_EXISTS_HUH: $(LIBVORBIS_EXISTS_HUH)) 
-ifeq ($(LIBVORBIS_EXISTS_HUH),no) 
-   $(info --> 'pkg-config' did not find 'libvorbis'.)
-   $(info -->   1. Is libvorbis installed? If not so, please see XXX) 
-   $(info -->   2. If libvorbis is installed but in some esoteric location, please edit this file, look for variables 'LIBVORBIS_EXISTS_HUH', 'LIBVORBIS_CFLAGS', and 'LIBVORBIS_LIBS', and specify them accordingly.) 
-   $(error ABORTING)
-endif
-
-LIBVORBIS_CFLAGS := $(shell $(PKGCONFIG) vorbis --cflags) 
-$(info LIBVORBIS_CFLAGS: $(LIBVORBIS_CFLAGS)) 
-
-LIBVORBIS_LIBS := $(shell $(PKGCONFIG) vorbis --libs) 
-$(info LIBVORBIS_LIBS  : $(LIBVORBIS_LIBS)) 
-
-
-# *** LIBOGG *** 
-LIBOGG_EXISTS_HUH := $(shell $(PKGCONFIG) ogg --exists > /dev/null 2>&1 ; echo $$?)
-#$(info LIBOGG_EXISTS_HUH: $(LIBOGG_EXISTS_HUH)) 
-ifeq ($(strip $(LIBOGG_EXISTS_HUH)),0) 
-  LIBOGG_EXISTS_HUH := yes
-else 
-  LIBOGG_EXISTS_HUH := no
-endif
-#$(info LIBOGG_EXISTS_HUH: $(LIBOGG_EXISTS_HUH)) 
-ifeq ($(LIBOGG_EXISTS_HUH),no) 
-   $(info --> 'pkg-config' did not find 'libogg'.)
-   $(info -->   1. Is libogg installed? If not so, please see XXX) 
-   $(info -->   2. If libogg is installed but in some esoteric location, please edit this file, look for variables 'LIBOGG_EXISTS_HUH', 'LIBOGG_CFLAGS', and 'LIBOGG_LIBS', and specify them accordingly.) 
-   $(error ABORTING)
-endif
-
-LIBOGG_CFLAGS := $(shell $(PKGCONFIG) ogg --cflags) 
-$(info LIBOGG_CFLAGS: $(LIBOGG_CFLAGS)) 
-
-LIBOGG_LIBS := $(shell $(PKGCONFIG) ogg --libs) 
-$(info LIBOGG_LIBS  : $(LIBOGG_LIBS)) 
-
-
-# *** NON-ANIME, ANIME, CARTE, PSCRIPT *** 
-NONANIME_DESTROOT := $(PWD)/libs/nonanime/destroot
-ANIME_DESTROOT    := $(PWD)/libs/anime/destroot
-CARTE_DESTROOT    := $(PWD)/libs/carte/destroot
-PSCRIPT_DESTROOT  := $(PWD)/libs/pscript/destroot
-
-ifneq (0,$(strip $(shell test -e $(NONANIME_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
-   $(info --> The installation directory ('destroot') of the sub-lib 'non-anime' was not found.)
-   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-nonanime) 
-   $(info -->   2. If so, please edit the './libs/nonanime' symlink so that it points to its directory ('./libs/nonanime/destroot' should exist).) 
-   $(error ABORTING)
-endif
-
-ifneq (0,$(strip $(shell test -e $(ANIME_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
-   $(info --> The installation directory ('destroot') of the sub-lib 'anime' was not found.)
-   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-anime) 
-   $(info -->   2. If so, please edit the './libs/anime' symlink so that it points to its directory ('./libs/anime/destroot' should exist).) 
-   $(error ABORTING)
-endif
-
-ifneq (0,$(strip $(shell test -e $(CARTE_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
-   $(info --> The installation directory ('destroot') of the sub-lib 'carte' was not found.)
-   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-carte) 
-   $(info -->   2. If so, please edit the './libs/carte' symlink so that it points to its directory ('./libs/carte/destroot' should exist).) 
-   $(error ABORTING)
-endif
-
-ifneq (0,$(strip $(shell test -e $(PSCRIPT_DESTROOT) > /dev/null 2>&1 ; echo $$?)))
-   $(info --> The installation directory ('destroot') of the sub-lib 'pscript' was not found.)
-   $(info -->   1. Is it installed? If not so, please see https://github.com/Romain7426/Mouton1-pscript) 
-   $(info -->   2. If so, please edit the './libs/pscript' symlink so that it points to its directory ('./libs/pscript/destroot' should exist).) 
-   $(error ABORTING)
-endif
-
-$(info NONANIME_DESTROOT: $(NONANIME_DESTROOT))
-$(info ANIME_DESTROOT   : $(ANIME_DESTROOT))
-$(info CARTE_DESTROOT   : $(CARTE_DESTROOT))
-$(info PSCRIPT_DESTROOT : $(PSCRIPT_DESTROOT))
 
 
 
