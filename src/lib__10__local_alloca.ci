@@ -1,0 +1,38 @@
+#ifndef LIB__10__LOCAL_ALLOCA_CI
+#define LIB__10__LOCAL_ALLOCA_CI
+
+// RL: Le problème est que la pseudo-fonction ‘alloca’ n’est pas safe. 
+// RL: L’allocation peut écrire sur d’autres zones mémoires. 
+// RL: Et ’alloca’ casse les protections de la pile de OpenBSD. 
+// 
+// RL: Idem pour les VLA (‘variable-length array’). 
+// 
+// RL: On alloue une taille prédéfinie sur la pile. On alloue dedans. Et celle-ci sera automatiquement désallouée à la sortie de la fonction. 
+
+//char tab[1+rep_n]; // For some unknown reasons, VLAs make «-fstack-protector» fail. 
+//char * tab = alloca(1+rep_n); 
+
+
+
+#define LOCAL_ALLOCA__DECLARE(int_type_t,LOCAL_ALLOCA16_SIZEOF)			\
+  enum { LOCAL_ALLOCA__BYTESIZE = (LOCAL_ALLOCA16_SIZEOF) }; char local_alloca__mem[LOCAL_ALLOCA__BYTESIZE]; int_type_t local_alloca__left = LOCAL_ALLOCA__BYTESIZE; int_type_t local_alloca__used = 0; int_type_t local_alloca__requested; 
+
+#define LOCAL_ALLOCA(REQUESTED_SIZEOF)					\
+  ((void *)(local_alloca__requested = (REQUESTED_SIZEOF), ((local_alloca__requested > local_alloca__left) ? NULL : (local_alloca__left -= local_alloca__requested, local_alloca__used += local_alloca__requested,  local_alloca__mem + local_alloca__used - local_alloca__requested))))
+
+
+
+
+#define strcopy__alloca(__cstr__) \
+  ((NULL == (__cstr__))? NULL : strncpy(LOCAL_ALLOCA(1+strlen(__cstr__)), (__cstr__), 1+strlen(__cstr__))) 
+
+#define strconcat__alloca(__cstr1__,__cstr2__) \
+  ((NULL == (__cstr1__))? strcopy__alloca(__cstr2__) : (NULL == (__cstr2__))? strcopy__alloca(__cstr1__) : strncpy(strncpy(LOCAL_ALLOCA(1+strlen(__cstr1__)+strlen(__cstr2__)), (__cstr1__), strlen(__cstr1__)), (__cstr2__), 1+strlen(__cstr2__))) 
+
+#define strconcat2__alloca strconcat__alloca
+#define strconcat3__alloca(__cstr1__,__cstr2__,__cstr3__) \
+  strconcat__alloca(strconcat__alloca(__cstr1__,__cstr2__),__cstr3__) 
+
+
+
+#endif /* LIB__10__LOCAL_ALLOCA_CI */
