@@ -221,7 +221,7 @@ static int anime_database__parse_from_buffer(const char * anime_filename, const 
   enum { anime_stdlog__bytesize = (1 << 10) }; 
   char   anime_stdlog[anime_stdlog__bytesize]; 
   int    anime_stdlog_d = -1; 
-  enum { anime_stdlog__buffer_bytesize = (1 << 14) }; 
+  enum { anime_stdlog__buffer_bytesize = INT16_MAX }; 
   char   anime_stdlog__buffer[anime_stdlog__buffer_bytesize]; 
   goto label__body; 
 
@@ -253,18 +253,34 @@ static int anime_database__parse_from_buffer(const char * anime_filename, const 
     //if (anime_stdlog_d > 0) { dprintf(anime_stdlog_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: INFO: " "Fichier log de l'analyse de ce fichier anime: %s" "\n", __func__, anime_log); }; 
     //fflush(NULL); 
     
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+
     const int anime_stdlog_write_fd = open(anime_stdlog, O_WRONLY | O_CREAT | O_TRUNC, (mode_t)0600); 
     if (0 > anime_stdlog_write_fd) return -1; 
     
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     anime_stdlog_d = buffered_outstream__open(anime_stdlog_write_fd, anime_stdlog__buffer, anime_stdlog__buffer_bytesize); 
     if (0 > anime_stdlog_d) { close(anime_stdlog_write_fd); return -2; }; 
     
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     dputs_array(anime_stdlog_d, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<", __func__, "()>}: INFO: " "-- Ouverture --" "\n"); 
     buffered_outstream__flush(anime_stdlog_d); 
     
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     //anime__make_r(anime_data, -1); 
     anime__make_r(anime_data, anime_stdlog_d); 
 
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
 
     for(;;) { 
 #if 0
@@ -277,11 +293,30 @@ static int anime_database__parse_from_buffer(const char * anime_filename, const 
       fprintf(stderr, "HERE-----------------------" "\n");
       return -1; 
 #endif 
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+      fprintf(stderr, "strlen(buffer) = %d" "\n", strlen(buffer)); 
+#endif 
       //const int_anime_error_t anime_error_id = anime__fill_from_file  (anime_data, anime_filename, anime_file_d, anime_stdlog_d); 
       //const int_anime_error_t anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, buffer_bytesize, -1); 
       //const int_anime_error_t anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, buffer_bytesize, anime_stdlog_d); 
-      const int_anime_error_t anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, strlen(buffer), anime_stdlog_d); 
-#if 1
+      
+      // Cette fonction d'analyse passe son temps à écrire les lexèmes dans le fichier log. 
+      // Donc, si il n'y a pas d'erreur, le fichier de log ne sera pas écrit.
+      int_anime_error_t anime_error_id;
+      { 
+	anime__stdlog_d__set(anime_data, -1); 
+	anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, strlen(buffer), anime_stdlog_d); 
+	anime__stdlog_d__set(anime_data, anime_stdlog_d); 
+      };
+      if (0 > anime_error_id) {
+	anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, strlen(buffer), anime_stdlog_d); 
+      }; 
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+#if 0
+      fprintf(stderr, "anime_error_id = %s" "\n", int_anime_error__get_cstr(anime_error_id)); 
       fprintf(stderr, "strlen(buffer) = %d" "\n", strlen(buffer)); 
 #endif 
 
@@ -342,6 +377,10 @@ const anime_t * anime_database__get(const char * filename) {
   time_t disk_mtime;
   enum { anime_fullpath__bytesize = (1 << 10) }; 
   char anime_fullpath[anime_fullpath__bytesize]; 
+
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   goto label__body; 
 
   label__error__could_not_push_filename: { 
@@ -368,6 +407,9 @@ const anime_t * anime_database__get(const char * filename) {
     if (NULL ==  filename) return NULL; 
     if ('\0' == *filename) return NULL; 
     
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     id_at_r = anime_database_at_runtime__filename__lookup(filename); 
 #if 1
     if (0 <= id_at_r) goto label__id_found; 
@@ -441,6 +483,10 @@ const anime_t * anime_database__get(const char * filename) {
   }; 
   
  label__got_fresh_content: { 
+#if 0
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+
     if (anime_database_at_runtime__data_huh[id_at_r]) goto label__got_data; 
 #if 0
       fprintf(stderr, "strlen(anime_database_at_runtime__filecontent[id_at_r]) = %d" "\n", strlen(anime_database_at_runtime__filecontent[id_at_r])); 
