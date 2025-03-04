@@ -154,6 +154,7 @@ static void main_win_print(void);
 int main(const int argc, const char * argv[]) { 
   LOCAL_ALLOCA__DECLARE(uint16_t,UINT16_MAX); 
   int retour = -1;
+  goto label__start; 
   
  label__start: {
     //int _SDL_main(int argc, char * argv[]) {
@@ -208,15 +209,7 @@ int main(const int argc, const char * argv[]) {
 #endif 
   
 
-  label__check_and_assert: { 
-    check_and_assert(/*debug_print_huh*/true, /*stderr_d*/STDERR_FILENO); 
-    goto label__body; 
-  }; 
-  
- label__body: { 
-    // RL: First thing to do: 
-    // Change current-working-directory to the directory containing the program («mouton-dir»), 
-    // in order to read data and write logs. 
+  label__change_to_program_dir: {
     for (;;) { 
       {
 	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "local_alloca__left: '%d' " "\n", __func__, (int) local_alloca__left);  
@@ -253,6 +246,21 @@ int main(const int argc, const char * argv[]) {
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "main_argv0__progdir: '%s' " "\n", __func__, main_argv0__progdir);  
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "CWD: '%s' " "\n", __func__, getcwd(local_alloca__mem + local_alloca__used, local_alloca__left));  
 #endif 
+    goto label__change_to_program_dir__return; 
+  };
+
+  label__check_and_assert: { 
+    int_buffered_outstream__error__check_and_assert(); 
+    int_buffer_to_fd__error__check_and_assert();
+    check_and_assert(/*debug_print_huh*/true, /*stderr_d*/STDERR_FILENO); 
+    goto label__body; 
+  }; 
+  
+ label__body: { 
+    // RL: First thing to do: 
+    // Change current-working-directory to the directory containing the program («mouton-dir»), 
+    // in order to read data and write logs. 
+    goto label__change_to_program_dir; label__change_to_program_dir__return: {}; 
     
     for (;;) { 
       const int16_t used_size = main__subdir__clean_up(main__stdout_log_default_subdir, &main__stdout_log_subdir, local_alloca__mem + local_alloca__used, SATURATED_CAST_TO_INT16(local_alloca__left)); 
@@ -304,6 +312,7 @@ int main(const int argc, const char * argv[]) {
     main_arch_print(); 
     main_proctitle_set(); 
     main_args_print(argc, argv); 
+    { char cwd[2048]; fprintf(stdout, "Répertoire actuel: %s" "\n", getcwd(cwd, sizeof(cwd))); }; 
     main_win_print(); 
     main__stdout_log_buffer__flush(); 
 
@@ -1202,6 +1211,7 @@ extern void * edata;
 extern void * end; 
 
 void main_win_print(void) {
+  LOCAL_ALLOCA__DECLARE(int16_t,INT16_MAX); 
 #ifdef _WIN32_WINNT 
   // _WIN32_WINNT >= 0x0501  pour windows XP et supérieur 
   // Windows 6: Vista 
@@ -1234,6 +1244,10 @@ void main_win_print(void) {
   
 #ifdef MINSIGSTKSZ 
   printf("Taille minimale standard d'une extra stack: %d" "\n", (int) MINSIGSTKSZ); 
+#endif 
+  
+#ifdef DEFAULTSTACKSIZE
+  printf("Taille par défaut d'une stack: %d" "\n", (int) DEFAULTSTACKSIZE); 
 #endif 
 
 #if 0
@@ -1277,19 +1291,34 @@ void main_win_print(void) {
   }; 
 
 
-  {
+  for (;;) {
+    // Pour faire taire le verbeux dlopen, on peut utiliser DL_DEBUG=0
+    // Ce sont des tests pour vérifier comment charger des pscripts écrits directement en C. 
+    // Note: Lors de dlopen:
+    //  - La fonction ayant l'attribut __attribute__((constructor)) est lancée avant le retour de dlopen.
+    //  - La fonction ayant l'attribut __attribute__((desstructor)) est lancée lors de l'appel à dlclose.
+    // 
+    // Apparemment, dlopen recherche également une fonction 'main()'.
+    // 
+    // Ce n'est pas indiqué dans la manpage, mais lors d'une erreur, dlopen retourne NULL. 
+
+    const char dlib[] = "../build/timer.so";
     void * a = NULL; 
-    a = dlopen(/*const char *path*/"../build/timer.so", /*int mode*/RTLD_NOW | RTLD_LOCAL); 
+    a = dlopen(/*const char *path*/dlib, /*int mode*/RTLD_NOW | RTLD_LOCAL); 
     fprintf(stdout, "dlopen = %p  " "\n", a); 
     fprintf(stdout, "dlerror = %s  " "\n", dlerror()); 
+    if (NULL == a) {
+      fprintf(stdout, "La bibliothèque dynamique n'a pas pu être chargée: %s" "\n", dlib); 
+      break; 
+    };
 
     Dl_info info[1]; 
     if (!dladdr(a, info)) { 
       fprintf(stdout, "dladdr: nothing found: %s  " "\n", dlerror()); 
-    } 
-    else { 
-      fprintf(stdout, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
+      goto label__dlclose;
     }; 
+
+    fprintf(stdout, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
     
     void * fun = dlsym(a, "timer_hello"); 
     fprintf(stdout, "dlsym = %p  " "\n", fun); 
@@ -1297,15 +1326,19 @@ void main_win_print(void) {
 
     if (!dladdr(fun, info)) { 
       fprintf(stdout, "dladdr: nothing found: %s  " "\n", dlerror()); 
-    } 
-    else { 
-      fprintf(stdout, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
-    }; 
+      goto label__dlclose;
+    };
+
+    fprintf(stdout, "dladdr: dli_fname = %s - dli_fbase = %p - dli_sname = %s - dli_saddr = %p  " "\n", info -> dli_fname, info -> dli_fbase, info -> dli_sname, info -> dli_saddr); 
     
     if (fun != NULL) { 
       void (*f)(void) = fun; 
       f(); 
     }; 
+
+    label__dlclose:
+    dlclose(a); 
+
     
     // RL: To resolve API_SCRIPT functions which are in the executables: 
     //     Quoting 'man (3) dlopen' 
@@ -1319,12 +1352,8 @@ void main_win_print(void) {
     //         -Wl,--dynamic-list=<file> 
     //       and the <file> contains the list of exported symbols, and its content looks like that: 
     //        { extern "C" { main; }; }; 
-    // 
-    
-    
-    if (a != NULL) { 
-      dlclose(a); 
-    }; 
+    //     
+    break; 
   }; 
 
 

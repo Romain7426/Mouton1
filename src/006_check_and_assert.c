@@ -7,7 +7,6 @@
 
 
 void check_and_assert(const int8_t debug_print_huh, const int stderr_d) { 
-  int_buffered_outstream__error__check_and_assert(); 
   CTexture__check_and_assert(debug_print_huh, stderr_d); 
   CCamera__check_and_assert(debug_print_huh, stderr_d); 
   CMoteurTeleportation__check_and_assert(debug_print_huh, stderr_d); 
