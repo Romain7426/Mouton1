@@ -1,3 +1,4 @@
+
 enum { ANIME_DATABASE_AT_COMPILE_TIME__MAX = 32 }; 
 
 static const char * anime_database_at_compile_time__filename[ANIME_DATABASE_AT_COMPILE_TIME__MAX] = { 

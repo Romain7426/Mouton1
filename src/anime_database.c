@@ -4,7 +4,11 @@
 #include <time.h>
 
 
-
+//static const char * anime_database_at_compile_time__filename[ANIME_DATABASE_AT_COMPILE_TIME__MAX];
+//static const char * anime_database_at_compile_time__filecontent[ANIME_DATABASE_AT_COMPILE_TIME__MAX];
+//static const time_t anime_database_at_compile_time__mtime[ANIME_DATABASE_AT_COMPILE_TIME__MAX];
+//static int8_t anime_database_at_compile_time__lookup_by_filename(const char * filename_sought);
+#include "anime_database_at_compile_time.ci"
 
 
 
@@ -24,20 +28,39 @@ static bool_t       anime_database_at_runtime__init_huh = false;
 static int8_t       anime_database_at_runtime__data_huh   [ANIME_DATABASE_AT_RUNTIME__MAX] = { }; 
 static int8_t       anime_database_at_runtime__nb = 0; 
 
-static void anime_database_at_runtime__anime_data__init(void) { 
-  if (anime_database_at_runtime__init_huh) return;
-  for (int8_t i = 0; i < ANIME_DATABASE_AT_RUNTIME__MAX; i++) {
-    anime_database_at_runtime__data    [i] = (anime_t *)(anime_database_at_runtime__data_buffer + i*ANIME_BYTESIZE);
-    anime_database_at_runtime__data_huh[i] = false;
-  }; 
-  anime_database_at_runtime__init_huh = true;
-};
-
-
 enum { anime_database_at_runtime__filename_buffer_bytesize = 1 << 10 }; 
 ASSERT_COMPILE__TOPLEVEL(anime_database_at_runtime__filename_buffer_bytesize > 0); 
 static char    anime_database_at_runtime__filename_buffer[anime_database_at_runtime__filename_buffer_bytesize]; 
 static int16_t anime_database_at_runtime__filename_buffer_nb = 0; 
+
+enum { anime_database_at_runtime__filecontent_buffer_bytesize = 1 << 16 }; 
+ASSERT_COMPILE__TOPLEVEL(anime_database_at_runtime__filecontent_buffer_bytesize > 0); 
+static char    anime_database_at_runtime__filecontent_buffer[anime_database_at_runtime__filecontent_buffer_bytesize]; 
+static int32_t anime_database_at_runtime__filecontent_buffer_nb = 0; 
+
+
+static void anime_database_at_runtime__anime_data__init(void) { 
+  if (anime_database_at_runtime__init_huh) return;
+  anime_database_at_runtime__nb = 0; 
+  for (int8_t i = 0; i < ANIME_DATABASE_AT_RUNTIME__MAX; i++) {
+    anime_database_at_runtime__data    [i] = (anime_t *)(((char *)anime_database_at_runtime__data_buffer) + i*ANIME_BYTESIZE);
+#if 0
+      fprintf(stderr, "anime_database_at_runtime__data[i] = %p" "\n", anime_database_at_runtime__data[i]);
+#endif 
+
+    anime_database_at_runtime__data_huh[i] = false;
+    anime_database_at_runtime__filename[i] = NULL;
+    anime_database_at_runtime__filecontent[i] = NULL;
+  }; 
+  anime_database_at_runtime__filename_buffer[0] = '\0';
+  anime_database_at_runtime__filename_buffer_nb = 1; 
+  anime_database_at_runtime__filecontent_buffer[0] = '\0';
+  anime_database_at_runtime__filecontent_buffer_nb = 1; 
+  anime_database_at_runtime__init_huh = true;
+};
+
+
+// FILENAME_STRING_STACK
 
 int16_t anime_database_at_runtime__filename_buffer__lookup(const char * filename_sought) { 
   if (NULL ==  filename_sought) return -2; 
@@ -63,7 +86,7 @@ int16_t anime_database_at_runtime__filename_buffer__push_no_lookup(const char * 
   
   const int16_t a_len = strlen(filename_sought); 
   const int16_t available = anime_database_at_runtime__filename_buffer_bytesize - anime_database_at_runtime__filename_buffer_nb; 
-  if (a_len > available) return -4; 
+  if (a_len + 1 > available) return -4; 
   
   const int16_t filename_buffer_id = anime_database_at_runtime__filename_buffer_nb; 
   strlcpy(anime_database_at_runtime__filename_buffer + filename_buffer_id, filename_sought, available); 
@@ -72,6 +95,9 @@ int16_t anime_database_at_runtime__filename_buffer__push_no_lookup(const char * 
   
   return filename_buffer_id; 
 }; 
+
+
+// FILENAME_STACK
 
 int8_t anime_database_at_runtime__filename__lookup(const char * filename_sought) { 
   if (NULL ==  filename_sought) return -2; 
@@ -90,12 +116,17 @@ int8_t anime_database_at_runtime__filename__push_no_lookup(const char * filename
   int8_t db_id = anime_database_at_runtime__nb; 
   
   int16_t buffer_id; 
+#if 0
   buffer_id = anime_database_at_runtime__filename_buffer__lookup(filename); 
   if (0 > buffer_id) { 
     buffer_id = anime_database_at_runtime__filename_buffer__push_no_lookup(filename); 
     if (0 > buffer_id) return -1; 
   }; 
-    
+#else
+  buffer_id = anime_database_at_runtime__filename_buffer__push_no_lookup(filename); 
+  if (0 > buffer_id) return -1; 
+#endif
+  
   anime_database_at_runtime__filename[db_id] = anime_database_at_runtime__filename_buffer + buffer_id; 
   anime_database_at_runtime__nb++; 
   return db_id; 
@@ -104,16 +135,7 @@ int8_t anime_database_at_runtime__filename__push_no_lookup(const char * filename
 
 
 
-
-
-
-
-
-
-enum { anime_database_at_runtime__filecontent_buffer_bytesize = 1 << 16 }; 
-ASSERT_COMPILE__TOPLEVEL(anime_database_at_runtime__filecontent_buffer_bytesize > 0); 
-static char    anime_database_at_runtime__filecontent_buffer[anime_database_at_runtime__filecontent_buffer_bytesize]; 
-static int32_t anime_database_at_runtime__filecontent_buffer_nb = 0; 
+// FILENAME_CONTENT_STACK
 
 int8_t anime_database_at_runtime__filecontent__lookup(const char * filecontent_sought) { 
   if (NULL ==  filecontent_sought) return -2; 
@@ -148,7 +170,7 @@ int32_t anime_database_at_runtime__filecontent_buffer__push_no_lookup(const char
   
   const int16_t a_len = strlen(filecontent_sought); 
   const int16_t available = anime_database_at_runtime__filecontent_buffer_bytesize - anime_database_at_runtime__filecontent_buffer_nb; 
-  if (a_len > available) return -4; 
+  if (a_len + 1 > available) return -4; 
   
   const int32_t filecontent_buffer_id = anime_database_at_runtime__filecontent_buffer_nb; 
   strlcpy(anime_database_at_runtime__filecontent_buffer + filecontent_buffer_id, filecontent_sought, available); 
@@ -162,6 +184,8 @@ int32_t anime_database_at_runtime__filecontent_buffer__push_no_lookup(const char
 
 
 
+
+// XXXXX_STACK
 
 
 static int anime_database__compute_fullpath_into_buffer(const char * anime_datadir, const char * anime_filename, char * buffer, int32_t buffer_bytesize) { 
@@ -241,10 +265,27 @@ static int anime_database__parse_from_buffer(const char * anime_filename, const 
     //anime__make_r(anime_data, -1); 
     anime__make_r(anime_data, anime_stdlog_d); 
 
+
     for(;;) { 
+#if 0
+      int len = 0;
+      { const char * p = buffer; for (;;) { if (*p == '\0') break; p++; len++; }; };
+      fprintf(stderr, "buffer_bytesize = %d" "\n", buffer_bytesize); 
+      fprintf(stderr, "strlen(buffer) = %d" "\n", strlen(buffer)); 
+      fprintf(stderr, "len-p = %d" "\n", len); 
+      //fprintf(stderr, "buffer = %s" "\n", buffer); 
+      fprintf(stderr, "HERE-----------------------" "\n");
+      return -1; 
+#endif 
       //const int_anime_error_t anime_error_id = anime__fill_from_file  (anime_data, anime_filename, anime_file_d, anime_stdlog_d); 
       //const int_anime_error_t anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, buffer_bytesize, -1); 
-      const int_anime_error_t anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, buffer_bytesize, anime_stdlog_d); 
+      //const int_anime_error_t anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, buffer_bytesize, anime_stdlog_d); 
+      const int_anime_error_t anime_error_id = anime__fill_from_buffer(anime_data, anime_filename, buffer, strlen(buffer), anime_stdlog_d); 
+#if 1
+      fprintf(stderr, "strlen(buffer) = %d" "\n", strlen(buffer)); 
+#endif 
+
+
       if (ANIME__OK == anime_error_id) break; 
       if (0 < anime_error_id) { 
 	dprintf(fileno(stdout), "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: WARNING: %s: %s" "\n", __func__, anime_filename, int_anime_error__get_cstr(anime_error_id)); 
@@ -328,10 +369,12 @@ const anime_t * anime_database__get(const char * filename) {
     if ('\0' == *filename) return NULL; 
     
     id_at_r = anime_database_at_runtime__filename__lookup(filename); 
+#if 1
     if (0 <= id_at_r) goto label__id_found; 
+#endif
 
     id_at_r = anime_database_at_runtime__filename__push_no_lookup(filename); 
-#if 0
+#if 1
     if (0 <= id_at_r) goto label__id_found; 
 #endif 
     
@@ -347,22 +390,27 @@ const anime_t * anime_database__get(const char * filename) {
     if (buffer_used <= 0) goto label__error__could_not_compute_fullpath; 
     
     if (NULL != anime_database_at_runtime__filecontent[id_at_r]) goto label__got_content; 
-  
+    
     goto label__load_content_from_compile_time; 
   }; 
 
  label__load_content_from_compile_time: { 
     const int8_t id_at_c = anime_database_at_compile_time__lookup_by_filename(filename); 
-    if (0 <= id_at_c) {
+
+    if (0 > id_at_c) {
+      disk_mtime = anime_database__mtime_disk(anime_fullpath); 
+      if (-1 == disk_mtime) goto label__error__no_content_anywhere; 
+      goto label__load_content_from_disk; 
+    };
+
+    
+    {
       anime_database_at_runtime__filecontent[id_at_r] = anime_database_at_compile_time__filecontent[id_at_c]; 
       anime_database_at_runtime__data_huh[id_at_r] = false; 
       anime_database_at_runtime__mtime[id_at_r] = anime_database_at_compile_time__mtime[id_at_c]; 
       goto label__got_content; 
     }; 
 
-    disk_mtime = anime_database__mtime_disk(anime_fullpath); 
-    if (-1 == disk_mtime) goto label__error__no_content_anywhere; 
-    goto label__load_content_from_disk; 
   }; 
   
  label__load_content_from_disk: { 
@@ -394,7 +442,12 @@ const anime_t * anime_database__get(const char * filename) {
   
  label__got_fresh_content: { 
     if (anime_database_at_runtime__data_huh[id_at_r]) goto label__got_data; 
-    const int parse_error = anime_database__parse_from_buffer(filename, anime_database_at_runtime__filecontent[id_at_r], strlen(anime_database_at_runtime__filecontent[id_at_r]), anime_database_at_runtime__data[id_at_r]); 
+#if 0
+      fprintf(stderr, "strlen(anime_database_at_runtime__filecontent[id_at_r]) = %d" "\n", strlen(anime_database_at_runtime__filecontent[id_at_r])); 
+      //fprintf(stderr, "buffer = %s" "\n", buffer); 
+#endif 
+
+    const int parse_error = anime_database__parse_from_buffer(filename, anime_database_at_runtime__filecontent[id_at_r], 1+strlen(anime_database_at_runtime__filecontent[id_at_r]), anime_database_at_runtime__data[id_at_r]); 
     anime_database_at_runtime__data_huh[id_at_r] = (0 == parse_error); 
     if (anime_database_at_runtime__data_huh[id_at_r]) goto label__got_data; 
     goto label__error__could_not_parse_anime_data_file; 

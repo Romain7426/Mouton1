@@ -326,14 +326,17 @@ int main(const int argc, const char * argv[]) {
     main_win_print(); 
     main__stdout_log_buffer__flush(); 
 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "FIRST PASS:  " "\n", __func__);  
+    
     if (true) { 
-      const char * anime_to_load[] = { "saintexupery.anime", "pere.anime", "bob.anime", "heros.anime", "brigitte.anime.ci", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
+      const char * anime_to_load[] = { "saintexupery.anime", "pere.anime", "bob.anime", "heros.anime", "brigitte.anime", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
       for (int i = 0; ; i++) { 
 	const char * anime_filename = anime_to_load[i]; 
 	if (NULL == anime_filename) break; 
 	const anime_t * one_anime; 
 	//one_anime = anime_database__load__compile_time(anime_filename); 
 	one_anime = anime_database__get(anime_filename); 
+	fprintf(stdout, "anime_filename = %20s \t-\t output = %p" "\n", anime_filename, one_anime);
 	main__stdout_log_buffer__flush(); 
       }; 
     }; 
@@ -341,13 +344,14 @@ int main(const int argc, const char * argv[]) {
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "SECOND_PASS:  " "\n", __func__);  
     
     if (true) { 
-      const char * anime_to_load[] = { "saintexupery.anime", "pere.anime", "bob.anime", "heros.anime", "brigitte.anime.ci", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
+      const char * anime_to_load[] = { "saintexupery.anime", "pere.anime", "bob.anime", "heros.anime", "brigitte.anime", "juliette.anime", "mouton.anime", "chaman.anime", "dinotore.anime", "heros.anime", "pecu.anime", "prokofiev.anime", "sang.anime", "chapinmechant.anime", "fantome.anime", "moutonmechant.anime", "pierre.anime", "y.anime", "m.anime", "c.anime", "a.anime", "bizarre1.anime", "bizarre2.anime", "bucheron.anime", "chapin.anime", "eclaboussures.anime", "homme_bizarre.anime", "puit_boss.anime", "squelette.anime", NULL }; 
       for (int i = 0; ; i++) { 
 	const char * anime_filename = anime_to_load[i]; 
 	if (NULL == anime_filename) break; 
 	const anime_t * one_anime; 
 	//one_anime = anime_database__load__compile_time(anime_filename); 
 	one_anime = anime_database__get(anime_filename); 
+	fprintf(stdout, "anime_filename = %20s \t-\t output = %p" "\n", anime_filename, one_anime);
 	main__stdout_log_buffer__flush(); 
       }; 
     }
