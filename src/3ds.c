@@ -16,21 +16,24 @@
 #include <string.h>
 #include "3ds.h"
 
-#define DEBUG_3DS_USING_PRINTF 0 
+#define DEBUG_3DS_USING_PRINTF 1
+
+#define DEBUG_TRACE 1
 
 #define debug_printf(...) 
 #ifdef DEBUG_3DS_USING_PRINTF 
 #if (DEBUG_3DS_USING_PRINTF != 0) 
 #undef debug_printf 
-#define debug_printf printf 
+//#define debug_printf printf
+#define debug_printf(...) fprintf(stderr,__VA_ARGS__)
 #endif 
 #endif 
 
 
 //struct CLoad3DS * new_CLoad3DS(void);
 static bool Import3DS(struct CLoad3DS * this, t3DModel * pModel, const char * strFileName);
-static int  GetString(struct CLoad3DS * this, char *);
-static void ReadChunk(struct CLoad3DS * this, tChunk *);
+static int  GetString(struct CLoad3DS * this, char *, int16_t);
+static void ReadChunk_header(struct CLoad3DS * this, tChunk *);
 static void ProcessNextChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
 static void ProcessNextObjectChunk(struct CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, tChunk *);
 static void ProcessNextMaterialChunk(struct CLoad3DS * this, t3DModel *pModel, tChunk *);
@@ -113,7 +116,7 @@ CLoad3DS * CLoad3DS_make_aux(CLoad3DS * this) {
   
   this -> Import3DS = Import3DS;
   this -> GetString = GetString;
-  this -> ReadChunk = ReadChunk;
+  this -> ReadChunk_header = ReadChunk_header;
   this -> ProcessNextChunk = ProcessNextChunk;
   this -> ProcessNextObjectChunk = ProcessNextObjectChunk;
   this -> ProcessNextMaterialChunk = ProcessNextMaterialChunk;
@@ -155,6 +158,9 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
   char strMessage[255] = {0}; 
     
   //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     
   pModel -> numOfMaterials = 0;
   pModel -> numOfObjects = 0;
@@ -170,6 +176,10 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
     CleanUp(this);
     return false; 
   }; 
+
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   // Once we have the file open, we need to read the very first data chunk
   // to see if it's a 3DS file.  That way we don't read an invalid file.
@@ -177,7 +187,7 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
   
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   // Read the first chuck of the file to see if it's a 3DS file
-  ReadChunk(this, this -> m_CurrentChunk);
+  ReadChunk_header(this, this -> m_CurrentChunk);
 
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   // Make sure this is a 3DS file
@@ -188,27 +198,102 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
     return false; 
   }; 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
+  fprintf(stderr,"Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
   debug_printf("Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
 
   // Now we actually start reading in the data.  ProcessNextChunk() is recursive
   
   // Begin loading objects, by calling this recursive function
-  debug_printf("   ProcessNextChunk...\n");
+  //debug_printf("   ProcessNextChunk...\n");
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   ProcessNextChunk(this, pModel, this -> m_CurrentChunk);
+
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+
+#if 1
+    {
+      fprintf(stderr, "pModel -> numOfObjects = %d" "\n", pModel -> numOfObjects); 
+      
+      t3DObject * pObject = &(pModel->pObject[0]);
+      CVector3 vPoly[3];
+      CVector3 vVert;
+
+      fprintf(stderr, "pObject -> numOfVerts = %d" "\n", pObject -> numOfVerts); 
+#if 0
+      for (int vert_i = 0; vert_i < pObject -> numOfVerts; vert_i++) {                                               
+	vVert = pObject -> pVerts[vert_i];
+	fprintf(stderr, "vert_i = %3d : ", vert_i); 
+	fprintf(stderr, "vVert = { %f ; %f ; %f }" " - ", vVert.x, vVert.y, vVert.z); 
+	fprintf(stderr, "\n"); 
+      };
+#endif 
+
+      
+      fprintf(stderr, "pObject -> numOfFaces = %d" "\n", pObject -> numOfFaces); 
+#if 0
+      for (int face_i = 0; face_i < pObject -> numOfFaces; face_i++) { 
+	const uint16_t vert0 = pObject->pFaces[face_i].vertIndex[0];
+	const uint16_t vert1 = pObject->pFaces[face_i].vertIndex[1];
+	const uint16_t vert2 = pObject->pFaces[face_i].vertIndex[2];
+	fprintf(stderr, "face_i = %3d : ", face_i); 
+	fprintf(stderr, "vVert = { %3d ; %3d ; %3d }" " - ", vert0, vert1, vert2); 
+	fprintf(stderr, "\n"); 
+      };
+#endif
+
+
+      fprintf(stderr, "pObject -> numTexVertex = %d" "\n", pObject -> numTexVertex); 
+#if 0
+    {
+      CVector2 vVert;
+      fprintf(stderr, "pObject -> numTexVertex = %d" "\n", pObject -> numTexVertex); 
+      for (int vert_i = 0; vert_i < pObject -> numTexVertex; vert_i++) {                                               
+	vVert = pObject -> pTexVerts[vert_i];
+
+	fprintf(stderr, "vert_i = %3d : ", vert_i); 
+	fprintf(stderr, "vVert = { %f ; %f  }" " - ", vVert.x, vVert.y); 
+	fprintf(stderr, "\n"); 
+      };
+    };
+#endif 
+
+      fflush(NULL); 
+      //assert(false);
+    };
+#endif 
+
 
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   // After we have read the whole 3DS file, we want to calculate our own vertex normals.
   debug_printf("   ComputeNormals...\n");
+  for (int object_i = 0; object_i < pModel->numOfObjects; object_i++) {
+    t3DObject * pObject = &(pModel->pObject[object_i]);
+    pObject -> pNormals = NULL;
+  };
   ComputeNormals(this, pModel);
 
+  return true;
+
+
+
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   // Clean up after everything
   CleanUp(this);
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   return true;
 }
 
@@ -219,7 +304,7 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
 ///////////////////////////////// CLEAN UP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
 void CleanUp(struct CLoad3DS * this) { 
-  fclose(this -> m_FilePointer);                      // Close the current file pointer
+  fclose(this -> m_FilePointer); 
   free(this -> m_CurrentChunk);                      // Free the current chunk
   free(this -> m_TempChunk);                         // Free our temporary chunk
 }; 
@@ -278,10 +363,11 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
   /* pModel->numOfMaterials = 0;
      pModel->numOfObjects = 0;*/
   
-  debug_printf("appel à processchunk : pModel->numOfObjects = %i\n", pModel->numOfObjects);
+  //debug_printf("appel à processchunk : pModel->numOfObjects = %i\n", pModel->numOfObjects);
 
     
-  unsigned int version = 0;                   // This will hold the file version
+  uint16_t version_3ds = 0;                   // This will hold the file version
+  uint32_t version_mesh = 0; 
   //int buffer[5000] = {0};                    // This is used to read past unwanted data
 
   this -> m_CurrentChunk = new_tChunk(); { 
@@ -293,51 +379,50 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
     // Continue to read the sub chunks until we have reached the length.
     // After we read ANYTHING we add the bytes read to the chunk and then check
     // check against the length.
-    debug_printf("boucle du chunk...\n");
+    //debug_printf("boucle du chunk...\n");
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d" "\n", __func__, prof); 
     while (pPreviousChunk->bytesRead < pPreviousChunk->length) {
       // Read next Chunk
-      debug_printf("   on lit un chunk...\n"); 
-      ReadChunk(this, this -> m_CurrentChunk); 
-      debug_printf("    chunk lu avec succès...\n"); 
+      //debug_printf("   on lit un chunk...\n"); 
+      ReadChunk_header(this, this -> m_CurrentChunk); 
+      //debug_printf("    chunk lu avec succès...\n"); 
       
       // Check the chunk ID
       switch (this -> m_CurrentChunk->ID) { 
-      case VERSION:                           // This holds the version of the file
-	debug_printf("    chunk VERSION... %X\n", VERSION);
-	printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = VERSION" "\n", __func__, prof); 
+      case VERSION: {                          // This holds the version of the file
+	//debug_printf("    chunk VERSION... %X\n", VERSION);
+	//printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = VERSION" "\n", __func__, prof); 
 	// This chunk has an unsigned short that holds the file version.
 	// Since there might be new additions to the 3DS file format in 4.0,
 	// we give a warning to that problem.
 	
 	// Read the file version and add the bytes read to our bytesRead variable
 	//m_CurrentChunk->bytesRead += fread(&version, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
-	this -> m_CurrentChunk->bytesRead += 4 * fread_(&version, 4, 1, this -> m_FilePointer);
+	this -> m_CurrentChunk->bytesRead += 4 * fread_(&version_3ds, 4, 1, this -> m_FilePointer);
 	// On skippe s'il en reste.
 	if (fseek(this -> m_FilePointer, this -> m_CurrentChunk->length - this -> m_CurrentChunk->bytesRead, SEEK_CUR) != 0) { printf("Erreur de positionnement."); } 
 	this -> m_CurrentChunk->bytesRead = this -> m_CurrentChunk->length;
-	debug_printf("Version: %X\n", version);
+	debug_printf("    chunk VERSION [%X] - version = %u" "\n", VERSION, version_3ds);
 
 	// If the file version is over 3, give a warning that there could be a problem
-	if (version > 0x03)
-	  printf("This 3DS file is over version 3 so it may load incorrectly\n");
-	break;
+	if (version_3ds > 0x03) printf("This 3DS file is over version 3 so it may load incorrectly\n");
+      }; break; 
 
-      case OBJECTINFO:                        // This holds the version of the mesh
+      case OBJECTINFO: {                       // This holds the version of the mesh
 	debug_printf("    chunk OBJECTINFO... %X\n", OBJECTINFO);
-	printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = OBJECTINFO" "\n", __func__, prof); 
+	//printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = OBJECTINFO" "\n", __func__, prof); 
 	// This chunk holds the version of the mesh.  It is also the head of the MATERIAL
 	// and OBJECT chunks.  From here on we start reading in the material and object info.
 
 	// Read the next chunk
-	ReadChunk(this, this -> m_TempChunk);
+	ReadChunk_header(this, this -> m_TempChunk);
 	
 	// Get the version of the mesh
 	//m_TempChunk->bytesRead += fread(&version, 1, m_TempChunk->length - m_TempChunk->bytesRead, m_FilePointer);
-	this -> m_TempChunk->bytesRead += 4 * fread_(&version, 4, 1, this -> m_FilePointer);
+	this -> m_TempChunk->bytesRead += 4 * fread_(&version_mesh, 4, 1, this -> m_FilePointer);
 	// On skippe s'il en reste.
 	if (fseek(this -> m_FilePointer, this -> m_TempChunk->length - this -> m_TempChunk->bytesRead, SEEK_CUR) != 0) { printf("Erreur de positionnement Mesh."); }
-	debug_printf("Version Mesh: %X\n", version);
+	debug_printf("Version Mesh: %X\n", version_mesh);
 	//printf("m_TempChunk->length = %u\n", m_TempChunk->length); fflush(NULL);
 
 	// Increase the bytesRead by the bytes read from the last chunk
@@ -345,14 +430,14 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
 
 	// Go to the next chunk, which is the object has a texture, it should be MATERIAL, then OBJECT.
 	ProcessNextChunk(this, pModel, this -> m_CurrentChunk);
-	break;
+	}; break;
 
-      case MATERIAL:                          // This holds the material information
+      case MATERIAL: {                          // This holds the material information
 	debug_printf("    chunk MATERIAL... %X\n", MATERIAL);
-	printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = MATERIAL" "\n", __func__, prof); 
+	//printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = MATERIAL" "\n", __func__, prof); 
 	// This chunk is the header for the material info chunks
 
-	if (pModel->numOfMaterials < 1024) { 
+	if (pModel->numOfMaterials < MATERIALS_MAX) { 
 	  // Add a empty texture structure to our texture list.
 	  // If you are unfamiliar with STL's "vector" class, all push_back()
 	  // does is add a new node onto the list.  I used the vector class
@@ -367,18 +452,18 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
 	  // Proceed to the material loading function
 	  ProcessNextMaterialChunk(this, pModel, this -> m_CurrentChunk); 
 	}; 
-	break;
+      }; break;
 
-      case OBJECT:                            // This holds the name of the object being read
+      case OBJECT: {                           // This holds the name of the object being read
 	debug_printf("    chunk OBJECT...\n"); 
-	printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = [%d]OBJECT" "\n", __func__, prof, (int) OBJECT); 
+	//printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = [%d]OBJECT" "\n", __func__, prof, (int) OBJECT); 
 	// This chunk is the header for the object info chunks.  It also
 	// holds the name of the object.
 
 	// Add a new tObject node to our list of objects (like a link list)
 	//pModel->pObject.push_back(newObject);
 	//pModel->pObject[pModel->pObject_nb++] = (newObject);
-	if (pModel->numOfObjects < 1024) { 
+	if (pModel->numOfObjects < OBJECTS_MAX) { 
 	  //pModel->pObject[pModel->numOfObjects] = (newObject);
 	  
 	  // Increase the object count
@@ -390,18 +475,18 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
 	  //debug_printf("    initialisation à 0 du pObject[%i] réussi...\n", pModel->numOfObjects - 1);  
 	  
 	  // Get the name of the object and store it, then add the read bytes to our byte counter.
-	  this -> m_CurrentChunk->bytesRead += GetString(this, pModel->pObject[pModel->numOfObjects - 1].strName);
+	  this -> m_CurrentChunk->bytesRead += GetString(this, pModel->pObject[pModel->numOfObjects - 1].strName, 255);
 	  
 	  //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - OBJECT NAME = '%s'" "\n", __func__, prof, pModel->pObject[pModel->numOfObjects - 1].strName); 
 
 	  // Now proceed to read in the rest of the object information
 	  ProcessNextObjectChunk(this, pModel, &(pModel->pObject[pModel->numOfObjects - 1]), this -> m_CurrentChunk);
 	}; 
-	break;
+	}; break;
 
-      case EDITKEYFRAME:
+      case EDITKEYFRAME: { 
 	debug_printf("    chunk EDITKEYFRAME... %X\n", EDITKEYFRAME);   
-	printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = EDITKEYFRAME" "\n", __func__, prof); 
+	//printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d - CHUNK_ID = EDITKEYFRAME" "\n", __func__, prof); 
 	// Because I wanted to make this a SIMPLE tutorial as possible, I did not include
 	// the key frame information.  This chunk is the header for all the animation info.
 	// In a later tutorial this will be the subject and explained thoroughly.
@@ -415,7 +500,7 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
 	  { printf("Erreur de positionnement."); }
     
 	this -> m_CurrentChunk->bytesRead = this -> m_CurrentChunk->length;
-	break;
+      }; break;
 
       default: 
 	debug_printf("    chunk non identifié, tant pis on passe au suivant... %X\n", this -> m_CurrentChunk->ID);    
@@ -438,7 +523,7 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
   }; free(this -> m_CurrentChunk); 
   // Free the current chunk and set it back to the previous chunk (since it started that way) 
   this -> m_CurrentChunk = pPreviousChunk;
-  debug_printf("fin chunk...\n");
+  //debug_printf("fin chunk...\n");
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "<<< prof = %d" "\n", __func__, prof); 
   prof--; 
 }; 
@@ -461,7 +546,7 @@ void ProcessNextObjectChunk(CLoad3DS * this, t3DModel *pModel, t3DObject *pObjec
     while (pPreviousChunk->bytesRead < pPreviousChunk->length) {
       // Read the next chunk
       debug_printf("      on lit chunk (object chunk)...\n");  
-      ReadChunk(this, this->m_CurrentChunk);
+      ReadChunk_header(this, this->m_CurrentChunk);
       debug_printf("      chunk lu (object chunk) avec succès...\n");  
       // Check which chunk we just read
       switch (this->m_CurrentChunk->ID) 
@@ -545,7 +630,7 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
   while (pPreviousChunk->bytesRead < pPreviousChunk->length)
     {
       // Read the next chunk
-      ReadChunk(this, this->m_CurrentChunk);
+      ReadChunk_header(this, this->m_CurrentChunk);
 
       // Check which chunk we just read in
       switch (this->m_CurrentChunk->ID)
@@ -554,7 +639,7 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
           debug_printf("  Chunk Material Name %X\n", MATNAME);
           // Here we read in the material name
           //this->m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strName, 1, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, this->m_FilePointer);
-          this->m_CurrentChunk->bytesRead += GetString(this, pModel->pMaterials[pModel->numOfMaterials - 1].strName);
+          this->m_CurrentChunk->bytesRead += GetString(this, pModel->pMaterials[pModel->numOfMaterials - 1].strName, 255);
           if (fseek(this->m_FilePointer, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
           this->m_CurrentChunk->bytesRead = this->m_CurrentChunk->length;
@@ -576,7 +661,7 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
           debug_printf("   Chunk Material Map File %X\n", MATMAPFILE);
           // Here we read in the material's file name
           //this->m_CurrentChunk->bytesRead += fread(pModel->pMaterials[pModel->numOfMaterials - 1].strFile, 1, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, this->m_FilePointer);
-          this->m_CurrentChunk->bytesRead += GetString(this, pModel->pMaterials[pModel->numOfMaterials - 1].strFile);
+          this->m_CurrentChunk->bytesRead += GetString(this, pModel->pMaterials[pModel->numOfMaterials - 1].strFile, 255);
           if (fseek(this->m_FilePointer, this->m_CurrentChunk->length - this->m_CurrentChunk->bytesRead, SEEK_CUR) != 0)
             { printf("Erreur de positionnement."); }
           this->m_CurrentChunk->bytesRead = this->m_CurrentChunk->length;
@@ -608,14 +693,14 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
 /////
 ///////////////////////////////// READ CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void ReadChunk(CLoad3DS * this, tChunk *pChunk) { 
+void ReadChunk_header(CLoad3DS * this, tChunk *pChunk) { 
   // This reads the chunk ID which is 2 bytes.
   // The chunk ID is like OBJECT or MATERIAL.  It tells what data is 
   // able to be read in within the chunks section.  
   //pChunk->bytesRead = fread(&pChunk->ID, 1, 2, this->m_FilePointer); 
   //pChunk -> bytesRead = 2 * fread_(&pChunk -> ID, /*object size*/2, /*number of objects to be read*/1, this -> m_FilePointer); 
   pChunk -> bytesRead = fread_(&pChunk -> ID, /*object size*/1, /*number of objects to be read*/2, this -> m_FilePointer); 
-  debug_printf("ChunkID: %4X\n", (unsigned int) pChunk -> ID); 
+  //debug_printf("ChunkID: %4X\n", (unsigned int) pChunk -> ID); 
 
   // Then, we read the length of the chunk which is 4 bytes. 
   // This is how we know how much to read in, or read past. 
@@ -623,11 +708,12 @@ void ReadChunk(CLoad3DS * this, tChunk *pChunk) {
   //pChunk->bytesRead += 4 * fread_(&pChunk->length, /*object size*/4, /*number of objects to be read*/1, this->m_FilePointer); 
   pChunk -> bytesRead += fread_(&pChunk -> length, /*object size*/1, /*number of objects to be read*/4, this->m_FilePointer); 
   //messerr("ChunkLength: %u\n", pChunk -> length); 
-  debug_printf("ChunkLength: %u\n", pChunk -> length); 
+  //debug_printf("ChunkLength: %u\n", pChunk -> length); 
 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- ChunkID: %4X - ChunkLength: %u " "\n", __func__, (unsigned int) pChunk -> ID, (int) pChunk -> length); 
+  debug_printf("%s(): ChunkID: %4u - ChunkLength: %u " "\n", __func__, (unsigned int) pChunk -> ID, (int) pChunk -> length); 
 
-  debug_printf("Lecture En-Tete Chunk oki.\n"); 
+  //debug_printf("Lecture En-Tete Chunk oki.\n"); 
 }; 
 
 ///////////////////////////////// GET STRING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
@@ -636,18 +722,30 @@ void ReadChunk(CLoad3DS * this, tChunk *pChunk) {
 /////
 ///////////////////////////////// GET STRING \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-int GetString(CLoad3DS * this, char *pBuffer) {
+int GetString(CLoad3DS * this, char *pBuffer, const int16_t buffer_bytesize) {
   int index = 0;
-
+  int buffer_i = 0; 
+  
+#if 0
   // Read 1 byte of data which is the first letter of the string
   fread(pBuffer, 1, 1, this->m_FilePointer);
+  index++;
+  buffer_i++; 
+#endif 
 
+  char c; 
   // Loop until we get NULL
-  while (*(pBuffer + index++) != 0) {
-
+  //while (*(pBuffer + index++) != 0) {
+  for (;;) { 
     // Read in a character at a time until we hit NULL.
-    fread(pBuffer + index, 1, 1, this->m_FilePointer);
-  }
+    fread(&c, 1, 1, this->m_FilePointer);
+    index++;
+    if (buffer_bytesize > buffer_i) {
+      pBuffer[buffer_i] = c; 
+      buffer_i++;
+    };
+    if ('\0' == c) break;
+  };
 
   // Return the string length, which is how many bytes we read in (including the NULL)
   //return strlen(pBuffer) + 1;
@@ -663,7 +761,7 @@ int GetString(CLoad3DS * this, char *pBuffer) {
 
 void ReadColorChunk(CLoad3DS * this, tMaterialInfo *pMaterial, tChunk *pChunk) {
   // Read the color chunk info
-  ReadChunk(this, this->m_TempChunk);
+  ReadChunk_header(this, this->m_TempChunk);
 
   // Read in the R G B color (3 bytes - 0 through 255)
   //this->m_TempChunk->bytesRead += fread(pMaterial->color, 1, this->m_TempChunk->length - this->m_TempChunk->bytesRead, this->m_FilePointer);
@@ -695,21 +793,27 @@ void ReadVertexIndices(CLoad3DS * this, t3DObject * pObject, tChunk * pPreviousC
   // Read in the number of faces that are in this object (int)
   // un unsigned short en realite --- Connard
   //pPreviousChunk->bytesRead += fread(&pObject->numOfFaces, 1, 2, this->m_FilePointer);
+  pObject->numOfFaces = 0;
 #ifndef LIBPROG_ENDIAN_BIG
   pPreviousChunk->bytesRead += 2 * fread_(&pObject->numOfFaces, 2, 1, this->m_FilePointer);
 #else
-  pObject->numOfFaces = 0;
   pPreviousChunk->bytesRead += 2 * fread_((((unsigned short *)(&((pObject)->numOfFaces))) + 1), 2, 1, this->m_FilePointer);
 #endif
-  debug_printf("Number of vertices: %d\n",  pObject->numOfFaces);
+  debug_printf("Number of faces: %d\n",  pObject->numOfFaces);
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- Number of vertices: %d" "\n", __func__, (int) pObject->numOfFaces); 
 
   // Alloc enough memory for the faces and initialize the structure
   //pObject->pFaces = new tFace [pObject->numOfFaces];
-  pObject->pFaces = malloc(pObject->numOfFaces * sizeof(tFace));
-  memset(pObject->pFaces, 0, sizeof(tFace) * pObject->numOfFaces);
+  const int32_t taille = pObject->numOfFaces * sizeof(tFace);
+  pObject->pFaces = malloc(taille); 
+  memset(pObject->pFaces, 0, taille); 
 
-  // Go through all of the faces in this object
+  const int32_t still = pPreviousChunk->length - pPreviousChunk->bytesRead; 
+  debug_printf("still = %d" "\n", still);
+  debug_printf("taille = %d" "\n", taille);
+  //assert(still >= taille); 
+  //assert(false); 
+
   for (int i = 0; i < pObject -> numOfFaces; i++) { 
     // Next, we read in the A then B then C index for the face, but ignore the 4th value.
     // The fourth value is a visibility flag for 3D Studio Max, we don't care about this.
@@ -717,14 +821,28 @@ void ReadVertexIndices(CLoad3DS * this, t3DObject * pObject, tChunk * pPreviousC
       // Read the first vertice index for the current face 
       //pPreviousChunk->bytesRead += fread(&index, 1, sizeof(index), this->m_FilePointer);
       pPreviousChunk->bytesRead += 2 * fread_(&index, 2, 1, this->m_FilePointer);
-      debug_printf("ReadVertexIndices: index = %d\n", (int) index);
-      
-      if (j < 3) {
-	// Store the index in our face structure.
-	pObject->pFaces[i].vertIndex[j] = index;
-      }; 
+      //debug_printf("ReadVertexIndices: index = %d\n", (int) index);
+      if (4 == j) continue;
+      pObject->pFaces[i].vertIndex[j] = index;
     }; 
   }; 
+
+#if 0
+  { 
+    fprintf(stderr, "pObject -> numOfFaces = %d" "\n", pObject -> numOfFaces); 
+    for (int face_i = 0; face_i < pObject -> numOfFaces; face_i++) { 
+      const uint16_t vert0 = pObject->pFaces[face_i].vertIndex[0];
+      const uint16_t vert1 = pObject->pFaces[face_i].vertIndex[1];
+      const uint16_t vert2 = pObject->pFaces[face_i].vertIndex[2];
+      fprintf(stderr, "face_i = %3d : ", face_i); 
+      fprintf(stderr, "vVert = { %3d ; %3d ; %3d }" " - ", vert0, vert1, vert2); 
+      fprintf(stderr, "\n"); 
+    };
+    fflush(NULL); 
+    //assert(false);
+  };
+#endif
+
 }; 
 
 
@@ -747,35 +865,57 @@ void ReadUVCoordinates(CLoad3DS * this, t3DObject *pObject, tChunk *pPreviousChu
 #else
   pPreviousChunk->bytesRead += 2 * fread_(( (unsigned short *) (&(pObject->numTexVertex))) + 1, 2, 1, this->m_FilePointer);
 #endif
-  debug_printf("  Number of Vertices: %d --- \n", pObject->numTexVertex); //fflush(NULL);
+  debug_printf("  Number of TexVertex: %d --- \n", pObject->numTexVertex); //fflush(NULL);
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---  Number of Vertices = %d " "\n", __func__, (int) pObject->numTexVertex); 
   
 
   // Allocate memory to hold the UV coordinates
 
   // Si il y a 0 elt, le new plante sur mac
-#ifdef LIBPROG_SYS_MACOSX
+#if 0 
+//#ifdef LIBPROG_SYS_MACOSX
   if (pObject->numTexVertex != 0)
     pObject->pTexVerts = new CVector2 [pObject->numTexVertex];
   else
     pObject->pTexVerts = NULL;
-#else
-  //pObject->pTexVerts = new CVector2 [pObject->numTexVertex];
-  pObject->pTexVerts = malloc(pObject->numTexVertex * sizeof(CVector2));
 #endif
+  const int32_t taille = pObject->numTexVertex * sizeof(CVector2);
+  //pObject->pTexVerts = new CVector2 [pObject->numTexVertex];
+  pObject -> pTexVerts = malloc(taille);
+  memset(pObject->pTexVerts, 0, taille); 
 
-  // Read in the texture coodinates (an array 2 float)
-  // Un float ici c'est 4.
-  // Attention, ici tableau de vecteur...
-  //messerr("ReadUVCoordinates:  pPreviousChunk->length = %u,  pPreviousChunk->bytesRead = %u\n", pPreviousChunk->length, pPreviousChunk->bytesRead);
-  //pPreviousChunk->bytesRead += fread(pObject->pTexVerts, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, this->m_FilePointer);
-  pPreviousChunk->bytesRead += 4 * fread_(pObject->pTexVerts, 4, (pPreviousChunk->length - pPreviousChunk->bytesRead) / 4, this->m_FilePointer);
+  const int32_t still = pPreviousChunk->length - pPreviousChunk->bytesRead; 
+  debug_printf("still = %d" "\n", still);
+  debug_printf("taille = %d" "\n", taille);
+  //assert(still >= taille); 
+  //assert(false); 
+  
+  const int8_t nb_objects = fread_(pObject->pTexVerts, taille, 1, this->m_FilePointer);
+  debug_printf("nb_objects = %d" "\n", nb_objects);
+  pPreviousChunk->bytesRead += taille;
   // On skippe s'il en reste.
-  if (fseek(this->m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
-    { printf("Erreur de positionnement ReadUVCoordinates."); }
+  if (0 != fseek(this->m_FilePointer, still - taille, SEEK_CUR))
+    { printf("Erreur de positionnement ReadVertices."); }
+  
   pPreviousChunk->bytesRead = pPreviousChunk->length;
 
-}
+#if 0
+    {
+      CVector2 vVert;
+      fprintf(stderr, "pObject -> numTexVertex = %d" "\n", pObject -> numTexVertex); 
+      for (int vert_i = 0; vert_i < pObject -> numTexVertex; vert_i++) {                                               
+	vVert = pObject -> pTexVerts[vert_i];
+
+	fprintf(stderr, "vert_i = %3d : ", vert_i); 
+	fprintf(stderr, "vVert = { %f ; %f  }" " - ", vVert.x, vVert.y); 
+	fprintf(stderr, "\n"); 
+      };
+      fflush(NULL); 
+      assert(false);
+    };
+#endif 
+
+};
 
 
 ///////////////////////////////// READ VERTICES \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
@@ -797,21 +937,47 @@ void ReadVertices(CLoad3DS * this, t3DObject *pObject, tChunk *pPreviousChunk) {
   pPreviousChunk->bytesRead += 2 * fread_(( (unsigned short *) &(pObject->numOfVerts)) + 1, 2, 1, this->m_FilePointer);
 #endif
 
+  debug_printf("pObject -> numOfVerts = %d" "\n", pObject -> numOfVerts); 
+  //assert(false);
 
   // Allocate the memory for the verts and initialize the structure
   //pObject->pVerts = new CVector3 [pObject->numOfVerts];
-  pObject->pVerts = malloc(pObject->numOfVerts * sizeof(CVector3));
-  memset(pObject->pVerts, 0, sizeof(CVector3) * pObject->numOfVerts);
+  const int32_t taille = pObject->numOfVerts * sizeof(CVector3);
+  pObject->pVerts = malloc(taille);
+  memset(pObject->pVerts, 0, taille); 
 
   // Read in the array of vertices (an array of 3 floats)
   // C'est un tableau !!!!
   // Un float c 4.
   //pPreviousChunk->bytesRead += fread(pObject->pVerts, 1, pPreviousChunk->length - pPreviousChunk->bytesRead, this->m_FilePointer);
-  pPreviousChunk->bytesRead += 4 * fread_(pObject->pVerts, 4, (pPreviousChunk->length - pPreviousChunk->bytesRead) / 4, this->m_FilePointer);
+  const int32_t still = pPreviousChunk->length - pPreviousChunk->bytesRead; 
+  debug_printf("still = %d" "\n", still);
+  debug_printf("taille = %d" "\n", taille);
+  assert(still >= taille); 
+
+  const int8_t nb_objects = fread_(pObject->pVerts, taille, 1, this->m_FilePointer);
+  debug_printf("nb_objects = %d" "\n", nb_objects);
+  pPreviousChunk->bytesRead += taille;
   // On skippe s'il en reste.
-  if (fseek(this->m_FilePointer, pPreviousChunk->length - pPreviousChunk->bytesRead, SEEK_CUR) != 0)
+  if (0 != fseek(this->m_FilePointer, still - taille, SEEK_CUR))
     { printf("Erreur de positionnement ReadVertices."); }
+  
   pPreviousChunk->bytesRead = pPreviousChunk->length;
+
+#if 0
+    {
+      CVector3 vVert;
+      fprintf(stderr, "pObject -> numOfVerts = %d" "\n", pObject -> numOfVerts); 
+      for (int vert_i = 0; vert_i < pObject -> numOfVerts; vert_i++) {                                               
+	vVert = pObject -> pVerts[vert_i];
+
+	fprintf(stderr, "vert_i = %d : ", vert_i); 
+	fprintf(stderr, "vVert = { %f ; %f ; %f }" " - ", vVert.x, vVert.y, vVert.z); 
+	fprintf(stderr, "\n"); 
+      };
+      fflush(NULL); 
+    };
+#endif 
 
 
   // Now we should have all of the vertices read in.  Because 3D Studio Max
@@ -822,19 +988,30 @@ void ReadVertices(CLoad3DS * this, t3DObject *pObject, tChunk *pPreviousChunk) {
   // we need to negate the Z to make it come out correctly.
 
   // Go through all of the vertices that we just read and swap the Y and Z values
-  for (int i = 0; i < pObject->numOfVerts; i++)
+  for (int vert_i = 0; vert_i < pObject->numOfVerts; vert_i++) {
+    const float fTempY        = pObject->pVerts[vert_i].y;
+    pObject->pVerts[vert_i].y = pObject->pVerts[vert_i].z;
+    pObject->pVerts[vert_i].z = -fTempY;
+  };
+
+
+#if 0
     {
-      // Store off the Y value
-      float fTempY = pObject->pVerts[i].y;
+      CVector3 vVert;
+      fprintf(stderr, "pObject -> numOfVerts = %d" "\n", pObject -> numOfVerts); 
+      for (int vert_i = 0; vert_i < pObject -> numOfVerts; vert_i++) {                                               
+	vVert = pObject -> pVerts[vert_i];
 
-      // Set the Y value to the Z value
-      pObject->pVerts[i].y = pObject->pVerts[i].z;
-
-      // Set the Z value to the Y value, 
-      // but negative Z because 3D Studio max does the opposite.
-      pObject->pVerts[i].z = -fTempY;
-    }
-}
+	fprintf(stderr, "vert_i = %d : ", vert_i); 
+	fprintf(stderr, "vVert = { %f ; %f ; %f }" " - ", vVert.x, vVert.y, vVert.z); 
+	fprintf(stderr, "\n"); 
+      };
+      fflush(NULL); 
+      //assert(false);
+    };
+#endif 
+  
+};
 
 
 ///////////////////////////////// READ OBJECT MATERIAL \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
@@ -853,7 +1030,7 @@ void ReadObjectMaterial(CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, t
 
   // Here we read the material name that is assigned to the current object.
   // strMaterial should now have a string of the material name, like "Material #2" etc..
-  pPreviousChunk->bytesRead += GetString(this, strMaterial);
+  pPreviousChunk->bytesRead += GetString(this, strMaterial, 255);
 
   // Now that we have a material name, we need to go through all of the materials
   // and check the name against each material.  When we find a material in our material
@@ -866,7 +1043,7 @@ void ReadObjectMaterial(CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, t
   for (int i = 0; i < pModel->numOfMaterials; i++)
     {
       // If the material we just read in matches the current texture name
-      if (strcmp(strMaterial, pModel->pMaterials[i].strName) == 0)
+      if (0 == strcmp(strMaterial, pModel->pMaterials[i].strName))
         {
           // Set the material ID to the current index 'i' and stop checking
           pObject->materialID = i;
@@ -979,12 +1156,84 @@ CVector3 Normalize(CVector3 vNormal)
 /////
 ///////////////////////////////// COMPUTER NORMALS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void ComputeNormals(CLoad3DS * this, t3DModel *pModel) {
+#undef DEBUG_TRACE
+#define DEBUG_TRACE 0
+static void ComputeNormals_one_face(CLoad3DS * this, t3DModel *pModel, t3DObject * pObject, tFace *pFace, const uint16_t face_i, CVector3 *pNormals, CVector3 *pTempNormals) {
   CVector3 vVector1, vVector2, vNormal, vPoly[3];
+                                               
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+  fprintf(stderr, "face_i = %d / %d" "\n", face_i, pObject -> numOfFaces); 
+#endif 
 
-  // If there are no objects, we can skip this part
-  if (pModel->numOfObjects <= 0)
-    return;
+  vPoly[0] = pObject->pVerts[pFace -> vertIndex[0]];
+  vPoly[1] = pObject->pVerts[pFace -> vertIndex[1]];
+  vPoly[2] = pObject->pVerts[pFace -> vertIndex[2]];
+
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+  fprintf(stderr, "face_i = %d / %d" "\n", face_i, pObject -> numOfFaces); 
+  fprintf(stderr, "vPoly[0] = { %f ; %f ; %f }" "\n", vPoly[0].x, vPoly[0].y, vPoly[0].z); 
+  fprintf(stderr, "vPoly[1] = { %f ; %f ; %f }" "\n", vPoly[1].x, vPoly[1].y, vPoly[1].z); 
+  fprintf(stderr, "vPoly[2] = { %f ; %f ; %f }" "\n", vPoly[2].x, vPoly[2].y, vPoly[2].z); 
+#endif 
+
+
+
+  // Now let's calculate the face normals (Get 2 vectors and find the cross product of those 2)
+
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+  fprintf(stderr, "face_i = %d / %d" "\n", face_i, pObject -> numOfFaces); 
+#endif 
+  vVector1 = Vector(vPoly[0], vPoly[2]);      // Get the vector of the polygon (we just need 2 sides for the normal)
+  //vVector2 = Vector(vPoly[0], vPoly[2]);      // Get the vector of the polygon (we just need 2 sides for the normal)
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+  fprintf(stderr, "face_i = %d / %d" "\n", face_i, pObject -> numOfFaces); 
+#endif 
+  vVector2 = Vector(vPoly[2], vPoly[1]);      // Get a second vector of the polygon
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+  fprintf(stderr, "face_i = %d / %d" "\n", face_i, pObject -> numOfFaces); 
+#endif 
+
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+  fprintf(stderr, "face_i = %d / %d" "\n", face_i, pObject -> numOfFaces); 
+#endif 
+  vNormal = Cross(vVector1, vVector2);       // Return the cross product of the 2 vectors (normalize vector, but not a unit vector)
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+  fprintf(stderr, "pTempNormals = %p" "\n", pTempNormals); 
+  fprintf(stderr, "face_i = %d / %d" "\n", face_i, pObject -> numOfFaces); 
+  fprintf(stderr, "sizeof(*pTempNormals) = %d" "\n", sizeof(*pTempNormals)); 
+  fprintf(stderr, "pTempNormals[face_i] = %p" "\n", pTempNormals[face_i]); 
+#endif 
+  pTempNormals[face_i] = vNormal;                  // Save the un-normalized normal for the vertex normals
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+  vNormal  = Normalize(vNormal);              // Normalize the cross product to give us the polygons normal
+
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+  pNormals[face_i] = vNormal;                      // Assign the normal to the list of normals
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+  //if (face_i == 0) assert(false);
+};
+
+#undef DEBUG_TRACE
+#define DEBUG_TRACE 1
+
+
+static void ComputeNormals_one_obecjt(CLoad3DS * this, t3DModel *pModel, t3DObject * pObject) { 
+  // RL: Il s'agit de calculer les normales des sommets. 
+  //     D'abord il faut calculer les normales des faces. 
+  //     Car la normale d'un sommet est la moyenne des normales de ses faces. 
 
   // What are vertex normals?  And how are they different from other normals?
   // Well, if you find the normal to a triangle, you are finding a "Face Normal".
@@ -995,78 +1244,72 @@ void ComputeNormals(CLoad3DS * this, t3DModel *pModel) {
   // calculate the face normals, then you take the average of all the normals around each
   // vertex.  It's just averaging.  That way you get a better approximation for that vertex.
 
-  // Go through each of the objects to calculate their normals
-  for (int index = 0; index < pModel->numOfObjects; index++)
-    {
-      // Get the current object
-      t3DObject *pObject = &(pModel->pObject[index]);
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
 
-      // Here we allocate all the memory we need to calculate the normals
-#if 0
-      CVector3 *pNormals      = new CVector3 [pObject->numOfFaces];
-      CVector3 *pTempNormals  = new CVector3 [pObject->numOfFaces];
-      pObject->pNormals       = new CVector3 [pObject->numOfVerts];
-#else
-      CVector3 *pNormals      = malloc(pObject->numOfFaces * sizeof(CVector3));
-      CVector3 *pTempNormals  = malloc(pObject->numOfFaces * sizeof(CVector3));
-      pObject->pNormals       = malloc(pObject->numOfVerts * sizeof(CVector3));
-#endif
-
-      // Go though all of the faces of this object
-      for (int i=0; i < pObject->numOfFaces; i++)
-        {                                               
-          // To cut down LARGE code, we extract the 3 points of this face
-          vPoly[0] = pObject->pVerts[pObject->pFaces[i].vertIndex[0]];
-          vPoly[1] = pObject->pVerts[pObject->pFaces[i].vertIndex[1]];
-          vPoly[2] = pObject->pVerts[pObject->pFaces[i].vertIndex[2]];
-
-          // Now let's calculate the face normals (Get 2 vectors and find the cross product of those 2)
-
-          vVector1 = Vector(vPoly[0], vPoly[2]);      // Get the vector of the polygon (we just need 2 sides for the normal)
-          vVector2 = Vector(vPoly[2], vPoly[1]);      // Get a second vector of the polygon
-
-          vNormal  = Cross(vVector1, vVector2);       // Return the cross product of the 2 vectors (normalize vector, but not a unit vector)
-          pTempNormals[i] = vNormal;                  // Save the un-normalized normal for the vertex normals
-          vNormal  = Normalize(vNormal);              // Normalize the cross product to give us the polygons normal
-
-          pNormals[i] = vNormal;                      // Assign the normal to the list of normals
-        }
-
-      //////////////// Now Get The Vertex Normals /////////////////
-
-      CVector3 vSum = {0.0, 0.0, 0.0};
-      CVector3 vZero = vSum;
-      int shared=0;
-
-      for (int i = 0; i < pObject->numOfVerts; i++)           // Go through all of the vertices
-        {
-          for (int j = 0; j < pObject->numOfFaces; j++)   // Go through all of the triangles
-            {                                               // Check if the vertex is shared by another face
-              if (pObject->pFaces[j].vertIndex[0] == i || 
-                  pObject->pFaces[j].vertIndex[1] == i || 
-                  pObject->pFaces[j].vertIndex[2] == i)
-                {
-                  vSum = AddVector(vSum, pTempNormals[j]);// Add the un-normalized normal of the shared face
-                  shared++;                               // Increase the number of shared triangles
-                }
-            }      
-            
-          // Get the normal by dividing the sum by the shared.  We negate the shared so it has the normals pointing out.
-          //pObject->pNormals[i] = DivideVectorByScaler(vSum, float(-shared));
-          pObject->pNormals[i] = DivideVectorByScaler(vSum, (-shared));
-
-          // Normalize the normal for the final vertex normal
-          pObject->pNormals[i] = Normalize(pObject->pNormals[i]); 
-
-          vSum = vZero;                                   // Reset the sum
-          shared = 0;                                     // Reset the shared
-        }
+  CVector3 *pNormals      = malloc(pObject->numOfFaces * sizeof(CVector3));
+  CVector3 *pTempNormals  = malloc(pObject->numOfFaces * sizeof(CVector3));
     
-      // Free our memory and start over on the next object
-      free(pTempNormals);
-      free(pNormals);
-    }
-}
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+    
+  for (uint16_t face_i = 0; face_i < pObject -> numOfFaces; face_i++) {
+    tFace *pFace = &pObject->pFaces[face_i];
+    ComputeNormals_one_face(this, pModel, pObject, pFace, face_i, pNormals, pTempNormals); 
+  };
+    
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+  
+  
+    
+  //////////////// Now Get The Vertex Normals /////////////////
+
+  pObject->pNormals       = malloc(pObject->numOfVerts * sizeof(CVector3));
+
+  CVector3 vSum = {0.0, 0.0, 0.0};
+  CVector3 vZero = vSum;
+  int shared = 0;
+
+  for (uint16_t vert_i = 0; vert_i < pObject->numOfVerts; vert_i++) {
+    vSum = vZero; 
+    shared = 0; 
+    for (uint16_t face_i = 0; face_i < pObject->numOfFaces; face_i++) {                                               
+      // Check if the vertex is shared by another face
+      if (pObject->pFaces[face_i].vertIndex[0] != vert_i) continue;
+      if (pObject->pFaces[face_i].vertIndex[1] != vert_i) continue; 
+      if (pObject->pFaces[face_i].vertIndex[2] != vert_i) continue;
+      // Add the un-normalized normal of the shared face
+      vSum = AddVector(vSum, pTempNormals[face_i]);
+      shared++; 
+    }; 
+    pObject->pNormals[vert_i] = DivideVectorByScaler(vSum, (-shared)); 
+    pObject->pNormals[vert_i] = Normalize(pObject->pNormals[vert_i]); 
+  };
+    
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+  free(pTempNormals);
+  free(pNormals);
+#if DEBUG_TRACE != 0 
+  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+};
+
+
+
+void ComputeNormals(CLoad3DS * this, t3DModel *pModel) {
+  if (pModel -> numOfObjects <= 0) return;
+  for (int index = 0; index < pModel->numOfObjects; index++) {
+      t3DObject * pObject = &(pModel->pObject[index]);
+      ComputeNormals_one_obecjt(this, pModel, pObject);
+  };
+};
+
 
 
 /////////////////////////////////////////////////////////////////////////////////

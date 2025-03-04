@@ -2,6 +2,8 @@
 #include "son.h"
 //#include "pascal/pascal.tools.hpp"
 
+#define DEBUG_TRACE 0
+
 static char * fichier_nom_sans_extension(const char * filename);
 
 static Mix_Music * try_to_load(const char * rep, const char * file_sans_ext, const char * ext);
@@ -9,6 +11,9 @@ static Mix_Music * try_to_load(const char * rep, const char * file_sans_ext, con
 
 // si filename == NULL ou "", alors c'est un peu comme si on avait une musique vide
 CMusique * CMusique_make(const char * filename) {
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   MALLOC_BZERO(CMusique,this); 
   
   ASSIGN_METHOD(CMusique,this,Jouer); 
@@ -21,14 +26,25 @@ CMusique * CMusique_make(const char * filename) {
 
   this -> NomMusique = strcopy(filename);
   
-
   char * nom_sans_ext = fichier_nom_sans_extension(filename);
   //messerr("nom_sans_ext: '%s'" "\n", nom_sans_ext); 
   
   do {
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     this -> music = try_to_load(SONSDIR, nom_sans_ext, ".ogg");
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     if (this -> music != NULL) { break; }; 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     messerr("SDL_mixer: %s" "\n", Mix_GetError()); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     
     this -> music = try_to_load(SONSDIR, nom_sans_ext, ".mp3");
     if (this -> music != NULL) { break; }; 
@@ -54,7 +70,13 @@ CMusique * CMusique_make(const char * filename) {
 #endif 
   };
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   free(nom_sans_ext);
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   return this; 
 };
@@ -68,8 +90,6 @@ Mix_Music * try_to_load(const char * rep, const char * file_sans_ext, const char
   reelfile = strconcat3__alloca(rep, file_sans_ext, ext);
   
   retour = Mix_LoadMUS(reelfile);
-  
-  free(reelfile); 
   
   return retour;
 }; 

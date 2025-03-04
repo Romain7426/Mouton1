@@ -35,6 +35,8 @@ static SDL_Surface * SDL_Screen;
 
 static bool isrunning = true; 
 
+#define DEBUG_TRACE 1
+
 // RL: On the long run, should become a local variable and not a global variable. 
 extern api_contexte_t api_contexte; //[1]; // RL: Used in apiscript.c 
 api_contexte_t api_contexte = {}; 
@@ -815,7 +817,10 @@ int Kernel_Init(void) {
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
   opengl__configure(SCREEN_WIDTH, SCREEN_HEIGHT); 
-  
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+
   init_audio(); 
   
   //opengl__stuffs(); 
@@ -824,20 +829,41 @@ int Kernel_Init(void) {
   fflush(NULL); 
   cooperative_thread__kernel_switch_to_thread(cooperative_thread_env, cooperative_thread__opengl); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   fflush(NULL); 
   supervisor_mode_huh = false; 
   supervisor_env = supervisor_env__make(); if (supervisor_env == NULL) { return -1; }; 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   fflush(NULL); 
   api_contexte__make_r(&api_contexte); 
   fflush(NULL); 
   api_contexte.Kernel_Script_Modal_ref = &Kernel_Script_Modal; 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
 
   fflush(NULL); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   retval = Game_Init(&api_contexte); if (retval < 0) { return retval; }; 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
 #if 1 
@@ -846,6 +872,9 @@ int Kernel_Init(void) {
 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //script_c_env__make_r(script_c_env); 
   //script_c_env = script_c_env__make(); 
   //script_c__lib1__fill(script_c_env); 
@@ -873,6 +902,9 @@ int Kernel_Init(void) {
   script -> init_step(script); 
 #endif 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
   printf("Fin de l'initialisation!! YOUPI!!" "\n");
@@ -1059,11 +1091,11 @@ static void opengl__configure(const int width, const int height) {
   // Falling back to a software renderer might a right issue (ownership, access rights). 
   // For instance, if I run it with root rights, I get a hardware renderer: 
   //        OpenGL renderer string: Mesa Intel(R) HD Graphics 3000 (SNB GT2) 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL version   : %s" "\n", __func__, glGetString(GL_VERSION   )); 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL vendor    : %s" "\n", __func__, glGetString(GL_VENDOR    )); 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL renderer  : %s" "\n", __func__, glGetString(GL_RENDERER  )); 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL extensions: %s" "\n", __func__, glGetString(GL_EXTENSIONS)); 
-  fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL shading language version: %s" "\n", __func__, glGetString(GL_SHADING_LANGUAGE_VERSION)); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL version   : %s" "\n", __func__, glGetString(GL_VERSION   )); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL vendor    : %s" "\n", __func__, glGetString(GL_VENDOR    )); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL renderer  : %s" "\n", __func__, glGetString(GL_RENDERER  )); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL extensions: %s" "\n", __func__, glGetString(GL_EXTENSIONS)); 
+  fprintf(stdout, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "OpenGL shading language version: %s" "\n", __func__, glGetString(GL_SHADING_LANGUAGE_VERSION)); 
   
   //* Setup our viewport. */
   glViewport(0, 0, width, height);

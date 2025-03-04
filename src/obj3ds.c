@@ -2,6 +2,8 @@
 #include "obj3ds.h"
 #include "texture.h"
 
+#define DEBUG_TRACE 1
+
 // ***** DB ***** 
 enum        { obj3ds_dico__size = 256 }; 
 static char * obj3ds_dico__filename[obj3ds_dico__size] = {}; 
@@ -44,6 +46,9 @@ static void obj3ds_dico__release(const int i) {
 // ***** OBJECT ***** 
 
 static int C3DS__load(C3DS * this, const char * filename) { 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   bool b3dModelLoaded;
   
@@ -55,6 +60,9 @@ static int C3DS__load(C3DS * this, const char * filename) {
   }; 
   
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
   // RL: Reading the file. 
@@ -71,7 +79,13 @@ static int C3DS__load(C3DS * this, const char * filename) {
     //printf("   Début de la lecture du fichier 3DS '%s' ... !!\n", filename); 
     //b3dModelLoaded = this -> g_Load3ds.Import3DS(&this -> g_Load3ds, &this -> g_3DModel, filename);         // Load our .3DS file into our model structure 
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     b3dModelLoaded = g_Load3ds.Import3DS(&g_Load3ds, &this -> g_3DModel, filename); // Load our .3DS file into our model structure 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
     //g_Load3ds.CleanUp(&g_Load3ds); 
     if (!b3dModelLoaded) { 
@@ -82,6 +96,9 @@ static int C3DS__load(C3DS * this, const char * filename) {
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   }; 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   //printf("   Lecture du fichier 3DS '%s' terminée !!\n", filename); 
   
@@ -135,16 +152,31 @@ static int C3DS__load(C3DS * this, const char * filename) {
   
   
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
   // RL: Generating an OpenGL DisplayList 
   this -> Liste = glGenLists(1);        // RL: Getting the list ID. // RL: '0' is an invalid display-list index. 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   glNewList(this -> Liste, GL_COMPILE); // RL: Start recording. 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   this -> RenderGL(this);               // RL: Recorded OpenGL operations. 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   glEndList();                          // RL: End recording. 
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   printf("<<< Objet 3DS chargé: '%s' " "\n", filename); 
   return true;  
 }; 
@@ -299,10 +331,16 @@ static C3DS * C3DS__copy(const C3DS * this) {
 }; 
 
 C3DS * C3DS__make(const char * filename) { 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   const int lookedup_index = obj3ds_dico__lookup(filename); 
   if (lookedup_index >= 0) { return obj3ds_dico__get(lookedup_index); }; 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   MALLOC_BZERO(C3DS,this); 
   
@@ -313,6 +351,9 @@ C3DS * C3DS__make(const char * filename) {
   ASSIGN_METHOD(C3DS,this,RenderGL); 
   //ASSIGN_METHOD(C3DS,this,CalcPE); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   this -> filename = strcopy(filename); 
   
   // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
@@ -323,12 +364,21 @@ C3DS * C3DS__make(const char * filename) {
   char realfile[realfile__bytesize]; 
   strcat(strcpy(realfile, T3DSDIR), filename); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   C3DS__load(this, realfile); 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   this -> dico_i = obj3ds_dico__push(filename, this); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   return this; 
 }; 

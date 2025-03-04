@@ -25,4 +25,3 @@ extern void CMusique__Jouer(CMusique * this);
 //extern void mixaudio(void * unused, Uint8 * stream, int len);
 
 #endif /* SON_H */
-

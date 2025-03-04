@@ -22,6 +22,8 @@ static void Game_Blit(void);
 
 static void RenderCiel(const CMap * Map, const float heros_y); 
 
+#define DEBUG_TRACE 1
+
 enum { nb_cases_afficheesX       = 1000 }; //25 }; 
 enum { nb_cases_afficheesYfond   = 1000 }; //20 }; 
 enum { nb_cases_afficheesYdevant = 1000 }; //10 }; 
@@ -116,6 +118,9 @@ int Game_Loop(const int animate_but_do_not_aliven_huh, api_contexte_t * api_cont
 
 
 int Game_Init(api_contexte_t * api_contexte) { 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " >>> " "\n", __func__); 
 
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
@@ -145,6 +150,9 @@ int Game_Init(api_contexte_t * api_contexte) {
   
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   game_events_env = game_events_env__make(); 
   game_events__handlers__push0(game_events_env, /*evt_type*/GAME_EVENTS__MAP__HERO_NO_MORE_PV, /*handler_type*/GAME_HANDLERS__STANDARD__HEROS_MORT); 
   
@@ -163,6 +171,9 @@ int Game_Init(api_contexte_t * api_contexte) {
   }; 
 #endif 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   our_manifold -> manifold_z_scale_factor__set(our_manifold, /*new_manifold_z_scale_factor*/1.125f); 
   //our_manifold -> temps__bloque(our_manifold); 
   //our_manifold -> temps__set(our_manifold, 0.25f); // RL: 'UTC time = 0.5f' = mid-day 
@@ -180,27 +191,60 @@ int Game_Init(api_contexte_t * api_contexte) {
   PageTitre = CPageTitre_make(); 
   MenuEntreeNom = CMenuEntreeNom_make(); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
   
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   Musique = CMusique_make("intro.mid");
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   Musique -> Jouer(Musique);
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //son_bouton_espace = CSon_make("./frappe.wav");
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   son_bouton_espace = CSon_make("epee.wav");
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //son_bouton_saut = CSon_make("./frappe.wav");
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   son_bouton_saut = CSon_make("epee.wav");
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //son_bouton_saut = new CSon("./plaisir.wav");
   
   //fprintf(stderr, "Init: ModeJeu = %d\n", ModeJeu);
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   AffichageCoeur = CAffichageCoeur_make();
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   AffichageMainPierre = CAffichageMainPierre_make();  
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
@@ -208,24 +252,51 @@ int Game_Init(api_contexte_t * api_contexte) {
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //CMoteurTeleportation__make_content(&MoteurTeleportation); 
   CMoteurTeleportation__make_content(MoteurTeleportation); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
 
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Vaisseau = CObjNonAnime__make(\"vaisseau.nonanime\"); --- ENTER ---" "\n", __func__); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   fflush(NULL); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   Vaisseau = CObjNonAnime__make("vaisseau.nonanime");
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "Vaisseau = CObjNonAnime__make(\"vaisseau.nonanime\"); --- EXIT ---" "\n", __func__); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   fflush(NULL); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
   
-  // Inventory 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+  // Inventaire
   printf("Création de l'inventaire\n");
   Menu_InventaireArmes = CMenu_make();
   fflush(NULL); 
@@ -238,6 +309,9 @@ int Game_Init(api_contexte_t * api_contexte) {
   SCRIPT_RecevoirUneArme("menu/arc"); 
   fflush(NULL); 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   // Hero 
   printf("Création du héros\n"); 
   fflush(NULL); 
@@ -250,6 +324,9 @@ int Game_Init(api_contexte_t * api_contexte) {
   // RL: TODO XXX FIXME: 'AffichageCoeur' should be updated about that. 
   Hero -> force_marche = 16.0f; 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   // Camera 
   //CCamera__make_aux(Camera); 
@@ -270,6 +347,9 @@ int Game_Init(api_contexte_t * api_contexte) {
   ModeJeu = mjTITRE; 
   
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   
   message("%s: " "END" "\n", __func__); 

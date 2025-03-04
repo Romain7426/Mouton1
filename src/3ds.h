@@ -2,8 +2,6 @@
 #define _3DS_H
 
 
-
-
 typedef unsigned char BYTE;
 
 
@@ -37,8 +35,8 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(CVector2);
 // and texture coordinate arrays.  From this information we know which vertices
 // from our vertex array go to which face, along with the correct texture coordinates.
 struct tFace {
-  int vertIndex[3];           // indicies for the verts that make up this triangle
-  int coordIndex[3];          // indicies for the tex coords to texture this face
+  uint16_t vertIndex[3];           // indicies for the verts that make up this triangle
+  uint16_t coordIndex[3];          // indicies for the tex coords to texture this face
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(tFace);
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(tFace);
@@ -64,13 +62,14 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(tMaterialInfo);
 // has loading/drawing/querying functions like:
 // LoadModel(...); DrawObject(...); DrawModel(...); DestroyModel(...);
 struct t3DObject {
-  int  numOfVerts;            // The number of verts in the model
-  int  numOfFaces;            // The number of faces in the model
-  int  numTexVertex;          // The number of texture coordinates
+  uint16_t  numOfVerts;        // The number of verts in the model
+  uint16_t  numOfFaces;            // The number of faces in the model
+  uint16_t  numTexVertex;          // The number of texture coordinates
   int  materialID;            // The texture ID to use, which is the index into our texture array
   bool bHasTexture;           // This is TRUE if there is a texture map for this object
   char strName[255];          // The name of the object
   CVector3  *pVerts;          // The object's vertices
+  /// Ce sont les normales des sommets et non des faces.
   CVector3  *pNormals;        // The object's normals
   CVector2  *pTexVerts;       // The texture's UV coordinates
   tFace *pFaces;              // The faces information of the object
@@ -80,6 +79,8 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(t3DObject);
 
 // This holds our model information.  This should also turn into a robust struct.
 // We use STL's (Standard Template Library) vector struct to ease our link list burdens. :)
+enum { MATERIALS_MAX = 1024 }; 
+enum { OBJECTS_MAX = 1024 }; 
 struct t3DModel {
   int numOfObjects;                   // The number of objects in the model
   int numOfMaterials;                 // The number of materials for the model
@@ -87,9 +88,9 @@ struct t3DModel {
   vector<tMaterialInfo> pMaterials;   // The list of material information (Textures and colors)
   vector<t3DObject> pObject;          // The object list for our model
 #else
-  tMaterialInfo pMaterials[1024];   // The list of material information (Textures and colors)
+  tMaterialInfo pMaterials[MATERIALS_MAX];   // The list of material information (Textures and colors)
   //int pMaterials_nb;
-  t3DObject pObject[1024];          // The object list for our model
+  t3DObject pObject[OBJECTS_MAX];          // The object list for our model
   //int pObject_nb;
 #endif
 };
@@ -222,9 +223,9 @@ TYPEDEF_TYPENAME_WITHOUT_STRUCT(tIndices);
 
 // This holds the chunk info
 struct tChunk {
-  unsigned short int ID;                  // The chunk's ID       
-  unsigned int length;                    // The length of the chunk
-  unsigned int bytesRead;                 // The amount of bytes read within that chunk
+  uint16_t ID;                  // The chunk's ID       
+  uint32_t length;                    // The length of the chunk
+  uint32_t bytesRead;                 // The amount of bytes read within that chunk
 };
 DEFINE_NEW_OPERATOR_FOR_STRUCT(tChunk); // RL: 'new_tChunk' // RL: It's a malloc + bzero - that's it. 
 TYPEDEF_TYPENAME_WITHOUT_STRUCT(tChunk);
@@ -249,10 +250,10 @@ struct CLoad3DS {
 
 //private:
   // This reads in a string and saves it in the char array passed in
-  int (* GetString)(struct CLoad3DS * this, char *);
+  int (* GetString)(struct CLoad3DS * this, char *,int16_t);
 
   // This reads the next chunk
-  void (* ReadChunk)(struct CLoad3DS * this, tChunk *);
+  void (* ReadChunk_header)(struct CLoad3DS * this, tChunk *);
 
   // This reads the next large chunk
   void (* ProcessNextChunk)(struct CLoad3DS * this, t3DModel *pModel, tChunk *);

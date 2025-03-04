@@ -35,6 +35,7 @@
 
 
 
+#define DEBUG_TRACE 1
 
 // RL: This file contains all the system stuffs. 
 //     Anything here is not related to the program per se. 
@@ -365,16 +366,26 @@ int main(const int argc, const char * argv[]) {
     main_win_print(); 
     main__stdout_log_buffer__flush(); 
 
-    goto label__anime_load_now; label__anime_load_now__ret: {}; 
+    //goto label__anime_load_now; 
+label__anime_load_now__ret: {}; 
 
     for (;;) {
       printf("<<< main" "\n"); 
       printf("===============================================================================" "\n"); 
        
       for (;;) { 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
 	retour = Kernel_Init();  if (retour < 0) { break; }; 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
 	{ dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 	
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
 	retour = Kernel_Run(); 
 	Kernel_Dispose(); 
 	break; 
