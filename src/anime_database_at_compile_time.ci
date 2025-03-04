@@ -1,0 +1,168 @@
+enum { ANIME_DATABASE_AT_COMPILE_TIME__MAX = 32 }; 
+
+static const char * anime_database_at_compile_time__filename[ANIME_DATABASE_AT_COMPILE_TIME__MAX] = { 
+  "bob.anime", 
+  "heros.anime", 
+  "pere.anime", 
+  "brigitte.anime", 
+  "juliette.anime", 
+  "mouton.anime", 
+  "chaman.anime", 
+  "dinotore.anime", 
+  "heros.anime", 
+  "pecu.anime", 
+  "prokofiev.anime", 
+  "sang.anime", 
+  "chapinmechant.anime", 
+  "fantome.anime", 
+  "moutonmechant.anime", 
+  "pierre.anime", 
+  "saintexupery.anime", 
+  "y.anime", 
+  "m.anime", 
+  "c.anime", 
+  "a.anime", 
+  "bizarre1.anime", 
+  "bizarre2.anime", 
+  "bucheron.anime", 
+  "chapin.anime", 
+  "eclaboussures.anime", 
+  "homme_bizarre.anime", 
+  "puit_boss.anime", 
+  "squelette.anime", 
+  NULL  
+}; 
+
+static const char * anime_database_at_compile_time__filecontent[ANIME_DATABASE_AT_COMPILE_TIME__MAX] = { 
+#include "bob.anime.ci" 
+,
+#include "heros.anime.ci" 
+,
+#include "pere.anime.ci" 
+,
+#include "brigitte.anime.ci" 
+,
+#include "juliette.anime.ci" 
+,
+#include "mouton.anime.ci" 
+,
+#include "chaman.anime.ci" 
+,
+#include "dinotore.anime.ci" 
+,
+#include "heros.anime.ci" 
+,
+#include "pecu.anime.ci" 
+,
+#include "prokofiev.anime.ci" 
+,
+#include "sang.anime.ci" 
+,
+#include "chapinmechant.anime.ci" 
+,
+#include "fantome.anime.ci" 
+,
+#include "moutonmechant.anime.ci" 
+,
+#include "pierre.anime.ci" 
+,
+#include "saintexupery.anime.ci" 
+,
+#include "y.anime.ci" 
+,
+#include "m.anime.ci" 
+,
+#include "c.anime.ci" 
+,
+#include "a.anime.ci" 
+,
+#include "bizarre1.anime.ci" 
+,
+#include "bizarre2.anime.ci" 
+,
+#include "bucheron.anime.ci" 
+,
+#include "chapin.anime.ci" 
+,
+#include "eclaboussures.anime.ci" 
+,
+#include "homme_bizarre.anime.ci" 
+,
+#include "puit_boss.anime.ci" 
+,
+#include "squelette.anime.ci" 
+,
+NULL 
+};
+
+static const time_t anime_database_at_compile_time__mtime[ANIME_DATABASE_AT_COMPILE_TIME__MAX] = { 
+#include "bob.anime.mtime" 
+,
+#include "heros.anime.mtime" 
+,
+#include "pere.anime.mtime" 
+,
+#include "brigitte.anime.mtime" 
+,
+#include "juliette.anime.mtime" 
+,
+#include "mouton.anime.mtime" 
+,
+#include "chaman.anime.mtime" 
+,
+#include "dinotore.anime.mtime" 
+,
+#include "heros.anime.mtime" 
+,
+#include "pecu.anime.mtime" 
+,
+#include "prokofiev.anime.mtime" 
+,
+#include "sang.anime.mtime" 
+,
+#include "chapinmechant.anime.mtime" 
+,
+#include "fantome.anime.mtime" 
+,
+#include "moutonmechant.anime.mtime" 
+,
+#include "pierre.anime.mtime" 
+,
+#include "saintexupery.anime.mtime" 
+,
+#include "y.anime.mtime" 
+,
+#include "m.anime.mtime" 
+,
+#include "c.anime.mtime" 
+,
+#include "a.anime.mtime" 
+,
+#include "bizarre1.anime.mtime" 
+,
+#include "bizarre2.anime.mtime" 
+,
+#include "bucheron.anime.mtime" 
+,
+#include "chapin.anime.mtime" 
+,
+#include "eclaboussures.anime.mtime" 
+,
+#include "homme_bizarre.anime.mtime" 
+,
+#include "puit_boss.anime.mtime" 
+,
+#include "squelette.anime.mtime" 
+,
+0
+};
+
+static int8_t anime_database_at_compile_time__lookup_by_filename(const char * filename_sought) { 
+  if (NULL ==  filename_sought) return -2; 
+  if ('\0' == *filename_sought) return -3; 
+  for (int i = 0; ; i++) { 
+    const char * u = anime_database_at_compile_time__filename[i]; 
+    if (NULL == u) return -1; 
+    if (0 == strcmp(filename_sought, u)) return i; 
+  }; 
+}; 
