@@ -152,14 +152,23 @@
 #define MALLOC_BZERO(ctype_t,this) ctype_t * this = NULL; this = (ctype_t *) malloc(sizeof(*this)); bzero(this, sizeof(*this)); 
 #define ASSIGN_METHOD(ctype_t,this,method_name) this -> method_name = glue3(ctype_t,__,method_name); 
 
-extern char * strcopy(const char * str); 
+extern char * strcopy_malloc(const char * str); 
 
 #define BIGLIB_STRING(s) BIGLIB_STRINGX(s)
 #define BIGLIB_STRINGX(s) #s
 
   
+//#define free(...)
 
+#define free(...) {							\
+    { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "FREE:  " STRINGIFY(__LINE__)  "\n", __func__);  fflush(NULL); }; \
+    free(__VA_ARGS__);							\
+  };									\
+  /* END OF MACRO */
 
+//#define DEBUG_TRACE 0
+//#define DEBUG_TRACE 1
+#define DEBUG_TRACE_PRINT() { fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  fflush(NULL); }; 
 
 
 

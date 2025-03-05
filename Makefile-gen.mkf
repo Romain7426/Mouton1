@@ -390,7 +390,7 @@ Makefile:
 #	echo "default: Makefile build run $(BIN)" >> $@
 #	echo "default: Makefile build $(LIB) $(BIN) run " >> $@
 #	echo "default: Makefile build build_h build_ci build_c build_i build_o build_so $(LIB) $(LIB_SO) $(BIN) run " >> $@
-	echo "default: Makefile build build_h build_ci build_c build_i build_anime build_o build_so $(BIN_LIB) $(BIN_SO) $(BIN) run " >> $@
+	echo "default: Makefile build build_h build_anime build_ci build_c build_i build_o build_so $(BIN_LIB) $(BIN_SO) $(BIN) run " >> $@
 	echo "" >> $@
 	echo "" >> $@
 	echo "" >> $@

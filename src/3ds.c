@@ -16,9 +16,9 @@
 #include <string.h>
 #include "3ds.h"
 
-#define DEBUG_3DS_USING_PRINTF 1
+#define DEBUG_3DS_USING_PRINTF 0
 
-#define DEBUG_TRACE 1
+#define DEBUG_TRACE 0
 
 #define debug_printf(...) 
 #ifdef DEBUG_3DS_USING_PRINTF 
@@ -156,7 +156,16 @@ struct CLoad3DS * new_CLoad3DS(void) {
 //bool CLoad3DS::Import3DS(t3DModel *pModel, const char * strFileName)
 bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
   char strMessage[255] = {0}; 
-    
+  
+  // RL: Quel est la structure d'un fichier 3DS?
+  //     Un fichier 3DS est un arbre de "chunks".
+  //     Un chunk est un bloc de données. Un chunk contient un en-tête de six octets puis ses données.
+  //     L'en-tête d'un chunk contient le type du chunk (deux octets) puis la taille du chunk (quatre octets). 
+  // 
+  //     Le chunk racine est au début du fichier. Son type est nécessairement "primaire". 
+  //     Quant à sa taille, celle-ci est l'intégralité des données; id est, quand on a fini de lire le chunk primaire, 
+  //     alors on a lues toutes les données.
+  
   //printf("appel à Import3DS : pModel->numOfObjects = %i\n", pModel->numOfObjects);
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
@@ -171,8 +180,8 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
   this -> m_FilePointer = fopen(strFileName, "rb");
 
   // Make sure we have a valid file pointer (we found the file)
-  if (!this -> m_FilePointer) {
-    printf("Unable to find the file: %s!\n", strFileName); 
+  if (NULL == this -> m_FilePointer) {
+    printf("Unable to find the file: %s - errno = %d" "\n", strFileName, errno); 
     CleanUp(this);
     return false; 
   }; 
@@ -180,32 +189,40 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
-  
-  // Once we have the file open, we need to read the very first data chunk
-  // to see if it's a 3DS file.  That way we don't read an invalid file.
-  // If it is a 3DS file, then the first chunk ID will be equal to PRIMARY (some hex num)
-  
-    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
-  // Read the first chuck of the file to see if it's a 3DS file
-  ReadChunk_header(this, this -> m_CurrentChunk);
 
+    // RL: Maintenant que le fichier est ouvert, nous lisons les premiers octets
+    //     et nous vérifions que son type est "primaire".
+    
+    // Once we have the file open, we need to read the very first data chunk
+    // to see if it's a 3DS file.  That way we don't read an invalid file.
+    // If it is a 3DS file, then the first chunk ID will be equal to PRIMARY (some hex num)
+  
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
-  // Make sure this is a 3DS file
-  if (this -> m_CurrentChunk -> ID != PRIMARY) { 
-    snprintf(strMessage, sizeof(strMessage), "Unable to load PRIMARY chuck from file: %s!", strFileName); 
-    printf("%s\n", strMessage); 
-    CleanUp(this); 
-    return false; 
-  }; 
+    // Read the first chuck of the file to see if it's a 3DS file
+    ReadChunk_header(this, this -> m_CurrentChunk);
+    
+    //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
+    // Make sure this is a 3DS file
+    if (PRIMARY != this -> m_CurrentChunk -> ID) { 
+      snprintf(strMessage, sizeof(strMessage), "Unable to load PRIMARY chuck from file: %s!", strFileName); 
+      printf("%s\n", strMessage); 
+      CleanUp(this); 
+      return false; 
+    }; 
   
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
   
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
-  fprintf(stderr,"Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
-  debug_printf("Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
-
+    //debug_printf("Le primary chunk a été loadé ; ID = %X ; PRIMARY = %X ; pointeur vers le fichier : %p\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_FilePointer);
+    debug_printf("Le primary chunk a été loadé ; ID = %X [ PRIMARY = %X ] ; taille des données 3DS: %u""\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_CurrentChunk->ID);
+    //fprintf(stderr,"Le primary chunk a été loadé ; ID = %X [ PRIMARY = %X ] ; taille des données 3DS: %u""\n", this -> m_CurrentChunk->ID, PRIMARY, this -> m_CurrentChunk->ID);
+  
+  // RL: Maintenant que nous avons reconnu le chunk primaire, on itère.
+  //     Les données du chunk primaire sont une suite de chunks.
+  //     On va donc parcourir la liste de ces chunks fils. 
+  
   // Now we actually start reading in the data.  ProcessNextChunk() is recursive
   
   // Begin loading objects, by calling this recursive function
@@ -304,9 +321,14 @@ bool Import3DS(CLoad3DS * this, t3DModel *pModel, const char * strFileName) {
 ///////////////////////////////// CLEAN UP \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
 void CleanUp(struct CLoad3DS * this) { 
+  fflush(NULL); 
   fclose(this -> m_FilePointer); 
+  this -> m_FilePointer = NULL;
   free(this -> m_CurrentChunk);                      // Free the current chunk
+  this -> m_CurrentChunk = NULL; 
   free(this -> m_TempChunk);                         // Free our temporary chunk
+  this -> m_TempChunk = NULL; 
+  fflush(NULL); 
 }; 
 
 
@@ -316,11 +338,14 @@ void CleanUp(struct CLoad3DS * this) {
 /////
 ///////////////////////////////// PROCESS NEXT CHUNK\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
-void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk) { 
+void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pParentChunk) { 
   static int prof = 0; prof++; 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " ">>> prof = %d" "\n", __func__, prof); 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(t3DObject) = %lu" "\n", __func__, (unsigned long) sizeof(t3DObject)); // 304 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " " sizeof(tMaterialInfo) = %lu" "\n", __func__, (unsigned long) sizeof(tMaterialInfo)); // 536 
+
+  // RL: Cette procédure parcourt la liste des chunks fils du chunk parent. 
+
 #if 0 
   t3DObject newObject;// = {0};
 #if 1 
@@ -366,10 +391,11 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
   //debug_printf("appel à processchunk : pModel->numOfObjects = %i\n", pModel->numOfObjects);
 
     
-  uint16_t version_3ds = 0;                   // This will hold the file version
+  uint32_t version_3ds = 0;                   // This will hold the file version
   uint32_t version_mesh = 0; 
   //int buffer[5000] = {0};                    // This is used to read past unwanted data
-
+  
+  // RL: Allocation du chunk qui contiendra le chunk fils courant. 
   this -> m_CurrentChunk = new_tChunk(); { 
   
     // Below we check our chunk ID each time we read a new chunk.  Then, if
@@ -381,7 +407,7 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
     // check against the length.
     //debug_printf("boucle du chunk...\n");
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "--- prof = %d" "\n", __func__, prof); 
-    while (pPreviousChunk->bytesRead < pPreviousChunk->length) {
+    while (pParentChunk->bytesRead < pParentChunk->length) {
       // Read next Chunk
       //debug_printf("   on lit un chunk...\n"); 
       ReadChunk_header(this, this -> m_CurrentChunk); 
@@ -400,7 +426,8 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
 	//m_CurrentChunk->bytesRead += fread(&version, 1, m_CurrentChunk->length - m_CurrentChunk->bytesRead, m_FilePointer);
 	this -> m_CurrentChunk->bytesRead += 4 * fread_(&version_3ds, 4, 1, this -> m_FilePointer);
 	// On skippe s'il en reste.
-	if (fseek(this -> m_FilePointer, this -> m_CurrentChunk->length - this -> m_CurrentChunk->bytesRead, SEEK_CUR) != 0) { printf("Erreur de positionnement."); } 
+	const int skip_len = this -> m_CurrentChunk->length - this -> m_CurrentChunk->bytesRead;
+	if (0 != fseek(this -> m_FilePointer, skip_len, SEEK_CUR)) { printf("Erreur de positionnement."); } 
 	this -> m_CurrentChunk->bytesRead = this -> m_CurrentChunk->length;
 	debug_printf("    chunk VERSION [%X] - version = %u" "\n", VERSION, version_3ds);
 
@@ -516,13 +543,13 @@ void ProcessNextChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPreviousChunk)
       }; // END OF SWITCH 
 
       // Add the bytes read from the last chunk to the previous chunk passed in.
-      pPreviousChunk->bytesRead += this -> m_CurrentChunk->bytesRead;
+      pParentChunk->bytesRead += this -> m_CurrentChunk->bytesRead;
     }; // END OF WHILE 
 
   
   }; free(this -> m_CurrentChunk); 
   // Free the current chunk and set it back to the previous chunk (since it started that way) 
-  this -> m_CurrentChunk = pPreviousChunk;
+  this -> m_CurrentChunk = pParentChunk;
   //debug_printf("fin chunk...\n");
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "<<< prof = %d" "\n", __func__, prof); 
   prof--; 
@@ -624,17 +651,15 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
   //int buffer[50000] = {0};                    // This is used to read past unwanted data
 
   // Allocate a new chunk to work with
-  this->m_CurrentChunk = new_tChunk();
+  this->m_CurrentChunk = new_tChunk(); { 
 
   // Continue to read these chunks until we read the end of this sub chunk
-  while (pPreviousChunk->bytesRead < pPreviousChunk->length)
-    {
+  while (pPreviousChunk->bytesRead < pPreviousChunk->length) {
       // Read the next chunk
       ReadChunk_header(this, this->m_CurrentChunk);
 
       // Check which chunk we just read in
-      switch (this->m_CurrentChunk->ID)
-        {
+      switch (this->m_CurrentChunk->ID) {
         case MATNAME:                           // This chunk holds the name of the material
           debug_printf("  Chunk Material Name %X\n", MATNAME);
           // Here we read in the material name
@@ -680,10 +705,10 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
 
       // Add the bytes read from the last chunk to the previous chunk passed in.
       pPreviousChunk->bytesRead += this->m_CurrentChunk->bytesRead;
-    }
+    };
 
   // Free the current chunk and set it back to the previous chunk (since it started that way)
-  free(this->m_CurrentChunk);
+  }; free(this->m_CurrentChunk);
   this->m_CurrentChunk = pPreviousChunk;
 }
 
@@ -694,6 +719,8 @@ void ProcessNextMaterialChunk(CLoad3DS * this, t3DModel *pModel, tChunk *pPrevio
 ///////////////////////////////// READ CHUNK \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 
 void ReadChunk_header(CLoad3DS * this, tChunk *pChunk) { 
+  this -> m_CurrentChunk -> ID = 0;
+
   // This reads the chunk ID which is 2 bytes.
   // The chunk ID is like OBJECT or MATERIAL.  It tells what data is 
   // able to be read in within the chunks section.  
@@ -1083,12 +1110,8 @@ void ReadObjectMaterial(CLoad3DS * this, t3DModel *pModel, t3DObject *pObject, t
 
 //////////////////////////////  Math Functions  ////////////////////////////////*
 
-// This computes the magnitude of a normal.   (magnitude = sqrt(x^2 + y^2 + z^2)
-#define Mag(Normal) (sqrt(Normal.x*Normal.x + Normal.y*Normal.y + Normal.z*Normal.z))
-
 // This calculates a vector between 2 points and returns the result
-CVector3 Vector(CVector3 vPoint1, CVector3 vPoint2)
-{
+CVector3 Vector(CVector3 vPoint1, CVector3 vPoint2) {
   CVector3 vVector;                           // The variable to hold the resultant vector
 
   vVector.x = vPoint1.x - vPoint2.x;          // Subtract point1 and point2 x's
@@ -1099,8 +1122,7 @@ CVector3 Vector(CVector3 vPoint1, CVector3 vPoint2)
 }
 
 // This adds 2 vectors together and returns the result
-CVector3 AddVector(CVector3 vVector1, CVector3 vVector2)
-{
+CVector3 AddVector(CVector3 vVector1, CVector3 vVector2) {
   CVector3 vResult;                           // The variable to hold the resultant vector
     
   vResult.x = vVector2.x + vVector1.x;        // Add Vector1 and Vector2 x's
@@ -1111,8 +1133,7 @@ CVector3 AddVector(CVector3 vVector1, CVector3 vVector2)
 }
 
 // This divides a vector by a single number (scalar) and returns the result
-CVector3 DivideVectorByScaler(CVector3 vVector1, float Scaler)
-{
+CVector3 DivideVectorByScaler(CVector3 vVector1, float Scaler) {
   CVector3 vResult;                           // The variable to hold the resultant vector
     
   vResult.x = vVector1.x / Scaler;            // Divide Vector1's x value by the scaler
@@ -1123,8 +1144,7 @@ CVector3 DivideVectorByScaler(CVector3 vVector1, float Scaler)
 }
 
 // This returns the cross product between 2 vectors
-CVector3 Cross(CVector3 vVector1, CVector3 vVector2)
-{
+CVector3 Cross(CVector3 vVector1, CVector3 vVector2) {
   CVector3 vCross;                                // The vector to hold the cross product
   // Get the X value
   vCross.x = ((vVector1.y * vVector2.z) - (vVector1.z * vVector2.y));
@@ -1136,19 +1156,16 @@ CVector3 Cross(CVector3 vVector1, CVector3 vVector2)
   return vCross;                              // Return the cross product
 }
 
-// This returns the normal of a vector
-CVector3 Normalize(CVector3 vNormal)
-{
-  double Magnitude;                           // This holds the magitude          
+// magnitude = sqrt(x^2 + y^2 + z^2)
+#define Mag(Normal) (sqrt(Normal.x*Normal.x + Normal.y*Normal.y + Normal.z*Normal.z))
 
-  Magnitude = Mag(vNormal);                   // Get the magnitude
-
-  vNormal.x /= (float)Magnitude;              // Divide the vector's X by the magnitude
-  vNormal.y /= (float)Magnitude;              // Divide the vector's Y by the magnitude
-  vNormal.z /= (float)Magnitude;              // Divide the vector's Z by the magnitude
-
-  return vNormal;                             // Return the normal
-}
+CVector3 Normalize(CVector3 vNormal) {
+  const double Magnitude = Mag(vNormal);
+  vNormal.x /= (float)Magnitude; 
+  vNormal.y /= (float)Magnitude; 
+  vNormal.z /= (float)Magnitude; 
+  return vNormal; 
+};
 
 ///////////////////////////////// COMPUTER NORMALS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\*
 /////
@@ -1230,10 +1247,11 @@ static void ComputeNormals_one_face(CLoad3DS * this, t3DModel *pModel, t3DObject
 #define DEBUG_TRACE 1
 
 
-static void ComputeNormals_one_obecjt(CLoad3DS * this, t3DModel *pModel, t3DObject * pObject) { 
+static void ComputeNormals_one_object(CLoad3DS * this, t3DModel *pModel, t3DObject * pObject) { 
   // RL: Il s'agit de calculer les normales des sommets. 
   //     D'abord il faut calculer les normales des faces. 
   //     Car la normale d'un sommet est la moyenne des normales de ses faces. 
+  //     (En l'occurrence, il prend l'opposé de cette moyenne...?)
 
   // What are vertex normals?  And how are they different from other normals?
   // Well, if you find the normal to a triangle, you are finding a "Face Normal".
@@ -1279,9 +1297,12 @@ static void ComputeNormals_one_obecjt(CLoad3DS * this, t3DModel *pModel, t3DObje
     shared = 0; 
     for (uint16_t face_i = 0; face_i < pObject->numOfFaces; face_i++) {                                               
       // Check if the vertex is shared by another face
-      if (pObject->pFaces[face_i].vertIndex[0] != vert_i) continue;
-      if (pObject->pFaces[face_i].vertIndex[1] != vert_i) continue; 
-      if (pObject->pFaces[face_i].vertIndex[2] != vert_i) continue;
+      if (pObject->pFaces[face_i].vertIndex[0] == vert_i) goto label__found_one;
+      if (pObject->pFaces[face_i].vertIndex[1] == vert_i) goto label__found_one;
+      if (pObject->pFaces[face_i].vertIndex[2] == vert_i) goto label__found_one;
+      continue;
+      
+    label__found_one:
       // Add the un-normalized normal of the shared face
       vSum = AddVector(vSum, pTempNormals[face_i]);
       shared++; 
@@ -1306,7 +1327,7 @@ void ComputeNormals(CLoad3DS * this, t3DModel *pModel) {
   if (pModel -> numOfObjects <= 0) return;
   for (int index = 0; index < pModel->numOfObjects; index++) {
       t3DObject * pObject = &(pModel->pObject[index]);
-      ComputeNormals_one_obecjt(this, pModel, pObject);
+      ComputeNormals_one_object(this, pModel, pObject);
   };
 };
 

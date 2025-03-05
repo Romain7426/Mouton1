@@ -4,6 +4,7 @@
 #include "map.h"
 #include <anime.h>
 #include "camera.h"
+#include "anime_database.h"
 #include <assert.h>
 
 
@@ -303,10 +304,8 @@ void CBonhomme__Life(CBonhomme * this) {
 }; 
 
 #if 1 
-int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * anime_datadir, const char * anime_filename) { 
-  //anime_t anime_data[1]; 
-  char      anime_data_buffer[ANIME_BYTESIZE];
-  anime_t * anime_data = (anime_t *)anime_data_buffer;
+static int CBonhomme__ReadDescriptionFile__fill(CBonhomme * this, const char * anime_datadir, const char * anime_filename, anime_t * * anime_data_r) { 
+  anime_t * anime_data = *anime_data_r;
   int       anime_stdlog_d = -1; 
   int       anime_file_d   = -1; 
   goto label__start; 
@@ -385,6 +384,8 @@ label__start: {};
     anime__make_r(anime_data, anime_stdlog_d); 
     fflush(NULL); 
 
+    const anime_t * anime_from_db = NULL;
+
     for(;;) { 
       const int_anime_error_t anime_error_id = anime__fill_from_file(anime_data, anime_filename, anime_stdlog_d); 
       if (ANIME__OK == anime_error_id) break; 
@@ -418,21 +419,40 @@ label__start: {};
     
     // Success 
     fflush(NULL); 
+#if 0
+    // RL: Imprimer prend longtemps... :(
     anime__print_d(anime_data, anime_stdlog_d); 
     fflush(NULL); 
+#endif
  
     // Closing files. 
     close(anime_file_d); anime_file_d = -1; 
     close(anime_stdlog_d); anime_stdlog_d = -1; 
   }; 
+  return 0;
+};
+
+int CBonhomme__ReadDescriptionFile(CBonhomme * this, const char * anime_datadir, const char * anime_filename) { 
+#if 1
+  const anime_t * anime_from_db = anime_database__get(anime_filename); 
+  if (NULL == anime_from_db) return -1; 
+  const anime_t * anime_data = anime_from_db; 
+#else
+  //anime_t anime_data[1]; 
+  char      anime_data_buffer[ANIME_BYTESIZE];
+  anime_t * anime_data = (anime_t *)anime_data_buffer;
+  
+  const int reval = CBonhomme__ReadDescriptionFile__fill(this, anime_datadir, anime_filename, anime_data); 
+  if (0 != retval) return retval;
+#endif
   
   this -> parent1.SetDimension(&this -> parent1, anime__choc_longueur__get(anime_data), anime__choc_largeur__get(anime_data), anime__choc_hauteur__get(anime_data)); 
   this -> parent1.masse = anime__masse__get(anime_data) / 240.0f; 
-  if (NULL == this -> parent1.filename) this -> parent1.filename = strcopy(anime_filename);
+  if (NULL == this -> parent1.filename) this -> parent1.filename = strcopy_malloc(anime_filename);
   this -> parent1.pvmax       = anime__hostile__get(anime_data);
   this -> parent1.Hostile_huh = anime__vie__get(anime_data);
   
-  if (NULL == this -> filename) this -> filename = strcopy(anime_filename);
+  if (NULL == this -> filename) this -> filename = strcopy_malloc(anime_filename);
   
   { 
     CObjActionnable * this_action = this -> parent1.actions; 
@@ -498,11 +518,11 @@ int CBonhomme__ReadDescriptionFile_old001(CBonhomme * this, const char * dir, co
   
   this -> parent1.SetDimension(&this -> parent1, anime_data -> choc_longueur, anime_data -> choc_largeur, anime_data -> choc_hauteur); 
   this -> parent1.masse = anime_data -> masse / 240.0f; 
-  if (NULL == this -> parent1.filename) this -> parent1.filename = strcopy(filename);
+  if (NULL == this -> parent1.filename) this -> parent1.filename = strcopy_malloc(filename);
   this -> parent1.pvmax       = anime_data -> vie; 
   this -> parent1.Hostile_huh = anime_data -> hostile; 
   
-  if (NULL == this -> filename) this -> filename = strcopy(filename);
+  if (NULL == this -> filename) this -> filename = strcopy_malloc(filename);
   
   for (int i = 0; i < anime_data -> actions_nb; i++) {
     this_action -> AjouterAction(this_action, anime_data -> actions_array_affichage[i], anime_data -> actions_array_icone[i], anime_data -> actions_array_gestionnaire_fichier[i], anime_data -> actions_array_gestionnaire_proc[i]); 
@@ -567,7 +587,7 @@ CBonhomme * CBonhomme__make(const char * filename) {
   this -> Etat = ebPretAMarcher; 
   this -> EtapeEtat = 0; 
   this -> invisible_etape = 0; 
-  this -> filename = strcopy(filename); 
+  this -> filename = strcopy_malloc(filename); 
     
   o -> Compressible_huh = false;
   o -> Fixe_huh = false;
@@ -590,7 +610,7 @@ CBonhomme * CBonhomme__make(const char * filename) {
   
   if (filename == NULL) return this;
   
-  this -> filename = strcopy(filename); 
+  this -> filename = strcopy_malloc(filename); 
   
   //int ret = LireAnime(ANIMESDIR, filename, this);
   const int ret = CBonhomme__ReadDescriptionFile(this, ANIMESDIR, filename); 

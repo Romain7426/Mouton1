@@ -403,7 +403,7 @@ static void CMessageTexte__SetMsg(CMessageTexte * this, const char * inS) {
   if (this -> s != NULL) { 
     free(this -> s); 
   }; 
-  this -> s = strcopy(inS); 
+  this -> s = strcopy_malloc(inS); 
   //fprintf(stderr, "%s : this -> s = %s " "\n", __func__, this -> s); 
   //s = oem2ansi(s); 
   this -> lignedebut = 0; 

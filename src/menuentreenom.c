@@ -21,11 +21,11 @@ CMenuEntreeNom * CMenuEntreeNom_make(void) {
 
   this -> poscur = 0; 
   
-  parent_parent -> NomSousMenu[0] = strcopy("Commande");
+  parent_parent -> NomSousMenu[0] = strcopy_malloc("Commande");
   parent_parent -> Add(parent_parent, 0, "OK!", "lettres/ok.png");
   parent_parent -> Add(parent_parent, 0, "Ret. arr.", "lettres/retarr.png"); 
    
-  parent_parent -> NomSousMenu[1] = strcopy("voyelles");
+  parent_parent -> NomSousMenu[1] = strcopy_malloc("voyelles");
   parent_parent -> Add(parent_parent, 1, "a", "lettres/a.png");
   parent_parent -> Add(parent_parent, 1, "e", "lettres/e.png");                                                  
   parent_parent -> Add(parent_parent, 1, "i", "lettres/i.png");
@@ -33,31 +33,31 @@ CMenuEntreeNom * CMenuEntreeNom_make(void) {
   parent_parent -> Add(parent_parent, 1, "u", "lettres/u.png");
   parent_parent -> Add(parent_parent, 1, "y", "lettres/y.png");
    
-  parent_parent -> NomSousMenu[2] = strcopy("consonnes dentales");
+  parent_parent -> NomSousMenu[2] = strcopy_malloc("consonnes dentales");
   parent_parent -> Add(parent_parent, 2, "d", "lettres/d.png");
   parent_parent -> Add(parent_parent, 2, "t", "lettres/t.png");
   parent_parent -> Add(parent_parent, 2, "n", "lettres/n.png");
    
-  parent_parent -> NomSousMenu[3] = strcopy("consonnes sybilantes");
+  parent_parent -> NomSousMenu[3] = strcopy_malloc("consonnes sybilantes");
   parent_parent -> Add(parent_parent, 3, "c", "lettres/c.png");
   parent_parent -> Add(parent_parent, 3, "s", "lettres/s.png");
   parent_parent -> Add(parent_parent, 3, "x", "lettres/x.png");
   parent_parent -> Add(parent_parent, 3, "z", "lettres/z.png");
   
-  parent_parent -> NomSousMenu[4] = strcopy("consonnes gutturales");
+  parent_parent -> NomSousMenu[4] = strcopy_malloc("consonnes gutturales");
   parent_parent -> Add(parent_parent, 4, "c", "lettres/c.png");
   parent_parent -> Add(parent_parent, 4, "g", "lettres/g.png");
   parent_parent -> Add(parent_parent, 4, "k", "lettres/k.png");
   parent_parent -> Add(parent_parent, 4, "q", "lettres/q.png");
   
-  parent_parent -> NomSousMenu[5] = strcopy("consonnes labiales");
+  parent_parent -> NomSousMenu[5] = strcopy_malloc("consonnes labiales");
   parent_parent -> Add(parent_parent, 5, "b", "lettres/b.png");
   parent_parent -> Add(parent_parent, 5, "p", "lettres/p.png");
   parent_parent -> Add(parent_parent, 5, "v", "lettres/v.png");
   parent_parent -> Add(parent_parent, 5, "f", "lettres/f.png");
   parent_parent -> Add(parent_parent, 5, "w", "lettres/w.png");
    
-  parent_parent -> NomSousMenu[6] = strcopy("consonnes lamentables");
+  parent_parent -> NomSousMenu[6] = strcopy_malloc("consonnes lamentables");
   parent_parent -> Add(parent_parent, 6, "h", "lettres/h.png");
   parent_parent -> Add(parent_parent, 6, "j", "lettres/j.png");
   parent_parent -> Add(parent_parent, 6, "l", "lettres/l.png");

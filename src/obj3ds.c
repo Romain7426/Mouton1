@@ -14,7 +14,7 @@ static int    obj3ds_dico__nb = 0;
 static int obj3ds_dico__push(const char * filename, C3DS * obj3ds_non_copie) {
   assert(obj3ds_dico__nb < obj3ds_dico__size); 
   const int index = obj3ds_dico__nb; 
-  obj3ds_dico__filename[index] = strcopy(filename); 
+  obj3ds_dico__filename[index] = strcopy_malloc(filename); 
   obj3ds_dico__obj3ds  [index] = obj3ds_non_copie; 
   obj3ds_dico__usersnb [index] = 1; 
   obj3ds_dico__nb++; 
@@ -354,7 +354,7 @@ C3DS * C3DS__make(const char * filename) {
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
-  this -> filename = strcopy(filename); 
+  this -> filename = strcopy_malloc(filename); 
   
   // For some unknown reasons, VLAs & ALLOCAs make «-fstack-protector» fail. 
   //char realfile[strlen(T3DSDIR) + strlen(filename) + 1]; 
@@ -437,7 +437,7 @@ C3DS * C3DS_make(const char * filename) {
   ASSIGN_METHOD(C3DS,this,RenderGL); 
   //ASSIGN_METHOD(C3DS,this,CalcPE); 
 
-  this -> filename = strcopy(filename); 
+  this -> filename = strcopy_malloc(filename); 
   
   char reelfile[strlen(T3DSDIR) + strlen(filename) + 1];
   strcat(strcpy(reelfile, T3DSDIR), filename);

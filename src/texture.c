@@ -29,7 +29,7 @@ static int16_t    texture_dico_nb = 0;
 
 static int16_t texture_dico_push(const char * filename, CTexture * texture_non_copiee) {
   assert(texture_dico_nb < texture_dico_size); 
-  texture_dico_filename[texture_dico_nb] = strcopy(filename); 
+  texture_dico_filename[texture_dico_nb] = strcopy_malloc(filename); 
   texture_dico_texture[texture_dico_nb] = texture_non_copiee; 
   texture_dico_usersnb[texture_dico_nb] = 1; 
   texture_dico_nb++; 
@@ -51,6 +51,7 @@ static CTexture * texture_dico_get(const int16_t i) {
 }; 
 
 static void texture_dico_release(const int16_t i) {
+  assert(texture_dico_usersnb[i] > 0); 
   texture_dico_usersnb[i] --; 
 }; 
 

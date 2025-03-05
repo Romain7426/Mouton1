@@ -256,7 +256,7 @@ CMenuAbstrait * SCRIPT_BeginAfficherMenu(void) {
   }; 
   //(*(api_contexte.MiniMenu)) = CMiniMenu_make(100, 200, 10000); 
   (*(api_contexte.MiniMenu)) = CMiniMenu_make(/*x*/100, /*y*/270, /*w*/10000); 
-  (*(api_contexte.MiniMenu)) -> parent.NomSousMenu[0] = strcopy("<DEFAULT>"); 
+  (*(api_contexte.MiniMenu)) -> parent.NomSousMenu[0] = strcopy_malloc("<DEFAULT>"); 
   (*(api_contexte.MiniMenu)) -> parent.iphi = 0; 
   //(*(api_contexte.TypeInstructionCourante)) = ticMiniMenu;  
   return &(*(api_contexte.MiniMenu)) -> parent; 
@@ -367,7 +367,7 @@ void SCRIPT_ChangerDeCarte_vZT(const struct CZoneTeleportation ZoneTeleportation
 void SCRIPT_ChangerDeCarte_vXYZ(const char * nom_carte, const float x, const float y, const float z, const TDirection direction) { 
   CZoneTeleportation zt; 
   
-  zt.destination_carte = (char *) strcopy(nom_carte);  
+  zt.destination_carte = (char *) strcopy_malloc(nom_carte);  
   zt.destination_position.x = x;
   zt.destination_position.y = y;
   zt.destination_position.z = z;   
@@ -419,7 +419,7 @@ void SCRIPT_ChangerDeCarte_vZT(CMoteurTeleportation * MoteurTeleportation, CZone
 void SCRIPT_ChangerDeCarte_vXYZ(CMoteurTeleportation * MoteurTeleportation, const char * nom_carte, float x, float y, float z, TDirection direction) {
   CZoneTeleportation zt;
   
-  zt.destination_carte = (char *) strcopy(nom_carte);  
+  zt.destination_carte = (char *) strcopy_malloc(nom_carte);  
   zt.destination_position.x = x;
   zt.destination_position.y = y;
   zt.destination_position.z = z;   
@@ -695,7 +695,7 @@ void SCRIPT_Readln(void) {
     SCRIPT_unepassedeboucle();  
 #endif
          
-  //return strcopy(MenuEntreeNom->buffer);
+  //return strcopy_malloc(MenuEntreeNom->buffer);
 }; 
 #endif 
 

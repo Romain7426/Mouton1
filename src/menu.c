@@ -9,18 +9,19 @@ MenuItem * MenuItem_make(void) {
 }; 
 
 void MenuItem_delete_aux(MenuItem * this) {
-  if (this -> nom != NULL) free(this -> nom); 
-  if (this -> texture != NULL) CTexture_delete(this -> texture); 
+  if (this -> nom != NULL) { free(this -> nom); this -> nom = NULL; }; 
+  if (this -> texture != NULL) { CTexture_delete(this -> texture); this -> texture = NULL; }; 
 }; 
 
 void MenuItem_delete(MenuItem * this) {
   MenuItem_delete_aux(this); 
+  bzero(this,sizeof(*this));
   free(this); 
 }; 
 
 MenuItem * MenuItem_copy_aux(MenuItem * this, const MenuItem * src) {
   *this = *src; 
-  if (src -> nom != NULL) this -> nom = strcopy(src -> nom); 
+  if (src -> nom != NULL) this -> nom = strcopy_malloc(src -> nom); 
   if (src -> texture != NULL) this -> texture = CTexture_copy(src -> texture); 
   return this; 
 }; 
@@ -84,6 +85,7 @@ void CMenuAbstrait_delete_aux(CMenuAbstrait * this) {
 
 void CMenuAbstrait_delete(CMenuAbstrait * this) {
   CMenuAbstrait_delete_aux(this); 
+  bzero(this,sizeof(*this));
   free(this); 
 }; 
 
@@ -92,7 +94,7 @@ CMenuAbstrait * CMenuAbstrait_copy_aux(CMenuAbstrait * this, const CMenuAbstrait
   // RL: Column titles 
   for (int i = 0; i < NB_SOUS_MENU; i++) {
     if (NULL != this -> NomSousMenu[i]) { 
-      this -> NomSousMenu[i] = strcopy(src -> NomSousMenu[i]); 
+      this -> NomSousMenu[i] = strcopy_malloc(src -> NomSousMenu[i]); 
     }; 
   }; 
   // RL: Column contents 
@@ -135,7 +137,7 @@ void CMenuAbstrait__Add(CMenuAbstrait * this, const int ssMenu, const char * nom
 void CMenuAbstrait__Add_qch(CMenuAbstrait * this, const int ssMenu, const char * nom, const char * nom_texture, void * qch) {
   // si nom_texture == NULL ou "", l'élément ajouté n'a pas d'icône 
   const int j = this -> ProchainIndice(this, ssMenu); 
-  this -> Items[ssMenu][j].nom = strcopy(nom); 
+  this -> Items[ssMenu][j].nom = strcopy_malloc(nom); 
   
   if (nom_texture == NULL) 
     this -> Items[ssMenu][j].texture = NULL; 
@@ -276,6 +278,7 @@ void CMenu_delete_aux(CMenu * this) {
 
 void CMenu_delete(CMenu * this) {
   CMenu_delete_aux(this); 
+  bzero(this,sizeof(*this));
   free(this); 
 }; 
  
@@ -473,6 +476,7 @@ void CMiniMenu_delete_aux(CMiniMenu * this) {
 void CMiniMenu_delete(CMiniMenu * this) {
   if (this == NULL) return; 
   CMiniMenu_delete_aux(this);
+  bzero(this,sizeof(*this));
   free(this); 
 }; 
 

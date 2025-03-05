@@ -27,7 +27,7 @@ CObjNonAnime * CObjNonAnime__copy(const CObjNonAnime * o) {
   CPhysicalObj__copy_aux(&this -> parent, &o -> parent); 
 
   this -> angleZ   = 0.0f; 
-  this -> filename = strcopy(o -> filename); 
+  this -> filename = strcopy_malloc(o -> filename); 
   
   this -> parent.Compressible_huh = o -> parent.Compressible_huh;
   this -> parent.Hostile_huh      = o -> parent.Hostile_huh;
@@ -64,7 +64,7 @@ CObjNonAnime * CObjNonAnime__make(const char * filename) {
 #endif 
   this -> resobj3ds = NULL; 
   this -> angleZ    = 0.0f; 
-  this -> filename  = strcopy(filename); 
+  this -> filename  = strcopy_malloc(filename); 
 
   this -> parent.Compressible_huh = true;  
   this -> parent.Hostile_huh = false;
@@ -186,7 +186,10 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
-    nonanime_data = nonanime_make_from_file(nonanime_fullpath, nonanime_log); 
+    nonanime_data = nonanime_make_from_file(nonanime_fullpath, NULL); 
+    if (NULL == nonanime_data) { 
+      nonanime_data = nonanime_make_from_file(nonanime_fullpath, nonanime_log); 
+    };
     //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
@@ -201,7 +204,7 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
-  if (NULL == this -> parent.filename) this -> parent.filename = strcopy(filename); 
+  if (NULL == this -> parent.filename) this -> parent.filename = strcopy_malloc(filename); 
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
@@ -221,14 +224,14 @@ int CObjNonAnime__ReadDescriptionFile(CObjNonAnime * this, const char * dir, con
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
   //printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "---" "\n", __func__); 
-  if (NULL == this -> filename) this -> filename = strcopy(filename); 
+  if (NULL == this -> filename) this -> filename = strcopy_malloc(filename); 
   
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
   fflush(NULL); 
   for (int i = 0; i < nonanime_data -> actions_nb; i++) { 
-#if 1 
+#if 1
     this_action -> AjouterAction(this_action, nonanime_data -> actions_array_affichage[i], nonanime_data -> actions_array_icone[i], nonanime_data -> actions_array_gestionnaire_fichier[i], nonanime_data -> actions_array_gestionnaire_proc[i]); 
 #endif 
   };  

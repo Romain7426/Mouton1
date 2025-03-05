@@ -577,6 +577,8 @@ int Kernel_Run__switch_to__game_loop__secondary(api_contexte_t * api_contexte) {
 
 
 static void Kernel_Run__switch_to__game_loop__fun(void) { 
+  // RL: Ici, nous sommes dans le thread. 
+  
   //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "  "   "\n", __func__     ); 
   //messerr("Kernel Game Loop" "\n"); 
   //const int ModeJeu_next = Game_Loop(/*blit_huh*/false); 
@@ -677,6 +679,7 @@ int Kernel_Run(void) {
   //fflush(NULL); 
   //fflush(stdout); 
   fflush(NULL); 
+
  
   while (isrunning) { 
     Kernel_DebutDePasse(); 
@@ -691,17 +694,20 @@ int Kernel_Run(void) {
 
     if (false) { 
       Kernel_Run__switch_to__supervisor_loop(supervisor_env); 
-    } 
-    else if (supervisor_mode_huh) { 
+      goto label__loop;
+    };
+
+    if (supervisor_mode_huh) { 
       //supervisor__loop(supervisor_env); 
       const int next_state = Kernel_Run__switch_to__supervisor_loop(supervisor_env); 
       if (next_state == SUPERVISOR_MODE__IDLE) { supervisor_mode_huh = false; }; 
-    } 
-    else { 
-      //Script__automaton(); 
-#if 1 
-      const int TypeInstruction_next = Script_Loop(&api_contexte); 
-#else 
+      goto label__loop;
+    };
+ 
+   
+#if 0  
+    //Script__automaton(); 
+    { 
       int TypeInstruction_next = -1; 
       if (*(api_contexte.TypeInstructionCourante) == Script_Automaton_Script_C) { 
 	// RL: TODO XXX FIXME: I can't see why this code is not in the Script_Automaton. 
@@ -742,26 +748,31 @@ int Kernel_Run(void) {
       else { 
 	TypeInstruction_next = Kernel_Run__switch_to__script_loop(&api_contexte); 
       }; 
+    };
 #endif 
       
-      //Game_unepassedeboucle(); 
-      //fprintf(stderr, "<%s>" "isrunning = %s" "\n", __func__, bool_string(isrunning)); fflush(NULL); 
-      
-      //const int ModeJeu_next = Game_Loop(); 
-      //const int ModeJeu_next = Kernel_Run__switch_to__game_loop(/*animate_but_do_not_aliven_huh*/TypeInstruction_next != Script_Automaton_Idle); 
-      int ModeJeu_next = -1; 
-      if (Kernel_Script_Modal == Kernel_Script_Modal__ScriptIsSlave) { 
-	ModeJeu_next = Kernel_Run__switch_to__game_loop__secondary(&api_contexte); 
-      } 
-      else { 
-	ModeJeu_next = Kernel_Run__switch_to__game_loop(/*animate_but_do_not_aliven_huh*/TypeInstruction_next != Script_Automaton_Idle, &api_contexte); 
-      }; 
-      
-      if (ModeJeu_next == mjIDLE && TypeInstruction_next == Script_Automaton_Idle) { 
-	isrunning = false; 
-      }; 
+
+    const int TypeInstruction_next = Script_Loop(&api_contexte); 
+
+    //Game_unepassedeboucle(); 
+    //fprintf(stderr, "<%s>" "isrunning = %s" "\n", __func__, bool_string(isrunning)); fflush(NULL); 
+    
+    //const int ModeJeu_next = Game_Loop(); 
+    //const int ModeJeu_next = Kernel_Run__switch_to__game_loop(/*animate_but_do_not_aliven_huh*/TypeInstruction_next != Script_Automaton_Idle); 
+    int ModeJeu_next = -1; 
+    if (Kernel_Script_Modal == Kernel_Script_Modal__ScriptIsSlave) { 
+      ModeJeu_next = Kernel_Run__switch_to__game_loop__secondary(&api_contexte); 
+    } 
+    else { 
+      ModeJeu_next = Kernel_Run__switch_to__game_loop(/*animate_but_do_not_aliven_huh*/TypeInstruction_next != Script_Automaton_Idle, &api_contexte); 
     }; 
     
+    if (ModeJeu_next == mjIDLE && TypeInstruction_next == Script_Automaton_Idle) { 
+      isrunning = false; 
+    }; 
+    
+
+  label__loop:
     SDL_GL_SwapBuffers(); 
     
     //printf("------------------------------------------------------------------------------" "\n"); 
@@ -812,69 +823,80 @@ int Kernel_Init(void) {
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
 
-  if (!sdl__init()) return -1; 
+  if (!sdl__init()) { 
+  fflush(NULL); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+    return -1; 
+  };
   
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
 
   opengl__configure(SCREEN_WIDTH, SCREEN_HEIGHT); 
+  fflush(NULL); 
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
 
   init_audio(); 
+  fflush(NULL); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   //opengl__stuffs(); 
-  fflush(NULL); 
+
+
+
   cooperative_thread__set_fun(cooperative_thread_env, cooperative_thread__opengl, opengl__stuffs); 
   fflush(NULL); 
-  cooperative_thread__kernel_switch_to_thread(cooperative_thread_env, cooperative_thread__opengl); 
-  
+  cooperative_thread__kernel_switch_to_thread(cooperative_thread_env, cooperative_thread__opengl);   
+  fflush(NULL); 
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
-  fflush(NULL); 
+
   supervisor_mode_huh = false; 
   supervisor_env = supervisor_env__make(); if (supervisor_env == NULL) { return -1; }; 
-  
+  fflush(NULL); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  fflush(NULL); 
+#endif 
+
+
+  const CPascal * pascal_script = CPascal__make_with_file("script.pml"); 
+  fflush(NULL); 
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
-  fflush(NULL); 
+  
   api_contexte__make_r(&api_contexte); 
   fflush(NULL); 
-  api_contexte.Kernel_Script_Modal_ref = &Kernel_Script_Modal; 
-  
+  api_contexte.Kernel_Script_Modal_ref = &Kernel_Script_Modal;   
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
   { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-#if DEBUG_TRACE != 0 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
-#endif 
 
-  fflush(NULL); 
-#if DEBUG_TRACE != 0 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
-#endif 
+
   retval = Game_Init(&api_contexte); if (retval < 0) { return retval; }; 
-#if DEBUG_TRACE != 0 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
-#endif 
-
-#if DEBUG_TRACE != 0 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
-#endif 
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-
-#if 1 
   fflush(NULL); 
-  retval = Script_Init(&api_contexte); if (retval < 0) { return retval; }; 
-
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
+  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+
+
+
+  retval = Script_Init(&api_contexte); if (retval < 0) { return retval; }; 
+  fflush(NULL); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
+  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
+
+
   //script_c_env__make_r(script_c_env); 
   //script_c_env = script_c_env__make(); 
   //script_c__lib1__fill(script_c_env); 
@@ -895,18 +917,15 @@ int Kernel_Init(void) {
   }; 
 #endif 
 
-#else 
+
+// RL: Ca n'a rien à faire dans Kernel_Init. 
+#if 0
   fflush(NULL); 
   script = CScriptLauncher_make("script.pml", "debut"); 
   assert(script != NULL); 
   script -> init_step(script); 
 #endif 
   
-#if DEBUG_TRACE != 0 
-    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
-#endif 
-  { dprintf(fileno(stdout), "STDOUT BUFFER: %p\n", stdout -> _bf._base); }; 
-
   printf("Fin de l'initialisation!! YOUPI!!" "\n");
   printf("{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "<<<" "\n", __func__); 
   printf("==============================================================================" "\n");

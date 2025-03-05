@@ -31,7 +31,7 @@ CZoneTeleportation * CZoneTeleportation_make(TPoint3D in_position, TPoint3D in_d
   this -> dimension = in_dimension;
   this -> depart_direction = in_depart_direction;
 
-  this -> destination_carte = strcopy(in_destination_carte);
+  this -> destination_carte = strcopy_malloc(in_destination_carte);
   this -> destination_position = in_destination_position;
   this -> destination_direction = in_destination_direction;
 
@@ -45,7 +45,7 @@ void CZoneTeleportation_delete(CZoneTeleportation * this) {
 CZoneTeleportation * CZoneTeleportation_copy(const CZoneTeleportation * zt_src) {
   MALLOC_BZERO(CZoneTeleportation,this);
   *this = *zt_src; 
-  this -> destination_carte = strcopy(zt_src -> destination_carte); 
+  this -> destination_carte = strcopy_malloc(zt_src -> destination_carte); 
   return this; 
 }; 
 

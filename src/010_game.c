@@ -81,7 +81,7 @@ static void Inventaire__Gestion(void);
 
 int Game_Loop(const int animate_but_do_not_aliven_huh, api_contexte_t * api_contexte) { 
   const int current_mj = ModeJeu; 
-  
+
   if (animate_but_do_not_aliven_huh) { 
     
     // RL: TODO XXX FIXME: We should be able to differentiate between 'animate' & 'aliven'. 
@@ -154,7 +154,13 @@ int Game_Init(api_contexte_t * api_contexte) {
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
   game_events_env = game_events_env__make(); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   game_events__handlers__push0(game_events_env, /*evt_type*/GAME_EVENTS__MAP__HERO_NO_MORE_PV, /*handler_type*/GAME_HANDLERS__STANDARD__HEROS_MORT); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
 #if 1 
   //our_manifold = riemann__make_rectangle(/*nb_maps_on_width*/4, /*nb_maps_on_height*/4, /*rectangle_width*/2400, /*rectangle_height*/2400); 
@@ -175,20 +181,50 @@ int Game_Init(api_contexte_t * api_contexte) {
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
   our_manifold -> manifold_z_scale_factor__set(our_manifold, /*new_manifold_z_scale_factor*/1.125f); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   //our_manifold -> temps__bloque(our_manifold); 
   //our_manifold -> temps__set(our_manifold, 0.25f); // RL: 'UTC time = 0.5f' = mid-day 
   our_manifold -> temps__set(our_manifold, 0.5f); // RL: 'UTC time = 0.5f' = mid-day 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   our_manifold -> temps__debloque(our_manifold); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   //{ dprintf(fileno(stdout), "STDOUT BUFFER: %p - %s - %d \n", stdout -> _bf._base, __FILE__, __LINE__); }; 
 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   init_actions(); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   EvenementsModule -> Init(); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   
   Text = CText_make(); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   MessageTexte = CMessageTexte_make(); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   PageTitre = CPageTitre_make(); 
+#if DEBUG_TRACE != 0 
+    fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
+#endif 
   MenuEntreeNom = CMenuEntreeNom_make(); 
   
 #if DEBUG_TRACE != 0 
@@ -301,9 +337,9 @@ int Game_Init(api_contexte_t * api_contexte) {
   Menu_InventaireArmes = CMenu_make();
   fflush(NULL); 
   //Menu_InventaireArmes = new CMiniMenu(100,300,200);
-  Menu_InventaireArmes -> parent.NomSousMenu[0] = strcopy("Armes");
-  Menu_InventaireArmes -> parent.NomSousMenu[1] = strcopy("Objets");
-  Menu_InventaireArmes -> parent.NomSousMenu[2] = strcopy("Magies");
+  Menu_InventaireArmes -> parent.NomSousMenu[0] = strcopy_malloc("Armes");
+  Menu_InventaireArmes -> parent.NomSousMenu[1] = strcopy_malloc("Objets");
+  Menu_InventaireArmes -> parent.NomSousMenu[2] = strcopy_malloc("Magies");
   fflush(NULL); 
   SCRIPT_RecevoirUneArme("menu/epee"); 
   SCRIPT_RecevoirUneArme("menu/arc"); 
@@ -718,15 +754,20 @@ int Game_ProcessInputs(const int current_mj) {
 	break; 
       } 
       else if (PageTitre_UserToldMe_NewGame == next) { 
+	DEBUG_TRACE_PRINT();
 	//ModeJeu = mjIDLE; //mjSCRIPT; 
 	ModeJeu = mjCARTE; 
 #if 1 
 	// RL: TODO XXX FIXME 
 	//fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "TO_BE_IMPLEMENTED"  "\n", __func__); 
+	DEBUG_TRACE_PRINT();
 	Kernel_Script_Start(/*script_file_name*/"script.pml", /*script_function_name*/"debutvrai"); 
+	DEBUG_TRACE_PRINT();
 #else 
 	TypeInstructionCourante = ticInstructionScript; 
 #endif 
+	DEBUG_TRACE_PRINT();
+
 	break; 
       } 
       else if (PageTitre_UserToldMe_LoadGame == next) { 

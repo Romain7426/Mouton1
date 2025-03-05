@@ -14,7 +14,7 @@ static int       CPascal_dico__nb = 0;
 static int CPascal_dico__push(const char * filename, CPascal * objet_non_copie) {
   assert(CPascal_dico__nb < CPascal_dico__size); 
   const int index = CPascal_dico__nb; 
-  CPascal_dico__filename[index] = strcopy(filename); 
+  CPascal_dico__filename[index] = strcopy_malloc(filename); 
   CPascal_dico__object  [index] = objet_non_copie; 
   CPascal_dico__usersnb [index] = 1; 
   CPascal_dico__nb++; 
@@ -206,7 +206,7 @@ int CPascal__read_file_no_init(CPascal * this, const char * filename) {
   if (this -> pscript_env == NULL) 
     this -> pscript_env = pscript_make(); 
   if (this -> filename != NULL) { free(this -> filename); }; 
-  this -> filename = strcopy(filename); 
+  this -> filename = strcopy_malloc(filename); 
   return CPascal__read_file_no_init__aux(this -> pscript_env, filename); 
 }; 
 

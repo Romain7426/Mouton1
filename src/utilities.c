@@ -98,11 +98,11 @@ SDL_PixelFormat sdl_pixel_format_rgba = {
 
 
 #if 0
-char * strcopy(const char * str) {
+char * strcopy_malloc(const char * str) {
   if (str == NULL) { return NULL; }; 
   const size_t len = strlen(str); 
   char * temp = (char *) malloc(sizeof(char) * (len+1));
-  return strcpy(temp, str);
+  return strncpy(temp, str, len+1);
 }; 
 #endif 
 

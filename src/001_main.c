@@ -308,7 +308,7 @@ int main(const int argc, const char * argv[]) {
     };
 
 
-  label__duplicating_stderr_to_stdlog: {
+ label__duplicating_stderr_to_stdlog: {
     for (;;) { 
       if (0 != main__stderr_pipe__open()) goto label__error__stderr__making_pipe_failed; 
       main__stderr__dup_to_post(); 
@@ -335,9 +335,14 @@ int main(const int argc, const char * argv[]) {
       break; 
     }; 
 
-    goto label__duplicating_stdout_to_stdlog; label__duplicating_stdout_to_stdlog__return: {}; 
-    
-    goto label__duplicating_stderr_to_stdlog; label__duplicating_stderr_to_stdlog__return: {}; 
+
+    // RL: ATTENTION! Très important!
+    //     Pour éviter les problèmes de concurrence, 
+    //     il faut que le former handler soit commun à stderr et à stdlog. 
+    goto label__duplicating_stdout_to_stdlog; 
+  label__duplicating_stdout_to_stdlog__return: {};     
+    goto label__duplicating_stderr_to_stdlog; 
+  label__duplicating_stderr_to_stdlog__return: {}; 
     
     
     // RL: Everything is UTF-8 unless specified otherwise. 
@@ -377,7 +382,9 @@ label__anime_load_now__ret: {};
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
-	retour = Kernel_Init();  if (retour < 0) { break; }; 
+	retour = Kernel_Init();  
+	main__stdout_log_buffer__flush(); 
+	if (retour < 0) { break; }; 
 #if DEBUG_TRACE != 0 
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
@@ -387,11 +394,14 @@ label__anime_load_now__ret: {};
     fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "DEBUG:  " STRINGIFY(__LINE__)  "\n", __func__);  
 #endif 
 	retour = Kernel_Run(); 
+	main__stdout_log_buffer__flush(); 
 	Kernel_Dispose(); 
+	main__stdout_log_buffer__flush(); 
 	break; 
       }; 
       printf("===============================================================================" "\n"); 
       printf(">>> main" "\n"); 
+      break; 
     }; 
     
     fprintf(stdout, "Fin du jeu!\n"); 
@@ -658,7 +668,7 @@ void main__stdout_log__SIGIO_handler(int sig) {
     signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
     sigprocmask(SIG_UNBLOCK, sigset, NULL); 
   }; 
-#if 0 
+#if 0
   int debug_fd = open("/dev/tty", O_WRONLY); 
   char debug_buffer[1024]; 
 #endif 
@@ -1001,7 +1011,12 @@ void main__stderr_pipe__SIGIO_handler(int sig) {
     sigset_t sigset[1]; 
     sigemptyset(sigset);
     sigaddset(sigset, SIGIO);
-    signal(SIGIO, main__stderr_pipe__SIGIO_former_handler); 
+    // RL: ATTENTION! Très important!
+    //     Pour éviter les problèmes de concurrence, 
+    //     il faut que le former handler soit commun à stderr et à stdlog. 
+    //signal(SIGIO, main__stderr_pipe__SIGIO_former_handler); 
+    //signal(SIGIO, main__stdout_pipe__SIGIO_former_handler); 
+    signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
     sigprocmask(SIG_UNBLOCK, sigset, NULL); 
   }; 
 #if 0 
@@ -1039,7 +1054,7 @@ void main__stderr_pipe__SIGIO_handler(int sig) {
     const ssize_t read_nb = read(main__stderr_pipe[0], main__stderr_buffer + main__stderr_buffer_nb, main__stderr_buffer__bytesize - main__stderr_buffer_nb); 
     //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "read_nb: '%d'" "\n", __func__, (int) read_nb); 
 #if 0 
-    if (false) { 
+    if (true) { 
       write_long_long_int_into_buffer(debug_buffer, sizeof(debug_buffer), read_nb); 
       write_string3(debug_fd, "[STDERR HANDLER] ---> read_nb = ", debug_buffer, "\n"); 
       //fprintf(stderr, "{" __FILE__ ":" STRINGIFY(__LINE__) ":<%s()>}: " "read_nb: '%d'" "\n", __func__, (int) read_nb); 
@@ -1049,21 +1064,29 @@ void main__stderr_pipe__SIGIO_handler(int sig) {
     if (0 >= read_nb) goto label__pas_nous; 
     main__stderr_buffer_nb += read_nb; 
     
-    // RL: On copie dans stdout-log. 
+    // RL: Nous avons deux choses à faire: 
+    //      - copier les données recues dans stdlog
+    //      - les afficher sur stderr
+    
+    // RL: 1. On copie dans stdlog. 
+    // Attention! Il faut bien s'y prendre! Car on est dans le même processus. 
+    // Donc stderr pourrait écrire dans stdlog, et attendre indéfiniment que stdlog lise. 
+#if 1
     { int16_t qty_left = read_nb; for (;;) { 
 	if (0 == qty_left) break; 
 	if (main__stdout_log_buffer__bytesize == main__stdout_log_buffer_nb) { 
 	  if (0 <= main__stdout_log_post_fd) write(main__stdout_log_post_fd, main__stdout_log_buffer, main__stdout_log_buffer_nb); 
 	  main__stdout_log_buffer_nb = 0; 
 	}; 
-	const int16_t to_be_copied = MIN(main__stdout_log_buffer__bytesize - main__stdout_log_buffer_nb, qty_left); 
-	bcopy(main__stderr_buffer + main__stderr_buffer_nb - qty_left, main__stdout_log_buffer + main__stdout_log_buffer_nb, to_be_copied); 
+	const int16_t to_be_copied = MIN(qty_left, main__stdout_log_buffer__bytesize - main__stdout_log_buffer_nb); 
+	bcopy(/*src*/main__stderr_buffer + main__stderr_buffer_nb - qty_left, /*dest*/main__stdout_log_buffer + main__stdout_log_buffer_nb, to_be_copied); 
 	main__stdout_log_buffer_nb += to_be_copied; 
 	qty_left -= to_be_copied; 
 	continue; 
     }; }; 
-
-    // RL: On flush tout de suite: stderr is unbuffered. 
+#endif 
+    
+    // RL: 2. On afficher sur stderr 
     if (true) { 
       if (0 <= main__stderr_post_fd) write(main__stderr_post_fd, main__stderr_buffer, main__stderr_buffer_nb); 
       main__stderr_buffer_nb = 0; 

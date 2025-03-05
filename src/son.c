@@ -24,7 +24,7 @@ CMusique * CMusique_make(const char * filename) {
 
   if (0 == *filename) { return this; }; 
 
-  this -> NomMusique = strcopy(filename);
+  this -> NomMusique = strcopy_malloc(filename);
   
   char * nom_sans_ext = fichier_nom_sans_extension(filename);
   //messerr("nom_sans_ext: '%s'" "\n", nom_sans_ext); 
@@ -97,7 +97,9 @@ Mix_Music * try_to_load(const char * rep, const char * file_sans_ext, const char
 
 char * fichier_nom_sans_extension(const char * filename) {
   const size_t len = strlen(filename);
-  char * filename_sans_extension = strcopy(filename);
+  //char * filename_sans_extension = strcopy_malloc(filename);
+  char * filename_sans_extension = malloc(1 + 2 * strlen(filename));
+  strlcpy(filename_sans_extension, filename, 1 + 2 * strlen(filename)); 
   char * p = filename_sans_extension + len - 1; 
   for (size_t i = 0; i < len; i++) { 
     if (*p != '.') { p--; continue; }; 
@@ -147,7 +149,7 @@ CSon * CSon_make(const char * filename) {
   
   ASSIGN_METHOD(CSon,this,Jouer); 
   
-  this -> filename = strcopy(filename); 
+  this -> filename = strcopy_malloc(filename); 
   
   char reelfile[strlen(SONSDIR) + strlen(filename) + 1];
   strcat(strcpy(reelfile, SONSDIR), filename);

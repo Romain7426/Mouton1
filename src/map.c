@@ -367,7 +367,7 @@ CMap * CMap__make(const char * filename, const int map_i, const int map_j, const
   
   if (filename == NULL) return this;
 
-  NomCarte = strcopy(filename); 
+  NomCarte = strcopy_malloc(filename); 
   
 #if 1
   EvenementsModule -> Vider(EVT_ChargementCarte);
@@ -579,7 +579,7 @@ void CMap__AjouterObjet_nom(CMap * this, const char * nom, CPhysicalObj * o) {
   
   assert(this -> objets_nb < DicoObjets_SIZE); 
   this -> objets_array[this -> objets_nb] = o; 
-  this -> objets_noms_array[this -> objets_nb] = strcopy(nom); 
+  this -> objets_noms_array[this -> objets_nb] = strcopy_malloc(nom); 
   this -> objets_nb++; 
   
   //printf("Ajout de l'objet physique réussi!!" "\n"); 

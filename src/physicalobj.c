@@ -723,7 +723,7 @@ CPhysicalObj * CPhysicalObj__make_aux(CPhysicalObj * this, const int subtype, co
   this -> DansEau_huh = false; 
   this -> AuSol_huh   = false; 
   this -> Hostile_huh = false; 
-  this -> filename    = strcopy(filename);
+  this -> filename    = strcopy_malloc(filename);
   
   this -> p.x = 0.0f;
   this -> p.y = 0.0f;

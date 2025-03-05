@@ -48,6 +48,7 @@ cooperative_thread_env_t * cooperative_thread_env__make_r(cooperative_thread_env
   // RL: There's no thread saved to the kernel. 
   //     No thread can't switch to the kernel thread. 
   //     A thread can only yield to the kernel. 
+  //this -> malloced_huh = false; 
   return this; 
 }; 
 
@@ -60,6 +61,10 @@ cooperative_thread_env_t * cooperative_thread_env__make(void) {
 }; 
 
 void cooperative_thread_env__delete_r(cooperative_thread_env_t * this) { 
+  // RL: XXX TODO FIXME
+  //     Les stacks allouées devraient être libérées.
+  // RL: Attention! Certaines stacks sont allouées avec mmap (donc unmap) 
+  //     et d'autres avec malloc (donc free). 
   bzero(this, sizeof(*this)); 
 }; 
  

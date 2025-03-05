@@ -149,7 +149,7 @@ int game_events__handlers__push0(game_events_env_t * this, const int evt_type, c
 
 int game_events__handlers__push_script(game_events_env_t * this, const int evt_type, const char * script_file, const char * script_name) { 
   //const int retval = game_events__handlers__push(this, evt_type, GAME_HANDLERS__SCRIPT, /*int_argc*/0, /*int_argv*/((int [0]){}), /*ptr_argc*/0, /*ptr_argv*/((void * [0]){}), /*cptr_argc*/2, /*cptr_argv*/((const void * [2]) {script_file, script_name})); 
-  const int retval = game_events__handlers__push(this, evt_type, GAME_HANDLERS__SCRIPT, /*int_argc*/0, /*int_argv*/((int [0]){}), /*ptr_argc*/2, /*ptr_argv*/((void * [2]){strcopy(script_file), strcopy(script_name)}), /*cptr_argc*/0, /*cptr_argv*/((const void * [0]) {})); 
+  const int retval = game_events__handlers__push(this, evt_type, GAME_HANDLERS__SCRIPT, /*int_argc*/0, /*int_argv*/((int [0]){}), /*ptr_argc*/2, /*ptr_argv*/((void * [2]){strcopy_malloc(script_file), strcopy_malloc(script_name)}), /*cptr_argc*/0, /*cptr_argv*/((const void * [0]) {})); 
   return retval; 
 }; 
 

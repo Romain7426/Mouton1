@@ -100,7 +100,7 @@ int_script_c_t script_c__lookup(const script_c_env_t * this, const char * script
   return -1; 
 }; 
 
-static const char * script_c__strcopy(script_c_env_t * this, const char * cstr) { 
+static const char * script_c__strcopy_malloc(script_c_env_t * this, const char * cstr) { 
   if (cstr == NULL) { return NULL; }; 
   if (*cstr == '\0') { return this -> string_buffer; }; 
   const int cstr_sizeof = 1 + strlen(cstr); 
@@ -117,7 +117,7 @@ static int_script_c_t script_c__push(script_c_env_t * this, const char * script_
   if (this -> nb >= SCRIPT_C__SIZE) { return -1; }; 
   const int index = this -> nb; 
   const char * script_c_name__lower = cstring__tolower__stack(script_c_name); 
-  const char * copied_name = script_c__strcopy(this, script_c_name__lower); 
+  const char * copied_name = script_c__strcopy_malloc(this, script_c_name__lower); 
   if (copied_name == NULL) { return -2; }; 
   for (int i = 0; i < this -> nb; i++) { 
     if (0 == strcmp(this -> script_c_name[i], script_c_name__lower)) { return -3; }; 
