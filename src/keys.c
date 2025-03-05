@@ -42,6 +42,7 @@ CKey KeyK = CKey_StaticInit('k');
 #define previous (this -> previous) 
 
 CKey * CKey_make(char kkk) {
+  assert(false);
   MALLOC_BZERO(CKey,this);
   
   ASSIGN_METHOD(CKey,this,Enfoncee); 
@@ -49,11 +50,23 @@ CKey * CKey_make(char kkk) {
   
   kk = kkk; 
   previous = 0;
+
+
+#ifdef KBD_AZERTY
+  fprintf(stderr, "KBD AZERTY" "\n");
+#elif defined KBD_QWERTY
+  fprintf(stderr, "KBD QWERTY" "\n");
+#else
+  fprintf(stderr, "KBD UNKNOWN" "\n");
+#endif
+  assert(false);
+
   
   return this; 
 }; 
 
 void CKey_delete(CKey * this) {
+  assert(false);
   free(this); 
 }; 
 
@@ -69,7 +82,7 @@ bool CKey__Enfoncee(CKey * this) {
 
 bool CKey__Appuye(CKey * this) {
   bool b;
-
+  
   b = (previous == 0) && (KeyBoard[(unsigned char) kk] != 0);
   previous = KeyBoard[(unsigned char) kk];
   return b;

@@ -40,7 +40,7 @@ extern CKey KeyF12;
 
 /*** les touches ************/
 
-#ifdef LIBPROG_SYS_MACOSX
+#ifdef KBD_AZERTY
 
 #define KEY_UP    (KeyBoard[SDLK_UP]    || KeyBoard['z'])
 #define KEY_DOWN  (KeyBoard[SDLK_DOWN]  || KeyBoard['s'])
@@ -50,24 +50,35 @@ extern CKey KeyF12;
 #define KEY_VUE_ANGLE_PLUS  (KeyBoard[SDLK_PAGEDOWN] || KeyBoard['c'])
 #define KEY_VUE_ANGLE_MOINS (KeyBoard[SDLK_PAGEUP]   || KeyBoard['w'])
            
-#else
+#elif defined KBD_QWERTY
 
 #define KEY_UP    (KeyBoard[SDLK_UP]    || KeyBoard['w'])
 #define KEY_DOWN  (KeyBoard[SDLK_DOWN]  || KeyBoard['s'])
 #define KEY_LEFT  (KeyBoard[SDLK_LEFT]  || KeyBoard['a'])
 #define KEY_RIGHT (KeyBoard[SDLK_RIGHT] || KeyBoard['d'])
 
-//#define KEY_VUE_ANGLE_PLUS  (KeyBoard[SDLK_PAGEDOWN] || KeyBoard['c'])
-//#define KEY_VUE_ANGLE_MOINS (KeyBoard[SDLK_PAGEUP]   || KeyBoard['z'])
 #define KEY_VUE_ANGLE_PLUS    (KeyBoard['c'])
 #define KEY_VUE_ANGLE_MOINS   (KeyBoard['z'])
+
+#else
+
+#define KEY_UP    (KeyBoard[SDLK_UP]    || KeyBoard['z'])
+#define KEY_DOWN  (KeyBoard[SDLK_DOWN]  || KeyBoard['s'])
+#define KEY_LEFT  (KeyBoard[SDLK_LEFT]  || KeyBoard['q'])
+#define KEY_RIGHT (KeyBoard[SDLK_RIGHT] || KeyBoard['d'])
+
+#define KEY_VUE_ANGLE_PLUS  (KeyBoard['c'])
+#define KEY_VUE_ANGLE_MOINS (KeyBoard['w'])
+
+#endif
+
+
 #define KEY_CAMERA_DIST_PLUS  (KeyBoard[SDLK_PAGEDOWN])
 #define KEY_CAMERA_DIST_MOINS (KeyBoard[SDLK_PAGEUP])
 
 #define KEY_CAMERA_ANGLE_Z_PLUS  (KeyBoard['o'])
 #define KEY_CAMERA_ANGLE_Z_MOINS (KeyBoard['l'])
-           
-#endif
+
 
 
 

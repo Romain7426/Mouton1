@@ -164,6 +164,21 @@ else
   STDLIB_PROVIDES_ARC4RANDOM_HUH := no
 endif 
 
+KBD := $(strip $(if $(strip $(wildcard KBD)),,$(shell echo azerty >> KBD)))
+KBD := $(strip $(if $(strip $(wildcard KBD)),$(shell cat KBD | head -1),))
+KBD := $(if $(KBD),$(KBD),$(shell echo azerty | tee KBD))
+$(info KBD: $(KBD))
+
+ifeq ($(KBD),azerty)
+ CC_CONFIG:=$(CC_CONFIG) -D KBD_AZERTY
+else ifeq ($(KBD),qwerty)
+ CC_CONFIG:=$(CC_CONFIG) -D KBD_QWERTY
+else
+ CC_CONFIG:=$(CC_CONFIG) -D KBD_AZERTY
+endif
+
+
+
 ifeq (0,1)
 $(info Has YASM?  $(YASM_HUH)) 
 $(info Has GAS?   $(GAS_HUH)) 
@@ -211,6 +226,42 @@ GCC_FLAGS := -fPIC -g3  -fno-early-inlining -fno-gcse-lm -fno-move-loop-invarian
 PCC_FLAGS := -fpic #-g #-fpic 
 TCC_FLAGS := -g -bt100 -static -fsigned-char #-b #-fpic #-g #-fpic 
 OPENBSD_GCC_FLAGS := -fstack-shuffle -msave-args -fstack-protector-all 
+
+
+
+
+
+# RL: Le préprocesseur de PCC émet un warning pour chaque identifiant plus que soixante-trois charactères: «identifier exceeds C99 5.2.4.1» 
+# RL: Cependant, ceci n’empêche pas le compilateur de continuer. Ceci a une influence uniquement pour les noms de macros, qui sont alors tronqués. 
+# RL: Ceci implique que un warning est émis, et donc change le code de retour. 
+# RL: Cependant, si l’option «-E» n'est pas spécifié à PCC, alors le préprocesseur de PCC retourne zéro en dépit des warnings. 
+# RL: SOURCE: {PCC_SOURCE}/cc/cpp/token.c
+# RL: SOURCE: {PCC_SOURCE}/cc/cpp/cpp.h
+# RL:          #define    MAXIDSZ 63      /* Max length of C99 identifier; 5.2.4.1 */
+# RL: 
+# RL: Cependant, problème: lors de l’appel récursif à son préprocesseur, PCC ne retire pas l’option «-E», lequel a une sémantique différente pour son propre préprocesseur… 
+# RL: Pas le choix, il faut tester le code de retour du préprocesseur de PCC. (0 -> OK; 1 -> erreur; 2 -> warnings) 
+# RL: Pire, PCC ajoute automatiquement l’option «-E» à son préprocesseur… 
+# RL: Il faut donc dire ensuite donner nous-même le fichier de sortie au compilateur. 
+# RL: 
+# RL: Pire, PCC ne supporte pas les points-virgules sur-numéraires dans la déclaration d’un ‘struct'… 
+# RL: 
+# RL: Pas le choix, pour PCC, il faut enlever tous les warnings. 
+# RL: 
+# RL: Pour obtenir la man-page du préprocesseur de PCC:  man /usr/local/man/man1/cpp.1 
+ifeq ($(CC_NAME),pcc)
+$(info ****** PCC ******)
+$(info PCC: Vous pouvez ignorer les avertissements émis par le préprocesseur de PCC à propos de la longueur des identifiants («identifier exceeds C99 5.2.4.1»), tant que ceux-ci ne concernent pas les noms de macros, lesquels seront alors tronqués par le préprocesseur de PCC.)
+$(info PCC: Vous pouvez ignorer les avertissements «extra ; in struct».) 
+$(info PCC: De façon générale, nous ignorons tous les messages émis par PCC. (Nous avons enlevés tous les flags «-W».)) 
+$(info ****** PCC ******)
+CC_FLAGS_W :=
+CC_FLAGS_W_NO :=
+endif
+
+
+
+
 
 CC_FLAGS_SPEC := 
 CC_FLAGS_SPEC := $(CC_FLAGS_SPEC) $(if $(strip $(filter $(CC_NAME),clang)),$(CLANG_FLAGS),) 

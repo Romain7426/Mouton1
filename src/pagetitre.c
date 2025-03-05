@@ -78,9 +78,9 @@ CPageTitre * CPageTitre_make(void) {
   this -> Titre = CTexture_make("titre/titre.png"); 
   
   this -> MiniMenu = CMiniMenu_make(/*x*/50, /*y*/165,/*w*/1000); 
+  this -> MiniMenu -> parent.Add(&this -> MiniMenu -> parent, /*colonne*/0, "Jouer une partie rapide", /*nom_texture*/NULL); 
   this -> MiniMenu -> parent.Add(&this -> MiniMenu -> parent, /*colonne*/0, "Commencer une nouvelle partie", /*nom_texture*/NULL); 
   this -> MiniMenu -> parent.Add(&this -> MiniMenu -> parent, /*colonne*/0, "Continuer une partie en cours", /*nom_texture*/NULL); 
-  this -> MiniMenu -> parent.Add(&this -> MiniMenu -> parent, /*colonne*/0, "Jouer une partie rapide", /*nom_texture*/NULL); 
   this -> MiniMenu -> parent.Add(&this -> MiniMenu -> parent, /*colonne*/0, "   ", /*nom_texture*/NULL); 
   this -> MiniMenu -> parent.Add(&this -> MiniMenu -> parent, /*colonne*/0, "Auteurs", /*nom_texture*/NULL); 
   this -> MiniMenu -> parent.Add(&this -> MiniMenu -> parent, /*colonne*/0, "Propriété intellectuelle", /*nom_texture*/NULL); 
@@ -141,17 +141,17 @@ int CPageTitre__Input(CPageTitre * this) {
 	  this -> Action = ptFADEOUT; 
 	  this -> fade = NB_ETAPE_FADING; 
 	} 
-	else if (0 == choice) { 
+	else if (1 == choice) { 
 	  // RL: New game 
 	  this -> the_user_told_me = PageTitre_UserToldMe_NewGame; 
 	  this -> Action = ptFADEOUT;   
 	} 
-	else if (1 == choice) { 
+	else if (2 == choice) { 
 	  // RL: Load game 
 	  this -> the_user_told_me = PageTitre_UserToldMe_LoadGame; 
 	  this -> Action = ptFADEOUT;   
 	} 
-	else if (2 == choice) { 
+	else if (0 == choice) { 
 	  // RL: Quick game 
 	  this -> the_user_told_me = PageTitre_UserToldMe_QuickGame; 
 	  this -> Action = ptFADEOUT;   

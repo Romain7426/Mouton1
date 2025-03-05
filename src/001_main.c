@@ -92,6 +92,8 @@ static       int      main__stdout_log_pipe[2] = {-1, -1}; // RL: [0] is output 
 static       int      main__stdout_log_post_fd = -1; 
 static       void (*  main__stdout_log__SIGIO_former_handler)(int) = NULL; 
 
+//static       void (*  main__SIGIO_system_handler)(int) = SIG_DFL; 
+
 static int  main__subdir__clean_up(const char * default_subdir, char * * cleanup_subdir_r, char * buffer, const int16_t buffer_bytesize); 
 extern void main__stdout_log_buffer__flush(void); 
 static void main__stdout_log__SIGIO_handler(int sig); 
@@ -646,7 +648,9 @@ int main__stdout_log_pipe__open_aux(int * stdout_log_pipe, void (* handler)(int)
     
     void * former_handler = signal(SIGIO, handler); 
     if (SIG_ERR == former_handler) goto label__error__installing_SIGIO_handler_failed; 
+    //assert(NULL != former_handler);
     *former_handler_r = former_handler; 
+    //if (NULL == main__SIGIO_system_handler) main__SIGIO_system_handler = former_handler;
     
     fcntl(stdout_log_pipe[0], F_SETOWN, getpid()); // RL: Qui recevra le signal SIGIO? 
     fcntl(stdout_log_pipe[0], F_SETFL, O_ASYNC | O_NONBLOCK); // RL: Générer le signal SIGIO + Ne pas bloquer en cas de poll. 
@@ -665,7 +669,9 @@ void main__stdout_log__SIGIO_handler(int sig) {
     sigset_t sigset[1]; 
     sigemptyset(sigset);
     sigaddset(sigset, SIGIO);
-    signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
+    //signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
+    //signal(SIGIO, main__SIGIO_system_handler);
+    signal(SIGIO, SIG_DFL);
     sigprocmask(SIG_UNBLOCK, sigset, NULL); 
   }; 
 #if 0
@@ -984,7 +990,9 @@ int main__stderr_pipe__open_aux(int * stderr_pipe, void (* handler)(int), void (
     
     void * former_handler = signal(SIGIO, handler); 
     if (SIG_ERR == former_handler) goto label__error__installing_SIGIO_handler_failed; 
+    //assert(NULL != former_handler);
     *former_handler_r = former_handler; 
+    //if (NULL == main__SIGIO_system_handler) main__SIGIO_system_handler = former_handler;
     
     fcntl(stderr_pipe[0], F_SETOWN, getpid()); // RL: Qui recevra le signal SIGIO? 
     fcntl(stderr_pipe[0], F_SETFL, O_ASYNC | O_NONBLOCK); // RL: Générer le signal SIGIO + Ne pas bloquer en cas de poll. 
@@ -1015,8 +1023,9 @@ void main__stderr_pipe__SIGIO_handler(int sig) {
     //     Pour éviter les problèmes de concurrence, 
     //     il faut que le former handler soit commun à stderr et à stdlog. 
     //signal(SIGIO, main__stderr_pipe__SIGIO_former_handler); 
-    //signal(SIGIO, main__stdout_pipe__SIGIO_former_handler); 
-    signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
+    //signal(SIGIO, main__stdout_log__SIGIO_former_handler); 
+    //signal(SIGIO, main__SIGIO_system_handler); 
+    signal(SIGIO, SIG_DFL);
     sigprocmask(SIG_UNBLOCK, sigset, NULL); 
   }; 
 #if 0 
