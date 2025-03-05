@@ -1,189 +1,265 @@
+
+FRANCAIS: [README.fra.md](README.fra.md)
+GLOBISH: [README.eng.md](README.eng.md)
+
+
+---------------------------------------------------------------------------
+
+COMMENTAIRE de mars 2025
+
+Ici, il s'agit d'un commentaire en complément de la description ci-dessous (datant de mars 2024).
+ - Tout d'abord, j'en ai marre du globish. Je suis français et vous me saoulez. 
+ - Ensuite, j'en ai marre du langage [*C*](https://en.wikipedia.org/wiki/C_(programming_language)). 
+   À mon avis, le principe du langage C est bon: faire abstraction du processeur sous-jacent, 
+   et opérer sur la mémoire. Opérant sur la mémoire, le langage C est appelé le langage de pointeurs.
+   De ce fait, le langage C serait un bon intermédiaire entre un langage processeur et un 
+   langage utilisateur. D'ailleurs, d'aucuns le considère comme un méta-assembleur.
+ - Cependant, l'implémentation actuelle est infâme. (Moins pire que le C++ cependant.) 
+ - À propos du C++, rappelons ces propos de son créateur, Bjarne Stroustrup: ["I did it for you all"]([*C*](http://harmful.cat-v.org/software/c++/I_did_it_for_you_all)
+ - Un programme ne compile jamais de la même facon. Ca dépend du systeme et de l'année.
+   Quelque chose qui compile sur un systeme ne compilera pas sur le voisin.
+   Quelque chose qui compilait l'année dernière ne compilera plus cette année.
+ - Quand on écrit une erreur, le compilateur essaye de trouver une semantique puis continue. 
+   Pour corriger un tel comportement, il faut activer moult options du compilateur. 
+ - On a beau lui dire de désactiver les optimisations, le compilateur optimise quand même.
+   Et quand on se retrouve dans le débuggueur, celui-ci ne sait pas où on est.
+   Et quand on lui demande d'afficher une variable, il répond que il ne la trouve pas. 
+ - Et ceci, quand gdb fonctionne. La plupart du temps, gdb plante.
+   Et quand il ne plante pas, il n'affiche que des points d'interrogation dans la backtrace. 
+   Donc on se retrouve à débugguer en mettant des printf partout. 
+ - De fait, les compilateurs C sont des programmes bloated, qui doivent savoir faire le café.
+ - Les préprocesseur bizarre. 
+ - GitHub est pénible. (Le côté réseau social pour geek est néanmoins sympa.)
+ - Dans les faits, je suis improductif en C. Je perds la quasi-totalité de mon temps 
+   en futilités et en points techniques qui n'ont aucun intérêt. Vraiment en putain de conneries. 
+   Alors que je devrais programmer le jeu sur un plan projectif! 
+   J'en ai putain de marre. Ca me saoule. 
+   Tout ça est une perte de temps. 
+   Donc j'arrête. Terminé. Je ne veux plus en entendre parler. 
+   J'ai le jeu. Il possède une beauté. Mais je ne retouche plus au C.
+   Pour ma part, par le passé, le langage où je fus productif fut le Pascal (Turbo/Delphi). 
+   J'arrête. 
+   Il n'y aura aucune amélioration à l'avenir. Ni aucun correctif.
+   J'arrête. 
+
+
+À toute cette instabilité et ce chaos, je préfère les consoles de jeux:
+ - le matériel ne change jamais 
+ - le compilateur ne change jamais
+
+Sept ans plus tard, le même programme compile et fonctionne de la même facon!
+
+
+Ceci étant dit, je suis admiratif de [Fabrice Bellard](http://fr.wikipedia.org/Fabrice_Bellard) qui, lui, arrive à coder C et produire de puissants logiciels: [FFmpag](http://fr.wikipedia.org/FFmpeg), [QEmu](http://fr.wikipedia.org/QEmu), et [TinyCC](http://fr.wikipedia.org/TinyCC). 
+ 
+Nous sommes tous différents.
+
+J'arrete.   
+
+
+En l'état, le jeu compile à peu près. Et il fonctionne couci-couça. Et surtout, il est lent. Alors que, vingt ans auparavant, pas de souci. 
+ 
+Je déteste tout ça. 
+
+---------------------------------------------------------------------------
+
+VERSION de décembre 2021
+
+---------------------------------------------------------------------------
+
 # *Dessine-moi un mouton!* :relaxed: 
 
-Hello everyone! :relaxed: 
+Bonjour tout le monde! :relaxed: 
 
-***Dessine-moi un mouton!*** is a game that we wrote during our university second year. That was a fairly long time ago (time flies, guys). 
-We're french, so the game is in french. 
+***Dessine-moi un mouton!*** est un jeu que nous conçûmes pendant notre licence 3. C'était il y a longtemps. (Vingt ans! Et pourtant c'était hier.) 
 
-The main spirit underlying the game is that we were (still are) great fans of [*The Legend of Zelda*](https://en.wikipedia.org/wiki/The_Legend_of_Zelda) and [*Secret of Mana*](https://en.wikipedia.org/wiki/Secret_of_Mana). We also happened to be mathematicians & computer scientists, meaning that this software a bit wild & crazy. However, 'computer scientists' does not mean 'software engineers', and we did not have any lecture on software designing (seems like it's still an academic issue though); so, we learnt through [our trials and our errors](https://en.wikipedia.org/wiki/Trial_and_error) and [backtracking](https://en.wikipedia.org/wiki/Backtracking), but the game was not thought nor designed. It was our first large project, with a team of artists (!), and we had too many ideas that we did not know were too big for the project. And our software lectures being quite scarce & poor, we rushed into it without knowing the dragons that we would meet nor how to properly & simply defeat them. Retrospectively, the result is not that bad considering the context (we also had to play *World of Warcraft*, exams to pass, academic projects, eating crêpes, drinking apple cider, working on internship essays (on [knots](https://en.wikipedia.org/wiki/Knot_(mathematics)) especially & [kontsevitch integral](https://en.wikipedia.org/wiki/Kontsevich_integral)), and so forth). <br> 
-The goal was to be able to present the game at the ['InterENS culturelles'](https://interq.ens.fr/) ("Cultural InterENS"), which we proudly (& brokenly) did. The result can (still!) be seen here (incl. screenshots): <br> 
+Nous, les concepteurs, sommes des joueurs de [*The Legend of Zelda*](https://en.wikipedia.org/wiki/The_Legend_of_Zelda) et de [*Secret of Mana*](https://en.wikipedia.org/wiki/Secret_of_Mana). Nous sommes également des mathématiciens, notamment en informatique théorique (laquelle fait partie des mathématiques), ce qui explique que notre jeu soit hors des clous. À ce sujet, un mathématicien en informatique théorique n'est pas ingénieur logiciel. Nous n'eûmes aucun cours de programmation, et surtout de conception de logiciel. Nous apprîmes donc par nous-mêmes, en procédant par [essais et erreurs](https://en.wikipedia.org/wiki/Trial_and_error) (et [backtracking](https://en.wikipedia.org/wiki/Backtracking)); cependant le jeu ne fut pas architecturé. Celui-ci était notre premier projet conséquent, ayant même une équipe d'artistes (!), et nous avions trop d'idées. À la fin de l'année, le jeu était jouable, mais nous avions passés trop de temps dans les détails techniques, au lieu de les passer dans la création. Et le jeu avait de nombreux bugs incompréhensibles. (Et il avait été codé en C++ - un enfer.)
+Retrospectivement, le résultat n'est pas si mauvais - j'en suis même fier (dans la mesure où celui-ci serait présentement jouable, ce qui n'est pas le cas). 
+Le but était de présente les jeux aux ['InterENS culturelles'](https://interq.ens.fr/) ("Cultural InterENS"), ce que nous fîmes fièrement. À l'époque, nous avions publié le résultat ici (les codes de connexion ont été hémas perdus): <br> 
 &nbsp;&nbsp;&nbsp; http://dessine.moi.mouton.free.fr/
  
   
-## Authors  
+## Auteurs 
  
-Authors: 
- - Mathilde <br> 
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Characters design <br> 
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
- - Pierre <br> 
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Characters design <br> 
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://www.facebook.com/pierre.carcaud?_fb_noscript=1 
- - Clément <br> 
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Texts & words <br> 
- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
- - Ludovic <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scenery items design <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://goudenege.perso.math.cnrs.fr/output/
+Auteurss: 
  - [François](https://github.com/francoisschwarzentruber) <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Music, Game engine, Level design <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Musiques, moteur du jeu, création des cartes <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://people.irisa.fr/Francois.Schwarzentruber/
- - [Romain](https://github.com/Romain7426) (myself)  <br> 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Description languages <br> 
+ - Ludovic <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; concepteur des objets 3DS <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://goudenege.perso.math.cnrs.fr/output/
+ - Pierre <br> 
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; concepteur des personnsages <br> 
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; https://www.facebook.com/pierre.carcaud?_fb_noscript=1 
+ - Mathilde <br> 
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; conceptrice des personnages <br> 
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
+ - Clément <br> 
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; textes <br> 
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
+ - [Romain](https://github.com/Romain7426) (moi-même)  <br> 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; langages de Description <br> 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://??? 
   
 
-## Compiling & Installing 
+## Compilation & Installation
 
 <pre>
-$ echo "clang" > ./CC        # Or your favorite compiler. 
-$ sh ./configure.sh          # First generate tools, and then the Makefile. 
+$ echo "clang" > ./CC        # Ou votre compilateur préféré. 
+$ sh ./configure.sh          # Génération des outils puis du Makefile. 
 $ make 
 $ make install 
 </pre>
  
-Customizations 
- - [Compiler](https://en.wikipedia.org/wiki/Compiler) — The default used [compiler](https://en.wikipedia.org/wiki/Compiler) is 'cc'. In order to use your favorite [compiler](https://en.wikipedia.org/wiki/Compiler), you have to specify it in the file ['./CC'](CC). 
+Personnalisations
+ - [Compilateur](https://fr.wikipedia.org/wiki/Compilateur) — Le compilateur utilisé par défaut est 'cc'. Vous pouvez utiliser votre compilateur préféré à travers le fichier ['./CC'](CC). 
     - $ echo "cc" > ./CC 
     - $ echo "clang" > ./CC 
     - $ echo "/usr/local/bin/x86_64-unknown-openbsd7.0-gcc-11.2.0" > ./CC 
     - $ echo "pcc -L /usr/lib " > ./CC 
     - $ echo "tcc" > ./CC 
- - Installation directory — The default installation directory is './destroot'. To use your favorite location, please edit the generated [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile), or even edit the generating ['./Makefile-gen.mkf'](Makefile-gen.mkf). (Another way is to symbolic-link the wanted destination as './destroot'; or to copy files from './destroot' to the wanted location). 
- - No other customization is available. (However, you can still edit the file ['./Makefile-gen.mkf'](Makefile-gen.mkf) as much as you like.) 
+ - Le répertoire d'installation — Par défaut, l'installation se fait dans le sous-répertoire './destroot'. Ensuite, il suffit de copier ce répertoire où vous voulez. 
+ - Aucune autre personnalisation. 
  
-Configuration architecture 
- - Configuration is not based on [GNU Autohell](https://en.wikipedia.org/wiki/Autohell). 
- - Instead, we devised something home-made. We based it is on [GNU Make](https://en.wikipedia.org/wiki/GNU_make). Why [GNU Make](https://en.wikipedia.org/wiki/GNU_make)? Because [GNU Make](https://en.wikipedia.org/wiki/GNU_make) language is way simpler & friendlier than [shell](https://en.wikipedia.org/wiki/Bourne_shell) language. 
- - Our idea is to generate a standard [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile), predictable & boring (example: [Makefile](Makefile)), so that it could be read by any exotic version of [Make](https://en.wikipedia.org/wiki/Make_(software)). Such a [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile) is way more readable, debuggable, understandable, and prevent the [Make](https://en.wikipedia.org/wiki/Make_(software)) software to take «smart» initiatives (by infering who knows which esoteric rule). (On top of that, theoretically speaking, such a [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile) would be distributable — however, it is not so due to each [compiler](https://en.wikipedia.org/wiki/Compiler) personality, and each [OS](https://en.wikipedia.org/wiki/Operating_system) personality, etc., which has therefore to be beforehand detected.) 
- - To generate this boring [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile), we use the file ['./Makefile-gen.mkf'](Makefile-gen.mkf), which is, as earlier explained, a [GNU Make](https://en.wikipedia.org/wiki/GNU_make) script. 
- - This script, ['./Makefile-gen.mkf'](Makefile-gen.mkf), requires external tools which are located in the sub-directory ['./tools'](tools). Thus, before running the script ['./Makefile-gen.mkf'](Makefile-gen.mkf), these have to be first generated. This is achieved by the [shell](https://en.wikipedia.org/wiki/Bourne_shell) script named ['./tools-compile.sh'](tools-compile.sh). (Theoretically, all these tools should compile & run issuelessly: «sh ./tools-compile.sh».) 
- - And that's all folks! All that is automagically dealt by the [shell](https://en.wikipedia.org/wiki/Bourne_shell) script named ['./configure.sh'](configure.sh). 
+Configuration
+ - La système de onfiguration n'est pas basé sur [GNU Autohell](https://en.wikipedia.org/wiki/Autohell). 
+ - À la place, nous avons conçu notre propre système. Celui-ci est basé sur [GNU Make](https://en.wikipedia.org/wiki/GNU_make). 
+ - Le [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile) est générer par GMake à partir du fichier ['./Makefile-gen.mkf'](Makefile-gen.mkf). 
+ - Le script ['./Makefile-gen.mkf'](Makefile-gen.mkf) nécessite des outils qui doivent être compilés en amont. Ceux-ci sont localisés dans le sous-répertoire ['./tools'](tools). Pour les compiler, il faut lancer le script sell ['./tools-compile.sh'](tools-compile.sh): «sh ./tools-compile.sh» 
+ - Et c'est fini. 
+ - En une seule étape, il est possible d'utiliser le script [shell](https://en.wikipedia.org/wiki/Bourne_shell) ['./configure.sh'](configure.sh): «sh ./congigure.sh» 
+ - Le script shell ['./configure.sh'](configure.sh) aura besoin de savoir comment invoquer GMake: 
+    - $ echo "gmake" > GMAKE
  
-Complaints 
- - For maximum compatibility, [shell](https://en.wikipedia.org/wiki/Bourne_shell) scripts should be run in using 'sh':
-    - $ sh ./configure.sh
-    - $ sh ./tools-compile.sh 
- - If the script named ['./configure.sh'](configure.sh) complains about not finding [GNU Make](https://en.wikipedia.org/wiki/GNU_make), please help it in editing the file ['./configure.sh'](configure.sh) and tell it where to find [GNU Make](https://en.wikipedia.org/wiki/GNU_make) on your system. 
- - The source code is compliant with [C99](https://en.wikipedia.org/wiki/C99); therefore, a [C99](https://en.wikipedia.org/wiki/C99)-compatible [compiler](https://en.wikipedia.org/wiki/Compiler) is required. 
- - For any other complaints, well, from here & now, I do not know. 
+Testé avec les [compilateurs](https://fr.wikipedia.org/wiki/Compilateur): 
+ - [clang](https://fr.wikipedia.org/wiki/Clang) - 2,6Mo 
+ - [gcc11](https://fr.wikipedia.org/wiki/GNU_Compiler_Collection) - 5,5Mo
+ - [tcc](https://fr.wikipedia.org/wiki/Tiny_C_Compiler) - 37,4 Mo
+ - [pcc](https://fr.wikipedia.org/wiki/Portable_C_Compiler) - Echoue. Son préprocesseur meurt. 
  
-Tested [compilers](https://en.wikipedia.org/wiki/Compiler): 
- - [clang](https://en.wikipedia.org/wiki/Clang): 2m (lib) and 3m (exe) 
- - [gcc11](https://en.wikipedia.org/wiki/GNU_Compiler_Collection): 28m (lib) and 5m (exe) 
- - [tcc](https://en.wikipedia.org/wiki/Tiny_C_Compiler): FAILS: Does not compile as of now 
- - [pcc](https://en.wikipedia.org/wiki/Portable_C_Compiler): FAILS: Cannot compile («identifier exceeds C99 5.2.4.1») 
- - Others? 
 
-Tested [operating systems](https://en.wikipedia.org/wiki/Operating_system): 
+Testé sur les systèmes suivants: 
  - [OpenBSD](https://en.wikipedia.org/wiki/OpenBSD) 
- - Other [BSD](https://en.wikipedia.org/wiki/Berkeley_Software_Distribution) should work flawlessly. 
- - Should be working on [MacOSX](https://en.wikipedia.org/wiki/MacOS). 
- - [Unix](https://en.wikipedia.org/wiki/Unix)-compatible systems should work. 
- - For [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows), we do not know, we do not have that system. Supposedly, the software should be able to work using [Cygwin](https://en.wikipedia.org/wiki/Cygwin), [MinGW](https://en.wikipedia.org/wiki/MinGW), etc. 
+ - Les autres [BSD](https://en.wikipedia.org/wiki/Berkeley_Software_Distribution) - Pas testé mais ne devrait pas poser de problèmes. 
+ - [MacOSX](https://en.wikipedia.org/wiki/MacOS) - Pas testé mais ne devrait pas poser de problèmes. 
+ - [Unix](https://en.wikipedia.org/wiki/Unix)-compatible - Pas testé mais ne devrait pas poser de problèmes. 
+ - [Windows](https://en.wikipedia.org/wiki/Microsoft_Windows) - Il y a vingt ans, il y fonctionnait. Hui, je ne sais pas. ([Cygwin](https://en.wikipedia.org/wiki/Cygwin)? [MinGW](https://en.wikipedia.org/wiki/MinGW)? Autre?)
  
-Dependencies: 
- - A [C99](https://en.wikipedia.org/wiki/C99)-[compiler](https://en.wikipedia.org/wiki/Compiler). 
- - [GNU Make](https://en.wikipedia.org/wiki/GNU_make). 
- 
-Nota bene: 
- - If compiling tools is too long, it can be skipped, and the [Makefile](https://en.wikipedia.org/wiki/Make_(software)#Makefile) could be directly generated: <br>
-    $ gmake -r -R -S -j 1 --warn-undefined-variables -f ./Makefile-gen.mkf  
+Dépendances: 
+ - Le code source est écrit en [C99](https://en.wikipedia.org/wiki/C99). 
+ - [GNU Make](https://fr.wikipedia.org/wiki/GNU_make). 
 
 
    
-## [Intellectual Property](https://en.wikipedia.org/wiki/Intellectual_property) 
+## [Propriété intellectuelle](https://fr.wikipedia.org/wiki/Propriete_intellectuelle) 
+
+On s'en fout. Faites-en ce que vous en voulez. 
  
-Basically, we do not care about [intellectual property](https://en.wikipedia.org/wiki/Intellectual_property). You can do whatever you like with anything in that project. 
- 
-However, as it seems that backward copyrighting could exist, therefore we did not release it in [public domain](https://en.wikipedia.org/wiki/Public_domain), instead we have a license to prevent that case - for uninteresting law related stuffs, please see [COPYING](COPYING) (it's an [ISC license](https://en.wikipedia.org/wiki/ISC_license), the most liberal license we found out: do whatever you like with it, as long as you do not prevent ourselves or others to use it). 
+Ce travail aurait pu être publié dans le [domaine publique](https://en.wikipedia.org/wiki/Public_domain). Cependant, il semblerait que il existe des moyens s'approprier respectivement des droits. Et donc nous désapproprier ce travail. Pour empêcher ce cas, ce travail est publiée sous une version allégée de la [licence ISC](https://en.wikipedia.org/wiki/ISC_license). Vous pouvez consulter [COPYING](COPYING)
  
 
-   
-## Technicalities 
+## Notes techniques
 
-First, likely, the game won't compile right off the bat on your computer: too many things to make it work. And as the saying goes, ['libtool is hell'](https://en.wikipedia.org/wiki/Autohell). I might look into that in twenty years. It used to compile and work on Windows & MacOSX. Currently, it compiles & works on BSD. 
+Hui, le jeu compile couci-couça - hélas. Et le jeu est lent (il ne l'était pas il y a vingt ans). 
+
+Aucune aide ne vous sera apporté pour le faire compiler. Pour nous, c'est terminé. Il s'agit d'une publication post-mortem. Le jeu ne sera plus mis à jour ni corrigé. 
+
+Pour compiler, le jeu repose sur les bibliothèques suivantes:
+ - [SDL](http://www.libsdl.org)
+ - [SDL_image](http://www.libsdl.org/projects/SDL_image/release-1.2.html)
+ - [SDL_mixer](http://www.libsdl.org/projects/SDL_mixer/release-1.2.html). If these libraries do not work on your computer, then it just can't work. But that's its only library depencies, so it's not that bad
+
+En sus, SDL_image & SDL_mixer dépendent d'autres librairies: libjpeg, libpng, libvorbis, libogg, etc.
  
-Then, the game depends on [SDL](http://www.libsdl.org), [SDL_image](http://www.libsdl.org/projects/SDL_image/release-1.2.html), [SDL_mixer](http://www.libsdl.org/projects/SDL_mixer/release-1.2.html). If these libraries do not work on your computer, then it just can't work. But that's its only library depencies, so it's not that bad (to be fair, SDL_image & SDL_mixer depend on sub-libraries, like libjpeg, libpng, libvorbis, libogg, etc.). 
- 
-Then, the game was compiled with [gcc](https://en.wikipedia.org/wiki/GNU_Compiler_Collection) and [clang](https://en.wikipedia.org/wiki/Clang). It might work with other compilers, but we can't know for sure. 
- 
-Then, this repository is the main repository - there are small sub-projects that need to be compiled first: 
+Egalement, le jeu a besoin des analyseurs de DSL: 
  - https://github.com/Romain7426/Mouton1-anime 
  - https://github.com/Romain7426/Mouton1-nonanime 
  - https://github.com/Romain7426/Mouton1-carte 
  - https://github.com/Romain7426/Mouton1-pscript 
-  
-I do not know how to integrate all of them in a single GitHub repository. So, in a [user-unfriendly](https://en.wikipedia.org/wiki/User-friendly) spirit, these have to be downloaded and compiled first. However, the idea was that these sub-projects were separate from the main project, and should be able to compile & run on their own. 
- 
-Then, as of now, loading of [3DS objects](https://en.wikipedia.org/wiki/.3ds) works on little-endian system, but cannot properly work on non-little-endian system as non-little-endian-ness is not handled (bytes have to be swapped while reading 3DS files). 
- 
-All that being said, after downloading the project, type '[gmake](https://en.wikipedia.org/wiki/GNU_make) -f Makefile-gen.mkf' and then 'make' and, supposedly, it should work. I would not bet my bottom dollar on it though. 
- 
-Also, the game used to be first developed in [*C++*](https://en.wikipedia.org/wiki/C%2B%2B). Along with many critics, we ran into [*C++*](https://en.wikipedia.org/wiki/C%2B%2B) confusedness: (i) it always compiles whatever one writes; (ii) nobody has any idea about the actual semantic; (iii) compiling errors, when the compiler fails to somehow find a random semantic, are cryptic (to solve compiling errors, we were «hmm, if we comment out these lines, perhaps that gonna compile» - insane & shameful for a compiler); (iv) output results are weird and very tough to debug; (v) very slow to compile (we were used to [Turbo Pascal](https://en.wikipedia.org/wiki/Turbo_Pascal), whose compilation was immediate); (vi) with the years, the game just stopped from compiling; (vii) no two [*C++*](https://en.wikipedia.org/wiki/C%2B%2B) compilers behave the same way. <br> 
-For our second game, we switched to old & boring [*C*](https://en.wikipedia.org/wiki/C_(programming_language)), and it was so much better - we did not regret it. 
- 
-That was the starting point of the currently published project: [*C++*](https://en.wikipedia.org/wiki/C%2B%2B) is an unstable language, the game did not compile any longer, and the game deserved to be published - so I decided to clean it up and to switch it to [*C*](https://en.wikipedia.org/wiki/C_(programming_language)), to make it work, and then to publish it to GitHub (for the record, as usual, it took way longer than initially planned). Here we are.  
- 
-  
-## Architecture & Structuring ideas 
- 
-Despite our lack of training in software design, we naturally wanted to divide & conquer that big dragon: cut that one big problem into smaller manageable problems. We still knew that the core, the game engine, would be big though. But we separated the character description, the music, the scenery items description, the level description, the narrative description, from the game engine. That way we could also divide the work among team members. 
- 
-### Spatial DSLs
 
-First, for the game stuffs descriptions, we designed small & quick purposed description languages (about that subject, one can check out that video [«Functional MzScheme DSLs in Game Development»](https://www.youtube.com/watch?v=Z8Xamkb-J2k), wherein they talk about «DSL» («data specific language») (very bad audio sadly); in this one, the audio is better: https://www.youtube.com/watch?v=oSmqbnhHp1c ). We ran into two issues: 
- - (i) *Lex* & *Yacc* - In the very scarce software engineering lessons we had, we were advised to use *Lex* & *Yacc*. Well well well. *Lex* & *Yacc* are nice theoretical objects, but should not be used in real life. First, one never knows whether the regular expressions are the right ones (and for some reasons, there are always weird issues). They are slow. They are weirdly designed. They are not thread-safe nor reentrant. And the syntax error management is terrible: *yacc* returns "syntax error" and that's it - you're stuck - it's very frustrating. And during these lectures, you're told about intricate weird issues. Great. In real life, description languages are trivial LL(1) languages. We're using a [BFG](https://en.wikipedia.org/wiki/BFG_(weapon)) to kill an ant; and worse, that [BFG](https://en.wikipedia.org/wiki/BFG_(weapon)) is broken and can't even do properly the job. <br> 
-   So, one should not use *Lex* & *Yacc* ever. One should study them to understand the underlying issues of [tokenizing & parsing](http://compilation.irisa.fr/), but one should not use these broken & useless tools. First, regarding tokenizing, it's way simpler to directly write the automata; automata are simple, and they simply do what you think they do. And do not write these automata as data arrays - for each token, just write a function that takes the current state, the being-read character, and returns the next state - that's it. It works perfectly, it's simple, and it's very fast. <br> 
-   For parsing, LL(1) languages are trivial. So just do it. Basically it's a big automaton. The only location where it could be trickier is expression-parsing: infix expressions ("1 + 2") are why LALR(0) stuffs were developed; they can still be parsed, but a side stack is needed. That's it. It's very simple, and it works very well. And syntax errors can be understood and more explanatory than the hellish "syntax error". <br> 
-   So, please, *Lex* & *Yacc* are nice curiosities, proofs of concept, but should not be used. Even for our very simple description languages, they poorly failed. 
- - (ii) *Typing* - As computer scientists, we were introduced to [*OCaml*](https://en.wikipedia.org/wiki/OCaml), typing inference, and program correctness-proof giving. Typing is seen as a way to automatically prove, at least partially, the correctness of a program. Duh... Academically speaking, I do understand the attractiveness of such concepts, and *OCaml* is a very nice language (*pattern-matching* is still really great), but in real life, what one actually wants, it's something like *Visual Basic*: proofs do not matter, the program should work - that's it - the team member who wants to describe the object he is working on does not care about typing - it should just work - typing does not even make sense to him. Unfortunately, we learnt it the hard way. <br> 
-   Regarding typing, we then met [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)), and we had a cognitive dissonance: this language is amazing, but does not care about typing at all. From the user point of view, there's no type (of course, in-memory data are typed). And the language was so powerful and easy. With very few lines of code, we could run quite powerful programs. In spirit, [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)) was the opposite of [OCaml](https://en.wikipedia.org/wiki/OCaml), and it was way easier & simple to use. (A quick note about so-called "functional programming" & "first-order functions": it does not matter, nobody cares. An actual full-fledged functional language is very complex, for nothing; the issue is to remember the current stack of lexical environments; *OCaml* & *Scheme* cope with that complexity in removing variables and substituting them with "bindings", and so-called *let-bindings*. Such choices are definitely understandable, but are not user-friendly; variables are the way to go; let-bindings are a creepy work-around in spirit, and slow in facts. Having both, variables & lexical stacked environment remembered means that the whole call-stack must be remembered at & for each *lambda*, which is huge - basically, it means that the call-stack is duplicated each time - and obviously, implementing '[call/cc](https://en.wikipedia.org/wiki/Call-with-current-continuation)' is trivial with such a feature. If in-line anymous functions are handy, remembering lexical environment does not worth it - just provide the global the environment to such functions. Or one can do the *Pascal* way: local functions cannot be objects (which is not convenient at all).) <br> 
-   So, please, type as less as possible your description languages. In spirit, description languages should be like [Scheme](https://en.wikipedia.org/wiki/Scheme_(programming_language)). And description languages implies that they are no variables (nor let-bindings). 
+Pour le moment, le sous-système des objets [3DS objects](https://en.wikipedia.org/wiki/.3ds) fonctionne pour les architectures little-endian. Je ne sais pas pour les autres. 
+
+Aussi, le jeu avait d'abord été écrit en [*C++*](https://fr.wikipedia.org/wiki/C%2B%2B): (i) il compile quoiqu'il arrive; (ii) la sémantique est obscure; (iii) les erreurs de compilation sont hermétiques («Voyons, je je commente ces lignes, peut-être que ça compilera»); (iv) avant de produire une erreur, le compilateur essaye toujours une sémantique); (v) le débogage est impossible; (vi) trèslent à compiler (voir [Turbo Pascal](https://fr.wikipedia.org/wiki/Turbo_Pascal) en comparaison: immédiat); (vii) bien entendu, après quelques années, le jeu cessa de compiler; (viii) aucun compilataur [*C++*](https://en.wikipedia.org/wiki/C%2B%2B) ne se comportent de la même façon. <br> 
+De cette expérience, nous réalisons notre second jeu en [*C*](https://en.wikipedia.org/wiki/C_(programming_language)); ce fut bien mieux - nous ne le regreattâmes pas. 
+
+Le fait que le jeu ne fonctionne plus et notre bonne expériene en C fut le point de départ de cette publication: le réécrire en C et faire que il fonctionne et compile. (Ce qui me pris beaucoup trop de temps. Plus jamais.)
+ 
+  
+## Architecture 
+ 
+Nous divisâmes le jeu en sous-projet afin de pouvoir travailler en équipe: la description des personnsages, la description des éléments du décoer, la description des cartes, la description des éléments de la narration, et le moteur du jeu. 
+
+ 
+### Les DSLs spatiales
+
+Pour la descriptions des éléments spatiaux, nous conçûmes des petits et rapides langages de descriptions. 
+
+À propos des DSL, vous pouvez visionner la vidéo: [«Functional MzScheme DSLs in Game Development»](https://www.youtube.com/watch?v=Z8Xamkb-J2k
+
+Nous avons rencontrés les problèmes suivants: 
+ - (i) *Lex* & *Yacc* - En pratique, on ne sait jamais si les expressions rgulières sont correctement écrites (dans les faits, il y a toujours des problèmes). Ils sont lents. Ils sont conçus bizarrement. Ils ne sont ni thread-safe ni reentrant. Et la gestion des erreurs de syntaxe est nulle: *yacc* returns "syntax error" et c'est tout. <br> 
+ - (ii) *Typage* - En tant que mathématiciens en informatique théorique, on nous parla de [*OCaml*](https://en.wikipedia.org/wiki/OCaml) et de son inférene de type. Je fus influencé par ça. Et j'en présente mes excuses à ceux qui écrivaient les descriptions. En fait, le typage, on s'en fout. Les langages de descriptions ne doivent pas être typés. Ca doit fonctionner, un point c'est tout. <br> 
    
  
  
-### Temporal DSL 
+### Les DSL-s temporelles
 
-Then, after spatial descriptions (the «objects»), we wanted temporal description (the «narrative»). Well well well. Now we can tell you that this is a very very very big dragon. 
- - (a) We quickly realized that a «scripting» language was needed: variables & procedures were needed. Better, at some point, we wanted the game to be driven from the narrative (makes sense, right). Duh... So a full-fledged scripting language was developed. <br> 
-       Such a choice is definitely understandable. But one should keep in mind that this is a very large & complex task, and that the scripting language should be kept as feature-less as possible - it should not make coffee & toasts. And it will already be very complicated. 
- - (b) That task was started without any actual lecture on such a subject, which could have been very very useful. In the end, the dragon got defeated, the narrative description language did work, but it was ugly. 
- - (c) Language design issues aside, the main issue is that, actually, there are two competiting sub-programs in one program: the script engine & the game engine. Technologically speaking, what we needed were [«cooperative threads»](https://byuu.org/projects/libco) ([«non-preempting threads»](https://en.wikipedia.org/wiki/Non-preemptive_multitasking), [«co-routines»](https://en.wikipedia.org/wiki/Coroutine), [«fibers»](https://en.wikipedia.org/wiki/Fiber_(computer_science))), but we did not know that. With «cooperative threads», one can have the two engines running in their own environments, and then would just have to write some in-between communication stuffs. The advantage of that is both engines can be black boxes; especially, the scripting language can be taken from any where, and it could be run without knowing anything about it. Same thing for the game engine. <br> 
-   We were not aware of that useful technology. Instead, we flattened and linearized both engines, and we had kernel which ran one step of the first engine and then one step of the second engine. We did not conceptually think about that. We were looking for a way to defeat that dragon, and that's the bottom-up solution we came up with - we did not realize what we were doing, we implemented these features because we needed them. <br> 
-   A good consequence was that the game engine was rewritten - it was still not good, but before that it was just a hell bunch of global variables and mutually recursive functions, where no-one could infer any semantic except the main developer. So that was definitely an improvement. <br> 
-   On the other hand, scripting language are easier when recursively interpreted. But the linearization & step-wise design implied to break that down. What should have been was to take the full step and develop a bytecode. We did not know that, but, in facts, bytecode is not very complicated - so that step could have been taken. Instead, a halfway solution was designed, the worst of the two worlds: stepped interpretation (it's an oxymoron; by definition, interpretation is a recursive process). Never do «stepped interpretation» - it's complicated as hell - bytecode is simpler. 
- - (d) As of now, I rewrote that whole part. It generates bytecode. It's easier, more powerfull, less buggy, and simpler. The narrative description language is called «PScript» for «Pascal Scripting Language». I tried to make as simple as possible, with variables, type-less as Scheme, no *lex* and no *yacc*. There are many things to be improved, to be tested, but the core works, and works pretty well. 
- - (e) The program now has an explicit kernel part, and two explicit cooperative threads: script & game. It makes much more sense. 
- - (f) A good consequence of cooperative threads is that the temporal DSL can be in any language, including plain *C*. As a proof of concept, I did implement some scripts in plain *C*. Meaning that it is not even necessary to develop to dedicated languages to do that. (Geez - Had we known that...!) 
+Une DSL temporelle décrit les évènements, les interrations, et la narration. 
+
+Dans notre cas, nous réalisâmes rapidement que nous avions besoin d'un langage de script
+ - Autant que faire se pouvait, il fallait se séparer le moteur du jeu du reste. Toute la description du jeu devait être séparée. 
+ - En l'espèece, il fallait pouvoir décrire les interractions. 
+ - En l'espèece, il fallait pouvoir décrire les évènements. 
+ - Et surtout, nous voulions pouvoir diriger le jeu comme si c'était un film. Le script dirigeait le moteur de jeu. 
+ - Plus encore, afin que le script et le jeu puisse coopérer, il fallait que chacun ait sa propre stack. 
+ - Peoblème, un tel langage de description était une tâche énorme. 
+ - Le résultat est que le langage fonctionne, mais le code interne est laid. 
+ - Pire, comme chacun n'avait pas sa propre stack, pour les faire coopérer, j'ai dû écrire un byte-code. Galère. Mauvais souvenirs. 
+
+Notre langqge de description temporelle s'appelle «PScript» for «Pascal Scripting Language». 
+
+Dans cette réécriture:
+ - J'ai effectivement séparé la stack de chacun. Ca a changé la vie. Les interactiosn entre les deux sont beaucoup plus simples. 
+ - Dans les faits, ce que nous avons implémentés sont des [threads coopératifs](https://en.wikipedia.org/wiki/Non-preemptive_multitasking) (ou encore des [«co-routines»](https://en.wikipedia.org/wiki/Coroutine), ou encore des[«fibers»](https://en.wikipedia.org/wiki/Fiber_(computer_science)) - [libco](https://byuu.org/projects/libco)). 
+ - Ces coop-threads furent bons. Ils permirent de réécrire le jeu, et de le linéariser. Car, auparavant, pour faire coopérer le moteur de jeu et le moteur de jeu, il s'agissait de fonctions mutuellement récursives et de variables globales. C'était incompréhensible. 
+ - Une autre conséquence des coop-threads est que le DSL temporel peut être en n'importe quel langage. Et, de fait, en l'espèce, j'ai testé en C. (Ce qui nous aurait permis de ne pas perdre de temps à développer PScript.)
   
   
  
+### Eléménts non standards 
 
-## Future & TODOs  
- 
-First, that game is ***NOT*** maintained. Patches are welcome, but the program is not actively developed. The point of that GiHub repository is to show off the work that we did - and it's still not a bad piece of software. 
- 
-Regarding the future & TODOs, there are many things: 
- - (i) Being able to walk a negative-curvature manifold (projective plan) would be great. 
- - (ii) Refactor the game engine which is still a bunch of functions bypassing one another, breaking assertions and invariants. A lot of work here. 
- - (iii) Make it compile and work on every arch & OS. A lot of uninteresting work here. 
- - (iv) Refine the DSLs. 
- - (v) Make the airteapot work. 
- - (vi) Make the ice map work. 
- - (vii) Develop many side tools (maps design, 3DS, etc.) 
- - (viii) Fix & improve the current narrative (when the game engine won't be based on a jenga-tower design, it should be easier to expand the narrative). 
- - (ix) There are obviously many bugs everywhere. 
- - (x) There are many useless files & lines of code ([trials, errors](https://en.wikipedia.org/wiki/Trial_and_error), & [backtracking](https://en.wikipedia.org/wiki/Backtracking)). 
- - (xi) Adding a 'world' descriptions (how many manifolds, size and characteristics of each, and then the maps on each). 
-  
-That said, once again, the game is not being currently developed. Do not expect any improvement for the upcoming twenty years (today is sunday the 24th of may 2020).  
- 
-For information, when we presented the game at the InterENS, the game was a broken buggy jenga-tower. It's so much better now. 
- 
-Thanks!! :smile: 
+Dans l'ensemble, le jeu n'utilise rien de compliquer. Deux exceptions:
+ - (a) Les coop-threads - Pour les créer et pour switcher, nous utiliser des signaux. 
+ - (b) stdlog et stderr
+      - Afin de débugger le jeu, nous écrivons verbeusement. Nous avons donc un gros (très gros) fichier de log. Pour l'écrire, nous redirigeâmes stdout vers ce fichier de log. (Techniquement, c'est un reopen.)
+      - Problème: le jeu passe beaucoup de temps à écrire ces logs, au point que ça le ralentisse. Nous dûmes donc mettre entre les deux un tampon. Et mettre ce tampon nécessite d'utiliser un pipe et SIGIO (ce qui est pénible). 
+      - Pire. Nous écrivions les erreurs sur stderr. Malheureusement, nous avions besoin du contexte au sein des logs. Donc il fallait dupliquer cette écriture vers stdlog. Idem, pour ceci, pipe & SIGIO (pénible). 
 
-And we all love you. :kissing_heart: 
+
+## Agenda
+ 
+Avant toute chose, le jeu est abandonné. Aucune aide ne sera fourni. Et plus aucun développement n'aura lieu. Ni aucun correctif. Malheureusement, le jeu ne fonctionne pas bien (contrairement à il y a vingt ans), mais c'est ainsi. 
+ 
+Les éventuelles choses à faires: 
+ - (i) Projeter le jeu sur un plan projectif. 
+ - (ii) Réécrire le moteur de jeu. (Plein de fonctions mutuellement récursives.) 
+ - (iii) Portabliité.
+ - (iv) Nettoyer les DSL. 
+ - (v) Faire fonctionner la théière. 
+ - (vi) Faire fonctionner la carte de la glace. 
+ - (vii) Ecrire des outils de développement (maps design, 3DS, etc.) (en FLTK)
+ - (viii) Développer le jeu. 
+ - (ix) Ajouter un type 'world' (la variété riemannienne, et le nombre de cartes sur icelle). 
+ - (x) Ajouter [GLFW](http://fr.wikipedia.org/GLFW). 
+ - (xi) Ajouter [TinyGL](http://bellarg.org/TinyGL).
+ - (xii) Ajouter [Small3Dlib](https://gitlab.com/drummyfish/small3dlib).
+ - (xiii) Ajouter Mesa pour avoir un OpenGL purement software (ce qui permettrait de faire des captures d'écran). 
+ - (xiv) Ajouter FFmpeg (ce qui permettrait d'afficher des vidés (ce qui était initialement prévu) et d'enregistrer une partie). 
+
+
+Ceci étant dit, rien de tout ça ne sera développé. C'est fini. 
 
  
+Merci!! :smile: 
 
+Et nous vous aimons tous. :kissing_heart: 

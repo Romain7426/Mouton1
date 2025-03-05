@@ -1,3 +1,13 @@
+
+FRANCAIS: [README.fra.md](README.fra.md)
+GLOBISH: [README.eng.md](README.eng.md)
+
+---------------------------------------------------------------------------
+
+VERSION de décembre 2021
+
+---------------------------------------------------------------------------
+
 # *Dessine-moi un mouton!* :relaxed: 
 
 Hello everyone! :relaxed: 
