@@ -29,6 +29,13 @@ Ici, il s'agit d'un commentaire en complément de la description ci-dessous (dat
    Donc on se retrouve à débugguer en mettant des printf partout. 
  - De fait, les compilateurs C sont des programmes bloated, qui doivent savoir faire le café.
  - Les préprocesseur bizarre. 
+ - L'absence de modules!!!!! (collision des noms) (et portée des nom)
+ - une libc bizarre
+ - libkernelcall (unistd.h) et la libc devrait être séparées. On voudrait pouvoir ne pas utiliser la libc. 
+   En revanche, on ne veut pas savoir comment techniquement réalisé un kernel call (int 80? syscall? On s'en fout.) 
+   On devrait pouvoir utiliser la libC qui nous plait. 
+ - De fait, il existe un concours du code le plus obscur en C. 
+ - Les bibliothèques tierces qui ne compilent jamais ("Tient! Cette bibliothèque a l'air de résoudre notre problème." Puis make échoue.). 
  - GitHub est pénible. (Le côté réseau social pour geek est néanmoins sympa.)
  - Dans les faits, je suis improductif en C. Je perds la quasi-totalité de mon temps 
    en futilités et en points techniques qui n'ont aucun intérêt. Vraiment en putain de conneries. 
@@ -54,7 +61,14 @@ Ceci étant dit, je suis admiratif de [Fabrice Bellard](http://fr.wikipedia.org/
  
 Nous sommes tous différents.
 
-J'arrete.   
+J'arrête. 
+
+
+Au lieu de créer, je perdais mon temps empêtré dans des putains de conneries techniques.
+
+Plus jamais.
+
+Je perdis trop de temps de ma vie. Je voulais créer - pas geeker. 
 
 
 En l'état, le jeu compile à peu près. Et il fonctionne couci-couça. Et surtout, il est lent. Alors que, vingt ans auparavant, pas de souci. 
@@ -76,7 +90,7 @@ Bonjour tout le monde! :relaxed:
 Nous, les concepteurs, sommes des joueurs de [*The Legend of Zelda*](https://en.wikipedia.org/wiki/The_Legend_of_Zelda) et de [*Secret of Mana*](https://en.wikipedia.org/wiki/Secret_of_Mana). Nous sommes également des mathématiciens, notamment en informatique théorique (laquelle fait partie des mathématiques), ce qui explique que notre jeu soit hors des clous. À ce sujet, un mathématicien en informatique théorique n'est pas ingénieur logiciel. Nous n'eûmes aucun cours de programmation, et surtout de conception de logiciel. Nous apprîmes donc par nous-mêmes, en procédant par [essais et erreurs](https://en.wikipedia.org/wiki/Trial_and_error) (et [backtracking](https://en.wikipedia.org/wiki/Backtracking)); cependant le jeu ne fut pas architecturé. Celui-ci était notre premier projet conséquent, ayant même une équipe d'artistes (!), et nous avions trop d'idées. À la fin de l'année, le jeu était jouable, mais nous avions passés trop de temps dans les détails techniques, au lieu de les passer dans la création. Et le jeu avait de nombreux bugs incompréhensibles. (Et il avait été codé en C++ - un enfer.)
 Retrospectivement, le résultat n'est pas si mauvais - j'en suis même fier (dans la mesure où celui-ci serait présentement jouable, ce qui n'est pas le cas). 
 Le but était de présente les jeux aux ['InterENS culturelles'](https://interq.ens.fr/) ("Cultural InterENS"), ce que nous fîmes fièrement. À l'époque, nous avions publié le résultat ici (les codes de connexion ont été hémas perdus): <br> 
-&nbsp;&nbsp;&nbsp; http://dessine.moi.mouton.free.fr/
+&nbsp;&nbsp;&nbsp; [http://dessine.moi.mouton.free.fr/](http://dessine.moi.mouton.free.fr/)
  
   
 ## Auteurs 
@@ -198,6 +212,7 @@ Pour la descriptions des éléments spatiaux, nous conçûmes des petits et rapi
 
 Nous avons rencontrés les problèmes suivants: 
  - (i) *Lex* & *Yacc* - En pratique, on ne sait jamais si les expressions rgulières sont correctement écrites (dans les faits, il y a toujours des problèmes). Ils sont lents. Ils sont conçus bizarrement. Ils ne sont ni thread-safe ni reentrant. Et la gestion des erreurs de syntaxe est nulle: *yacc* returns "syntax error" et c'est tout. <br> 
+       Dans les faits, un analyseur LALR(0) produit par yacc fonctionne bien quand la syntaxe est déjà correcte. Un tel analyseur permet alors de produire un arbre (ou du code) (ou d'interpréter). Mais alors, il faut d'abord vérifier la syntaxe (sans quoi yacc nous dit le laconique "syntax error"). 
  - (ii) *Typage* - En tant que mathématiciens en informatique théorique, on nous parla de [*OCaml*](https://en.wikipedia.org/wiki/OCaml) et de son inférene de type. Je fus influencé par ça. Et j'en présente mes excuses à ceux qui écrivaient les descriptions. En fait, le typage, on s'en fout. Les langages de descriptions ne doivent pas être typés. Ca doit fonctionner, un point c'est tout. <br> 
    
  
@@ -229,11 +244,24 @@ Dans cette réécriture:
 ### Eléménts non standards 
 
 Dans l'ensemble, le jeu n'utilise rien de compliquer. Deux exceptions:
- - (a) Les coop-threads - Pour les créer et pour switcher, nous utiliser des signaux. 
+ - (a) Les coop-threads - Pour les créer, nous utiliser des signaux. Pour basculer, nous utilisons des long-jmp. 
  - (b) stdlog et stderr
       - Afin de débugger le jeu, nous écrivons verbeusement. Nous avons donc un gros (très gros) fichier de log. Pour l'écrire, nous redirigeâmes stdout vers ce fichier de log. (Techniquement, c'est un reopen.)
       - Problème: le jeu passe beaucoup de temps à écrire ces logs, au point que ça le ralentisse. Nous dûmes donc mettre entre les deux un tampon. Et mettre ce tampon nécessite d'utiliser un pipe et SIGIO (ce qui est pénible). 
       - Pire. Nous écrivions les erreurs sur stderr. Malheureusement, nous avions besoin du contexte au sein des logs. Donc il fallait dupliquer cette écriture vers stdlog. Idem, pour ceci, pipe & SIGIO (pénible). 
+
+
+### Critiques
+
+J'ai une critique à émettre par rapport à notre organisation: il aurait fallu un unique chef. Notre méthode était trop consensuelle (un comité). Ce qui fait que certaines décisions ne plaisaient à personne. 
+
+Non. Il faut une unique vision. Et implémenter une unique vision. Afin que le jeu ait une cohérence et une personnalité. Un truc mou, consensuel, fade, sans personnalité, est pire. 
+
+Et le fait d'avoir un chef est vrai pour la division du travail: 
+ - un unique chef pour la conception du moteur de jeu, 
+ - un unique chef pour la eonception des DSL, 
+ - un unique chef pour la conception des cartes, 
+ - et un unique pour la vision du jeu.
 
 
 ## Agenda
@@ -255,6 +283,29 @@ Les éventuelles choses à faires:
  - (xii) Ajouter [Small3Dlib](https://gitlab.com/drummyfish/small3dlib).
  - (xiii) Ajouter Mesa pour avoir un OpenGL purement software (ce qui permettrait de faire des captures d'écran). 
  - (xiv) Ajouter FFmpeg (ce qui permettrait d'afficher des vidés (ce qui était initialement prévu) et d'enregistrer une partie). 
+ - (xv) Ajouter un mode VESA. 
+ - (xvi) Porter le jeu sur WebGL. 
+ - (xvii) Porter le jeu sur Nintendo 64. 
+ - (xviii) Pouvoir redimensionner le jeu. (Par exemple, 960x720. Hui, il ne supporte que le 800x600.)
+ - (xix) En fait, le jeu devrait être entièrement écrit en DSL. Et le deux aurait deux parties: le code qui précède la DSL, et le code qui suit la DSL. 
+          Le moteur et la bibliothèque. 
+          Le code qui suit la DSL serait une bibliothèque fournie à la DSL (donc ffi) pour réaliser ses opérations. Par exemple,
+          bonhomme.c est une bibliothèque pour la DSL. 
+          La partie créative elle-même devrait être en DSL. 
+          Par exemple, pour la page de titre, on pourrait avoir quelque chose comme:
+             begin
+               mode2D();
+               image_de_fonds("mouton.png");
+               menu := menu(/*pos_x en %*/40, /*y*/40, /*largeur en %*/66.6);
+               menu -> ajouter("Jeu rapide");
+	       menu -> ajouter("Mode histoire");
+               menu -> ajouter("Restaurer une sauvegarde");
+               menu -> afficher();
+             end
+ - (xx) Pour continuer cette idée, en sus, les FFI de la bibliothèques appelées ne devraient pas être appelées mais empilées sur une pile FIFO
+           et ensuite être exécutée par le moteur du jeu. 
+ - (xxi) Idéalement, pour éviter tous ces problèmes insupportables dus au C, il serait bon de développer un langage spécifique 
+         pour le moteur de jeu. Ainsi, seul ce langage serait écrit en C, et devrait supporter les affres et les instablités du C. 
 
 
 Ceci étant dit, rien de tout ça ne sera développé. C'est fini. 
