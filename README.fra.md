@@ -41,6 +41,8 @@ Ici, il s'agit d'un commentaire en complément de la description ci-dessous (dat
     - Et là, ce connard vient de me refuser un commit pour des raisons obscures. 
     - Putain! Même commiter est un putain de problèmes. 
     - Poubelle!
+ - Accessoirement, git est bloated et est une usine à gaz. 
+   De fait, il existe des générateurs de manpage pour Git: [https://git-man-page-generator.lokaltog.net/](https://git-man-page-generator.lokaltog.net/)
  - Dans les faits, je suis improductif en C. Je perds la quasi-totalité de mon temps 
    en futilités et en points techniques qui n'ont aucun intérêt. Vraiment en putain de conneries. 
    Alors que je devrais programmer le jeu sur un plan projectif! 
@@ -288,11 +290,12 @@ Les éventuelles choses à faires:
  - (xii) Ajouter [Small3Dlib](https://gitlab.com/drummyfish/small3dlib).
  - (xiii) Ajouter Mesa pour avoir un OpenGL purement software (ce qui permettrait de faire des captures d'écran). 
  - (xiv) Ajouter FFmpeg (ce qui permettrait d'afficher des vidés (ce qui était initialement prévu) et d'enregistrer une partie). 
- - (xv) Ajouter un mode VESA. 
+ - (xv) Ajouter un mode VESA. (Voire le faire fonctionner sous DosBox tel Theme Hospital.)
  - (xvi) Porter le jeu sur WebGL. 
  - (xvii) Porter le jeu sur Nintendo 64. 
- - (xviii) Pouvoir redimensionner le jeu. (Par exemple, 960x720. Hui, il ne supporte que le 800x600.)
- - (xix) En fait, le jeu devrait être entièrement écrit en DSL. Et le deux aurait deux parties: le code qui précède la DSL, et le code qui suit la DSL. 
+ - (xviii) Porter le jeu [RetroArch](http://fr.wikipedia.org/RetroArch). 
+ - (xix) Pouvoir redimensionner le jeu. (Par exemple, 960x720. Hui, il ne supporte que le 800x600.)
+ - (xx) En fait, le jeu devrait être entièrement écrit en DSL. Et le deux aurait deux parties: le code qui précède la DSL, et le code qui suit la DSL. 
           Le moteur et la bibliothèque. 
           Le code qui suit la DSL serait une bibliothèque fournie à la DSL (donc ffi) pour réaliser ses opérations. Par exemple,
           bonhomme.c est une bibliothèque pour la DSL. 
@@ -307,11 +310,12 @@ Les éventuelles choses à faires:
                menu -> ajouter("Restaurer une sauvegarde");
                menu -> afficher();
              end
- - (xx) Pour continuer cette idée, en sus, les FFI de la bibliothèques appelées ne devraient pas être appelées mais empilées sur une pile FIFO
+ - (xxi) Pour continuer cette idée, en sus, les FFI de la bibliothèques appelées ne devraient pas être appelées mais empilées sur une pile FIFO
            et ensuite être exécutée par le moteur du jeu. 
- - (xxi) Idéalement, pour éviter tous ces problèmes insupportables dus au C, il serait bon de développer un langage spécifique 
+ - (xxii) Idéalement, pour éviter tous ces problèmes insupportables dus au C, il serait bon de développer un langage spécifique 
          pour le moteur de jeu. Ainsi, seul ce langage serait écrit en C, et devrait supporter les affres et les instablités du C. 
- - (xxxii) Se débarrasser de GitHub.
+ - (xxxiii) Se débarrasser de GitHub.
+ - (xxiv) Pour publier des versions compilées, les mettre dans une img en fat32. (À défaut de les monter, ils sont extractibles par 7z.) (Hélas, pas par bsdtar.)  
 
 
 Ceci étant dit, rien de tout ça ne sera développé. C'est fini. 
