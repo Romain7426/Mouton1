@@ -240,7 +240,7 @@ Notre langqge de description temporelle s'appelle «PScript» for «Pascal Scrip
 Dans cette réécriture:
  - J'ai effectivement séparé la stack de chacun. Ca a changé la vie. Les interactiosn entre les deux sont beaucoup plus simples. 
  - Dans les faits, ce que nous avons implémentés sont des [threads coopératifs](https://en.wikipedia.org/wiki/Non-preemptive_multitasking) (ou encore des [«co-routines»](https://en.wikipedia.org/wiki/Coroutine), ou encore des[«fibers»](https://en.wikipedia.org/wiki/Fiber_(computer_science)) - [libco](https://byuu.org/projects/libco)). 
- - Ces coop-threads furent bons. Ils permirent de réécrire le jeu, et de le linéariser. Car, auparavant, pour faire coopérer le moteur de jeu et le moteur de jeu, il s'agissait de fonctions mutuellement récursives et de variables globales. C'était incompréhensible. 
+ - Ces coop-threads furent bons. Ils permirent de réécrire le jeu, et de le linéariser. Car, auparavant, pour faire coopérer le moteur de jeu et le moteur de jeu, il s'agissait de fonctions imbriquées et mutuellement récursives et de variables globales. C'était incompréhensible. 
  - Une autre conséquence des coop-threads est que le DSL temporel peut être en n'importe quel langage. Et, de fait, en l'espèce, j'ai testé en C. (Ce qui nous aurait permis de ne pas perdre de temps à développer PScript.)
   
   
@@ -253,6 +253,7 @@ Dans l'ensemble, le jeu n'utilise rien de compliquer. Deux exceptions:
       - Afin de débugger le jeu, nous écrivons verbeusement. Nous avons donc un gros (très gros) fichier de log. Pour l'écrire, nous redirigeâmes stdout vers ce fichier de log. (Techniquement, c'est un reopen.)
       - Problème: le jeu passe beaucoup de temps à écrire ces logs, au point que ça le ralentisse. Nous dûmes donc mettre entre les deux un tampon. Et mettre ce tampon nécessite d'utiliser un pipe et SIGIO (ce qui est pénible). 
       - Pire. Nous écrivions les erreurs sur stderr. Malheureusement, nous avions besoin du contexte au sein des logs. Donc il fallait dupliquer cette écriture vers stdlog. Idem, pour ceci, pipe & SIGIO (pénible). 
+      - Dans les fais, il semblerait que, une fois dans un handler suite à signal, le programme ne puisse plus attraper lui-même de nouveaux signaux (sans quoi une attente mutuelle se produit: attente que le précédent handler se termine pour prendre la main). 
 
 
 ### Critiques
@@ -274,7 +275,7 @@ Avant toute chose, le jeu est abandonné. Aucune aide ne sera fourni. Et plus au
  
 Les éventuelles choses à faires: 
  - (i) Projeter le jeu sur un plan projectif. 
- - (ii) Réécrire le moteur de jeu. (Plein de fonctions mutuellement récursives.) 
+ - (ii) Réécrire le moteur de jeu. (Plein de fonctions imbriquées et mutuellement récursives.) 
  - (iii) Portabliité.
  - (iv) Nettoyer les DSL. 
  - (v) Faire fonctionner la théière. 
