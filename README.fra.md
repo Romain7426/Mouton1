@@ -39,6 +39,7 @@ Ici, il s'agit d'un commentaire en complément de la description ci-dessous (dat
  - GitHub est pénible. (Le côté réseau social pour geek est néanmoins sympa.)
     - Il nous casse les couilles avec son token que il fait expirer régulièrement.
     - Et là, ce connard vient de me refuser un commit pour des raisons obscures. 
+    - Putain! Même commiter est un putain de problèmes. 
     - Poubelle!
  - Dans les faits, je suis improductif en C. Je perds la quasi-totalité de mon temps 
    en futilités et en points techniques qui n'ont aucun intérêt. Vraiment en putain de conneries. 
