@@ -21,6 +21,8 @@ Ici, il s'agit d'un commentaire en complément de la description ci-dessous (dat
    Quelque chose qui compilait l'année dernière ne compilera plus cette année.
  - Quand on écrit une erreur, le compilateur essaye de trouver une semantique puis continue. 
    Pour corriger un tel comportement, il faut activer moult options du compilateur. 
+   (Par exemple, dans Mouton2, il y avait une faute de frappe dans un nom d'une fonction, 
+   et ça n'a pas empêché le compilateur de compiler. Magie noire.) 
  - On a beau lui dire de désactiver les optimisations, le compilateur optimise quand même.
    Et quand on se retrouve dans le débuggueur, celui-ci ne sait pas où on est.
    Et quand on lui demande d'afficher une variable, il répond que il ne la trouve pas. 
@@ -30,6 +32,7 @@ Ici, il s'agit d'un commentaire en complément de la description ci-dessous (dat
  - De fait, les compilateurs C sont des programmes bloated, qui doivent savoir faire le café.
  - Les préprocesseur bizarre. 
  - L'absence de modules!!!!! (collision des noms) (et portée des nom)
+ - La gestion des dépendances (entre modules) est infecte. 
  - une libc bizarre
  - libkernelcall (unistd.h) et la libc devrait être séparées. On voudrait pouvoir ne pas utiliser la libc. 
    En revanche, on ne veut pas savoir comment techniquement réalisé un kernel call (int 80? syscall? On s'en fout.) 
@@ -95,7 +98,7 @@ Bonjour tout le monde! :relaxed:
 
 Nous, les concepteurs, sommes des joueurs de [*The Legend of Zelda*](https://en.wikipedia.org/wiki/The_Legend_of_Zelda) et de [*Secret of Mana*](https://en.wikipedia.org/wiki/Secret_of_Mana). Nous sommes également des mathématiciens, notamment en informatique théorique (laquelle fait partie des mathématiques), ce qui explique que notre jeu soit hors des clous. À ce sujet, un mathématicien en informatique théorique n'est pas ingénieur logiciel. Nous n'eûmes aucun cours de programmation, et surtout de conception de logiciel. Nous apprîmes donc par nous-mêmes, en procédant par [essais et erreurs](https://en.wikipedia.org/wiki/Trial_and_error) (et [backtracking](https://en.wikipedia.org/wiki/Backtracking)); cependant le jeu ne fut pas architecturé. Celui-ci était notre premier projet conséquent, ayant même une équipe d'artistes (!), et nous avions trop d'idées. À la fin de l'année, le jeu était jouable, mais nous avions passés trop de temps dans les détails techniques, au lieu de les passer dans la création. Et le jeu avait de nombreux bugs incompréhensibles. (Et il avait été codé en C++ - un enfer.)
 Retrospectivement, le résultat n'est pas si mauvais - j'en suis même fier (dans la mesure où celui-ci serait présentement jouable, ce qui n'est pas le cas). 
-Le but était de présente les jeux aux ['InterENS culturelles'](https://interq.ens.fr/) ("Cultural InterENS"), ce que nous fîmes fièrement. À l'époque, nous avions publié le résultat ici (les codes de connexion ont été hémas perdus): <br> 
+Le but était de présente les jeux aux ['InterENS culturelles'](https://interq.ens.fr/) ("Cultural InterENS"), ce que nous fîmes fièrement. À l'époque, nous avions publié le résultat ici: <br> 
 &nbsp;&nbsp;&nbsp; [http://dessine.moi.mouton.free.fr/](http://dessine.moi.mouton.free.fr/)
  
   
@@ -180,7 +183,7 @@ Ce travail aurait pu être publié dans le [domaine publique](https://en.wikiped
 
 ## Notes techniques
 
-Hui, le jeu compile couci-couça - hélas. Et le jeu est lent (il ne l'était pas il y a vingt ans). 
+Hui, le jeu compile bon gré mal gré - hélas. Le jeu fonctionne au petit bonheur la chance. Surtout, le jeu est lent (il ne l'était pas il y a vingt ans). 
 
 Aucune aide ne vous sera apporté pour le faire compiler. Pour nous, c'est terminé. Il s'agit d'une publication post-mortem. Le jeu ne sera plus mis à jour ni corrigé. 
 
