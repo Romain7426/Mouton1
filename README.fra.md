@@ -37,6 +37,9 @@ Ici, il s'agit d'un commentaire en complément de la description ci-dessous (dat
  - De fait, il existe un concours du code le plus obscur en C. 
  - Les bibliothèques tierces qui ne compilent jamais ("Tient! Cette bibliothèque a l'air de résoudre notre problème." Puis make échoue.). 
  - GitHub est pénible. (Le côté réseau social pour geek est néanmoins sympa.)
+    - Il nous casse les couilles avec son token que il fait expirer régulièrement.
+    - Et là, ce connard vient de me refuser un commit pour des raisons obscures. 
+    - Poubelle!
  - Dans les faits, je suis improductif en C. Je perds la quasi-totalité de mon temps 
    en futilités et en points techniques qui n'ont aucun intérêt. Vraiment en putain de conneries. 
    Alors que je devrais programmer le jeu sur un plan projectif! 
@@ -306,6 +309,7 @@ Les éventuelles choses à faires:
            et ensuite être exécutée par le moteur du jeu. 
  - (xxi) Idéalement, pour éviter tous ces problèmes insupportables dus au C, il serait bon de développer un langage spécifique 
          pour le moteur de jeu. Ainsi, seul ce langage serait écrit en C, et devrait supporter les affres et les instablités du C. 
+ - (xxxii) Se débarrasser de GitHub.
 
 
 Ceci étant dit, rien de tout ça ne sera développé. C'est fini. 
