@@ -220,8 +220,10 @@ Pour la descriptions des éléments spatiaux, nous conçûmes des petits et rapi
 À propos des DSL, vous pouvez visionner la vidéo: [«Functional MzScheme DSLs in Game Development»](https://www.youtube.com/watch?v=Z8Xamkb-J2k
 
 Nous avons rencontrés les problèmes suivants: 
- - (i) *Lex* & *Yacc* - En pratique, on ne sait jamais si les expressions rgulières sont correctement écrites (dans les faits, il y a toujours des problèmes). Ils sont lents. Ils sont conçus bizarrement. Ils ne sont ni thread-safe ni reentrant. Et la gestion des erreurs de syntaxe est nulle: *yacc* returns "syntax error" et c'est tout. <br> 
-       Dans les faits, un analyseur LALR(0) produit par yacc fonctionne bien quand la syntaxe est déjà correcte. Un tel analyseur permet alors de produire un arbre (ou du code) (ou d'interpréter). Mais alors, il faut d'abord vérifier la syntaxe (sans quoi yacc nous dit le laconique "syntax error"). 
+ - (i) *Lex* & *Yacc* - En pratique, on ne sait jamais si les expressions rgulières sont correctement écrites (dans les faits, il y a toujours des problèmes). Ils sont lents. Ils sont conçus bizarrement. Ils ne sont ni thread-safe ni reentrant. Et la gestion des erreurs de syntaxe est nulle: *yacc* returns "syntax error" et c'est tout. <br>
+       Dans les faits, un analyseur LALR(0) produit par yacc fonctionne bien quand la syntaxe est déjà correcte. <br>
+       À vrai dire, un analyseur LALR(0) permet de se passer de construire l'arbre: il permet de parcourir l'arbre sans le construire. Grâce à ce parcours, on peut générer du code ou interpréter du code. <br>
+       Cependant, il faut que la syntaxe soit correcte - sans quoi yacc nous envoie le laconique "syntax error". Il est donc nécessaire de vérifier la syntaxe en amont. 
  - (ii) *Typage* - En tant que mathématiciens en informatique théorique, on nous parla de [*OCaml*](https://en.wikipedia.org/wiki/OCaml) et de son inférene de type. Je fus influencé par ça. Et j'en présente mes excuses à ceux qui écrivaient les descriptions. En fait, le typage, on s'en fout. Les langages de descriptions ne doivent pas être typés. Ca doit fonctionner, un point c'est tout. <br> 
    
  
